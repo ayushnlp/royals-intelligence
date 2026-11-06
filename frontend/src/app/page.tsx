@@ -146,23 +146,22 @@ export default function OverviewPage() {
         <div className="relative z-10 max-w-3xl">
           <div className="flex flex-wrap items-center gap-2 mb-3">
             <span className="px-3 py-1 rounded-full text-xs font-mono font-bold bg-[#E91E8F] text-white">
-              STAGE 0 INITIALIZED
+              STAGE 1 ACTIVE
             </span>
             <span className="px-3 py-1 rounded-full text-xs font-mono bg-[#D6B56D]/20 text-[#D6B56D] border border-[#D6B56D]/40">
               RAJASTHAN ROYALS CRICKET PLATFORM
             </span>
             <span className="text-xs text-slate-400 font-mono">
-              Primary Season: IPL 2026
+              Target: IPL 2026 & IPL 2027 Auction
             </span>
           </div>
 
           <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight text-white mb-2">
-            Royals Intelligence Architectural Foundation
+            Royals Intelligence Data Acquisition Command Center
           </h1>
           <p className="text-sm text-slate-300 leading-relaxed mb-6">
-            Foundation baseline established. Repository structure, Next.js application shell,
-            FastAPI async engine, PostgreSQL database connection architecture, and comprehensive
-            documentation suite initialized. Cricket analytics data integration commences in Stage 1.
+            Stage 1 Data Acquisition Engine initialized. Multi-source registry, SHA-256 cryptographic
+            checksums, cricket arithmetic validation, and columnar Apache Parquet storage active.
           </p>
 
           <div className="inline-flex items-center gap-3 bg-[#0B1220]/80 border border-slate-700/60 rounded-xl px-4 py-2 text-xs">
@@ -215,9 +214,9 @@ export default function OverviewPage() {
           />
           <StatCard
             title="Project Roadmap"
-            value="Stage 0 / 13"
-            subtitle="Baseline initialization complete. Next: Stage 1 Data Ingestion"
-            badgeText="On Schedule"
+            value="Stage 1 / 13"
+            subtitle="Data Acquisition Engine operational. Next: Stage 2 Relational ETL"
+            badgeText="In Progress"
             icon={<Cpu size={18} />}
           />
         </div>

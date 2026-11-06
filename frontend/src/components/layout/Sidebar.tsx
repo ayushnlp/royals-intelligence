@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import {
   LayoutDashboard,
+  DownloadCloud,
   Swords,
   MapPin,
   TrendingUp,
@@ -30,8 +31,15 @@ export const Sidebar: React.FC<SidebarProps> = ({ className }) => {
       title: "System Overview",
       href: "/",
       icon: LayoutDashboard,
-      active: true,
+      active: false,
       stage: "Stage 0",
+    },
+    {
+      title: "Data Acquisition",
+      href: "/acquisition",
+      icon: DownloadCloud,
+      active: true,
+      stage: "Stage 1",
     },
     {
       title: "Match Intelligence",
@@ -210,10 +218,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ className }) => {
               <span className="font-mono text-emerald-400 font-semibold">STAGE 0</span>
             </div>
             <div className="w-full bg-[#1A2B50] rounded-full h-1.5 overflow-hidden">
-              <div className="bg-gradient-to-r from-[#E91E8F] to-[#D6B56D] h-full w-[8%]" />
+              <div className="bg-gradient-to-r from-[#E91E8F] to-[#D6B56D] h-full w-[15%]" />
             </div>
             <p className="text-[10px] text-slate-500 font-mono">
-              Stage 0 of 13 Initialized
+              Stage 1 of 13 Ingestion Active
             </p>
           </div>
         ) : (

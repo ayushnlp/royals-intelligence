@@ -4,8 +4,18 @@ Uses Pydantic BaseSettings for strong typing and environment parsing.
 """
 
 from typing import List, Union
+from pathlib import Path
 from pydantic import AnyHttpUrl, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+
+def get_repo_root() -> Path:
+    """Finds monorepo root by locating README.md and backend directory."""
+    current = Path(__file__).resolve()
+    for parent in current.parents:
+        if (parent / "README.md").exists() and (parent / "backend").exists():
+            return parent
+    return current.parents[2]  # Fallback: backend/app/core -> backend -> root
 
 
 class Settings(BaseSettings):

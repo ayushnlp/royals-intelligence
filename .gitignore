@@ -65,16 +65,18 @@ pnpm-debug.log*
 
 # Data and Proprietary Assets Isolation
 # Note: Keep directories via .gitkeep but ignore heavy and proprietary datasets
-data/raw/*
-!data/raw/.gitkeep
-data/processed/*
-!data/processed/.gitkeep
-data/external/*
-!data/external/.gitkeep
-data/metadata/*
-!data/metadata/.gitkeep
-data/proprietary/*
-!data/proprietary/.gitkeep
+data/raw/**/*
+!data/raw/**/.gitkeep
+!data/raw/**/
+data/processed/**/*
+!data/processed/**/.gitkeep
+!data/processed/**/
+data/external/**/*
+!data/external/**/.gitkeep
+!data/external/**/
+data/proprietary/**/*
+!data/proprietary/**/.gitkeep
+!data/proprietary/**/
 
 # Generated Reports & Exports
 reports/generated/*

@@ -62,6 +62,21 @@
 }
 ```
 
+### 2.3. Data Acquisition Engine Endpoints (Stage 1)
+
+| Method | Endpoint | Description |
+| :--- | :--- | :--- |
+| `GET` | `/api/v1/acquisition/sources` | Lists registered cricket data sources with reliability tiers and legal licensing |
+| `GET` | `/api/v1/acquisition/sources/{source_id}` | Detailed source specifications, update frequency, and known gaps |
+| `GET` | `/api/v1/acquisition/sources/{source_id}/health` | Operational availability probe and access constraints |
+| `GET` | `/api/v1/acquisition/runs` | List recent ingestion runs with execution duration and validation completeness |
+| `GET` | `/api/v1/acquisition/runs/{run_id}` | Detailed execution log, SHA-256 checksums, and validation error records |
+| `POST`| `/api/v1/acquisition/runs` | Trigger an authorized ingestion run over a specified raw folder / source |
+| `GET` | `/api/v1/acquisition/datasets` | List acquired dataset manifests with record counts and Parquet paths |
+| `GET` | `/api/v1/acquisition/datasets/{dataset_id}` | Retrieve provenance manifest and SHA-256 hashes for an acquired dataset |
+| `GET` | `/api/v1/acquisition/coverage` | Comprehensive tournament coverage audit across IPL 2026, SMAT, Ranji |
+| `POST`| `/api/v1/acquisition/upload` | Safe manual upload for user-supplied JSON/CSV datasets with SHA-256 verification |
+
 ---
 
 ## 3. Centralized Error Response Format

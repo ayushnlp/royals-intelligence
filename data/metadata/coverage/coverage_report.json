@@ -1,0 +1,36 @@
+{
+  "generated_at": "2026-11-06T23:47:44.481255Z",
+  "primary_season": "IPL 2026",
+  "competitions": [
+    {
+      "competition_id": "ipl",
+      "competition_name": "Indian Premier League",
+      "season": "2026",
+      "total_scheduled_matches": 74,
+      "matches_acquired": 0,
+      "ball_by_ball_available": 0,
+      "scorecards_available": 0,
+      "squads_available": true,
+      "status": "PARTIALLY_ACQUIRED",
+      "data_gaps": [
+        "In-season 2026 live match deliveries commence with tournament kickoff."
+      ]
+    },
+    {
+      "competition_id": "ipl",
+      "competition_name": "Indian Premier League",
+      "season": "2024",
+      "total_scheduled_matches": null,
+      "matches_acquired": 2,
+      "ball_by_ball_available": 31,
+      "scorecards_available": 2,
+      "squads_available": true,
+      "status": "ACQUIRED",
+      "data_gaps": []
+    }
+  ],
+  "total_matches_acquired": 2,
+  "total_deliveries_indexed": 31,
+  "total_players_registered": 0,
+  "sources_active": 7
+}

@@ -1,0 +1,236 @@
+{
+  "version": "1.0.0",
+  "last_updated": "2026-11-07T05:10:00Z",
+  "reliability_tiers": {
+    "TIER_1": {
+      "name": "Authoritative Open Data (Explicit Open License)",
+      "criteria": "Freely accessible bulk structured datasets with explicit open data licensing (ODbL, CC-BY, Open Data Commons), verified schema stability, and no anti-scraping/API restrictions.",
+      "permitted_methods": ["automated_download", "batch_ingestion", "programmatic_api"]
+    },
+    "TIER_2": {
+      "name": "Official Governing Body / Franchise Public Web Feeds",
+      "criteria": "Official competition portals (BCCI, IPLT20, Rajasthan Royals) providing public scorecards. Requires respectful rate limiting, cache TTL enforcement, and adherence to public terms of use.",
+      "permitted_methods": ["cached_fetch", "rate_limited_api", "official_feed"]
+    },
+    "TIER_3": {
+      "name": "Curated Structured Datasets & Manual Import",
+      "criteria": "Internal franchise scouting records, verified manual match scorecards, and vetted domestic match logs with SHA-256 cryptographic provenance tracking.",
+      "permitted_methods": ["manual_upload", "file_import", "curated_feed"]
+    },
+    "TIER_4": {
+      "name": "Restricted Commercial Platforms (ToS Prohibited / Gated)",
+      "criteria": "Commercial cricket platforms (ESPNcricinfo, Cricbuzz) with strict anti-scraping Terms of Service, anti-bot mechanisms, or commercial API paywalls. Direct scraping is strictly prohibited.",
+      "permitted_methods": ["manual_import_only", "user_supplied_export"]
+    }
+  },
+  "sources": [
+    {
+      "source_id": "cricsheet_open",
+      "name": "Cricsheet",
+      "url": "https://cricsheet.org",
+      "tier": "TIER_1",
+      "status": "active",
+      "category": "Ball-by-Ball & Match Records",
+      "coverage": {
+        "competitions": ["Indian Premier League", "Syed Mushtaq Ali Trophy", "International T20s", "Ranji Trophy (selected)", "BBL", "PSL"],
+        "seasons": "2008 to 2026",
+        "historical_depth_years": 18,
+        "ipl_coverage": "Complete ball-by-ball for all completed IPL seasons up to IPL 2025; ongoing match additions."
+      },
+      "update_frequency": "Post-matchday batch updates",
+      "access_method": "Public structured JSON / CSV downloadable match archives",
+      "authentication": "None required",
+      "licensing": {
+        "license_name": "Open Data Commons Open Database License (ODbL)",
+        "commercial_use_permitted": true,
+        "attribution_required": true,
+        "attribution_text": "Data provided by Cricsheet (cricsheet.org), licensed under ODbL."
+      },
+      "rate_limits": "No strict rate limit on downloads; bulk zip download recommended to minimize server load.",
+      "reliability_assessment": "High (industry gold standard for open ball-by-ball cricket data)",
+      "known_gaps": [
+        "Real-time live ball-by-ball streaming latency (updates typically appear hours or days post-match)",
+        "Advanced tracking telemetry (release speed, spin RPM, wagon wheel coordinates) unavailable in standard feed"
+      ],
+      "last_verified": "2026-11-07T05:10:00Z"
+    },
+    {
+      "source_id": "iplt20_official",
+      "name": "IPL Official Platform",
+      "url": "https://www.iplt20.com",
+      "tier": "TIER_2",
+      "status": "active",
+      "category": "Official Competition Statistics & Squads",
+      "coverage": {
+        "competitions": ["Indian Premier League (IPL)"],
+        "seasons": "2008 to 2026 (including IPL 2026 schedule & squads)",
+        "historical_depth_years": 18,
+        "ipl_coverage": "Official match scorecards, playing XIs, tournament schedules, points table, auction player lists, and official fantasy stats."
+      },
+      "update_frequency": "Live in-match / post-match immediate",
+      "access_method": "Official public web endpoints / JSON endpoints",
+      "authentication": "Public read-only",
+      "licensing": {
+        "license_name": "BCCI / IPL Proprietary - Public Display Only",
+        "commercial_use_permitted": false,
+        "attribution_required": true,
+        "attribution_text": "Data sourced from official Indian Premier League platform (iplt20.com)."
+      },
+      "rate_limits": "Max 30 requests/minute to respect server infrastructure; aggressive caching required.",
+      "reliability_assessment": "High (official authoritative source for tournament outcomes, squads, and auction registrations)",
+      "known_gaps": [
+        "No bulk downloadable historical database archive",
+        "Raw tracking data (Hawkeye/ball trajectories) restricted to broadcast partners"
+      ],
+      "last_verified": "2026-11-07T05:10:00Z"
+    },
+    {
+      "source_id": "rajasthan_royals_official",
+      "name": "Rajasthan Royals Official Portal",
+      "url": "https://www.rajasthanroyals.com",
+      "tier": "TIER_2",
+      "status": "active",
+      "category": "Franchise Roster & Campaign Intelligence",
+      "coverage": {
+        "competitions": ["IPL 2026 Campaign", "Rajasthan Royals Squads", "RR Academy & Scouting Notes"],
+        "seasons": "2008 to 2026",
+        "historical_depth_years": 18,
+        "ipl_coverage": "Verified squad lists, player profiles, jersey numbers, retention announcements, and SupeRR Selector fan intelligence."
+      },
+      "update_frequency": "Periodic franchise announcements",
+      "access_method": "Public web feed / announcements",
+      "authentication": "Public read-only",
+      "licensing": {
+        "license_name": "Royal Multisport Private Limited - Proprietary",
+        "commercial_use_permitted": false,
+        "attribution_required": true,
+        "attribution_text": "Information referenced from Rajasthan Royals official franchise portal."
+      },
+      "rate_limits": "Conservative polling (1 request/hour)",
+      "reliability_assessment": "Authoritative for official franchise rosters and retained player statuses",
+      "known_gaps": [
+        "Does not provide ball-by-ball delivery feeds",
+        "Opponent granular data not hosted here"
+      ],
+      "last_verified": "2026-11-07T05:10:00Z"
+    },
+    {
+      "source_id": "bcci_domestic",
+      "name": "BCCI Domestic Cricket Operations",
+      "url": "https://www.bcci.tv",
+      "tier": "TIER_2",
+      "status": "active",
+      "category": "Domestic Uncapped Talent Feeds",
+      "coverage": {
+        "competitions": ["Syed Mushtaq Ali Trophy (SMAT)", "Ranji Trophy", "Vijay Hazare Trophy (VHT)", "Duleep Trophy", "CK Nayudu Trophy (U23)"],
+        "seasons": "2018 to 2026",
+        "historical_depth_years": 8,
+        "ipl_coverage": "Direct feeder tournaments for IPL uncapped scouting pool."
+      },
+      "update_frequency": "Post-matchday official scorecards",
+      "access_method": "Public tournament portal & match centers",
+      "authentication": "Public read-only",
+      "licensing": {
+        "license_name": "BCCI Domestic Regulations - Public Display",
+        "commercial_use_permitted": false,
+        "attribution_required": true,
+        "attribution_text": "BCCI Domestic Cricket Operations."
+      },
+      "rate_limits": "Max 20 requests/minute",
+      "reliability_assessment": "High for official Indian domestic match outcomes and player state affiliations",
+      "known_gaps": [
+        "Inconsistent ball-by-ball depth for early round state matches",
+        "Occasional delays in scorecard publishing for lower-tier youth divisions"
+      ],
+      "last_verified": "2026-11-07T05:10:00Z"
+    },
+    {
+      "source_id": "open_meteo_historical",
+      "name": "Open-Meteo Weather Archive & Forecast API",
+      "url": "https://open-meteo.com",
+      "tier": "TIER_1",
+      "status": "active",
+      "category": "Environmental, Dew & Weather Telemetry",
+      "coverage": {
+        "competitions": ["All IPL & Domestic Venues (Jaipur, Guwahati, Mumbai, Chennai, Kolkata, Bengaluru, Ahmedabad, etc.)"],
+        "seasons": "1940 to present (hourly historical) + 16-day forecast",
+        "historical_depth_years": 80,
+        "ipl_coverage": "Hourly temperature, relative humidity, dew point, wind speed, precipitation, surface pressure at exact venue GPS coordinates."
+      },
+      "update_frequency": "Hourly",
+      "access_method": "REST JSON API",
+      "authentication": "None required (Free Open-Meteo Non-Commercial / CC-BY 4.0)",
+      "licensing": {
+        "license_name": "Creative Commons Attribution 4.0 International (CC-BY 4.0)",
+        "commercial_use_permitted": true,
+        "attribution_required": true,
+        "attribution_text": "Weather data by Open-Meteo.com under CC-BY 4.0."
+      },
+      "rate_limits": "Up to 10,000 daily API calls free tier; cached locally.",
+      "reliability_assessment": "High (validated ECMWF / ERA5 / GFS meteorological reanalysis models)",
+      "known_gaps": [
+        "Micro-climate inside stadium bowl (e.g. roof shade, enclosed wind buffering) not captured at sub-kilometer resolution"
+      ],
+      "last_verified": "2026-11-07T05:10:00Z"
+    },
+    {
+      "source_id": "espncricinfo_reference",
+      "name": "ESPNcricinfo Statistics & Profiles",
+      "url": "https://www.espncricinfo.com",
+      "tier": "TIER_4",
+      "status": "restricted_manual_only",
+      "category": "Cricket Information & Player Records",
+      "coverage": {
+        "competitions": ["Global Cricket, IPL, Domestic"],
+        "seasons": "Historical to Present",
+        "historical_depth_years": 100,
+        "ipl_coverage": "Comprehensive player biographies, career stats, and match articles."
+      },
+      "update_frequency": "Real-time",
+      "access_method": "Restricted (Web scraping prohibited by Terms of Service). Manual CSV/JSON import only.",
+      "authentication": "None for public reading; commercial API requires enterprise contract.",
+      "licensing": {
+        "license_name": "ESPN Sports Media Ltd. - All Rights Reserved",
+        "commercial_use_permitted": false,
+        "attribution_required": true,
+        "attribution_text": "Referenced from ESPNcricinfo via compliant manual export."
+      },
+      "rate_limits": "Automated scrapers blocked by Cloudflare/Anti-bot. AUTOMATED SCRAPING STRICTLY DISALLOWED.",
+      "reliability_assessment": "High accuracy, but programmatic access is disallowed without commercial license.",
+      "known_gaps": [
+        "No public API for automated integration",
+        "Strict anti-scraping policy requires manual import pipeline"
+      ],
+      "last_verified": "2026-11-07T05:10:00Z"
+    },
+    {
+      "source_id": "curated_rr_scouting",
+      "name": "Rajasthan Royals Curated Scouting Logs",
+      "url": "internal://data/raw/domestic/rr_scouting_manifest.json",
+      "tier": "TIER_3",
+      "status": "active",
+      "category": "Proprietary & Uncapped Scouting Dossiers",
+      "coverage": {
+        "competitions": ["SMAT 2025/2026", "Ranji Trophy", "State T20 Leagues (UP T20, Maharaja T20, TNPL)"],
+        "seasons": "2024 to 2026",
+        "historical_depth_years": 3,
+        "ipl_coverage": "Qualitative scout assessments, physical testing metrics, trial notes, and IPL 2027 watchlists."
+      },
+      "update_frequency": "Post-trial / periodic scouting camps",
+      "access_method": "Encrypted local JSON / manual secure upload",
+      "authentication": "Role-based franchise authorization",
+      "licensing": {
+        "license_name": "Rajasthan Royals Technical Operations - Strictly Confidential",
+        "commercial_use_permitted": false,
+        "attribution_required": false,
+        "attribution_text": "Confidential RR Scouting Dossier."
+      },
+      "rate_limits": "Internal filesystem access; SHA-256 hash verified.",
+      "reliability_assessment": "High (primary source direct from RR talent scouts and analysts)",
+      "known_gaps": [
+        "Subjective qualitative observations require normalization against deterministic stats"
+      ],
+      "last_verified": "2026-11-07T05:10:00Z"
+    }
+  ]
+}

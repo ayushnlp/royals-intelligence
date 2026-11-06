@@ -32,3 +32,43 @@ export async function fetchSystemHealth(): Promise<SystemHealth> {
     };
   }
 }
+
+export async function fetchSources() {
+  try {
+    const res = await fetch(`${API_BASE_URL}/acquisition/sources`, { cache: "no-store" });
+    if (!res.ok) throw new Error("Failed to fetch sources");
+    return await res.json();
+  } catch (e) {
+    return [];
+  }
+}
+
+export async function fetchCoverage() {
+  try {
+    const res = await fetch(`${API_BASE_URL}/acquisition/coverage`, { cache: "no-store" });
+    if (!res.ok) throw new Error("Failed to fetch coverage");
+    return await res.json();
+  } catch (e) {
+    return null;
+  }
+}
+
+export async function fetchIngestionRuns() {
+  try {
+    const res = await fetch(`${API_BASE_URL}/acquisition/runs`, { cache: "no-store" });
+    if (!res.ok) throw new Error("Failed to fetch runs");
+    return await res.json();
+  } catch (e) {
+    return [];
+  }
+}
+
+export async function fetchDatasets() {
+  try {
+    const res = await fetch(`${API_BASE_URL}/acquisition/datasets`, { cache: "no-store" });
+    if (!res.ok) throw new Error("Failed to fetch datasets");
+    return await res.json();
+  } catch (e) {
+    return [];
+  }
+}

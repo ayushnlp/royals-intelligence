@@ -1,0 +1,39 @@
+{
+  "dataset_id": "ipl_2024_ball_by_ball",
+  "competition_id": "ipl",
+  "season": "2024",
+  "source_id": "cricsheet_open",
+  "version": "1.0.0",
+  "created_at": "2026-11-06T23:47:44.203036Z",
+  "updated_at": "2026-11-06T23:47:44.428329Z",
+  "run_id": "run_cricsheet_open_20261106_234744_8d330a",
+  "raw_files": [
+    {
+      "file_path": "C:\\Users\\ayush\\Documents\\ROYALS INTELLIGENCE\\data\\raw\\matches\\ipl\\2024\\sample_match_rr_csk.json",
+      "file_name": "sample_match_rr_csk.json",
+      "file_format": "json",
+      "file_size_bytes": 6546,
+      "checksum_sha256": "78fdb57e88ec29033f5d0d92487702c2c9f626cf31786770846103b51c2a36d9",
+      "record_count": 1,
+      "created_at": "2026-11-06T23:47:44.221621Z"
+    },
+    {
+      "file_path": "C:\\Users\\ayush\\Documents\\ROYALS INTELLIGENCE\\data\\raw\\matches\\ipl\\2024\\sample_match_rr_mi.json",
+      "file_name": "sample_match_rr_mi.json",
+      "file_format": "json",
+      "file_size_bytes": 4902,
+      "checksum_sha256": "5757debc25851e57dca7e1f3361d3c77450cef3b69d33741fbbe67fea3d577c8",
+      "record_count": 1,
+      "created_at": "2026-11-06T23:47:44.269714Z"
+    }
+  ],
+  "processed_parquet_paths": [
+    "C:\\Users\\ayush\\Documents\\ROYALS INTELLIGENCE\\data\\processed\\ball_by_ball\\season=2024\\deliveries.parquet",
+    "C:\\Users\\ayush\\Documents\\ROYALS INTELLIGENCE\\data\\processed\\matches\\matches.parquet"
+  ],
+  "total_matches": 2,
+  "total_deliveries": 31,
+  "total_players": 0,
+  "validation_status": "VALIDATED",
+  "completeness_percentage": 100.0
+}
