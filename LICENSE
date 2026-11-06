@@ -1,17 +1,56 @@
-CONFIDENTIAL AND PROPRIETARY LICENSE
-=====================================
+ROYALS INTELLIGENCE SOFTWARE LICENSE & INTELLECTUAL PROPERTY NOTICE
+===================================================================
 
-Copyright (c) 2026 Rajasthan Royals / Royals Intelligence Project.
-All Rights Reserved.
+1. ORIGINAL SOURCE CODE & ARCHITECTURE
+--------------------------------------
+Copyright (c) 2026 Royals Intelligence Platform Contributors.
+All original software source code, application architectures, data pipeline
+frameworks, interface implementations, and predictive modeling logic authored
+within this repository are proprietary and confidential to the Royals
+Intelligence development team and its authorized internal users.
 
-NOTICE: This software, its source code, data schemas, analytical models,
-predictive algorithms, and tactical intelligence architecture are strictly
-confidential and the proprietary intellectual property of Rajasthan Royals
-and authorized platform contributors.
+Unauthorized duplication, distribution, decompilation, public dissemination,
+or commercial exploitation of this original source code is strictly prohibited.
 
-Unauthorized reproduction, distribution, decompilation, public display,
-or reverse engineering of any portion of this codebase or its models
-without explicit prior written consent from the Rajasthan Royals management
-and Lead Software Architecture team is strictly prohibited.
 
-INTERNAL SPORTS INTELLIGENCE ACCESS ONLY.
+2. TRADEMARKS & FRANCHISE INTELLECTUAL PROPERTY DISCLAIMER
+----------------------------------------------------------
+"Rajasthan Royals", franchise logos, wordmarks, emblems, uniform designs,
+and associated team identifiers are the exclusive registered trademarks and
+intellectual property of Royal Multisport Private Limited and/or their
+respective rights holders.
+
+The Indian Premier League ("IPL") and associated tournament marks are the
+intellectual property of the Board of Control for Cricket in India ("BCCI").
+
+Neither this project nor its software developers claim ownership of, or
+proprietary rights to, any trademarks, logos, official franchise branding,
+or league intellectual property. All references to franchises, tournaments,
+venues, and players are made strictly for analytical modeling and contextual
+decision-support purposes.
+
+
+3. THIRD-PARTY SOFTWARE & OPEN-SOURCE DEPENDENCIES
+--------------------------------------------------
+This software builds upon and interfaces with third-party open-source software
+libraries and frameworks (including, without limitation: FastAPI, Next.js,
+React, Tailwind CSS, SQLAlchemy, Pydantic, Alembic, AsyncPG, NumPy, Pandas,
+PyArrow, SciPy, Scikit-learn, and Pytest).
+
+All third-party libraries remain the property of their respective copyright
+holders and are used subject to their applicable licenses (MIT, Apache 2.0,
+BSD, or PSF). Nothing in this document alters or restricts the rights granted
+under those individual open-source licenses.
+
+
+4. COMPETITION DATA & CONFIDENTIALITY PROTOCOLS
+------------------------------------------------
+- Public Cricket Records: Historical statistical records and open ball-by-ball
+  event logs (e.g., Cricsheet or publicly available match scorecards) remain
+  subject to their respective public domain or open data licensing terms.
+- Proprietary Franchise Materials: Any confidential scouting evaluations,
+  internal player ratings, medical screening logs, tactical memos, or auction
+  bid limits supplied by franchise operations are confidential competitive
+  information. Such data is not licensed under this document, must remain strictly
+  segregated in encrypted, uncommitted storage, and is governed by applicable
+  non-disclosure agreements.
