@@ -1,0 +1,105 @@
+name: royals-intelligence
+
+services:
+  # ============================================================================
+  # PostgreSQL Database Service (Postgres 16)
+  # ============================================================================
+  db:
+    image: postgres:16-alpine
+    container_name: royals_intelligence_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-royals_admin}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-royals_secure_dev_password}
+      POSTGRES_DB: ${POSTGRES_DB:-royals_intelligence_db}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-royals_admin} -d ${POSTGRES_DB:-royals_intelligence_db}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - royals_network
+
+  # ============================================================================
+  # Redis Cache & Task Broker (Redis 7)
+  # ============================================================================
+  redis:
+    image: redis:7-alpine
+    container_name: royals_intelligence_redis
+    restart: unless-stopped
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - royals_network
+
+  # ============================================================================
+  # Backend API Service (FastAPI / Python 3.12)
+  # ============================================================================
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: royals_intelligence_backend
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      - ENVIRONMENT=development
+      - DEBUG=True
+      - POSTGRES_HOST=db
+      - POSTGRES_PORT=5432
+      - POSTGRES_USER=${POSTGRES_USER:-royals_admin}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-royals_secure_dev_password}
+      - POSTGRES_DB=${POSTGRES_DB:-royals_intelligence_db}
+      - DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER:-royals_admin}:${POSTGRES_PASSWORD:-royals_secure_dev_password}@db:5432/${POSTGRES_DB:-royals_intelligence_db}
+      - REDIS_URL=redis://redis:6379/0
+      - BACKEND_CORS_ORIGINS=["http://localhost:3000","http://127.0.0.1:3000"]
+    ports:
+      - "${BACKEND_PORT:-8000}:8000"
+    volumes:
+      - ./backend/app:/app/app
+      - ./data:/data
+    networks:
+      - royals_network
+
+  # ============================================================================
+  # Frontend Service (Next.js 15)
+  # ============================================================================
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: royals_intelligence_frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8000/api/v1
+      - NEXT_PUBLIC_ENVIRONMENT=development
+      - PORT=3000
+    ports:
+      - "3000:3000"
+    networks:
+      - royals_network
+
+volumes:
+  pgdata:
+  redisdata:
+
+networks:
+  royals_network:
+    driver: bridge
