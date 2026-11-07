@@ -1,4 +1,14 @@
-import { SystemHealth } from "@/types";
+import {
+  SystemHealth,
+  CompetitionSeasonSummary,
+  MatchSummaryItem,
+  InningsAnalysisResponse,
+  MatchScorecardResponse,
+  PlayerDomesticSeasonStats,
+  PlayerMatchHistoryItem,
+  PlayerPhaseSplitDetail,
+  AllRoundContributionResponse,
+} from "@/types";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
 
@@ -206,5 +216,145 @@ export async function fetchPlayerEvaluations(playerId: string, userRole: string 
     return await res.json();
   } catch (e) {
     return [];
+  }
+}
+
+// --- Stage 3: Domestic Season and Match Intelligence API ---
+
+export async function fetchDomesticCompetitions(): Promise<CompetitionSeasonSummary[]> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/domestic/competitions`, { cache: "no-store" });
+    if (!res.ok) throw new Error("Failed to fetch domestic competitions");
+    return await res.json();
+  } catch (e) {
+    return [];
+  }
+}
+
+export async function fetchSeasonMatches(
+  competitionId: string,
+  season: string,
+  params?: { team?: string; page?: number; page_size?: number }
+): Promise<{ total: number; page: number; page_size: number; matches: MatchSummaryItem[] }> {
+  try {
+    const searchParams = new URLSearchParams();
+    if (params?.team) searchParams.append("team", params.team);
+    if (params?.page) searchParams.append("page", String(params.page));
+    if (params?.page_size) searchParams.append("page_size", String(params.page_size));
+
+    const qs = searchParams.toString();
+    const url = `${API_BASE_URL}/domestic/seasons/${competitionId}/${season}/matches${qs ? `?${qs}` : ""}`;
+    const res = await fetch(url, { cache: "no-store" });
+    if (!res.ok) throw new Error("Failed to fetch season matches");
+    return await res.json();
+  } catch (e) {
+    return { total: 0, page: 1, page_size: 20, matches: [] };
+  }
+}
+
+export async function fetchSeasonSummary(
+  competitionId: string,
+  season: string
+): Promise<CompetitionSeasonSummary | null> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/domestic/seasons/${competitionId}/${season}/summary`, {
+      cache: "no-store",
+    });
+    if (!res.ok) throw new Error("Failed to fetch season summary");
+    return await res.json();
+  } catch (e) {
+    return null;
+  }
+}
+
+export async function fetchMatchScorecard(matchId: string): Promise<MatchScorecardResponse | null> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/domestic/matches/${matchId}`, { cache: "no-store" });
+    if (!res.ok) throw new Error("Failed to fetch match scorecard");
+    return await res.json();
+  } catch (e) {
+    return null;
+  }
+}
+
+export async function fetchInningsAnalysis(
+  matchId: string,
+  inningsNumber: number
+): Promise<InningsAnalysisResponse | null> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/domestic/matches/${matchId}/innings/${inningsNumber}`, {
+      cache: "no-store",
+    });
+    if (!res.ok) throw new Error("Failed to fetch innings analysis");
+    return await res.json();
+  } catch (e) {
+    return null;
+  }
+}
+
+export async function fetchPlayerDomesticStats(
+  playerId: string,
+  competitionId?: string
+): Promise<PlayerDomesticSeasonStats[]> {
+  try {
+    const qs = competitionId ? `?competition_id=${encodeURIComponent(competitionId)}` : "";
+    const res = await fetch(`${API_BASE_URL}/domestic/players/${playerId}/season-stats${qs}`, {
+      cache: "no-store",
+    });
+    if (!res.ok) throw new Error("Failed to fetch player domestic season stats");
+    return await res.json();
+  } catch (e) {
+    return [];
+  }
+}
+
+export async function fetchPlayerMatchHistory(
+  playerId: string,
+  params?: { competition_id?: string; season?: string; page?: number; page_size?: number }
+): Promise<{ total: number; page: number; page_size: number; history: PlayerMatchHistoryItem[] }> {
+  try {
+    const searchParams = new URLSearchParams();
+    if (params?.competition_id) searchParams.append("competition_id", params.competition_id);
+    if (params?.season) searchParams.append("season", params.season);
+    if (params?.page) searchParams.append("page", String(params.page));
+    if (params?.page_size) searchParams.append("page_size", String(params.page_size));
+
+    const qs = searchParams.toString();
+    const url = `${API_BASE_URL}/domestic/players/${playerId}/match-history${qs ? `?${qs}` : ""}`;
+    const res = await fetch(url, { cache: "no-store" });
+    if (!res.ok) throw new Error("Failed to fetch player match history");
+    return await res.json();
+  } catch (e) {
+    return { total: 0, page: 1, page_size: 20, history: [] };
+  }
+}
+
+export async function fetchPlayerPhaseSplits(
+  playerId: string,
+  competitionId?: string
+): Promise<PlayerPhaseSplitDetail[]> {
+  try {
+    const qs = competitionId ? `?competition_id=${encodeURIComponent(competitionId)}` : "";
+    const res = await fetch(`${API_BASE_URL}/domestic/players/${playerId}/phase-splits${qs}`, {
+      cache: "no-store",
+    });
+    if (!res.ok) throw new Error("Failed to fetch player phase splits");
+    return await res.json();
+  } catch (e) {
+    return [];
+  }
+}
+
+export async function fetchPlayerAllRoundSummary(
+  playerId: string
+): Promise<AllRoundContributionResponse | null> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/domestic/players/${playerId}/all-round-summary`, {
+      cache: "no-store",
+    });
+    if (!res.ok) throw new Error("Failed to fetch player all-round summary");
+    return await res.json();
+  } catch (e) {
+    return null;
   }
 }

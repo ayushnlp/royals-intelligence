@@ -51,39 +51,31 @@
 
 ## Detailed Stage Definitions
 
-### Stage 0: Foundation, Repository Setup & Architecture Initialization (CURRENT STAGE)
+### Stage 0: Foundation, Repository Setup & Architecture Initialization (SEALED `6e185ef`)
 * **Objective:** Establish the clean monorepo, Rajasthan Royals visual identity frontend shell, FastAPI async backend, database connection architecture, Docker orchestration, comprehensive documentation, and CI/CD foundations.
-* **Deliverables:**
-  * Clean monorepo structure with zero legacy dependencies.
-  * Next.js App Router shell with Royals navy/pink branding and responsive navigation.
-  * FastAPI backend with `/health` and `/api/v1/health` probes.
-  * SQLAlchemy 2.0 Async + Alembic migration harness.
-  * Documentation suite (`PROJECT_BLUEPRINT`, `ARCHITECTURE`, `DATABASE_DESIGN`, `DATA_STRATEGY`, `API_DESIGN`, `DEVELOPMENT_ROADMAP`, `DESIGN_SYSTEM`, `SECURITY`, `STAGE_STATUS`).
-  * Docker Compose configuration for Postgres, Redis, Backend, Frontend.
-  * Verified unit tests for backend health probes and frontend production build.
+* **Status:** Complete, sealed, and audited.
 
-### Stage 1: Data Ingestion Infrastructure & Historical Data Pipelines
+### Stage 1: Data Ingestion Infrastructure & Historical Data Pipelines (SEALED `c546306`)
 * **Objective:** Build robust automated ingestion pipelines for historical IPL and domestic T20 cricket data.
-* **Deliverables:**
-  * Cricsheet and raw JSON match data parsers with schema validation.
-  * Data normalization and player identity deduplication engine.
-  * Partitioned Apache Parquet analytical store in `data/processed/`.
+* **Status:** Complete, sealed, and audited.
 
-### Stage 2: Database Schema Implementation & Relational Persistence
-* **Objective:** Execute Alembic migrations to instantiate all core relational tables and indexes.
-* **Deliverables:**
-  * Tables: `teams`, `venues`, `matches`, `innings`, `deliveries`, `players`.
-  * High-performance composite indexes on `(match_id, innings_id, over_number)` and `(bowler_id, striker_id)`.
-  * Batch async loading pipeline from Parquet to PostgreSQL.
+### Stage 2: Database Schema Implementation & Relational Persistence (SEALED `f4a72b7`)
+* **Objective:** Instantiate SQLAlchemy 2.0 async models, Alembic migrations, uncapped player identity governance, and proprietary data pack interfaces.
+* **Status:** Complete, sealed, and hardened (Uncapped Scope Only).
 
-### Stage 3: Core Batting Intelligence & Advanced Metrics
-* **Objective:** Implement advanced batting diagnostics beyond conventional average and strike rate.
+### Stage 3: Domestic Season and Match Intelligence (COMPLETED & VERIFIED)
+* **Objective:** Implement domestic cricket season directories, format-aware phase engines, ball-by-ball scorecards, fall of wickets, partnerships, progression worms, and all-round dual-contribution profiles.
+* **Status:** Completed & fully verified (52/52 backend tests passing, 0 warnings, Next.js static build passing).
 * **Deliverables:**
-  * Phase-specific metrics (Powerplay, Middle, Death).
-  * Control percentage, false shot rate, dot ball mitigation index, and boundary frequency.
-  * Pace-vs-spin splits and entry-point acceleration profiles.
+  * Domestic competitions directory covering SMAT, Vijay Hazare, Ranji, DPL, and UP T20.
+  * Format-aware phase assigner (T20, List A, Multi-Day First Class).
+  * Cricket integrity rules: strictly excludes run-outs from bowler credit; zero-denominator protections.
+  * Deep innings diagnostics: FoW, wicket partnerships, and scoring progression worms.
+  * All-round dual-discipline profile without arbitrary composite formulas or ratings.
+  * Full FastAPI `/api/v1/domestic` REST API suite (9 endpoints).
+  * Interactive Next.js `/domestic` and `/uncapped` UI with full scorecard viewer and phase leverage metrics.
 
-### Stage 4: Core Bowling & Phase Intelligence
+### Stage 4: Core Bowling & Phase Intelligence (NEXT MILESTONE — AWAITING AUTHORIZATION)
 * **Objective:** Implement bowling diagnostics, length distributions, and release consistency analysis.
 * **Deliverables:**
   * Length cluster efficiency (yorker, full, good, back-of-length, short).

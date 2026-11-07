@@ -146,22 +146,23 @@ export default function OverviewPage() {
         <div className="relative z-10 max-w-3xl">
           <div className="flex flex-wrap items-center gap-2 mb-3">
             <span className="px-3 py-1 rounded-full text-xs font-mono font-bold bg-[#E91E8F] text-white">
-              STAGE 1 ACTIVE
+              STAGE 3 ACTIVE
             </span>
             <span className="px-3 py-1 rounded-full text-xs font-mono bg-[#D6B56D]/20 text-[#D6B56D] border border-[#D6B56D]/40">
               RAJASTHAN ROYALS CRICKET PLATFORM
             </span>
             <span className="text-xs text-slate-400 font-mono">
-              Target: IPL 2026 & IPL 2027 Auction
+              Target: IPL 2026 & IPL 2027 Auction (Uncapped Scope)
             </span>
           </div>
 
           <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight text-white mb-2">
-            Royals Intelligence Data Acquisition Command Center
+            Royals Intelligence Domestic Season & Match Command Center
           </h1>
           <p className="text-sm text-slate-300 leading-relaxed mb-6">
-            Stage 1 Data Acquisition Engine initialized. Multi-source registry, SHA-256 cryptographic
-            checksums, cricket arithmetic validation, and columnar Apache Parquet storage active.
+            Stage 3 Domestic Season & Match Intelligence operational. Multi-format phase engines (SMAT T20,
+            Vijay Hazare List A, Ranji Multi-Day), ball-by-ball scorecards, partnerships, progression worms,
+            and uncompromised all-round dual-discipline profiles.
           </p>
 
           <div className="inline-flex items-center gap-3 bg-[#0B1220]/80 border border-slate-700/60 rounded-xl px-4 py-2 text-xs">
@@ -214,8 +215,8 @@ export default function OverviewPage() {
           />
           <StatCard
             title="Project Roadmap"
-            value="Stage 1 / 13"
-            subtitle="Data Acquisition Engine operational. Next: Stage 2 Relational ETL"
+            value="Stage 3 / 13"
+            subtitle="Domestic Season & Match Intelligence operational. Scope: Uncapped Only."
             badgeText="In Progress"
             icon={<Cpu size={18} />}
           />

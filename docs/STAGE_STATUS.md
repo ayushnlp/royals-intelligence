@@ -1,49 +1,57 @@
 # ROYALS INTELLIGENCE — STAGE STATUS & AUDIT LEDGER
-**Milestone:** STAGE 2 — Database and Analytics Foundation (Uncapped Players Only) — Hardened & Sealed  
-**Previous Stages:** Stage 0 (Sealed `6e185ef`), Stage 1 (Sealed `c546306`), Stage 2 Baseline (`8ab48d4`)  
-**Current Status:** STAGE 2 HARDENED & AUDITED (Zero Warnings, Zero Vulnerabilities, Zero Technical Debt)  
+**Milestone:** STAGE 3 — Domestic Season and Match Intelligence (Uncapped Players Only) — Completed & Verified  
+**Accepted Baselines:** Stage 0 (`6e185ef`), Stage 1 (`c546306`), Stage 2 (`f4a72b7`)  
+**Current Status:** STAGE 3 COMPLETED (52/52 Tests Passing, Zero Warnings, Strict Uncapped Scope Enforced)  
+**Round 1 Competition Deadline:** 18 November 2026, 11:59 PM IST  
 
 ---
 
-## 1. Stage 2 Final Hardening Verification Matrix
+## 1. Stage 3 Domestic Intelligence Verification Matrix
 
 | Area | Component / Requirement | Verification Method | Status | Verification Findings & Architecture Hardening |
 | :--- | :--- | :---: | :---: | :--- |
-| **Relational Schema** | 29 SQLAlchemy 2.0 Models | `app/models/` | **VERIFIED (PASS)** | Complete schema covering core, performance, governance, and uncapped scouting domains. Updated with cap separation and rule provenance fields. |
-| **Migrations** | Alembic Revision Script | `001_uncapped_player_foundation.py` | **VERIFIED (PASS)** | Deterministic upgrade and downgrade definitions aligned with SQLAlchemy models. Dialect agnostic. |
-| **Database Engines** | Cross-Engine Verification | Test Suite & Diagnostics | **PARTIALLY VERIFIED** | **SQLite Async (`sqlite+aiosqlite:///:memory:`): VERIFIED (PASS)** in test suite. **PostgreSQL 16: UNVERIFIED** in live container (Host Docker daemon offline). Schema and syntax verified against async SQLAlchemy 2.0. |
-| **Age Cutoff Assumption** | Configurable Reference Date | `PlayerIdentityService` | **VERIFIED (PASS)** | Removed hardcoded `2026-11-18` assumption. Reference date is configurable via `EligibilityRuleConfig`. Unconfirmed reference date yields `None` ("Age Unresolved"). Missing DOB never produces a fabricated age. |
-| **Proprietary Security** | Server-Side Authentication & Deny-by-Default | `app/core/security.py` | **VERIFIED (PASS)** | Eliminated client-asserted `x-user-role` header bypass. Rejects unauthenticated requests and forged headers with `401 Unauthorized`. Requires server-verified Bearer token or API key for privileged routes. |
-| **Data Masking** | Confidential Field Redaction | `mask_confidential_data` | **VERIFIED (PASS)** | Masks scout identifiers to `[ANONYMIZED_RR_SCOUT]`, strips internal notes and valuations for anonymous and public callers. Unmasked views require verified `rr_scout_admin` principal. |
-| **Eligibility Semantics** | Senior Caps vs Uncapped Eligibility | `EligibilityRuleConfig` | **VERIFIED (PASS)** | Decouples lifetime international cap facts (`is_capped`, `last_international_match_date`) from tournament eligibility. Evaluates IPL Rule 4.3 (5-year international inactivity clause). Unverified rules default to `PENDING_VERIFICATION`. |
-| **Validation vs Completeness** | Telemetry Metric Segregation | Ingestion Contracts & Validator | **VERIFIED (PASS)** | Formally separates `validation_pass_rate` ($(\text{valid\_checks} / \text{total\_checks}) \times 100$) from `completeness_percentage` (attribute and record population score). |
-| **Deprecation Warnings** | Zero-Warning Policy | Python 3.12 / Pytest | **VERIFIED (PASS)** | Replaced all deprecated `datetime.utcnow()` calls with `datetime.now(timezone.utc)` and `utc_now()`. Filtered Starlette testclient external warning. **67 warnings reduced to 0**. |
-| **Backend API** | Uncapped & Proprietary Endpoints | FastAPI Router (`/api/v1`) | **VERIFIED (PASS)** | Endpoints `/players`, `/players/{id}`, `/players/{id}/verify-eligibility`, `/analytics/...`, and `/proprietary/...` verified with dynamic reference dates and strict RBAC. |
-| **Frontend UI** | Uncapped Scouting Hub | Next.js `/uncapped` | **VERIFIED (PASS)** | 4-tab dashboard displaying resolved/unresolved age, verified badges, recent form, and secure RR Data Pack ingestion interface. |
-| **Regression Suite** | Backend Pytest | `pytest backend/tests` | **VERIFIED (PASS)** | **44 / 44 tests passed** in 4.94s with **0 failures and 0 warnings**. |
-| **Frontend Verification**| TypeScript & Production Build | `npm run type-check` & `build` | **VERIFIED (PASS)** | 0 TypeScript errors, 0 ESLint warnings, 6/6 static pages prerendered successfully. |
+| **Domestic Competitions** | SMAT, VHT, Ranji, DPL, UP T20 Directory | `DomesticSeasonService` | **VERIFIED (PASS)** | Directory covers BCCI major domestic competitions and Tier-1 state feeder T20 leagues. Provides match counts, participating teams, ball-by-ball verification flags, and completeness scores. |
+| **Format-Aware Phases** | T20, List A, and Multi-Day Phase Engine | `assign_phase()` | **VERIFIED (PASS)** | Dynamically assigns cricket overs to match phases based on competition format: T20 (Overs 0-5 PP, 6-14 Middle, 15-19 Death); List A (Overs 0-9 PP, 10-39 Middle, 40-49 Death); Ranji/First-Class (Overs 0-14 New Ball, 15+ Middle/Old Ball). Zero arbitrary T20 death cuts applied to multi-day cricket. |
+| **Dismissal & Bowler Credit** | Dismissal Kind Bowler Attribution | Scorecard Builder | **VERIFIED (PASS)** | Strictly credits bowler wickets ONLY for `bowled`, `caught`, `lbw`, `stumped`, and `hit wicket`. `run out`, `retired hurt`, `timed out`, and `obstructing the field` are explicitly excluded from bowler wickets, bowling averages, and bowling strike rates. |
+| **Zero-Denominator Protections** | Edge-Case Cricket Arithmetic | Analytical Engine | **VERIFIED (PASS)** | 0 balls faced $\to$ Strike Rate `0.0`. 0 dismissals (not out) $\to$ Batting Average `None` (unfabricated). 0 boundaries $\to$ Balls per boundary `None`. 0 bowler wickets $\to$ Bowling Average and Bowling Strike Rate `None`. 0 balls bowled $\to$ Economy Rate `0.0`. |
+| **Innings Diagnostics** | Fall of Wickets (FoW) & Partnerships | `DomesticMatchService` | **VERIFIED (PASS)** | Computes cumulative FoW progression and all wicket partnerships with individual batter run/ball contributions and unbroken partnership indicators. |
+| **Scoring Worm Progression** | Over-by-Over Cumulative Curves | Match Progression Builder | **VERIFIED (PASS)** | Builds over-by-over progression tracking runs in over, cumulative runs, wickets in over, and cumulative wickets. |
+| **All-Round Dual Contribution**| Multi-Discipline Player Profiles | `AllRoundContributionResponse` | **VERIFIED (PASS)** | Strictly prevents speculative composite formulas/ratings; preserves independent batting, bowling, and fielding profiles with transparent sample sizes (matches, innings batted, overs bowled). Formulates evidence-based qualitative role archetypes. |
+| **Scope Guarding** | Strict Uncapped Player Scope | Scope Enforcer | **VERIFIED (PASS)** | Guards player analytics endpoints to ensure only uncapped players or domestic feeder talents are queried. Rejects international capped player requests with `403 Forbidden`. |
+| **REST API Router** | 9 `/domestic` Endpoints | FastAPI `/api/v1/domestic` | **VERIFIED (PASS)** | Complete domestic API surface: `/competitions`, `/seasons/{c}/{s}/matches`, `/seasons/{c}/{s}/summary`, `/matches/{id}`, `/matches/{id}/innings/{n}`, `/players/{id}/season-stats`, `/players/{id}/match-history`, `/players/{id}/phase-splits`, `/players/{id}/all-round-summary`. |
+| **Frontend UI** | Domestic Command Center | Next.js `/domestic` & `/uncapped` | **VERIFIED (PASS)** | Comprehensive domestic command center featuring tournament selector, match list with team filtering, modal scorecard viewer (with format-aware phases, batting/bowling scorecards, FoW, partnerships, progression worm), and all-round dual contribution viewer. |
+| **Regression Suite** | Pytest Backend | `backend/tests/` | **VERIFIED (PASS)** | **52 / 52 tests passed** in 2.75s with **0 failures and 0 warnings**. |
+| **Frontend Verification** | Type-check, Lint, Production Build | `npm run build` | **VERIFIED (PASS)** | 0 TypeScript errors, 0 ESLint warnings, 7/7 static pages prerendered successfully including `/domestic`. |
 
 ---
 
-## 2. Security & Eligibility Hardening Details
+## 2. Mathematical & Domain Integrity Rules Applied
 
-### 2.1. Authentication & Authorization Path
-- **Mechanism:** HTTP Bearer token (`Authorization: Bearer <token>`) or API Key (`X-API-Key: <key>`).
-- **Principal:** `AuthenticatedUser(user_id, username, roles, auth_method)`.
-- **Server-Side Validation:** Checked against trusted server configuration (`SCOUT_ADMIN_API_KEY`, `LEAD_ANALYST_API_KEY`).
-- **Forged Header Defense:** Any request attempting to assert privileged roles via client headers (e.g., `x-user-role: rr_scout_admin`) without valid server-side credentials is fundamentally rejected with `401 Unauthorized` ("Untrusted client-controlled role header rejected").
-- **Deny-by-Default:** Privileged operations (`/proprietary/ingest-pack`, `/proprietary/discover-schema`, `/players/{id}/verify-eligibility`) reject anonymous callers with `401 Unauthorized` and insufficient roles with `403 Forbidden`.
-- **Public Masking:** Public callers querying `/proprietary/evaluations/{id}` receive masked evaluation objects with redacted notes and anonymized scout codes.
+1. **Format-Aware Phase Cutoffs**:
+   - **T20 (SMAT, DPL, UP T20, IPL Feeder)**:
+     - Powerplay: Overs $0 \le \text{over} \le 5$ (Balls 0.1 to 6.0)
+     - Middle Overs: Overs $6 \le \text{over} \le 14$ (Balls 6.1 to 15.0)
+     - Death Overs: Overs $15 \le \text{over} \le 19$ (Balls 15.1 to 20.0)
+   - **List A (Vijay Hazare Trophy)**:
+     - Powerplay: Overs $0 \le \text{over} \le 9$ (Balls 0.1 to 10.0)
+     - Middle Overs: Overs $10 \le \text{over} \le 39$ (Balls 10.1 to 40.0)
+     - Death Overs: Overs $40 \le \text{over} \le 49$ (Balls 40.1 to 50.0)
+   - **Multi-Day First Class (Ranji Trophy)**:
+     - New Ball Phase: Overs $0 \le \text{over} \le 14$ (Balls 0.1 to 15.0)
+     - Middle / Old Ball Phase: Overs $\text{over} \ge 15$ (Balls 15.1+)
 
-### 2.2. Uncapped Eligibility & Age Provenance Engine
-- **Decoupled Semantics:** A player's historical international appearances (`PlayerModel.is_capped`, `last_international_match_date`) are stored as immutable historical facts, while tournament eligibility is calculated dynamically by `PlayerIdentityService.evaluate_uncapped_eligibility`.
-- **BCCI IPL Clause 4.3 Support:** Indian players with prior international caps who have not played international cricket in the preceding 5 calendar years and do not hold a central contract are verified as eligible under the 5-year inactive clause.
-- **Reference Date Integrity:** No tournament reference date is presumed. If the official tournament cutoff is unpromulgated or unsupplied, `calculated_age_at_cutoff` remains `None` ("Age Unresolved") and age-dependent criteria remain `PENDING_VERIFICATION`. Missing DOB never produces a fabricated age.
-- **Rule Verification:** Rules marked `is_rule_verified=False` hold players in `PENDING_VERIFICATION` status until official tournament regulations are promulgated.
+2. **Wicket Attribution Integrity**:
+   - In accordance with standard cricket laws and platform integrity guidelines, **Run Outs are not credited to the bowler**.
+   - Credited bowler dismissals: `bowled`, `caught`, `lbw`, `stumped`, `hit wicket`.
+   - Excluded bowler dismissals: `run out`, `retired hurt`, `timed out`, `obstructing the field`.
+
+3. **No Synthetic Composite All-Round Ratings**:
+   - The platform strictly avoids arbitrary composite formulas (such as `batting_sr * 0.5 + bowling_econ * (-2)`).
+   - Independent batting, bowling, and fielding metrics are tracked side-by-side with transparent sample sizes.
 
 ---
 
-## 3. Test Execution Ledger (44/44 Passing, 0 Warnings)
+## 3. Test Execution Ledger (52/52 Passing, 0 Warnings)
 
 ```
 ============================= test session starts =============================
@@ -52,19 +60,20 @@ rootdir: C:\Users\ayush\Documents\ROYALS INTELLIGENCE\backend
 configfile: pytest.ini
 plugins: anyio-4.16.0, asyncio-1.4.1.post1
 asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function
-collected 44 items
+collected 52 items
 
-backend/tests/test_acquisition.py ..................                     [ 40%]
-backend/tests/test_analytics_foundation.py ..                            [ 45%]
-backend/tests/test_config.py ..                                          [ 50%]
-backend/tests/test_database_models.py ....                               [ 59%]
-backend/tests/test_db_config.py ...                                      [ 65%]
-backend/tests/test_health.py ..                                          [ 70%]
-backend/tests/test_proprietary_pack.py ...                               [ 77%]
-backend/tests/test_uncapped_api.py .....                                 [ 88%]
+backend/tests/test_acquisition.py ..................                     [ 34%]
+backend/tests/test_analytics_foundation.py ..                            [ 38%]
+backend/tests/test_config.py ..                                          [ 42%]
+backend/tests/test_database_models.py ....                               [ 50%]
+backend/tests/test_db_config.py ...                                      [ 55%]
+backend/tests/test_domestic_intelligence.py ........                     [ 71%]
+backend/tests/test_health.py ..                                          [ 75%]
+backend/tests/test_proprietary_pack.py ...                               [ 80%]
+backend/tests/test_uncapped_api.py .....                                 [ 90%]
 backend/tests/test_uncapped_identity.py .....                            [100%]
 
-============================= 44 passed in 4.94s ==============================
+============================= 52 passed in 2.75s ==============================
 
 > royals-intelligence-frontend@0.1.0-stage0 type-check
 > tsc --noEmit
@@ -77,13 +86,19 @@ backend/tests/test_uncapped_identity.py .....                            [100%]
 
 > royals-intelligence-frontend@0.1.0-stage0 build
 > next build
-✓ Compiled successfully in 11.2s
-✓ Generating static pages (6/6)
+✓ Compiled successfully in 6.9s
+✓ Generating static pages (7/7)
+Route (app)                                 Size  First Load JS
+┌ ○ /                                      123 B         103 kB
+├ ○ /_not-found                            992 B         104 kB
+├ ○ /acquisition                         6.57 kB         117 kB
+├ ○ /domestic                            9.27 kB         112 kB
+└ ○ /uncapped                            7.12 kB         110 kB
 (Exit code 0)
 ```
 
 ---
 
 ## 4. Checkpoint Summary
-- **Stage 2 Status:** FULLY HARDENED & AUDITED.
-- **Next Step:** Awaiting user explicit approval before Stage 3. Under no circumstances will Stage 3 commence prematurely.
+- **Stage 3 Status:** FULLY IMPLEMENTED, VERIFIED & AUDITED.
+- **Next Step:** Awaiting user explicit approval before subsequent stages. Do not begin Stage 4 without authorization.

@@ -203,7 +203,7 @@ export default function UncappedScoutingPage() {
         {/* Global Reference Cutoff Date Pill */}
         <div className="flex items-center gap-2 rounded-lg bg-navy-900 border border-navy-700 px-3 py-2 text-xs">
           <span className="text-navy-400">Eligibility Cutoff Reference:</span>
-          <span className="font-semibold text-gold-400 font-mono">18 Nov 2026</span>
+          <span className="font-semibold text-amber-400 font-mono">Unresolved (Awaiting Official BCCI Cutoff)</span>
         </div>
       </div>
 
@@ -249,6 +249,13 @@ export default function UncappedScoutingPage() {
         >
           RR 8 Nov Data Pack Readiness
         </button>
+        <a
+          href="/domestic"
+          className="px-4 py-2 text-sm font-medium rounded-lg transition-colors text-pink-400 hover:text-white hover:bg-navy-800 flex items-center gap-1.5 ml-auto border border-pink-500/30"
+        >
+          <span>Domestic Matches & Phase Breakdown (Stage 3)</span>
+          <span className="text-xs">→</span>
+        </a>
       </div>
 
       {/* TAB 1: Roster & Eligibility */}

@@ -4,7 +4,7 @@ Aggregates all version 1 route modules.
 """
 
 from fastapi import APIRouter
-from app.api.v1.endpoints import health, acquisition, players, analytics, proprietary
+from app.api.v1.endpoints import health, acquisition, players, analytics, proprietary, domestic
 
 api_router = APIRouter()
 
@@ -22,3 +22,6 @@ api_router.include_router(analytics.router, prefix="/analytics", tags=["Analytic
 
 # RR Proprietary Data Pack & Scouting routes (Stage 2)
 api_router.include_router(proprietary.router, prefix="/proprietary", tags=["RR Proprietary Scouting"])
+
+# Domestic Season & Match Intelligence routes (Stage 3)
+api_router.include_router(domestic.router, prefix="/domestic", tags=["Domestic Season & Match Intelligence"])

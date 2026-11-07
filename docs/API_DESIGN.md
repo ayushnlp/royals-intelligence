@@ -171,5 +171,61 @@ Every analytics endpoint will return confidence telemetry:
 
 ### 5.9. Role-Masked Scouting Evaluations
 * **Route:** `GET /api/v1/proprietary/evaluations/{player_id}`
-* **Header:** `x-user-role: public | rr_scout_admin`
-* **Security:** Strips confidential scout notes and anonymizes scout identifiers unless user has `rr_scout_admin` privileges.
+* **Security:** Strips confidential scout notes and anonymizes scout identifiers unless user provides verified server-side Bearer token / API key with `rr_scout_admin` privileges.
+
+---
+
+## 6. Implemented Stage 3 Endpoints (Domestic Season & Match Intelligence)
+
+All Stage 3 endpoints are mounted under `/api/v1/domestic` and enforce the strict platform scope: **UNCAPPED PLAYERS ONLY**.
+
+### 6.1. Domestic Competitions Directory
+* **Route:** `GET /api/v1/domestic/competitions`
+* **Purpose:** Directory of verified domestic competitions (SMAT, Vijay Hazare, Ranji, DPL, UP T20).
+* **Response:** Array of `CompetitionSeasonSummary` with match counts, participating teams, ball-by-ball availability flags, and data completeness metrics.
+
+### 6.2. Season Matches Explorer
+* **Route:** `GET /api/v1/domestic/seasons/{competition_id}/{season}/matches`
+* **Query Parameters:** `team` (optional filter), `page` (default 1), `page_size` (default 20)
+* **Response:** Paginated list of `MatchSummaryItem` objects with match date, home/away teams, venue, outcome, and ball-by-ball verification flags.
+
+### 6.3. Season Standings & Performance Summary
+* **Route:** `GET /api/v1/domestic/seasons/{competition_id}/{season}/summary`
+* **Response:** Aggregate season metrics including total matches, active teams, ball-by-ball pass rates, and provenance metadata.
+
+### 6.4. Complete Match Scorecard & Context
+* **Route:** `GET /api/v1/domestic/matches/{match_id}`
+* **Purpose:** Comprehensive match intelligence dossier.
+* **Response:** Complete `MatchScorecardResponse` including match metadata (venue, toss, player of match, winner) and detailed analysis for all innings.
+
+### 6.5. Deep Innings Diagnostics
+* **Route:** `GET /api/v1/domestic/matches/{match_id}/innings/{innings_number}`
+* **Purpose:** Granular ball-by-ball analytics for a specific innings.
+* **Response:** `InningsAnalysisResponse` containing:
+  - Batting scorecards (with runs, balls, 4s, 6s, SR, and phase-split contributions).
+  - Bowling scorecards (with overs, maidens, runs, bowler wickets excluding run-outs, economy, dot balls).
+  - Fall of Wickets (FoW) progression.
+  - Wicket partnerships with individual batter contributions and unbroken flags.
+  - Format-aware phase leverage summaries (Powerplay, Middle, Death).
+  - Over-by-over scoring progression (cumulative runs and wickets).
+
+### 6.6. Uncapped Player Domestic Season Aggregates
+* **Route:** `GET /api/v1/domestic/players/{player_id}/season-stats`
+* **Query Parameters:** `competition_id` (optional filter)
+* **Security/Scope:** Strictly guards against capped international players (`403 Forbidden`).
+* **Response:** Array of `PlayerDomesticSeasonStats` with batting metrics (average, strike rate, boundaries, high score) and bowling metrics (average, economy, bowler wickets).
+
+### 6.7. Player Chronological Domestic Match History
+* **Route:** `GET /api/v1/domestic/players/{player_id}/match-history`
+* **Query Parameters:** `competition_id`, `season`, `page`, `page_size`
+* **Response:** Paginated list of `PlayerMatchHistoryItem` records showing individual match performances in chronological order.
+
+### 6.8. Granular Player Phase Splits
+* **Route:** `GET /api/v1/domestic/players/{player_id}/phase-splits`
+* **Query Parameters:** `competition_id` (optional)
+* **Response:** Detailed `PlayerPhaseSplitDetail` array with format-aware phase cuts (Powerplay, Middle, Death) for both batting and bowling disciplines.
+
+### 6.9. All-Round Dual-Contribution Profile
+* **Route:** `GET /api/v1/domestic/players/{player_id}/all-round-summary`
+* **Integrity Rule:** Strictly avoids arbitrary composite formulas or synthetic ratings. Preserves independent batting, bowling, and fielding profiles with transparent sample sizes.
+* **Response:** `AllRoundContributionResponse` featuring evidence-based qualitative role archetype classification and sample sizes (matches, innings batted, overs bowled).

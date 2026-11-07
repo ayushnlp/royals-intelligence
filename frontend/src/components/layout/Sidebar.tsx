@@ -49,12 +49,11 @@ export const Sidebar: React.FC<SidebarProps> = ({ className }) => {
       stage: "Stage 2",
     },
     {
-      title: "Match Intelligence",
-      href: "#",
+      title: "Domestic & Matches",
+      href: "/domestic",
       icon: Swords,
-      active: false,
-      badge: "Pending",
-      stage: "Stage 9",
+      active: true,
+      stage: "Stage 3",
     },
     {
       title: "Venue & Pitch",
