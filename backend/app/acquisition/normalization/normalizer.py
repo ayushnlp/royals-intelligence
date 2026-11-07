@@ -275,3 +275,4 @@ class CricketDataNormalizer:
             "source_id": source_ref.source_id,
             "ingested_at": source_ref.ingested_at.isoformat(),
         }
+

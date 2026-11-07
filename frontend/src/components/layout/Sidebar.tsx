@@ -42,6 +42,13 @@ export const Sidebar: React.FC<SidebarProps> = ({ className }) => {
       stage: "Stage 1",
     },
     {
+      title: "Uncapped Scouting",
+      href: "/uncapped",
+      icon: Users,
+      active: true,
+      stage: "Stage 2",
+    },
+    {
       title: "Match Intelligence",
       href: "#",
       icon: Swords,

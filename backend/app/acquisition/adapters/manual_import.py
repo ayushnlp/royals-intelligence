@@ -48,3 +48,4 @@ class ManualImportAdapter(BaseSourceAdapter):
             return {"format": "csv", "records": df.to_dict(orient="records")}
         else:
             raise ValueError(f"Unsupported file format '{suffix}' for manual import.")
+

@@ -115,3 +115,163 @@ export interface DatasetManifestData {
   validation_status: string;
   completeness_percentage: number;
 }
+
+// --- Stage 2: Uncapped Players, Eligibility & Analytics ---
+
+export type EligibilityStatus =
+  | "CONFIRMED_UNCAPPED"
+  | "SUSPECTED_CAPPED"
+  | "INELIGIBLE_OVERAGE"
+  | "PENDING_VERIFICATION"
+  | "FLAGGED_CONFLICT";
+
+export type ScoutingTier =
+  | "TARGET_A_LIST"
+  | "WATCHLIST_HIGH"
+  | "MONITOR"
+  | "BACKUP";
+
+export interface IdentityItem {
+  source_name: string;
+  external_player_id: string;
+  confidence_score: number;
+}
+
+export interface UncappedPlayerSummary {
+  id: string;
+  canonical_id: string;
+  full_name: string;
+  known_as?: string;
+  dob?: string;
+  calculated_age?: number;
+  home_state_association?: string;
+  primary_role?: string;
+  batting_hand?: string;
+  bowling_style?: string;
+  is_capped: boolean;
+  eligibility_status: EligibilityStatus;
+  scouting_tier: ScoutingTier;
+  is_rr_trialist: boolean;
+}
+
+export interface UncappedPlayerDetail extends UncappedPlayerSummary {
+  identities: IdentityItem[];
+  dob_source?: string;
+  dob_verified: boolean;
+  verification_notes?: string;
+  reference_date_used?: string;
+  created_at: string;
+}
+
+export interface PhaseMetrics {
+  phase: string;
+  runs: number;
+  balls: number;
+  wickets: number;
+  strike_rate: number;
+  economy_rate: number;
+  boundary_percentage: number;
+  dot_ball_percentage: number;
+}
+
+export interface BattingAggregates {
+  player_id: string;
+  innings_count: number;
+  runs: number;
+  balls_faced: number;
+  fours: number;
+  sixes: number;
+  strike_rate: number;
+  batting_average?: number;
+  dismissals: number;
+  dot_balls: number;
+  dot_ball_percentage: number;
+  boundary_percentage: number;
+  high_score: number;
+  phase_splits: Record<string, PhaseMetrics>;
+}
+
+export interface BowlingAggregates {
+  player_id: string;
+  innings_count: number;
+  overs: number;
+  legal_balls: number;
+  runs_conceded: number;
+  wickets: number;
+  economy_rate: number;
+  bowling_average?: number;
+  bowling_strike_rate?: number;
+  dot_balls: number;
+  dot_ball_percentage: number;
+  phase_splits: Record<string, PhaseMetrics>;
+}
+
+export interface MatchScorecardItem {
+  match_id: string;
+  match_date: string;
+  opposition_team: string;
+  venue_name: string;
+  runs_or_wickets_display: string;
+  strike_rate_or_economy: number;
+}
+
+export interface RecentFormWindow {
+  player_id: string;
+  window_size: number;
+  innings_evaluated: number;
+  aggregate_metric_summary: string;
+  recent_matches: MatchScorecardItem[];
+}
+
+export interface ColumnMappingConfig {
+  name_col: string;
+  external_id_col?: string;
+  dob_col?: string;
+  state_association_col?: string;
+  primary_role_col?: string;
+  batting_hand_col?: string;
+  bowling_style_col?: string;
+  technical_rating_col?: string;
+  potential_rating_col?: string;
+  confidential_notes_col?: string;
+  is_trialist_col?: string;
+}
+
+export interface SchemaDiscoveryResult {
+  detected_columns: string[];
+  sample_row_count: number;
+  recommended_mapping: ColumnMappingConfig;
+  column_type_hints: Record<string, string>;
+  unmapped_columns: string[];
+}
+
+export interface RRDataPackIngestionSummary {
+  dataset_key: string;
+  total_rows_parsed: number;
+  players_created: number;
+  players_matched_existing: number;
+  conflicts_detected: number;
+  missing_dob_count: number;
+  evaluations_recorded: number;
+  conflict_reports: Array<{ row_index: number; player_name: string; conflicts: string[] }>;
+  missing_field_reports: Array<{ row_index: number; player_name: string; missing_field: string; action_taken: string }>;
+  data_classification: string;
+}
+
+export interface EvaluationItem {
+  id: string;
+  uncapped_profile_id: string;
+  scout_identifier: string;
+  evaluation_date: string;
+  competition_or_trial: string;
+  technical_skill_rating: number;
+  temperament_rating: number;
+  athleticism_rating: number;
+  tactical_iq_rating: number;
+  ceiling_potential_rating: number;
+  strengths_summary: string;
+  development_areas: string;
+  scout_recommendation: string;
+  proprietary_notes?: string;
+  data_classification: string;
+}

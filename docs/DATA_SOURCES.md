@@ -80,3 +80,4 @@ To eliminate arbitrary scoring, Royals Intelligence classifies all cricket data 
 * **Licensing:** Strictly Confidential & Proprietary (Rajasthan Royals Internal Only).
 * **Access Method:** Encrypted local JSON / manual secure upload interface with SHA-256 verification.
 * **Reliability:** High. Primary observations direct from RR talent scouting network.
+

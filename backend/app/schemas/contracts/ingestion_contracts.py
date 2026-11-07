@@ -103,3 +103,4 @@ class OverallCoverageReport(BaseModel):
     total_deliveries_indexed: int = 0
     total_players_registered: int = 0
     sources_active: int = 0
+

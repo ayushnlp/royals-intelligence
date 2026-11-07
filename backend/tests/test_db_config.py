@@ -9,8 +9,8 @@ from app.db.session import engine, check_database_connection
 
 def test_declarative_base_instantiation():
     assert Base.metadata is not None
-    # Verify no tables exist in Stage 0
-    assert len(Base.metadata.tables) == 0
+    # In Stage 2, core, performance, governance, and scouting tables are registered
+    assert len(Base.metadata.tables) >= 29
 
 
 def test_async_engine_configuration():

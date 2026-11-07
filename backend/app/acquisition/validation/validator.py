@@ -232,3 +232,4 @@ class CricketDataValidator:
             errors=all_issues,
             passed=(not has_critical)
         )
+

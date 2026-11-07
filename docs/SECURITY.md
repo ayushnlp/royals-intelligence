@@ -55,3 +55,22 @@
 - **CORS Protection:** Backend API strictly allows configured origins (e.g., `http://localhost:3000` in local dev). Wildcard `*` origins are prohibited.
 - **Health Probes:** `/health` and `/api/v1/health` endpoints expose only operational status, latency, and component health. Database connection strings, passwords, and host IP addresses are never leaked in response payloads.
 - **Error Sanitization:** Centralized exception handlers catch database and server exceptions and return sanitized RFC-7807 problem details without internal stack traces in non-debug mode.
+
+
+---
+
+## 4. Stage 2 Data Classification & Access Boundary Enforcement
+
+### 4.1. Dataset Classification Levels
+1. **`PUBLIC`**: Standard scorecards and aggregated metrics. Freely exposed to all API callers.
+2. **`INTERNAL_SCOUTING`**: Roster priority tiers, player archetypes, and calculated age metrics. Visible within platform interface.
+3. **`RR_PROPRIETARY_CONFIDENTIAL`**: Qualitative scout evaluations, confidential notes, strategic bid ceilings, and trialist evaluations.
+
+### 4.2. Automated Access Masking Engine
+The system enforces automatic role-based data masking via `RRDataPackService.mask_confidential_data()`:
+- Public / standard users receive masked strings:
+  - `confidential_notes`: `"[RESTRICTED - RAJASTHAN ROYALS PROPRIETARY]"`
+  - `proprietary_notes`: `"[RESTRICTED - RAJASTHAN ROYALS PROPRIETARY]"`
+  - `scout_identifier`: `"[ANONYMIZED_RR_SCOUT]"`
+  - `scouting_tier`: `"INTERNAL"`
+- Full evaluation fidelity is unlocked exclusively for authenticated requests carrying authorized headers (`x-user-role: rr_scout_admin` or `rr_lead_analyst`).

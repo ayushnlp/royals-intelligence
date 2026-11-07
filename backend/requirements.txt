@@ -9,6 +9,7 @@ python-multipart>=0.0.18
 # Database & Async Persistence
 sqlalchemy[asyncio]>=2.0.36,<2.1.0
 asyncpg>=0.30.0
+aiosqlite>=0.20.0
 alembic>=1.14.0,<1.15.0
 
 # Testing & Quality
@@ -19,5 +20,6 @@ httpx>=0.28.0
 # Scientific & Analytics Foundation (Stage 1+ Readiness)
 numpy>=2.0.0
 pandas>=2.2.0
+pyarrow>=17.0.0
 scipy>=1.14.0
 scikit-learn>=1.5.0

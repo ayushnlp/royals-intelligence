@@ -125,3 +125,49 @@ Every analytics endpoint will return confidence telemetry:
   "confidence_rating": "MODERATE"
 }
 ```
+
+
+---
+
+## 5. Implemented Stage 2 Endpoints (Uncapped Players & Analytics)
+
+### 5.1. Uncapped Players Directory
+* **Route:** `GET /api/v1/players`
+* **Query Parameters:** `eligibility`, `tier`, `role`, `state`, `trialist_only`
+* **Response:** Array of `UncappedPlayerSummary` objects with calculated age at cutoff (`2026-11-18`), verification badges, and primary discipline.
+
+### 5.2. Granular Player Profile & Provenance
+* **Route:** `GET /api/v1/players/{player_id}`
+* **Response:** Detailed `UncappedPlayerDetail` including all multi-source external IDs, DOB source, and verification history notes.
+
+### 5.3. Audit & Update Eligibility
+* **Route:** `POST /api/v1/players/{player_id}/verify-eligibility`
+* **Payload:** `{"new_status": "...", "verification_notes": "...", "verified_by": "..."}`
+* **Response:** `EligibilityVerificationResponse` with timestamp and previous/new status.
+
+### 5.4. Career Batting & Phase Breakdown
+* **Route:** `GET /api/v1/analytics/players/{player_id}/batting`
+* **Response:** Total runs, balls faced, strike rate, average, boundary %, dot ball %, and granular Powerplay, Middle, and Death overs phase splits.
+
+### 5.5. Career Bowling & Phase Breakdown
+* **Route:** `GET /api/v1/analytics/players/{player_id}/bowling`
+* **Response:** Overs, legal balls, runs conceded, wickets, economy rate, bowling average, bowling strike rate, and Death overs economy.
+
+### 5.6. Chronological Recent Form Window
+* **Route:** `GET /api/v1/analytics/players/{player_id}/recent-form?last_n=5&discipline=batting`
+* **Response:** Scorecards across the last N match innings with match dates, venues, oppositions, and strike rates.
+
+### 5.7. RR Proprietary Schema Discovery
+* **Route:** `POST /api/v1/proprietary/discover-schema`
+* **Payload:** `{"sample_rows": [...]}`
+* **Response:** Discovered column names, inferred data types, and recommended mapping.
+
+### 5.8. RR Proprietary Pack Ingestion
+* **Route:** `POST /api/v1/proprietary/ingest-pack`
+* **Payload:** `{"records": [...], "column_mapping": {...}, "dataset_key": "..."}`
+* **Response:** Ingestion summary with conflict reports and missing-field audits.
+
+### 5.9. Role-Masked Scouting Evaluations
+* **Route:** `GET /api/v1/proprietary/evaluations/{player_id}`
+* **Header:** `x-user-role: public | rr_scout_admin`
+* **Security:** Strips confidential scout notes and anonymizes scout identifiers unless user has `rr_scout_admin` privileges.

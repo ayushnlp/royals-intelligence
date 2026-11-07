@@ -273,3 +273,4 @@ def test_api_manual_upload_valid_json(client):
     data = res.json()
     assert data["checksum_sha256"] is not None
     assert data["file_format"] == "json"
+

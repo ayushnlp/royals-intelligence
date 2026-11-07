@@ -233,3 +233,4 @@ class Match(BaseModel):
     player_of_match: Optional[str] = None
     innings: List[Innings] = Field(default_factory=list)
     source_ref: SourceReference
+

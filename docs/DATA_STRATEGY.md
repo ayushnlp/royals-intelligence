@@ -89,3 +89,33 @@ Every match artifact undergoes a three-layer validation check before being accep
 ### 5.3. Completeness Calculation
 $$\text{Completeness Percentage} = \left( \frac{\text{Valid Checks}}{\text{Total Checks}} \right) \times 100$$
 Any file with a critical error is flagged as `REJECTED`, preserving the raw evidence for operator inspection without polluting the analytical Parquet store.
+
+
+---
+
+## 6. Uncapped Player Identity, Eligibility & RR 8 Nov Data Pack
+
+### 6.1. Player Identity Deduplication & Alias Resolution
+1. **Canonical Player ID:** Immutable internal UUID assigned to each distinct physical player.
+2. **Multi-Source Identity Mapping:** `player_identities` table maps external provider IDs (Cricsheet, BCCI, ESPNcricinfo, RR Scouting).
+3. **Name Normalization:** Dot-stripped title casing (e.g., `R. Parag` -> `R Parag`, `A.B. de Villiers` -> `Ab De Villiers`).
+4. **DOB Provenance:** Every date of birth carries its verified source and timestamp. **Dates of birth are never invented.** Missing DOBs trigger `PENDING_VERIFICATION` and age is set to `None`.
+5. **Age Calculation:** Evaluated dynamically against a configurable competition cutoff date:
+   $$\text{Age (yrs)} = \frac{\text{Reference Date} - \text{DOB}}{365.25}$$
+   *Default competition cutoff:* `2026-11-18`.
+
+### 6.2. Formal Eligibility Verification States
+- `CONFIRMED_UNCAPPED`: Verified zero senior international caps across Test, ODI, and T20I cricket.
+- `SUSPECTED_CAPPED`: Evidence of senior international representation detected.
+- `INELIGIBLE_OVERAGE`: Exceeds tournament-specific age ceilings.
+- `PENDING_VERIFICATION`: Demographic or debut evidence incomplete (e.g., missing DOB).
+- `FLAGGED_CONFLICT`: Discrepancies between sources (differing birth dates, batting styles, or cap status).
+
+### 6.3. Rajasthan Royals 8 November Proprietary Data Pack Readiness
+1. **Dynamic Schema Discovery:** Analyzes incoming files without preconceptions, infers column types, and recommends an optimal column mapping.
+2. **Field-Level Validation & Type Casting:** Standardizes arbitrary column names to canonical player models.
+3. **Conflict & Missing-Field Reporting:** Records discrepancies in `data_quality_records` without overwriting prior evidence.
+4. **Data Classification & Access Boundaries:**
+   - `PUBLIC`: Standard scorecard and aggregated stats.
+   - `INTERNAL_SCOUTING`: Roster tiers and player archetype profiles.
+   - `RR_PROPRIETARY_CONFIDENTIAL`: Scout ratings, qualitative notes, and auction strategic ceilings. Automatically masked for non-admin roles.

@@ -522,3 +522,4 @@ export default function AcquisitionPage() {
     </div>
   );
 }
+

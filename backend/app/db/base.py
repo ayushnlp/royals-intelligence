@@ -3,6 +3,7 @@ Royals Intelligence - Database Declarative Base
 Central metadata registry for all future SQLAlchemy models.
 """
 
+import uuid
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 from sqlalchemy import MetaData
 
@@ -16,6 +17,11 @@ convention = {
 }
 
 metadata = MetaData(naming_convention=convention)
+
+
+def generate_uuid() -> str:
+    """Generate canonical UUID4 string."""
+    return str(uuid.uuid4())
 
 
 class Base(DeclarativeBase):

@@ -132,3 +132,32 @@ data/
 2. **CORS Hardening:** Backend strictly restricts origins to authorized frontend domains.
 3. **Data Protection:** Database passwords, JWT secret keys, and data storage paths are configurable via environment variables only.
 4. **Isolated Network:** In Docker environments, database and redis are exposed only to the backend internal network, not mapped directly to public host interfaces in production.
+
+
+---
+
+## 6. Stage 2 Database & Analytics Foundation Architecture
+
+```
++-----------------------------------------------------------------------------------+
+|                        STAGE 2 SERVICES & FOUNDATION LAYER                        |
+|                                                                                   |
+|  +---------------------------+  +----------------------------------------------+  |
+|  | PlayerIdentityService     |  | RRDataPackService                            |  |
+|  | - Canonical player dedupe |  | - Dynamic schema discovery                   |  |
+|  | - External source IDs     |  | - Configurable column mapping                |  |
+|  | - Age at 2026-11-18 cutoff|  | - Confidential data masking                  |  |
+|  | - 5 eligibility states    |  | - Conflict & missing DOB audit               |  |
+|  +-------------+-------------+  +----------------------+-----------------------+  |
+|                |                                       |                          |
+|                +-------------------+-------------------+                          |
+|                                    |                                              |
+|                                    v                                              |
+|  +---------------------------------+-------------------------------------------+  |
+|  | UncappedAnalyticsService        | RelationalLoader                          |  |
+|  | - Career batting/bowling aggs   | - Parquet to relational DB sync           |  |
+|  | - Phase splits (PP/Middle/Death)| - Foreign key integrity & idempotency     |  |
+|  | - Recent form window (last N)   | - Check constraint balance                |  |
+|  +---------------------------------+-------------------------------------------+  |
++------------------------------------+----------------------------------------------+
+```

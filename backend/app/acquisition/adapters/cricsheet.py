@@ -73,3 +73,4 @@ class CricsheetAdapter(BaseSourceAdapter):
     def parse_raw_artifact(self, file_path: Path) -> Dict[str, Any]:
         with open(file_path, "r", encoding="utf-8") as f:
             return json.load(f)
+

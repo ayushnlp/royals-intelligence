@@ -36,3 +36,4 @@ class BaseSourceAdapter(ABC):
         Parse raw source file (JSON/CSV) into intermediate Python dictionary representation.
         """
         pass
+
