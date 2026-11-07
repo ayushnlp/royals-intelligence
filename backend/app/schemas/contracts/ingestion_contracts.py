@@ -36,9 +36,13 @@ class ValidationSummary(BaseModel):
     rejected_records: int
     warning_count: int
     duplicate_records_detected: int
-    completeness_percentage: float = Field(
-        ...,
+    validation_pass_rate: float = Field(
+        default=100.0,
         description="Calculated as (valid_records / total_records) * 100"
+    )
+    completeness_percentage: float = Field(
+        default=100.0,
+        description="Dataset field completeness percentage (present required fields / total expected fields * 100)"
     )
     errors: List[ValidationErrorItem] = Field(default_factory=list)
     passed: bool

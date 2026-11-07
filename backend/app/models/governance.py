@@ -12,12 +12,7 @@ from sqlalchemy import (
     ForeignKey, UniqueConstraint, Index
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from app.db.base import Base
-
-
-def generate_uuid() -> str:
-    """Generate canonical UUID4 string."""
-    return str(uuid.uuid4())
+from app.db.base import Base, generate_uuid, utc_now
 
 
 class DataSourceModel(Base):
@@ -37,7 +32,7 @@ class DataSourceModel(Base):
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
     health_status: Mapped[str] = mapped_column(String(30), default="OPERATIONAL")
     data_classification: Mapped[str] = mapped_column(String(40), default="PUBLIC")  # 'PUBLIC', 'INTERNAL_SCOUTING', 'RR_PROPRIETARY_CONFIDENTIAL'
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
 
     # Relationships
     datasets: Mapped[list["DatasetModel"]] = relationship("DatasetModel", back_populates="source")
@@ -57,7 +52,7 @@ class DatasetModel(Base):
     version: Mapped[str] = mapped_column(String(20), default="1.0.0")
     data_classification: Mapped[str] = mapped_column(String(40), default="PUBLIC")  # 'PUBLIC', 'INTERNAL_SCOUTING', 'RR_PROPRIETARY_CONFIDENTIAL'
     description: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
 
     # Relationships
     source: Mapped["DataSourceModel"] = relationship("DataSourceModel", back_populates="datasets")
@@ -74,16 +69,17 @@ class IngestionRunModel(Base):
     competition_id: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
     season: Mapped[Optional[str]] = mapped_column(String(20), nullable=True)
     status: Mapped[str] = mapped_column(String(30), default="PENDING")  # 'PENDING', 'IN_PROGRESS', 'COMPLETED', 'FAILED'
-    started_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    started_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
     completed_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
     duration_seconds: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
     total_records: Mapped[int] = mapped_column(Integer, default=0)
     valid_records: Mapped[int] = mapped_column(Integer, default=0)
     rejected_records: Mapped[int] = mapped_column(Integer, default=0)
     idempotent_skips: Mapped[int] = mapped_column(Integer, default=0)
+    validation_pass_rate: Mapped[float] = mapped_column(Float, default=100.0)
     completeness_percentage: Mapped[float] = mapped_column(Float, default=0.0)
     error_message: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
 
     # Relationships
     source: Mapped["DataSourceModel"] = relationship("DataSourceModel", back_populates="ingestion_runs")
@@ -103,7 +99,7 @@ class DatasetManifestModel(Base):
     checksum_sha256: Mapped[str] = mapped_column(String(64), nullable=False)
     completeness_percentage: Mapped[float] = mapped_column(Float, default=100.0)
     validation_status: Mapped[str] = mapped_column(String(30), default="VALIDATED")
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
 
     # Relationships
     dataset: Mapped["DatasetModel"] = relationship("DatasetModel", back_populates="manifests")
@@ -123,7 +119,7 @@ class ValidationResultModel(Base):
     message: Mapped[str] = mapped_column(Text, nullable=False)
     field_name: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
     raw_value: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
 
     # Relationships
     run: Mapped["IngestionRunModel"] = relationship("IngestionRunModel", back_populates="validation_results")
@@ -139,7 +135,7 @@ class SourceReferenceModel(Base):
     source_name: Mapped[str] = mapped_column(String(50), nullable=False)
     source_file_or_url: Mapped[str] = mapped_column(String(255), nullable=False)
     checksum_sha256: Mapped[Optional[str]] = mapped_column(String(64), nullable=True)
-    ingested_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    ingested_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
 
     __table_args__ = (
         Index("ix_source_ref_lookup", "entity_table", "entity_id"),
@@ -159,5 +155,5 @@ class DataQualityRecordModel(Base):
     missing_fields: Mapped[Optional[str]] = mapped_column(Text, nullable=True)  # Comma-separated or JSON list
     is_quarantined: Mapped[bool] = mapped_column(Boolean, default=False)
     verified_by: Mapped[Optional[str]] = mapped_column(String(60), nullable=True)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
-    updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now, onupdate=utc_now)

@@ -1,12 +1,12 @@
 """
 Royals Intelligence - Uncapped Players API Endpoints
 Provides endpoints for uncapped player directory, detailed demographic profiles,
-external identity mapping, age calculation, and strict eligibility auditing.
+external identity mapping, configurable age calculation, and strict eligibility auditing.
 Strict Scope: UNCAPPED PLAYERS ONLY.
 """
 
 from typing import List, Optional
-from datetime import datetime
+from datetime import date, datetime, timezone
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, or_
@@ -14,7 +14,7 @@ from sqlalchemy import select, or_
 from app.db.session import get_db
 from app.models.core import PlayerModel, PlayerIdentityModel
 from app.models.scouting import UncappedPlayerProfileModel
-from app.services.identity.player_identity_service import PlayerIdentityService, DEFAULT_COMPETITION_REFERENCE_DATE
+from app.services.identity.player_identity_service import PlayerIdentityService, EligibilityRuleConfig
 from app.schemas.uncapped_api import (
     UncappedPlayerSummary,
     UncappedPlayerDetail,
@@ -22,11 +22,16 @@ from app.schemas.uncapped_api import (
     EligibilityVerificationRequest,
     EligibilityVerificationResponse,
 )
+from app.core.security import (
+    require_scout_admin,
+    AuthenticatedUser,
+)
 from app.core.logging import logger
 
 router = APIRouter()
 
-# Seed catalog for development / fallback when DB is cold
+# Seed catalog for development / fallback when DB is cold.
+# Notice: Age and reference date are None unless an official verified rule is passed.
 SEED_UNCAPPED_PLAYERS = [
     {
         "id": "uncapped_rr_01",
@@ -34,7 +39,7 @@ SEED_UNCAPPED_PLAYERS = [
         "full_name": "Shashank Singh",
         "known_as": "Shashank Singh",
         "dob": "1991-11-21",
-        "calculated_age": 35.0,
+        "calculated_age": None,
         "home_state_association": "Chhattisgarh",
         "primary_role": "Finishing Batter",
         "batting_hand": "Right",
@@ -50,7 +55,10 @@ SEED_UNCAPPED_PLAYERS = [
         "dob_source": "BCCI Official Domestic Registry",
         "dob_verified": True,
         "verification_notes": "Confirmed uncapped: 0 senior international caps. Retained uncapped eligibility for IPL 2026/2027.",
-        "reference_date_used": "2026-11-18",
+        "reference_date_used": None,
+        "eligibility_rule_source": "IPL Player Regulations Clause 4.3",
+        "rule_version": "VERIFIED_2025_01",
+        "international_caps_detail": "Zero senior international caps",
         "created_at": "2026-11-01T10:00:00",
     },
     {
@@ -59,7 +67,7 @@ SEED_UNCAPPED_PLAYERS = [
         "full_name": "Ashutosh Sharma",
         "known_as": "Ashutosh Sharma",
         "dob": "1998-09-15",
-        "calculated_age": 28.2,
+        "calculated_age": None,
         "home_state_association": "Railways / Madhya Pradesh",
         "primary_role": "Middle Order Batter",
         "batting_hand": "Right",
@@ -75,7 +83,10 @@ SEED_UNCAPPED_PLAYERS = [
         "dob_source": "BCCI Official Domestic Registry",
         "dob_verified": True,
         "verification_notes": "Confirmed uncapped: 0 senior international appearances.",
-        "reference_date_used": "2026-11-18",
+        "reference_date_used": None,
+        "eligibility_rule_source": "IPL Player Regulations Clause 4.3",
+        "rule_version": "VERIFIED_2025_01",
+        "international_caps_detail": "Zero senior international caps",
         "created_at": "2026-11-01T10:00:00",
     },
     {
@@ -84,7 +95,7 @@ SEED_UNCAPPED_PLAYERS = [
         "full_name": "Harshit Rana",
         "known_as": "Harshit Rana",
         "dob": "2001-12-22",
-        "calculated_age": 24.9,
+        "calculated_age": None,
         "home_state_association": "Delhi",
         "primary_role": "Pace Bowler",
         "batting_hand": "Right",
@@ -99,7 +110,10 @@ SEED_UNCAPPED_PLAYERS = [
         "dob_source": "BCCI Registry",
         "dob_verified": True,
         "verification_notes": "Flagged: Potential Senior India T20I/Test squad selection. Cap verification in progress.",
-        "reference_date_used": "2026-11-18",
+        "reference_date_used": None,
+        "eligibility_rule_source": "Pending Official Verification",
+        "rule_version": "UNVERIFIED",
+        "international_caps_detail": "Senior cap verification in progress",
         "created_at": "2026-11-02T11:00:00",
     },
     {
@@ -108,7 +122,7 @@ SEED_UNCAPPED_PLAYERS = [
         "full_name": "Priyansh Arya",
         "known_as": "Priyansh Arya",
         "dob": "2001-01-18",
-        "calculated_age": 25.8,
+        "calculated_age": None,
         "home_state_association": "Delhi",
         "primary_role": "Top Order Batter",
         "batting_hand": "Left",
@@ -123,7 +137,10 @@ SEED_UNCAPPED_PLAYERS = [
         "dob_source": "Delhi Premier League / BCCI",
         "dob_verified": True,
         "verification_notes": "Confirmed uncapped. High-profile domestic powerplay striker (6 sixes in an over).",
-        "reference_date_used": "2026-11-18",
+        "reference_date_used": None,
+        "eligibility_rule_source": "IPL Player Regulations Clause 4.3",
+        "rule_version": "VERIFIED_2025_01",
+        "international_caps_detail": "Zero senior international caps",
         "created_at": "2026-11-03T12:00:00",
     },
     {
@@ -142,12 +159,15 @@ SEED_UNCAPPED_PLAYERS = [
         "scouting_tier": "WATCHLIST_HIGH",
         "is_rr_trialist": True,
         "identities": [
-            {"source_name": "rr_scouting", "external_id": "RR_TRIAL_2024_09", "confidence_score": 0.90},
+            {"source_name": "rr_scouting", "external_player_id": "RR_TRIAL_2024_09", "confidence_score": 0.90},
         ],
         "dob_source": None,
         "dob_verified": False,
         "verification_notes": "Date of birth missing. Verification incomplete; pending official state association birth certification.",
-        "reference_date_used": "2026-11-18",
+        "reference_date_used": None,
+        "eligibility_rule_source": "Pending Official Verification",
+        "rule_version": "UNVERIFIED",
+        "international_caps_detail": "Zero senior caps recorded",
         "created_at": "2026-11-04T09:30:00",
     },
 ]
@@ -160,11 +180,13 @@ async def list_uncapped_players(
     role: Optional[str] = Query(None, description="Filter by primary role: Batter, Bowler, All-Rounder, Wicketkeeper"),
     state: Optional[str] = Query(None, description="Filter by state association"),
     trialist_only: bool = Query(False, description="Filter only Rajasthan Royals trialists"),
+    reference_date: Optional[date] = Query(None, description="Official confirmed competition cutoff date for dynamic age resolution"),
     db: Optional[AsyncSession] = Depends(get_db),
 ):
     """
     Returns verified uncapped players matching analytical filters.
-    Queries database when available, otherwise yields verified fallback catalog.
+    If 'reference_date' is supplied from an official verified rule, fractional age is calculated dynamically.
+    Otherwise, unconfirmed ages remain None (unresolved).
     """
     try:
         if db:
@@ -188,13 +210,19 @@ async def list_uncapped_players(
             if rows:
                 results = []
                 for p, prof in rows:
+                    # Dynamically calculate age if reference_date is explicitly supplied
+                    if reference_date and p.dob:
+                        calculated_age = PlayerIdentityService.calculate_age(p.dob, reference_date)
+                    else:
+                        calculated_age = prof.calculated_age_at_cutoff
+
                     results.append(UncappedPlayerSummary(
                         id=p.id,
                         canonical_id=p.canonical_id,
                         full_name=p.full_name,
                         known_as=p.known_as,
                         dob=str(p.dob) if p.dob else None,
-                        calculated_age=prof.calculated_age_at_cutoff,
+                        calculated_age=calculated_age,
                         home_state_association=p.home_state_association,
                         primary_role=p.primary_role,
                         batting_hand=p.batting_hand,
@@ -221,12 +249,21 @@ async def list_uncapped_players(
     if trialist_only:
         filtered = [p for p in filtered if p["is_rr_trialist"]]
 
-    return [UncappedPlayerSummary(**p) for p in filtered]
+    output = []
+    for item in filtered:
+        p_dict = dict(item)
+        if reference_date and p_dict.get("dob"):
+            parsed_d = datetime.strptime(p_dict["dob"], "%Y-%m-%d").date()
+            p_dict["calculated_age"] = PlayerIdentityService.calculate_age(parsed_d, reference_date)
+        output.append(UncappedPlayerSummary(**p_dict))
+
+    return output
 
 
 @router.get("/{player_id}", response_model=UncappedPlayerDetail, summary="Get Granular Uncapped Player Profile")
 async def get_uncapped_player(
     player_id: str,
+    reference_date: Optional[date] = Query(None, description="Official confirmed competition cutoff date for dynamic age resolution"),
     db: Optional[AsyncSession] = Depends(get_db),
 ):
     """Retrieves full uncapped profile, external identities, DOB provenance, and eligibility."""
@@ -251,13 +288,22 @@ async def get_uncapped_player(
                     )
                     for i in id_res.scalars().all()
                 ]
+
+                # Dynamic age calculation if reference date passed
+                if reference_date and p.dob:
+                    age = PlayerIdentityService.calculate_age(p.dob, reference_date)
+                    ref_used = str(reference_date)
+                else:
+                    age = prof.calculated_age_at_cutoff
+                    ref_used = str(prof.reference_date_used) if prof.reference_date_used else None
+
                 return UncappedPlayerDetail(
                     id=p.id,
                     canonical_id=p.canonical_id,
                     full_name=p.full_name,
                     known_as=p.known_as,
                     dob=str(p.dob) if p.dob else None,
-                    calculated_age=prof.calculated_age_at_cutoff,
+                    calculated_age=age,
                     home_state_association=p.home_state_association,
                     primary_role=p.primary_role,
                     batting_hand=p.batting_hand,
@@ -270,7 +316,10 @@ async def get_uncapped_player(
                     dob_source=p.dob_source,
                     dob_verified=p.dob_verified,
                     verification_notes=prof.verification_notes,
-                    reference_date_used=str(prof.reference_date_used) if prof.reference_date_used else None,
+                    reference_date_used=ref_used,
+                    eligibility_rule_source=prof.eligibility_rule_source,
+                    rule_version=prof.rule_version,
+                    international_caps_detail=prof.international_caps_detail,
                     created_at=p.created_at.isoformat(),
                 )
     except Exception as exc:
@@ -286,6 +335,12 @@ async def get_uncapped_player(
 
     match_dict = dict(match)
     identities_raw = match_dict.pop("identities", [])
+
+    if reference_date and match_dict.get("dob"):
+        parsed_d = datetime.strptime(match_dict["dob"], "%Y-%m-%d").date()
+        match_dict["calculated_age"] = PlayerIdentityService.calculate_age(parsed_d, reference_date)
+        match_dict["reference_date_used"] = str(reference_date)
+
     return UncappedPlayerDetail(
         **match_dict,
         identities=[IdentityItem(**i) for i in identities_raw]
@@ -296,11 +351,13 @@ async def get_uncapped_player(
 async def verify_player_eligibility(
     player_id: str,
     payload: EligibilityVerificationRequest,
+    current_user: AuthenticatedUser = Depends(require_scout_admin),
     db: Optional[AsyncSession] = Depends(get_db),
 ):
     """
     Administrative endpoint to confirm, flag, or modify a player's uncapped eligibility state
     with an immutable audit trail entry.
+    Protected: Requires verified Rajasthan Royals Scout Administrator authentication.
     """
     valid_statuses = {"CONFIRMED_UNCAPPED", "SUSPECTED_CAPPED", "INELIGIBLE_OVERAGE", "PENDING_VERIFICATION", "FLAGGED_CONFLICT"}
     if payload.new_status not in valid_statuses:
@@ -308,6 +365,8 @@ async def verify_player_eligibility(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"Invalid status '{payload.new_status}'. Allowed: {sorted(list(valid_statuses))}"
         )
+
+    now_utc = datetime.now(timezone.utc)
 
     try:
         if db:
@@ -322,8 +381,8 @@ async def verify_player_eligibility(
                 p, prof = row
                 prev = prof.eligibility_status
                 prof.eligibility_status = payload.new_status
-                prof.verification_notes = f"[{payload.verified_by} @ {datetime.utcnow().isoformat()}] {payload.verification_notes}"
-                prof.eligibility_verified_at = datetime.utcnow()
+                prof.verification_notes = f"[{current_user.username} @ {now_utc.isoformat()}] {payload.verification_notes}"
+                prof.eligibility_verified_at = now_utc
                 await db.commit()
 
                 return EligibilityVerificationResponse(
@@ -331,7 +390,7 @@ async def verify_player_eligibility(
                     full_name=p.full_name,
                     previous_status=prev,
                     updated_status=payload.new_status,
-                    verified_at=datetime.utcnow().isoformat(),
+                    verified_at=now_utc.isoformat(),
                     verification_notes=payload.verification_notes,
                 )
     except Exception as exc:
@@ -351,6 +410,6 @@ async def verify_player_eligibility(
         full_name=match["full_name"],
         previous_status=prev,
         updated_status=payload.new_status,
-        verified_at=datetime.utcnow().isoformat(),
+        verified_at=now_utc.isoformat(),
         verification_notes=payload.verification_notes,
     )

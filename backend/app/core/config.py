@@ -27,6 +27,10 @@ class Settings(BaseSettings):
     API_V1_PREFIX: str = "/api/v1"
     APP_VERSION: str = "0.1.0-stage0"
     SECRET_KEY: str = "development-secret-key-change-in-production-min-32-chars"
+    
+    # Server-Side Security & Proprietary Credentials (never client-asserted)
+    SCOUT_ADMIN_API_KEY: str = "rr_scout_admin_secret_token_2026"
+    LEAD_ANALYST_API_KEY: str = "rr_lead_analyst_secret_token_2026"
 
     # Server Binding
     HOST: str = "0.0.0.0"

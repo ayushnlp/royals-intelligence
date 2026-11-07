@@ -348,7 +348,7 @@ export default function UncappedScoutingPage() {
                       <span className="font-semibold text-navy-200">
                         {player.calculated_age !== null && player.calculated_age !== undefined
                           ? `${player.calculated_age} yrs`
-                          : "Pending DOB"}
+                          : (player.dob ? "Unresolved Cutoff" : "Missing DOB")}
                       </span>
                     </div>
                     <div>

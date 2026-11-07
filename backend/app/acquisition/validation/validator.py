@@ -217,10 +217,11 @@ class CricketDataValidator:
                             else:
                                 valid_checks += 1
 
-        # Summary calculation
+        # Summary calculation: Distinguish check validation pass rate from attribute completeness
         all_issues = errors + warnings
         has_critical = any(e.severity == "CRITICAL" for e in errors)
-        completeness = round((valid_checks / total_checks) * 100, 2) if total_checks > 0 else 0.0
+        pass_rate = round((valid_checks / total_checks) * 100, 2) if total_checks > 0 else 0.0
+        completeness = round(((total_checks - len(errors)) / total_checks) * 100, 2) if total_checks > 0 else 0.0
 
         return ValidationSummary(
             total_records=total_checks,
@@ -228,6 +229,7 @@ class CricketDataValidator:
             rejected_records=len(errors),
             warning_count=len(warnings),
             duplicate_records_detected=duplicates,
+            validation_pass_rate=pass_rate,
             completeness_percentage=completeness,
             errors=all_issues,
             passed=(not has_critical)

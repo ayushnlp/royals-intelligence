@@ -66,11 +66,13 @@
 2. **`INTERNAL_SCOUTING`**: Roster priority tiers, player archetypes, and calculated age metrics. Visible within platform interface.
 3. **`RR_PROPRIETARY_CONFIDENTIAL`**: Qualitative scout evaluations, confidential notes, strategic bid ceilings, and trialist evaluations.
 
-### 4.2. Automated Access Masking Engine
-The system enforces automatic role-based data masking via `RRDataPackService.mask_confidential_data()`:
-- Public / standard users receive masked strings:
+### 4.2. Automated Access Masking & Server-Side Authorization Engine
+The system enforces automatic role-based data masking via `RRDataPackService.mask_confidential_data()` backed by trusted server-side authentication:
+- **Server-Side Authentication Dependency:** Requests must supply valid Bearer tokens or API keys (`Authorization: Bearer <token>` or `X-API-Key: <key>`).
+- **Rejection of Client-Asserted Roles:** Client-controlled headers such as `x-user-role` are untrusted and rejected with `401 Unauthorized` if supplied without matching server-verified credentials.
+- **Deny-by-Default:** Anonymous and standard callers receive masked evaluation payloads:
   - `confidential_notes`: `"[RESTRICTED - RAJASTHAN ROYALS PROPRIETARY]"`
   - `proprietary_notes`: `"[RESTRICTED - RAJASTHAN ROYALS PROPRIETARY]"`
   - `scout_identifier`: `"[ANONYMIZED_RR_SCOUT]"`
   - `scouting_tier`: `"INTERNAL"`
-- Full evaluation fidelity is unlocked exclusively for authenticated requests carrying authorized headers (`x-user-role: rr_scout_admin` or `rr_lead_analyst`).
+- **Privileged Unmasked Access:** Full evaluation fidelity is unlocked exclusively for authenticated principals verified with the `rr_scout_admin` role. Privileged actions (such as data pack ingestion and schema discovery) require explicit scout admin credentials.

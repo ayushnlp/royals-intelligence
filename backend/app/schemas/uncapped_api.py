@@ -40,6 +40,9 @@ class UncappedPlayerDetail(UncappedPlayerSummary):
     dob_verified: bool = False
     verification_notes: Optional[str] = None
     reference_date_used: Optional[str] = None
+    eligibility_rule_source: Optional[str] = None
+    rule_version: Optional[str] = None
+    international_caps_detail: Optional[str] = None
     created_at: str
 
 

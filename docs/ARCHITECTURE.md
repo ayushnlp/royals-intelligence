@@ -146,7 +146,7 @@ data/
 |  | PlayerIdentityService     |  | RRDataPackService                            |  |
 |  | - Canonical player dedupe |  | - Dynamic schema discovery                   |  |
 |  | - External source IDs     |  | - Configurable column mapping                |  |
-|  | - Age at 2026-11-18 cutoff|  | - Confidential data masking                  |  |
+|  | - Configurable age cutoff |  | - Confidential data masking                  |  |
 |  | - 5 eligibility states    |  | - Conflict & missing DOB audit               |  |
 |  +-------------+-------------+  +----------------------+-----------------------+  |
 |                |                                       |                          |

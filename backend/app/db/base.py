@@ -4,6 +4,7 @@ Central metadata registry for all future SQLAlchemy models.
 """
 
 import uuid
+from datetime import datetime, timezone
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 from sqlalchemy import MetaData
 
@@ -22,6 +23,11 @@ metadata = MetaData(naming_convention=convention)
 def generate_uuid() -> str:
     """Generate canonical UUID4 string."""
     return str(uuid.uuid4())
+
+
+def utc_now() -> datetime:
+    """Return timezone-aware current UTC datetime."""
+    return datetime.now(timezone.utc)
 
 
 class Base(DeclarativeBase):

@@ -13,12 +13,7 @@ from sqlalchemy import (
     ForeignKey, UniqueConstraint, Index
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from app.db.base import Base
-
-
-def generate_uuid() -> str:
-    """Generate canonical UUID4 string."""
-    return str(uuid.uuid4())
+from app.db.base import Base, generate_uuid, utc_now
 
 
 class UncappedPlayerProfileModel(Base):
@@ -50,6 +45,13 @@ class UncappedPlayerProfileModel(Base):
     calculated_age_at_cutoff: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
     reference_date_used: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
     
+    # Eligibility rule provenance and cap separation
+    international_caps_detail: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    last_international_appearance_date: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
+    eligibility_rule_source: Mapped[Optional[str]] = mapped_column(String(150), nullable=True)
+    rule_version: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
+    rule_evidence: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    
     # State and domestic allegiance
     state_association: Mapped[Optional[str]] = mapped_column(String(100), nullable=True, index=True)
     current_domestic_team: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
@@ -65,8 +67,8 @@ class UncappedPlayerProfileModel(Base):
     # Proprietary access segregation
     data_classification: Mapped[str] = mapped_column(String(40), default="INTERNAL_SCOUTING")
     
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
-    updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now, onupdate=utc_now)
 
     # Relationships
     player: Mapped["PlayerModel"] = relationship("PlayerModel", back_populates="uncapped_profile", lazy="selectin")
@@ -106,7 +108,7 @@ class PlayerPerformanceSnapshotModel(Base):
     death_economy: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
     dot_ball_percentage_bowling: Mapped[float] = mapped_column(Float, default=0.0)
     
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
 
     __table_args__ = (
         UniqueConstraint("uncapped_profile_id", "competition_id", "season", name="uq_snapshot_profile_comp_season"),
@@ -133,7 +135,7 @@ class PlayerRoleAssessmentModel(Base):
     
     role_readiness: Mapped[str] = mapped_column(String(40), default="DEVELOPMENTAL")  # 'IPL_READY', 'IMPACT_SUB_READY', 'DEVELOPMENTAL'
     notes: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
 
     # Relationships
     profile: Mapped["UncappedPlayerProfileModel"] = relationship("UncappedPlayerProfileModel", back_populates="role_assessments")
@@ -167,7 +169,7 @@ class ScoutingEvaluationModel(Base):
     proprietary_notes: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     
     data_classification: Mapped[str] = mapped_column(String(40), default="RR_PROPRIETARY_CONFIDENTIAL")
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
 
     # Relationships
     profile: Mapped["UncappedPlayerProfileModel"] = relationship("UncappedPlayerProfileModel", back_populates="evaluations")
@@ -185,7 +187,7 @@ class ScoutingEvidenceModel(Base):
     metric_value: Mapped[str] = mapped_column(String(100), nullable=False)
     source_reference: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
     notes: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
 
     # Relationships
     evaluation: Mapped["ScoutingEvaluationModel"] = relationship("ScoutingEvaluationModel", back_populates="evidence_items")
@@ -201,7 +203,7 @@ class PlayerComparisonModel(Base):
     comparison_context: Mapped[str] = mapped_column(String(80), nullable=False)  # e.g., 'SMAT_2024_DEATH_HITTING'
     similarity_score: Mapped[float] = mapped_column(Float, default=0.0)  # Cosine / normalized similarity (0.0 - 1.0)
     comparison_summary: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
 
     __table_args__ = (
         UniqueConstraint("subject_player_id", "benchmark_player_id", "comparison_context", name="uq_player_benchmark_context"),

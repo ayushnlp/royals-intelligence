@@ -133,15 +133,17 @@ Every analytics endpoint will return confidence telemetry:
 
 ### 5.1. Uncapped Players Directory
 * **Route:** `GET /api/v1/players`
-* **Query Parameters:** `eligibility`, `tier`, `role`, `state`, `trialist_only`
-* **Response:** Array of `UncappedPlayerSummary` objects with calculated age at cutoff (`2026-11-18`), verification badges, and primary discipline.
+* **Query Parameters:** `eligibility`, `tier`, `role`, `state`, `trialist_only`, `reference_date` (optional confirmed competition cutoff date)
+* **Response:** Array of `UncappedPlayerSummary` objects with dynamically calculated age (or `null`/unresolved if reference date is unconfirmed), verification badges, and primary discipline.
 
 ### 5.2. Granular Player Profile & Provenance
 * **Route:** `GET /api/v1/players/{player_id}`
-* **Response:** Detailed `UncappedPlayerDetail` including all multi-source external IDs, DOB source, and verification history notes.
+* **Query Parameters:** `reference_date` (optional)
+* **Response:** Detailed `UncappedPlayerDetail` including all multi-source external IDs, DOB source, eligibility rule source/version, and verification history notes.
 
 ### 5.3. Audit & Update Eligibility
 * **Route:** `POST /api/v1/players/{player_id}/verify-eligibility`
+* **Security:** Authenticated Principal (`Authorization: Bearer <token>` or `X-API-Key: <key>`), role: `rr_scout_admin`.
 * **Payload:** `{"new_status": "...", "verification_notes": "...", "verified_by": "..."}`
 * **Response:** `EligibilityVerificationResponse` with timestamp and previous/new status.
 

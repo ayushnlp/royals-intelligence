@@ -12,12 +12,7 @@ from sqlalchemy import (
     ForeignKey, UniqueConstraint, Index, CheckConstraint
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from app.db.base import Base
-
-
-def generate_uuid() -> str:
-    """Generate canonical UUID4 string."""
-    return str(uuid.uuid4())
+from app.db.base import Base, generate_uuid, utc_now
 
 
 class BattingScorecardModel(Base):
@@ -50,7 +45,7 @@ class BattingScorecardModel(Base):
     death_runs: Mapped[Optional[int]] = mapped_column(SmallInteger, default=0)
     death_balls: Mapped[Optional[int]] = mapped_column(SmallInteger, default=0)
 
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
 
     __table_args__ = (
         UniqueConstraint("match_id", "innings_number", "player_id", name="uq_batting_match_innings_player"),
@@ -94,7 +89,7 @@ class BowlingScorecardModel(Base):
     death_wickets: Mapped[Optional[int]] = mapped_column(SmallInteger, default=0)
     death_runs: Mapped[Optional[int]] = mapped_column(SmallInteger, default=0)
 
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
 
     __table_args__ = (
         UniqueConstraint("match_id", "innings_number", "player_id", name="uq_bowling_match_innings_player"),
@@ -144,7 +139,7 @@ class BallByBallDeliveryModel(Base):
     delivery_classification: Mapped[Optional[str]] = mapped_column(String(30), nullable=True)  # 'yorker', 'slower_ball' etc.
     shot_type: Mapped[Optional[str]] = mapped_column(String(40), nullable=True)
 
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
 
     __table_args__ = (
         CheckConstraint("total_runs = batter_runs + extra_runs", name="ck_runs_math_balance"),
@@ -166,7 +161,7 @@ class FieldingContributionModel(Base):
     stumpings: Mapped[int] = mapped_column(SmallInteger, default=0)
     dropped_catches: Mapped[Optional[int]] = mapped_column(SmallInteger, nullable=True)
     runs_saved: Mapped[Optional[int]] = mapped_column(SmallInteger, nullable=True)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
 
     __table_args__ = (
         UniqueConstraint("match_id", "player_id", name="uq_fielding_match_player"),
@@ -192,7 +187,7 @@ class PartnershipModel(Base):
     batter_2_runs: Mapped[int] = mapped_column(SmallInteger, default=0)
     batter_2_balls: Mapped[int] = mapped_column(SmallInteger, default=0)
     is_unbroken: Mapped[bool] = mapped_column(Boolean, default=False)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
 
     __table_args__ = (
         UniqueConstraint("match_id", "innings_number", "wicket_number", name="uq_partnership_wicket"),
@@ -220,7 +215,7 @@ class PlayerMatchPerformanceModel(Base):
     catches: Mapped[int] = mapped_column(SmallInteger, default=0)
     stumpings: Mapped[int] = mapped_column(SmallInteger, default=0)
     is_player_of_match: Mapped[bool] = mapped_column(Boolean, default=False)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
 
     __table_args__ = (
         UniqueConstraint("match_id", "player_id", name="uq_player_match_perf"),

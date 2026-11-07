@@ -22,7 +22,7 @@ from app.models.governance import (
     DatasetModel,
     DataQualityRecordModel,
 )
-from app.services.identity.player_identity_service import PlayerIdentityService, DEFAULT_COMPETITION_REFERENCE_DATE
+from app.services.identity.player_identity_service import PlayerIdentityService, EligibilityRuleConfig
 from app.core.logging import logger
 
 
@@ -182,7 +182,7 @@ class RRDataPackService:
         Performs field mapping, player identity resolution, conflict detection,
         and creates confidential scouting evaluations.
         """
-        ref_date = reference_date or DEFAULT_COMPETITION_REFERENCE_DATE
+        ref_date = reference_date
         created_count = 0
         matched_count = 0
         conflict_count = 0
@@ -315,7 +315,7 @@ class RRDataPackService:
                     id=str(uuid.uuid4()),
                     uncapped_profile_id=profile.id,
                     scout_identifier=str(row.get(mapping.scout_id_col) or "RR_SCOUT_DOMESTIC"),
-                    evaluation_date=ref_date,
+                    evaluation_date=ref_date or date.today(),
                     competition_or_trial="Domestic Scouting Pack 2026",
                     technical_skill_rating=safe_float(tech_rating, 6.5),
                     temperament_rating=safe_float(row.get(mapping.temperament_rating_col), 6.5),

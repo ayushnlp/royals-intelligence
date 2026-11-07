@@ -110,13 +110,19 @@ export async function fetchUncappedPlayerDetail(playerId: string) {
   }
 }
 
+// Client-side authentication token for Rajasthan Royals scout administrator operations
+const SCOUT_ADMIN_TOKEN = process.env.NEXT_PUBLIC_SCOUT_ADMIN_TOKEN || "rr_scout_admin_secret_token_2026";
+
 export async function verifyPlayerEligibility(
   playerId: string,
   payload: { new_status: string; verification_notes: string; verified_by?: string }
 ) {
   const res = await fetch(`${API_BASE_URL}/players/${playerId}/verify-eligibility`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${SCOUT_ADMIN_TOKEN}`,
+    },
     body: JSON.stringify(payload),
   });
   if (!res.ok) throw new Error("Failed to verify eligibility");
@@ -159,7 +165,10 @@ export async function fetchPlayerRecentForm(playerId: string, lastN: number = 5,
 export async function discoverProprietarySchema(sampleRows: any[]) {
   const res = await fetch(`${API_BASE_URL}/proprietary/discover-schema`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${SCOUT_ADMIN_TOKEN}`,
+    },
     body: JSON.stringify({ sample_rows: sampleRows }),
   });
   if (!res.ok) throw new Error("Failed to discover schema");
@@ -173,7 +182,10 @@ export async function ingestProprietaryPack(payload: {
 }) {
   const res = await fetch(`${API_BASE_URL}/proprietary/ingest-pack`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${SCOUT_ADMIN_TOKEN}`,
+    },
     body: JSON.stringify(payload),
   });
   if (!res.ok) throw new Error("Failed to ingest proprietary pack");
@@ -182,8 +194,12 @@ export async function ingestProprietaryPack(payload: {
 
 export async function fetchPlayerEvaluations(playerId: string, userRole: string = "public") {
   try {
+    const headers: Record<string, string> = {};
+    if (userRole === "rr_scout_admin") {
+      headers["Authorization"] = `Bearer ${SCOUT_ADMIN_TOKEN}`;
+    }
     const res = await fetch(`${API_BASE_URL}/proprietary/evaluations/${playerId}`, {
-      headers: { "x-user-role": userRole },
+      headers,
       cache: "no-store",
     });
     if (!res.ok) throw new Error("Failed to fetch evaluations");

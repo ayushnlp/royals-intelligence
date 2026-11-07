@@ -104,7 +104,7 @@ All 29 relational models are defined using modern SQLAlchemy 2.0 type-annotated 
     - `INELIGIBLE_OVERAGE`: Exceeds tournament age limit.
     - `PENDING_VERIFICATION`: Missing date of birth or debut history.
     - `FLAGGED_CONFLICT`: Discrepancies between sources.
-    - Age at cutoff calculated dynamically using reference date `2026-11-18`.
+    - Age at cutoff calculated dynamically using verified competition reference date (or None / unresolved when unconfirmed). International cap facts decoupled from competition-specific uncapped eligibility (e.g. IPL 5-year inactive international clause).
 25. **`player_performance_snapshots`**: Domestic T20 season aggregates (SMAT, CK Nayudu) with phase strike rates and death economy.
 26. **`player_role_assessments`**: Readiness ratings (Powerplay, Middle, Death, Pace vs Spin comfort) on 1.0–10.0 scale.
 27. **`scouting_evaluations`**: Rajasthan Royals proprietary scout evaluations. Data classification: `RR_PROPRIETARY_CONFIDENTIAL`. Protected by automated security masking.

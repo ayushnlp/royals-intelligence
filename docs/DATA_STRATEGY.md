@@ -86,9 +86,16 @@ Every match artifact undergoes a three-layer validation check before being accep
 - Dismissal logic: `player_out` must be verified; caught dismissals require a credited fielder.
 - Duplicate delivery prevention: unique key on `(match_id, innings_number, over_number, ball_in_over)`.
 
-### 5.3. Completeness Calculation
-$$\text{Completeness Percentage} = \left( \frac{\text{Valid Checks}}{\text{Total Checks}} \right) \times 100$$
-Any file with a critical error is flagged as `REJECTED`, preserving the raw evidence for operator inspection without polluting the analytical Parquet store.
+### 5.3. Validation Pass Rate vs. Data Completeness Metrics
+In Royals Intelligence telemetry, validation check success is rigorously distinguished from data attribute completeness:
+
+1. **Validation Pass Rate (%):**
+   $$\text{Validation Pass Rate} = \left( \frac{\text{Valid Checks}}{\text{Total Checks}} \right) \times 100$$
+   Measures structural and logical rule conformity. Any file with a critical error is flagged as `REJECTED`, preserving raw evidence without polluting analytical stores.
+
+2. **Dataset Field Completeness (%):**
+   $$\text{Completeness Percentage} = \left( \frac{\text{Present Required Attributes}}{\text{Total Expected Attributes}} \right) \times 100$$
+   Measures demographic and match-level coverage (e.g., presence of verified DOB, tracking of batting hands, bowling styles, and venue coordinates). Missing attributes trigger `data_quality_records` diagnostic entries.
 
 
 ---
@@ -100,15 +107,16 @@ Any file with a critical error is flagged as `REJECTED`, preserving the raw evid
 2. **Multi-Source Identity Mapping:** `player_identities` table maps external provider IDs (Cricsheet, BCCI, ESPNcricinfo, RR Scouting).
 3. **Name Normalization:** Dot-stripped title casing (e.g., `R. Parag` -> `R Parag`, `A.B. de Villiers` -> `Ab De Villiers`).
 4. **DOB Provenance:** Every date of birth carries its verified source and timestamp. **Dates of birth are never invented.** Missing DOBs trigger `PENDING_VERIFICATION` and age is set to `None`.
-5. **Age Calculation:** Evaluated dynamically against a configurable competition cutoff date:
-   $$\text{Age (yrs)} = \frac{\text{Reference Date} - \text{DOB}}{365.25}$$
-   *Default competition cutoff:* `2026-11-18`.
+5. **Age Calculation & Cutoff Integrity:** Evaluated dynamically against an explicitly verified competition cutoff date:
+   $$\text{Age (yrs)} = \frac{\text{Confirmed Reference Date} - \text{DOB}}{365.25}$$
+   *Rule Policy:* No reference date is silently assumed. If the tournament's official age-reference date is unconfirmed by tournament organizers, age is marked as `None` ("Age Unresolved"). Missing DOB never produces a fabricated age.
 
-### 6.2. Formal Eligibility Verification States
-- `CONFIRMED_UNCAPPED`: Verified zero senior international caps across Test, ODI, and T20I cricket.
-- `SUSPECTED_CAPPED`: Evidence of senior international representation detected.
+### 6.2. Formal Eligibility Verification States & Cap Decoupling
+Lifetime international cap history (`is_capped`, `last_international_match_date`) is strictly decoupled from competition-specific uncapped eligibility:
+- `CONFIRMED_UNCAPPED`: Verified uncapped under competition rules. Includes domestic players with 0 senior international caps, or players eligible under competition exemptions such as the **IPL 5-Year Retired Player Clause (Rule 4.3)** (players inactive in international cricket for 5+ calendar years).
+- `INELIGIBLE_CAPPED`: Active senior international player ineligible under competition rules.
 - `INELIGIBLE_OVERAGE`: Exceeds tournament-specific age ceilings.
-- `PENDING_VERIFICATION`: Demographic or debut evidence incomplete (e.g., missing DOB).
+- `PENDING_VERIFICATION`: Demographic or debut evidence incomplete (e.g. missing DOB, unverified DOB provenance, or unconfirmed tournament reference dates).
 - `FLAGGED_CONFLICT`: Discrepancies between sources (differing birth dates, batting styles, or cap status).
 
 ### 6.3. Rajasthan Royals 8 November Proprietary Data Pack Readiness

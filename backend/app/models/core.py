@@ -12,12 +12,7 @@ from sqlalchemy import (
     ForeignKey, UniqueConstraint, Index
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from app.db.base import Base
-
-
-def generate_uuid() -> str:
-    """Generate canonical UUID4 string."""
-    return str(uuid.uuid4())
+from app.db.base import Base, generate_uuid, utc_now
 
 
 class CompetitionModel(Base):
@@ -30,7 +25,7 @@ class CompetitionModel(Base):
     competition_type: Mapped[str] = mapped_column(String(30), nullable=False)  # T20, List A, First Class
     governing_body: Mapped[str] = mapped_column(String(50), default="BCCI")
     is_domestic: Mapped[bool] = mapped_column(Boolean, default=True)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
 
     # Relationships
     seasons: Mapped[List["SeasonModel"]] = relationship("SeasonModel", back_populates="competition", cascade="all, delete-orphan")
@@ -47,7 +42,7 @@ class SeasonModel(Base):
     year_start: Mapped[int] = mapped_column(Integer, nullable=False)
     year_end: Mapped[int] = mapped_column(Integer, nullable=False)
     is_active: Mapped[bool] = mapped_column(Boolean, default=False)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
 
     # Unique constraint per competition + season
     __table_args__ = (
@@ -72,7 +67,7 @@ class TeamModel(Base):
     state_association: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
     primary_color: Mapped[Optional[str]] = mapped_column(String(20), nullable=True)
     accent_color: Mapped[Optional[str]] = mapped_column(String(20), nullable=True)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
 
     # Relationships
     home_matches: Mapped[List["MatchModel"]] = relationship("MatchModel", foreign_keys="MatchModel.team_home_id", back_populates="team_home")
@@ -96,7 +91,7 @@ class VenueModel(Base):
     leg_boundary_m: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
     latitude: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
     longitude: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
 
     # Relationships
     matches: Mapped[List["MatchModel"]] = relationship("MatchModel", back_populates="venue")
@@ -121,10 +116,12 @@ class PlayerModel(Base):
     
     # Cap Status: True if player has represented Senior National team in any format
     is_capped: Mapped[bool] = mapped_column(Boolean, default=False, index=True)
+    last_international_match_date: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
+    international_caps_detail: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     ipl_debut_season: Mapped[Optional[str]] = mapped_column(String(20), nullable=True)
     
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
-    updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now, onupdate=utc_now)
 
     # Relationships
     identities: Mapped[List["PlayerIdentityModel"]] = relationship("PlayerIdentityModel", back_populates="player", cascade="all, delete-orphan", lazy="selectin")
@@ -145,7 +142,7 @@ class PlayerIdentityModel(Base):
     alias_names: Mapped[Optional[str]] = mapped_column(Text, nullable=True)  # Comma-separated or JSON string of aliases
     confidence_score: Mapped[float] = mapped_column(Float, default=1.0)
     conflict_notes: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
 
     __table_args__ = (
         UniqueConstraint("source_name", "external_player_id", name="uq_source_external_player"),
@@ -167,7 +164,7 @@ class PlayerRoleModel(Base):
     bowling_phase_preference: Mapped[Optional[str]] = mapped_column(String(30), nullable=True)
     tactical_niche: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)  # 'Hard length enforcer', 'Pace-hitter'
     is_primary: Mapped[bool] = mapped_column(Boolean, default=True)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
 
     # Relationships
     player: Mapped["PlayerModel"] = relationship("PlayerModel", back_populates="roles")
@@ -196,7 +193,7 @@ class MatchModel(Base):
     is_super_over: Mapped[bool] = mapped_column(Boolean, default=False)
     result_outcome: Mapped[str] = mapped_column(String(100), default="normal")
     player_of_match_id: Mapped[Optional[str]] = mapped_column(String(36), ForeignKey("players.id"), nullable=True)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
 
     # Relationships
     competition: Mapped["CompetitionModel"] = relationship("CompetitionModel", back_populates="matches")
@@ -222,7 +219,7 @@ class InningsModel(Base):
     overs_completed: Mapped[float] = mapped_column(Float, default=0.0)
     is_declared_or_all_out: Mapped[bool] = mapped_column(Boolean, default=False)
     extras_total: Mapped[int] = mapped_column(Integer, default=0)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
 
     __table_args__ = (
         UniqueConstraint("match_id", "innings_number", name="uq_match_innings_number"),
@@ -247,7 +244,7 @@ class PlayerParticipationModel(Base):
     is_impact_out: Mapped[bool] = mapped_column(Boolean, default=False)
     is_captain: Mapped[bool] = mapped_column(Boolean, default=False)
     is_wicketkeeper: Mapped[bool] = mapped_column(Boolean, default=False)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
 
     __table_args__ = (
         UniqueConstraint("match_id", "player_id", name="uq_match_player_participation"),
