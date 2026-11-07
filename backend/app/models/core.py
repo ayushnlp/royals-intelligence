@@ -92,9 +92,13 @@ class VenueModel(Base):
     latitude: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
     longitude: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
+    boundary_dimensions_source: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
+    coordinates_source: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
 
     # Relationships
     matches: Mapped[List["MatchModel"]] = relationship("MatchModel", back_populates="venue")
+    pitch_reports: Mapped[List["VenuePitchReportModel"]] = relationship("VenuePitchReportModel", back_populates="venue", cascade="all, delete-orphan")
+    weather_observations: Mapped[List["MatchWeatherModel"]] = relationship("MatchWeatherModel", back_populates="venue")
 
 
 class PlayerModel(Base):
@@ -203,6 +207,8 @@ class MatchModel(Base):
     team_away: Mapped["TeamModel"] = relationship("TeamModel", foreign_keys=[team_away_id], back_populates="away_matches")
     innings: Mapped[List["InningsModel"]] = relationship("InningsModel", back_populates="match", cascade="all, delete-orphan")
     participations: Mapped[List["PlayerParticipationModel"]] = relationship("PlayerParticipationModel", back_populates="match")
+    weather_observations: Mapped[List["MatchWeatherModel"]] = relationship("MatchWeatherModel", back_populates="match", cascade="all, delete-orphan")
+    pitch_reports: Mapped[List["VenuePitchReportModel"]] = relationship("VenuePitchReportModel", back_populates="match")
 
 
 class InningsModel(Base):
@@ -254,3 +260,57 @@ class PlayerParticipationModel(Base):
     match: Mapped["MatchModel"] = relationship("MatchModel", back_populates="participations")
     player: Mapped["PlayerModel"] = relationship("PlayerModel", back_populates="participations")
     team: Mapped["TeamModel"] = relationship("TeamModel")
+
+
+class MatchWeatherModel(Base):
+    """Meteorological observations and context for a specific match fixture."""
+    __tablename__ = "match_weather_observations"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=generate_uuid)
+    match_id: Mapped[str] = mapped_column(String(36), ForeignKey("matches.id", ondelete="CASCADE"), nullable=False, index=True)
+    venue_id: Mapped[str] = mapped_column(String(36), ForeignKey("venues.id"), nullable=False, index=True)
+    
+    observation_time: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+    phase_in_match: Mapped[str] = mapped_column(String(30), default="MATCH_START")  # 'PRE_MATCH', 'INNINGS_1', 'INNINGS_2', 'POST_MATCH'
+    temperature_c: Mapped[float] = mapped_column(Float, nullable=False)
+    relative_humidity_pct: Mapped[float] = mapped_column(Float, nullable=False)
+    dew_point_c: Mapped[float] = mapped_column(Float, nullable=False)
+    precipitation_mm: Mapped[float] = mapped_column(Float, default=0.0)
+    wind_speed_kph: Mapped[float] = mapped_column(Float, default=0.0)
+    wind_direction_deg: Mapped[float] = mapped_column(Float, default=0.0)
+    cloud_cover_pct: Mapped[float] = mapped_column(Float, default=0.0)
+    weather_condition: Mapped[str] = mapped_column(String(50), default="Clear")
+    is_forecast: Mapped[bool] = mapped_column(Boolean, default=False)
+    source_name: Mapped[str] = mapped_column(String(50), default="open_meteo_historical")
+    retrieval_timestamp: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
+    reliability: Mapped[str] = mapped_column(String(20), default="HIGH")
+
+    # Relationships
+    match: Mapped["MatchModel"] = relationship("MatchModel", back_populates="weather_observations")
+    venue: Mapped["VenueModel"] = relationship("VenueModel", back_populates="weather_observations")
+
+
+class VenuePitchReportModel(Base):
+    """Expert groundstaff or scouting pitch observations for a venue or match."""
+    __tablename__ = "venue_pitch_reports"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=generate_uuid)
+    venue_id: Mapped[str] = mapped_column(String(36), ForeignKey("venues.id", ondelete="CASCADE"), nullable=False, index=True)
+    match_id: Mapped[Optional[str]] = mapped_column(String(36), ForeignKey("matches.id"), nullable=True, index=True)
+    report_date: Mapped[date] = mapped_column(Date, nullable=False, index=True)
+    
+    pitch_soil_type: Mapped[str] = mapped_column(String(50), nullable=False)  # 'Black Soil', 'Red Soil', 'Clay Blend'
+    grass_coverage: Mapped[Optional[str]] = mapped_column(String(40), nullable=True)  # 'Heavy', 'Light Grass', 'Abrasive Bare'
+    expected_pace_bounce: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
+    expected_turn: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
+    source_type: Mapped[str] = mapped_column(String(50), default="OFFICIAL_BCCI_REPORT")  # 'OFFICIAL_BCCI_REPORT', 'RR_SCOUT_INSPECTION'
+    reporter_reference: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
+    confidence_score: Mapped[float] = mapped_column(Float, default=1.0)
+    is_verified: Mapped[bool] = mapped_column(Boolean, default=True)
+    notes: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
+
+    # Relationships
+    venue: Mapped["VenueModel"] = relationship("VenueModel", back_populates="pitch_reports")
+    match: Mapped[Optional["MatchModel"]] = relationship("MatchModel", back_populates="pitch_reports")
+

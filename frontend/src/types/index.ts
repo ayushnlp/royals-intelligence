@@ -536,3 +536,174 @@ export interface AllRoundContributionResponse {
   role_archetype_context: string;
   has_sufficient_sample: boolean;
 }
+
+// --- Stage 4: Venue, Pitch & Weather Intelligence Interfaces ---
+
+export interface BoundaryDimensions {
+  straight_m?: number;
+  off_boundary_m?: number;
+  leg_boundary_m?: number;
+  dimension_source?: string;
+  is_verified: boolean;
+  status: string; // 'VERIFIED', 'PARTIALLY_AVAILABLE', 'UNAVAILABLE'
+}
+
+export interface VenueSummaryItem {
+  venue_id: string;
+  venue_code: string;
+  name: string;
+  city: string;
+  state?: string;
+  country: string;
+  is_rr_home: boolean;
+  rr_venue_type: string;
+  latitude?: number;
+  longitude?: number;
+  coordinates_source?: string;
+  altitude_m?: number;
+  pitch_soil_type?: string;
+  matches_hosted_count: number;
+  competitions_hosted: string[];
+  data_completeness_pct: number;
+}
+
+export interface VenueDetailResponse {
+  venue_id: string;
+  venue_code: string;
+  name: string;
+  city: string;
+  state?: string;
+  country: string;
+  is_rr_home: boolean;
+  rr_venue_type: string;
+  latitude?: number;
+  longitude?: number;
+  coordinates_source?: string;
+  altitude_m?: number;
+  pitch_soil_type?: string;
+  aliases: string[];
+  boundary_dimensions: BoundaryDimensions;
+  surface_details: Record<string, any>;
+  stadium_capacity?: number;
+  floodlights_certified: boolean;
+  matches_hosted_count: number;
+  competitions_hosted: string[];
+  provenance: Record<string, any>;
+}
+
+export interface VenueScoringTrendsResponse {
+  venue_code: string;
+  venue_name: string;
+  matches_evaluated: number;
+  date_range_evaluated: string;
+  avg_first_innings_score: number;
+  avg_second_innings_score: number;
+  highest_total_recorded: number;
+  highest_total_match?: string;
+  lowest_total_recorded: number;
+  lowest_total_match?: string;
+  toss_decision_stats: Record<string, number>;
+  match_outcome_by_innings: Record<string, number>;
+  avg_wickets_per_innings: number;
+  phase_scoring_rates: Record<string, number>;
+  sample_size_confidence: string;
+  sample_size_warning?: string;
+  is_fallback_data: boolean;
+}
+
+export interface PitchEvidenceAnalysisResponse {
+  venue_code: string;
+  venue_name: string;
+  pitch_soil_type: string;
+  observed_pace_vs_spin: {
+    pace_wickets_share_pct: number;
+    spin_wickets_share_pct: number;
+    pace_economy: number;
+    spin_economy: number;
+    pace_average?: number;
+    spin_average?: number;
+    pace_strike_rate?: number;
+    spin_strike_rate?: number;
+  };
+  boundary_patterns: {
+    boundary_runs_pct: number;
+    fours_per_match: number;
+    sixes_per_match: number;
+  };
+  dot_ball_patterns: {
+    dot_ball_pct: number;
+  };
+  wickets_per_match: number;
+  conditions_evidence_classification: string;
+  observed_statistical_summary: string;
+  expert_reported_summary?: string;
+  sample_matches_evaluated: number;
+  deliveries_evaluated: number;
+  date_range_evaluated: string;
+  evidence_confidence: string;
+  limitations_disclaimer: string;
+  is_fallback_data: boolean;
+}
+
+export interface WeatherObservationItem {
+  venue_code: string;
+  observation_time: string;
+  phase_in_match: string;
+  temperature_c: number;
+  relative_humidity_pct: number;
+  dew_point_c: number;
+  dew_severity_risk: string;
+  precipitation_mm: number;
+  wind_speed_kph: number;
+  wind_direction_deg: number;
+  wind_direction_compass: string;
+  cloud_cover_pct: number;
+  weather_condition: string;
+  is_forecast: boolean;
+  source_attribution: string;
+  retrieval_timestamp: string;
+  reliability: string;
+}
+
+export interface MatchWeatherContextResponse {
+  match_id: string;
+  match_date: string;
+  venue_code: string;
+  venue_name: string;
+  is_night_match: boolean;
+  observations: WeatherObservationItem[];
+  dew_impact_assessment: string;
+  temperature_swing_c?: number;
+  humidity_swing_pct?: number;
+  historical_scoring_context: Record<string, any>;
+  pitch_evidence_summary: string;
+  provenance: Record<string, any>;
+}
+
+export interface WeatherSourceStatusResponse {
+  source_id: string;
+  source_name: string;
+  tier: string;
+  status: string;
+  is_accessible: boolean;
+  licensing: Record<string, string>;
+  api_endpoint: string;
+  rate_limit_policy: string;
+  cached_records_count: number;
+  last_verified_timestamp: string;
+}
+
+export interface UncappedPlayerVenuePerformanceResponse {
+  player_id: string;
+  player_name: string;
+  is_uncapped: boolean;
+  eligibility_status: string;
+  venue_code: string;
+  venue_name: string;
+  matches_at_venue: number;
+  batting_at_venue: Record<string, any>;
+  bowling_at_venue: Record<string, any>;
+  sample_size_confidence: string;
+  sample_size_warning?: string;
+  role_archetype: string;
+}

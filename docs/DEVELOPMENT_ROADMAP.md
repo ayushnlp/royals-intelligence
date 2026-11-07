@@ -1,6 +1,7 @@
 # ROYALS INTELLIGENCE — COMPREHENSIVE DEVELOPMENT ROADMAP
 **Platform Target:** Rajasthan Royals Cricket Intelligence & IPL 2027 Auction Decision Support  
 **Roadmap Scope:** Stages 0 through 13  
+**Current Milestone:** Stage 4 Completed & Verified (Awaiting Stage 5 Authorization)  
 
 ---
 
@@ -8,22 +9,25 @@
 
 ```
 +-----------------------------------------------------------------------------------------+
-| Stage 0: Foundation & Architecture Setup (CURRENT)                                      |
+| Stage 0: Foundation & Architecture Setup (SEALED 6e185ef)                               |
 +-----------------------------------------------------------------------------------------+
        |
        v
 +------------------------------------+      +-------------------------------------------+
-| Stage 1: Data Ingestion & Pipeline | ---> | Stage 2: Database Schema & Relational ETL |
+| Stage 1: Data Acquisition Engine   | ---> | Stage 2: Database Schema & Relational ETL |
+| (SEALED c546306)                   |      | (SEALED f4a72b7)                          |
 +------------------------------------+      +-------------------------------------------+
        |
        v
 +------------------------------------+      +-------------------------------------------+
-| Stage 3: Core Batting Analytics    | ---> | Stage 4: Core Bowling & Phase Analytics   |
+| Stage 3: Domestic Season & Match   | ---> | Stage 4: Venue, Pitch & Weather Intel     |
+| Intelligence (SEALED 1e7d9e7)      |      | (COMPLETED & VERIFIED)                    |
 +------------------------------------+      +-------------------------------------------+
        |
        v
 +------------------------------------+      +-------------------------------------------+
-| Stage 5: Venue & Pitch Engine      | ---> | Stage 6: Player vs Player Matchups        |
+| Stage 5: Core Batting & Bowling    | ---> | Stage 6: Player vs Player Matchups        |
+| Deep Analytics Engine              |      | & Archetype Engine                        |
 +------------------------------------+      +-------------------------------------------+
        |
        v
@@ -63,31 +67,33 @@
 * **Objective:** Instantiate SQLAlchemy 2.0 async models, Alembic migrations, uncapped player identity governance, and proprietary data pack interfaces.
 * **Status:** Complete, sealed, and hardened (Uncapped Scope Only).
 
-### Stage 3: Domestic Season and Match Intelligence (COMPLETED & VERIFIED)
+### Stage 3: Domestic Season and Match Intelligence (SEALED `1e7d9e7`)
 * **Objective:** Implement domestic cricket season directories, format-aware phase engines, ball-by-ball scorecards, fall of wickets, partnerships, progression worms, and all-round dual-contribution profiles.
-* **Status:** Completed & fully verified (52/52 backend tests passing, 0 warnings, Next.js static build passing).
-* **Deliverables:**
-  * Domestic competitions directory covering SMAT, Vijay Hazare, Ranji, DPL, and UP T20.
-  * Format-aware phase assigner (T20, List A, Multi-Day First Class).
-  * Cricket integrity rules: strictly excludes run-outs from bowler credit; zero-denominator protections.
-  * Deep innings diagnostics: FoW, wicket partnerships, and scoring progression worms.
-  * All-round dual-discipline profile without arbitrary composite formulas or ratings.
-  * Full FastAPI `/api/v1/domestic` REST API suite (9 endpoints).
-  * Interactive Next.js `/domestic` and `/uncapped` UI with full scorecard viewer and phase leverage metrics.
+* **Status:** Complete, sealed, and verified (52/52 backend tests passing, 0 warnings, Next.js static build passing).
 
-### Stage 4: Core Bowling & Phase Intelligence (NEXT MILESTONE — AWAITING AUTHORIZATION)
-* **Objective:** Implement bowling diagnostics, length distributions, and release consistency analysis.
+### Stage 4: Venue, Pitch and Weather Intelligence (COMPLETED & VERIFIED)
+* **Objective:** Build a normalized venue, pitch, and environmental intelligence layer for major Indian cricket grounds, integrating Open-Meteo weather telemetry and uncapped player venue tracking.
+* **Status:** Completed & fully verified (61/61 backend tests passing, 0 warnings, Next.js static build passing with `/venues`).
+* **Deliverables:**
+  * Normalized Venue Intelligence Service with 10 verified major Indian grounds (SMS Jaipur, Barsapara, etc.).
+  * Boundary dimensions geometry tracking strictly sourced from BCCI specifications (prohibiting unverified guesses).
+  * Historical scoring par, chasing win %, and format-aware phase run rates with low-sample size warnings.
+  * Pitch evidence diagnostics (pace vs spin wicket shares, boundary and dot ball percentages) with analytical caveat disclaimers.
+  * Open-Meteo CC-BY 4.0 weather telemetry integration with empirical dew severity risk calculations.
+  * Forecast vs historical observation data segregation (`is_forecast: true`, `reliability: "FORECAST_PROJECTION"`).
+  * Strict uncapped player scope guarding on venue prospect endpoints (raising `403 Forbidden` on senior international capped players).
+  * Alembic migration `002_venue_pitch_weather.py` and 2 new normalized tables (`match_weather_observations`, `venue_pitch_reports`).
+  * 9 new REST API endpoints under `/api/v1/venues` and `/api/v1/weather`.
+  * Interactive Next.js `/venues` Command Center with RR home ground filtering and telemetry visualization.
+
+### Stage 5: Core Batting & Bowling Deep Analytics Engine (NEXT MILESTONE — AWAITING AUTHORIZATION)
+* **Objective:** Implement advanced batting and bowling performance diagnostics, phase masteries, pressure-over metrics, and pitch-adjusted metrics.
 * **Deliverables:**
   * Length cluster efficiency (yorker, full, good, back-of-length, short).
+  * Entry-point and game-state adjusted batting metrics.
+  * Phase mastery indices across Powerplay, Middle, and Death overs.
   * Pressure-over metrics (defending <8 runs in 19th/20th overs).
   * Slower ball variation detection and wicket-taking threat indices.
-
-### Stage 5: Venue, Pitch & Environmental Intelligence
-* **Objective:** Quantify the influence of ground geometry, soil, dew, and weather conditions.
-* **Deliverables:**
-  * Venue boundary length database and asymmetry scoring.
-  * Black soil vs Red soil turn/bounce decay modeling.
-  * Dew impact regression engine for night matches.
 
 ### Stage 6: Player vs Player Matchups & Archetype Engine
 * **Objective:** Build granular micro-battle analytics and archetype generalization for low-sample pairings.

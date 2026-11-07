@@ -127,3 +127,26 @@ Lifetime international cap history (`is_capped`, `last_international_match_date`
    - `PUBLIC`: Standard scorecard and aggregated stats.
    - `INTERNAL_SCOUTING`: Roster tiers and player archetype profiles.
    - `RR_PROPRIETARY_CONFIDENTIAL`: Scout ratings, qualitative notes, and auction strategic ceilings. Automatically masked for non-admin roles.
+
+---
+
+## 7. Venue, Pitch & Meteorological Data Governance (Stage 4)
+
+### 7.1. Ground Measurement Sourcing & Anti-Fabrication Guarantee
+1. **Measured Boundaries Only:** Boundary lengths (straight, off, leg in meters) are recorded exclusively from official BCCI stadium measurement surveys or verified engineering architectural plans.
+2. **Explicit Missingness:** Where physical boundary dimensions or soil classifications are unknown or unverified, they are represented explicitly as `None` (`null`) with status `UNAVAILABLE`.
+3. **Coordinates Provenance:** Venue GPS coordinates are derived from official stadium geocoding and Survey of India registries, attributed to `Open-Meteo Geocoding / Survey of India`.
+
+### 7.2. Pitch Evidence vs Deterministic Prediction Rule
+1. **Observational vs Reported Distinction:** Observed statistical distributions (e.g. pace vs spin wicket shares, boundary percentages) are strictly distinguished from qualitative pitch reports.
+2. **Sample Size & Confidence Transparency:** Every pitch evaluation carries its sample size ($N$ matches), date range, and confidence classification (`HIGH` for $N \ge 10$, `MODERATE` for $5 \le N \le 9$, `LOW_SAMPLE` for $N < 5$ with advisory caveats).
+3. **Anti-Deterministic Clause:** The platform enforces an explicit disclaimer: historical statistical tendencies reflect past conditions across evaluated samples and must never be interpreted as deterministic forecasts of pitch behaviour.
+
+### 7.3. Open-Meteo CC-BY 4.0 Meteorological Governance
+1. **Licensing Compliance:** Meteorological data is acquired under the Creative Commons Attribution 4.0 International (CC-BY 4.0) open license. Mandatory attribution text (`Weather data by Open-Meteo.com under CC-BY 4.0`) is embedded in all API responses and UI components.
+2. **Rate Limit & Caching Architecture:** Free-tier access (up to 10,000 requests/day) is protected by persistent local caching. Redundant external calls for historical matches are strictly avoided.
+
+### 7.4. Strict Segregation of Observations and Forecasts
+1. **Historical Immutability:** Historical match observations are marked with `is_forecast: false` and `reliability: "HIGH"`.
+2. **Forecast Projections:** Future match forecasts are marked with `is_forecast: true` and `reliability: "FORECAST_PROJECTION"`.
+3. **No Overwrite Policy:** A forecast projection must never overwrite or masquerade as a verified historical weather observation.

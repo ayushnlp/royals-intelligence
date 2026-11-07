@@ -14,6 +14,8 @@ from app.models.core import (
     MatchModel,
     InningsModel,
     PlayerParticipationModel,
+    MatchWeatherModel,
+    VenuePitchReportModel,
 )
 from app.models.performance import (
     BattingScorecardModel,
@@ -53,6 +55,8 @@ __all__ = [
     "MatchModel",
     "InningsModel",
     "PlayerParticipationModel",
+    "MatchWeatherModel",
+    "VenuePitchReportModel",
     # Performance entities
     "BattingScorecardModel",
     "BowlingScorecardModel",

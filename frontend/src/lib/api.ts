@@ -8,6 +8,14 @@ import {
   PlayerMatchHistoryItem,
   PlayerPhaseSplitDetail,
   AllRoundContributionResponse,
+  VenueSummaryItem,
+  VenueDetailResponse,
+  VenueScoringTrendsResponse,
+  PitchEvidenceAnalysisResponse,
+  WeatherObservationItem,
+  MatchWeatherContextResponse,
+  WeatherSourceStatusResponse,
+  UncappedPlayerVenuePerformanceResponse,
 } from "@/types";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
@@ -353,6 +361,117 @@ export async function fetchPlayerAllRoundSummary(
       cache: "no-store",
     });
     if (!res.ok) throw new Error("Failed to fetch player all-round summary");
+    return await res.json();
+  } catch (e) {
+    return null;
+  }
+}
+
+// --- Stage 4: Venue, Pitch & Weather Intelligence API ---
+
+export async function fetchVenues(rrOnly: boolean = false): Promise<VenueSummaryItem[]> {
+  try {
+    const qs = rrOnly ? "?rr_only=true" : "";
+    const res = await fetch(`${API_BASE_URL}/venues${qs}`, { cache: "no-store" });
+    if (!res.ok) throw new Error("Failed to fetch venues");
+    return await res.json();
+  } catch (e) {
+    return [];
+  }
+}
+
+export async function fetchVenueDetail(venueId: string): Promise<VenueDetailResponse | null> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/venues/${venueId}`, { cache: "no-store" });
+    if (!res.ok) throw new Error("Failed to fetch venue detail");
+    return await res.json();
+  } catch (e) {
+    return null;
+  }
+}
+
+export async function fetchVenueScoringTrends(venueId: string): Promise<VenueScoringTrendsResponse | null> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/venues/${venueId}/scoring-trends`, { cache: "no-store" });
+    if (!res.ok) throw new Error("Failed to fetch scoring trends");
+    return await res.json();
+  } catch (e) {
+    return null;
+  }
+}
+
+export async function fetchVenuePitchAnalysis(venueId: string): Promise<PitchEvidenceAnalysisResponse | null> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/venues/${venueId}/pitch-analysis`, { cache: "no-store" });
+    if (!res.ok) throw new Error("Failed to fetch pitch analysis");
+    return await res.json();
+  } catch (e) {
+    return null;
+  }
+}
+
+export async function fetchPlayerVenuePerformance(
+  venueId: string,
+  playerId: string
+): Promise<UncappedPlayerVenuePerformanceResponse | null> {
+  try {
+    const res = await fetch(
+      `${API_BASE_URL}/venues/${venueId}/player-performance?player_id=${encodeURIComponent(playerId)}`,
+      { cache: "no-store" }
+    );
+    if (!res.ok) throw new Error("Failed to fetch player venue performance");
+    return await res.json();
+  } catch (e) {
+    return null;
+  }
+}
+
+export async function fetchMatchWeatherContext(matchId: string): Promise<MatchWeatherContextResponse | null> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/weather/match/${matchId}`, { cache: "no-store" });
+    if (!res.ok) throw new Error("Failed to fetch match weather context");
+    return await res.json();
+  } catch (e) {
+    return null;
+  }
+}
+
+export async function fetchHistoricalWeather(
+  venueCode: string,
+  matchDate: string
+): Promise<WeatherObservationItem[]> {
+  try {
+    const res = await fetch(
+      `${API_BASE_URL}/weather/historical?venue_code=${encodeURIComponent(venueCode)}&match_date=${encodeURIComponent(matchDate)}`,
+      { cache: "no-store" }
+    );
+    if (!res.ok) throw new Error("Failed to fetch historical weather");
+    return await res.json();
+  } catch (e) {
+    return [];
+  }
+}
+
+export async function fetchWeatherForecast(
+  venueCode: string,
+  daysAhead: number = 7
+): Promise<WeatherObservationItem[]> {
+  try {
+    const res = await fetch(
+      `${API_BASE_URL}/weather/forecast?venue_code=${encodeURIComponent(venueCode)}&days_ahead=${daysAhead}`,
+      { cache: "no-store" }
+    );
+    if (!res.ok) throw new Error("Failed to fetch weather forecast");
+    return await res.json();
+  } catch (e) {
+    return [];
+  }
+}
+
+export async function fetchWeatherSourceStatus(): Promise<WeatherSourceStatusResponse | null> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/weather/source-status`, { cache: "no-store" });
+    if (!res.ok) throw new Error("Failed to fetch weather source status");
     return await res.json();
   } catch (e) {
     return null;

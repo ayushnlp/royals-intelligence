@@ -1,33 +1,33 @@
 # ROYALS INTELLIGENCE — DATABASE ARCHITECTURE & DESIGN
-**Document Version:** 2.0.0 (Stage 2 Implemented & Verified)  
+**Document Version:** 3.0.0 (Stage 4 Implemented & Verified)  
 **Database Engine:** PostgreSQL 16 (Production) / SQLite Async (In-Memory Testing Harness)  
 **ORM / Data Layer:** SQLAlchemy 2.0 (Async) + AsyncPG / aiosqlite  
-**Schema Migration Engine:** Alembic (Revision: `001_uncapped_player_foundation`)  
+**Schema Migration Engine:** Alembic (Revisions: `001_uncapped_player_foundation`, `002_venue_pitch_weather`)  
 **Target Scope:** UNCAPPED PLAYERS ONLY  
 
 ---
 
 ## 1. Overview & Architecture
 
-The database architecture for ROYALS INTELLIGENCE provides an enterprise foundation for high-volume cricket delivery streams, multi-source player identity deduplication, data provenance tracking, and confidential Rajasthan Royals uncapped scouting evaluations.
+The database architecture for ROYALS INTELLIGENCE provides an enterprise foundation for high-volume cricket delivery streams, multi-source player identity deduplication, data provenance tracking, stadium geometry, pitch diagnostics, Open-Meteo CC-BY 4.0 meteorological telemetry, and confidential Rajasthan Royals uncapped scouting evaluations.
 
-All 29 relational models are defined using modern SQLAlchemy 2.0 type-annotated Declarative syntax (`Mapped[...]`, `mapped_column(...)`), with strict foreign keys, cascade rules, composite indexes, and check constraints.
+All 31 relational models are defined using modern SQLAlchemy 2.0 type-annotated Declarative syntax (`Mapped[...]`, `mapped_column(...)`), with strict foreign keys, cascade rules, composite indexes, and check constraints.
 
 ```
        +------------------+             +------------------+
-       |   COMPETITIONS   |             |      VENUES      |
-       +--------+---------+             +--------+---------+
-                | 1                              | 1
-                |                                |
-                | M                              | M
-       +--------v---------+             +--------v---------+
-       |     SEASONS      |             |     MATCHES      |<----+
+       |   COMPETITIONS   |             |      VENUES      |<----+
        +--------+---------+             +--------+---------+     |
                 | 1                              | 1             |
+                |                                |               |
                 | M                              | M             |
-                +--------------------------------+               |
-                                                 |               |
-       +------------------+             +--------v---------+     |
+       +--------v---------+             +--------v---------+     |
+       |     SEASONS      |             |     MATCHES      |<----+
+       +--------+---------+             +---+----+----+----+     |
+                | 1                         |    |    |          |
+                | M                         |    |    |          |
+                +---------------------------+    |    |          |
+                                                 |    |          |
+       +------------------+             +--------v----+----+     |
        |      TEAMS       |             |     INNINGS      |     |
        +--------+---------+             +--------+---------+     |
                 | 1                              | 1             |
@@ -44,20 +44,20 @@ All 29 relational models are defined using modern SQLAlchemy 2.0 type-annotated 
                             +---+----+----+----+                 |
                                 |    |    |                      |
              +------------------+    |    +----------------------+
-             | 1                     | 1
-             | M                     | 1
-    +--------v---------+    +--------v------------------+
-    | PLAYER_IDENTITY  |    |  UNCAPPED_PLAYER_PROFILE  |
-    | (Multi-Source IDs|    | (Eligibility Verification |
-    |  & Name Aliases) |    |  Age Cutoff & RR Tier)    |
-    +------------------+    +--------+------------------+
-                                     | 1
-                                     | M
-                            +--------v------------------+
-                            |   SCOUTING_EVALUATIONS    |
-                            | (Confidential RR Insights |
-                            |  Access Boundary Masked)  |
-                            +---------------------------+
+             | 1                     | 1                         | 1
+             | M                     | 1                         | M
+    +--------v---------+    +--------v------------------+  +-----v------------------------+
+    | PLAYER_IDENTITY  |    |  UNCAPPED_PLAYER_PROFILE  |  | MATCH_WEATHER_OBSERVATIONS   |
+    | (Multi-Source IDs|    | (Eligibility Verification |  | (Open-Meteo CC-BY 4.0        |
+    |  & Name Aliases) |    |  Age Cutoff & RR Tier)    |  |  Hourly Telemetry & Dew Risk)|
+    +------------------+    +--------+------------------+  +------------------------------+
+                                     | 1                         | 1
+                                     | M                         | M
+                            +--------v------------------+  +-----v------------------------+
+                            |   SCOUTING_EVALUATIONS    |  |   VENUE_PITCH_REPORTS        |
+                            | (Confidential RR Insights |  | (Soil classification, turn,  |
+                            |  Access Boundary Masked)  |  |  pace & bounce observations) |
+                            +---------------------------+  +------------------------------+
 ```
 
 ---
@@ -111,11 +111,18 @@ All 29 relational models are defined using modern SQLAlchemy 2.0 type-annotated 
 28. **`scouting_evidence`**: Empirical benchmarks, video clips, and trial session telemetry backing scout assessments.
 29. **`player_comparisons`**: Peer benchmarking and statistical similarity scores between uncapped prospects.
 
+### 2.5. Venue, Pitch & Weather Intelligence (2 Tables, Stage 4)
+30. **`match_weather_observations`**: In-match hourly meteorological telemetry (temperature, relative humidity, dew point, dew severity risk index, wind speed/direction, cloud cover) from Open-Meteo CC-BY 4.0 API. Includes `is_forecast: bool` to strictly separate observations from forecast models.
+31. **`venue_pitch_reports`**: Expert groundstaff and RR talent scout pitch evaluations, recording soil types (black soil, red soil, loam blend), grass coverage, expected pace/bounce, expected turn, reporter reference, and confidence score.
+
 ---
 
 ## 3. Alembic Migrations
 
-- Initial Migration: `001_uncapped_player_foundation.py`
-- Upgrades: All 29 tables, composite unique constraints, check constraints, and foreign key cascades created deterministically.
-- Downgrades: Dropped in exact reverse topological order without orphan key deadlocks.
+- Migration `001_uncapped_player_foundation.py`:
+  - Upgrades: 29 core, performance, governance, and uncapped scouting tables.
+  - Downgrades: Reverse topological drop.
+- Migration `002_venue_pitch_weather.py`:
+  - Upgrades: Adds `boundary_dimensions_source` and `coordinates_source` columns to `venues`; creates `match_weather_observations` and `venue_pitch_reports` tables with indexes on `(match_id)` and `(venue_id)`.
+  - Downgrades: Drops tables and removes added columns cleanly.
 - Dialect Agnostic: Seamless execution on PostgreSQL 16 and in-memory SQLite (`sqlite+aiosqlite:///:memory:`).

@@ -229,3 +229,48 @@ All Stage 3 endpoints are mounted under `/api/v1/domestic` and enforce the stric
 * **Route:** `GET /api/v1/domestic/players/{player_id}/all-round-summary`
 * **Integrity Rule:** Strictly avoids arbitrary composite formulas or synthetic ratings. Preserves independent batting, bowling, and fielding profiles with transparent sample sizes.
 * **Response:** `AllRoundContributionResponse` featuring evidence-based qualitative role archetype classification and sample sizes (matches, innings batted, overs bowled).
+
+---
+
+## 7. Implemented Stage 4 Endpoints (Venue, Pitch & Weather Intelligence)
+
+Endpoints are mounted under `/api/v1/venues` and `/api/v1/weather`.
+
+### 7.1. Venue Directory & Overview
+* **Route:** `GET /api/v1/venues`
+* **Query Parameters:** `rr_only: bool = false`
+* **Response:** List of `VenueSummaryItem` objects with city, state, coordinates, altitude, soil type, and match count.
+
+### 7.2. Venue Detail & Boundary Geometry
+* **Route:** `GET /api/v1/venues/{venue_id}`
+* **Response:** `VenueDetailResponse` containing measured straight, off, and leg boundary lengths (in meters) with source attribution, soil details, floodlights certification, and capacity.
+
+### 7.3. Venue Historical Scoring Trends
+* **Route:** `GET /api/v1/venues/{venue_id}/scoring-trends`
+* **Response:** `VenueScoringTrendsResponse` featuring 1st/2nd innings averages, highest/lowest scores, toss win & match win rates, average wickets, phase run rates, and sample size confidence score.
+
+### 7.4. Evidence-Backed Pitch Diagnostics
+* **Route:** `GET /api/v1/venues/{venue_id}/pitch-analysis`
+* **Integrity Rule:** Strictly separates observed statistical patterns from subjective reports. Disclaims deterministic predictions.
+* **Response:** `PitchEvidenceAnalysisResponse` with pace vs spin wicket shares, economy comparison, boundary runs %, dot ball %, empirical conditions classification, and limitations caveat.
+
+### 7.5. Uncapped Prospect Venue Performance
+* **Route:** `GET /api/v1/venues/{venue_id}/player-performance?player_id={player_id}`
+* **Security/Scope:** Strictly restricted to uncapped domestic players (`403 Forbidden` if capped player requested).
+* **Response:** `UncappedPlayerVenuePerformanceResponse` containing batting & bowling records at the venue with sample size warnings.
+
+### 7.6. Match Weather & Environmental Context
+* **Route:** `GET /api/v1/weather/match/{match_id}`
+* **Response:** `MatchWeatherContextResponse` with in-match hourly observations, temperature/humidity swings, dew severity risk assessment, and scoring variance against venue historical par.
+
+### 7.7. Historical Weather Telemetry
+* **Route:** `GET /api/v1/weather/historical?venue_code={code}&match_date={date}`
+* **Response:** Array of `WeatherObservationItem` from Open-Meteo CC-BY 4.0 (`is_forecast: false`).
+
+### 7.8. Meteorological Fixture Forecast
+* **Route:** `GET /api/v1/weather/forecast?venue_code={code}&days_ahead={days}`
+* **Response:** Array of `WeatherObservationItem` tagged with `is_forecast: true` and `reliability: "FORECAST_PROJECTION"`.
+
+### 7.9. Weather Source Status & Attribution
+* **Route:** `GET /api/v1/weather/source-status`
+* **Response:** `WeatherSourceStatusResponse` auditing Open-Meteo CC-BY 4.0 status, legal licensing, and rate limits.
