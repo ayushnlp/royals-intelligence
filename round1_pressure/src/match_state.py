@@ -351,11 +351,23 @@ class MatchStateEngine:
 
             if inn == 2:
                 rev_target = m_meta.get("revised_target")
-                if pd.notna(rev_target) and float(rev_target) > 0:
+                m_result = str(m_meta.get("result", ""))
+                has_rev_target = pd.notna(rev_target) and float(rev_target) > 0
+                has_dls_text = bool(re.search(r"D/L|DLS", m_result))
+
+                if has_rev_target:
                     target_exact = float(rev_target)
                     target_lower_bound = float(rev_target)
                     target_source = "DLS_REVISED_TARGET"
                     target_is_exact = True
+                elif has_dls_text:
+                    # Unresolved DLS case (Matches 20182, 23674, 24822, 28334):
+                    # DLS applied per result string, but target unrecorded in matches.csv.
+                    # Withhold exact target to prevent false precision downstream.
+                    target_exact = None
+                    target_lower_bound = float(inn1_totals_lower[mid] + 1) if mid in inn1_totals_lower else None
+                    target_source = "DLS_METHOD_UNRECORDED_TARGET"
+                    target_is_exact = False
                 elif mid in inn1_totals_lower:
                     target_lower_bound = float(inn1_totals_lower[mid] + 1)
                     if inn1_score_status.get(mid) == "EXACT":
@@ -805,7 +817,12 @@ class MatchStateEngine:
             m_format = c_meta.get("match_format", "T20")
 
             res = str(m["result"])
-            is_dls = pd.notna(m["revised_target"]) or "D/L" in res or "DLS" in res
+            rev_tgt = m.get("revised_target")
+            has_revised_target = pd.notna(rev_tgt) and float(rev_tgt) > 0
+            has_dls_text = bool(re.search(r"D/L|DLS", res))
+            r1_raw = m.get("first_inn_revised_overs")
+            r2_raw = m.get("second_inn_revised_overs")
+            has_revised_overs = pd.notna(r1_raw) or pd.notna(r2_raw)
 
             i1 = inn_lookup.get((mid, 1))
             i2 = inn_lookup.get((mid, 2))
@@ -822,13 +839,38 @@ class MatchStateEngine:
             reconstructed_diff = (i1_score - i2_score) if (i1_score is not None and i2_score is not None) else None
             recon_delta = (stated_margin - reconstructed_diff) if (stated_margin is not None and reconstructed_diff is not None) else None
 
-            if res in ["No Result", "Match Abandoned"] or i1 is None:
+            # Mutually exclusive classification across all 883 matches:
+            if has_revised_target:
+                cat = "REVISED_TARGET_RECORDED"
+                dls_concept = "REVISED_TARGET_RECORDED"
+                if res in ["No Result", "Match Abandoned"]:
+                    target_app = "DLS_ABANDONED_INCOMPLETE_CHASE"
+                    notes = f"Revised target recorded ({rev_tgt}), but match abandoned as {res} after partial play (25 balls in Innings 2). Target not applicable to a concluded chase."
+                else:
+                    target_app = "DLS_TARGET_APPLICABLE"
+                    notes = f"Verified revised DLS target ({rev_tgt}) recorded in matches.csv and applicable to 2nd innings chase."
+            elif has_dls_text and not has_revised_target:
+                cat = "DLS_STATUS_UNRESOLVED"
+                dls_concept = "DLS_STATUS_UNRESOLVED"
+                target_app = "DLS_STATUS_UNRESOLVED"
+                notes = f"Match result decided by DLS/DL method ('{res}'), but revised_target and revised_overs were omitted from matches.csv schema. Target provenance is unresolved."
+            elif res in ["No Result", "Match Abandoned"] or i1 is None:
                 cat = "NO_RESULT_OR_ABANDONED"
-                notes = "Match was abandoned or no deliveries were bowled. Score comparison not possible."
-            elif is_dls:
-                cat = "DLS_REVISED_TARGET"
-                notes = f"Match subject to DLS target adjustments (revised_target={m.get('revised_target')}). Standard run-margin arithmetic does not apply."
+                if has_revised_overs:
+                    dls_concept = "CURTAILED_WITHOUT_REVISED_TARGET"
+                    target_app = "CURTAILED_ABANDONED_INNINGS_1"
+                    notes = "Match curtailed and abandoned without a recorded revised target. Overs metadata recorded."
+                else:
+                    dls_concept = "STANDARD_MATCH"
+                    target_app = "ABANDONED_NO_TARGET"
+                    notes = "Match was abandoned or no deliveries were bowled without revised target."
             elif m_run:
+                if has_revised_overs:
+                    dls_concept = "CURTAILED_WITHOUT_REVISED_TARGET"
+                    target_app = "CURTAILED_STANDARD_TARGET"
+                else:
+                    dls_concept = "STANDARD_MATCH"
+                    target_app = "STANDARD_CHASE_TARGET"
                 both_exact = (i1_status == "EXACT" and i2_status == "EXACT")
                 if both_exact:
                     if reconstructed_diff == stated_margin:
@@ -841,10 +883,18 @@ class MatchStateEngine:
                     cat = "INCOMPLETE_EXTRAS_RUN_WIN"
                     notes = f"Match won by runs, but one or both innings contain unconfirmed extras (Inn1 unconfirmed={i1['unconf_count']}, Inn2 unconfirmed={i2['unconf_count']}). Difference is an approximation."
             elif m_wkt:
+                if has_revised_overs:
+                    dls_concept = "CURTAILED_WITHOUT_REVISED_TARGET"
+                    target_app = "CURTAILED_STANDARD_TARGET"
+                else:
+                    dls_concept = "STANDARD_MATCH"
+                    target_app = "STANDARD_CHASE_TARGET"
                 cat = "WICKET_WIN_NO_OFFICIAL_TOTAL_IN_SCHEMA"
                 notes = "Match won by wickets. Supplied raw matches.csv schema does NOT contain independent official innings score fields; only margin in wickets is provided."
             else:
                 cat = "OTHER_RESULT"
+                dls_concept = "STANDARD_MATCH"
+                target_app = "SPECIAL_OUTCOME"
                 notes = f"Special match outcome ({res}); standard margin reconciliation does not apply."
 
             reconcil_records.append({
@@ -862,6 +912,11 @@ class MatchStateEngine:
                 "reconstructed_diff_runs": reconstructed_diff,
                 "reconciliation_delta": recon_delta,
                 "reconciliation_outcome": cat,
+                "dls_audit_concept": dls_concept,
+                "target_applicability": target_app,
+                "has_revised_target": has_revised_target,
+                "has_revised_overs": has_revised_overs,
+                "is_dls_target_applicable": (target_app == "DLS_TARGET_APPLICABLE"),
                 "reconciliation_notes": notes,
             })
 
@@ -870,8 +925,12 @@ class MatchStateEngine:
 
     def build_revised_overs_and_dls_audit(self) -> pd.DataFrame:
         """
-        R1-02.1 Audit: Audits all 34 matches with revised overs metadata and 23 DLS revised targets.
-        Proves conclusively that revised_overs represents scheduled legal balls (not overs).
+        R1-02.2 Audit: Audits all 38 matches involving DLS revised targets, revised overs,
+        or DLS match outcomes.
+        - 23 matches with REVISED_TARGET_RECORDED (22 DLS_TARGET_APPLICABLE, 1 DLS_ABANDONED_INCOMPLETE_CHASE)
+        - 11 matches with CURTAILED_WITHOUT_REVISED_TARGET (2 pre-match standard target, 9 abandoned)
+        - 4 matches with DLS_STATUS_UNRESOLVED (result text indicates DLS, but target/overs unrecorded)
+        Total: 38 matches.
         """
         if self.bbb_df is None or self.matches_df is None:
             self.load_raw_data()
@@ -881,7 +940,8 @@ class MatchStateEngine:
         revised_matches = self.matches_df[
             self.matches_df["revised_target"].notna() |
             self.matches_df["first_inn_revised_overs"].notna() |
-            self.matches_df["second_inn_revised_overs"].notna()
+            self.matches_df["second_inn_revised_overs"].notna() |
+            self.matches_df["result"].str.contains(r"D/L|DLS", na=False)
         ].copy()
 
         audit_records: List[Dict[str, Any]] = []
@@ -890,6 +950,8 @@ class MatchStateEngine:
             mid = m["match_id"]
             cid = m["comp_id"]
             c_name = comps_dict.get(cid, {}).get("comp_name", "Unknown")
+            season = m.get("season", "Unknown")
+            res = str(m.get("result", ""))
 
             m_bbb = self.bbb_df[self.bbb_df["match_id"] == mid]
             inn1 = m_bbb[m_bbb["innings"] == 1]
@@ -902,20 +964,40 @@ class MatchStateEngine:
             inn1_max_o = int(inn1["overid"].max()) if len(inn1) else 0
             inn2_max_o = int(inn2["overid"].max()) if len(inn2) else 0
 
-            # Unit verification: balls vs overs
-            # If r1_raw == 48.0 and inn1_max_o == 8, then 48.0 / 6 = 8.0 overs -> raw unit is legal balls!
+            has_revised_target = pd.notna(rev_tgt) and float(rev_tgt) > 0
+            has_revised_overs = pd.notna(r1_raw) or pd.notna(r2_raw)
+            has_dls_text = bool(re.search(r"D/L|DLS", res))
+
             r1_unit = "LEGAL_BALLS" if pd.notna(r1_raw) and r1_raw > 20 else ("OVERS" if pd.notna(r1_raw) else "NOT_APPLICABLE")
             r2_unit = "LEGAL_BALLS" if pd.notna(r2_raw) and r2_raw > 20 else ("OVERS" if pd.notna(r2_raw) else "NOT_APPLICABLE")
 
-            has_target = pd.notna(rev_tgt)
-            target_applicability = "INNINGS_2_CHASE_TARGET" if has_target else "NO_REVISED_TARGET"
+            if has_revised_target:
+                dls_concept = "REVISED_TARGET_RECORDED"
+                if res in ["No Result", "Match Abandoned"]:
+                    target_applicability = "DLS_ABANDONED_INCOMPLETE_CHASE"
+                    notes = f"Revised target ({rev_tgt}) recorded, but match abandoned as No Result after 25 deliveries in Innings 2. Target not applicable to concluded chase."
+                else:
+                    target_applicability = "DLS_TARGET_APPLICABLE"
+                    notes = f"Verified revised target ({rev_tgt}) applicable to 2nd innings chase."
+            elif has_dls_text and not has_revised_target:
+                dls_concept = "DLS_STATUS_UNRESOLVED"
+                target_applicability = "DLS_STATUS_UNRESOLVED"
+                notes = f"Match decided by DLS per result ('{res}'), but revised_target and revised_overs were omitted from schema. Target provenance unresolved."
+            else:
+                dls_concept = "CURTAILED_WITHOUT_REVISED_TARGET"
+                if res in ["No Result", "Match Abandoned"]:
+                    target_applicability = "CURTAILED_ABANDONED_INNINGS_1"
+                    notes = "Overs shortened, match abandoned in Innings 1. No revised target."
+                else:
+                    target_applicability = "CURTAILED_STANDARD_TARGET"
+                    notes = f"Pre-match shortened match ({r1_raw} balls/inn). Standard target rule applies (Inn1 + 1)."
 
             audit_records.append({
                 "match_id": mid,
                 "comp_id": cid,
                 "comp_name": c_name,
-                "season": m.get("season", "Unknown"),
-                "result": m.get("result"),
+                "season": season,
+                "result": res,
                 "first_inn_revised_raw": r1_raw,
                 "first_inn_unit_verified": r1_unit,
                 "first_inn_scheduled_balls": int(r1_raw) if pd.notna(r1_raw) else 120,
@@ -925,8 +1007,13 @@ class MatchStateEngine:
                 "second_inn_scheduled_balls": int(r2_raw) if pd.notna(r2_raw) else (int(r1_raw) if pd.notna(r1_raw) and inn2_max_o > 0 and len(inn2) > 0 else 120),
                 "second_inn_max_over_bowled": inn2_max_o,
                 "revised_target": rev_tgt,
+                "dls_audit_concept": dls_concept,
                 "target_applicability": target_applicability,
-                "is_dls_target_match": has_target,
+                "is_dls_target_recorded": has_revised_target,
+                "is_dls_target_applicable": (target_applicability == "DLS_TARGET_APPLICABLE"),
+                "is_revised_overs_recorded": has_revised_overs,
+                "is_dls_status_unresolved": (dls_concept == "DLS_STATUS_UNRESOLVED"),
+                "audit_notes": notes,
             })
 
         self.dls_audit_df = pd.DataFrame(audit_records)
@@ -1156,10 +1243,10 @@ class MatchStateEngine:
         dls_matches = self.match_summary_df["is_dls_revised"].sum()
 
         lines = [
-            "# ROYALS INTELLIGENCE — MATCH-STATE RECONSTRUCTION REPORT (R1-02 & R1-02.1)",
+            "# ROYALS INTELLIGENCE — MATCH-STATE RECONSTRUCTION REPORT (R1-02, R1-02.1 & R1-02.2)",
             f"**Generated:** {pd.Timestamp.now(tz='UTC').isoformat()}  ",
             "**Architecture:** ROYALS INTELLIGENCE v4.1  ",
-            "**Tasks:** R1-02 & R1-02.1 Match-State Integrity Audit & Remediation  ",
+            "**Tasks:** R1-02, R1-02.1 & R1-02.2 Match-State Integrity & DLS Consistency Audit  ",
             "**Status:** `MATCH_STATE_RECONSTRUCTION_ACCEPTED_AND_AUDITED`  ",
             "",
             "---",
@@ -1217,22 +1304,34 @@ class MatchStateEngine:
             "> [!IMPORTANT]",
             "> **Schema Limitation:** The supplied `matches.csv` schema contains ONLY a text `result` field (e.g. 'India Won by 7 wickets', 'Won by 20 runs'). **The dataset does NOT contain independent official innings score fields** (`inn1_runs`, `inn2_runs`). Therefore, absolute score reconciliation against independent official totals cannot be performed from the supplied schema without external data.",
             "",
-            "### Reconciliation Breakdown Across All 883 Matches:",
-            f"- **`EXACT_BOTH_INNS_MARGIN_MATCH`:** {rec_counts.get('EXACT_BOTH_INNS_MARGIN_MATCH', 0)} matches — both innings had zero unconfirmed extras, match won by runs, and reconstructed margin matches stated margin exactly.",
-            f"- **`EXACT_BOTH_INNS_MARGIN_MISMATCH`:** {rec_counts.get('EXACT_BOTH_INNS_MARGIN_MISMATCH', 0)} matches — both innings had zero unconfirmed byes/legbyes, but stated margin differs by 1–4 runs (likely unrecorded multi-run wides/overthrows).",
-            f"- **`INCOMPLETE_EXTRAS_RUN_WIN`:** {rec_counts.get('INCOMPLETE_EXTRAS_RUN_WIN', 0)} matches — match won by runs, but one or both innings contain unconfirmed extras.",
+            "### Reconciliation Breakdown Across All 883 Matches (Mutually Exclusive):",
             f"- **`WICKET_WIN_NO_OFFICIAL_TOTAL_IN_SCHEMA`:** {rec_counts.get('WICKET_WIN_NO_OFFICIAL_TOTAL_IN_SCHEMA', 0)} matches — match won by wickets; official team totals absent from schema.",
-            f"- **`DLS_REVISED_TARGET`:** {rec_counts.get('DLS_REVISED_TARGET', 0)} matches — match curtailed under DLS revised target.",
-            f"- **`NO_RESULT_OR_ABANDONED`:** {rec_counts.get('NO_RESULT_OR_ABANDONED', 0)} matches — match abandoned or no result.",
+            f"- **`INCOMPLETE_EXTRAS_RUN_WIN`:** {rec_counts.get('INCOMPLETE_EXTRAS_RUN_WIN', 0)} matches — match won by runs, but one or both innings contain unconfirmed extras.",
+            f"- **`NO_RESULT_OR_ABANDONED`:** {rec_counts.get('NO_RESULT_OR_ABANDONED', 0)} matches — match abandoned or no result without a recorded revised target.",
             f"- **`OTHER_RESULT`:** {rec_counts.get('OTHER_RESULT', 0)} matches — tied matches / Super Overs.",
+            f"- **`REVISED_TARGET_RECORDED`:** {rec_counts.get('REVISED_TARGET_RECORDED', 0)} matches — positive revised target explicitly recorded in `matches.csv`.",
+            f"- **`DLS_STATUS_UNRESOLVED`:** {rec_counts.get('DLS_STATUS_UNRESOLVED', 0)} matches — match decided by DLS/DL method per text result, but target was unrecorded in schema.",
+            f"- **`EXACT_BOTH_INNS_MARGIN_MISMATCH`:** {rec_counts.get('EXACT_BOTH_INNS_MARGIN_MISMATCH', 0)} matches — both innings had zero unconfirmed byes/legbyes, but stated margin differs by 1–4 runs (likely unrecorded multi-run wides/overthrows).",
+            f"- **`EXACT_BOTH_INNS_MARGIN_MATCH`:** {rec_counts.get('EXACT_BOTH_INNS_MARGIN_MATCH', 0)} matches — both innings had zero unconfirmed extras, match won by runs, and reconstructed margin matches stated margin exactly.",
+            f"- **Total Matches Audited:** {sum(rec_counts.values())} (100.0% match-level coverage, exactly 883 matches).",
             "",
             "---",
             "",
-            "## 6. Revised Overs, Shortened Matches & DLS Coverage",
+            "## 6. Revised Overs, Shortened Matches & DLS Coverage (R1-02.2 Resolution)",
             "",
-            "- **Verified Unit:** Across all 34 matches with revised overs, `first_inn_revised_overs` and `second_inn_revised_overs` store **scheduled legal balls** (e.g. 48.0 = 8.0 overs, 66.0 = 11.0 overs, 90.0 = 15.0 overs, 114.0 = 19.0 overs), verified by max overs bowled in ball-by-ball records.",
-            "- **All 23 DLS Matches Audited:** In all 23 matches with `revised_target`, the target applies exclusively to **Innings 2** (the chasing team), paired with verified scheduled balls.",
-            "- **11 Non-Target Shortened Matches:** 9 were abandoned in Innings 1 (No Result); 2 were pre-match agreed 11-over matches (Matches 16753 & 19959) where standard target = Inn1 + 1 applied.",
+            "### Resolution of the 23-versus-26 Discrepancy:",
+            "The initial R1-02.1 audit noted 23 matches with `revised_target > 0` versus 26 matches labeled `DLS_REVISED_TARGET`. The source investigation established the exact mathematical reason:",
+            "1. **23 matches** in `matches.csv` explicitly record a positive `revised_target` (22 decisive chases + 1 abandoned chase, Match 17765).",
+            "2. **4 matches** (Matches 20182, 23674, 24822, 28334) had `revised_target == NaN` and `revised_overs == NaN`, but their text `result` strings contained `'(D/L Method)'` or `'(DLS method)'`.",
+            "3. In R1-02.1, the reconciliation classifier evaluated `NO_RESULT_OR_ABANDONED` first, routing Match 17765 to abandonment (-1), while routing the 4 unrecorded DLS matches to `DLS_REVISED_TARGET` (+4).",
+            "4. **Net Discrepancy:** 22 + 4 = 26 matches. Net difference = 26 - 23 = +3 matches (+4 unrecorded minus 1 abandoned).",
+            "",
+            "### Explicit R1-02.2 Classification Concepts:",
+            "- **`REVISED_TARGET_RECORDED` (23 matches):** Source explicitly provides a positive `revised_target` in `matches.csv`.",
+            "- **`REVISED_OVERS_RECORDED` (34 matches):** Source provides revised scheduled-ball metadata (`first_inn_revised_overs` or `second_inn_revised_overs`). Unit verified as legal balls (integers divisible by 6, range 30 to 114).",
+            "- **`DLS_TARGET_APPLICABLE` (22 matches):** Positive revised target is validated as applicable to a concluded second-innings chase.",
+            "- **`CURTAILED_WITHOUT_REVISED_TARGET` (11 matches):** Scheduled overs shortened without a recorded revised target (2 pre-match 11-over standard target matches [16753, 19959], 9 abandoned in Innings 1).",
+            "- **`DLS_STATUS_UNRESOLVED` (4 matches):** Result string states DLS was applied, but target and overs metadata were omitted from schema (Matches 20182, 23674, 24822, 28334). Target provenance is unresolved; exact target/RRR is strictly withheld.",
             "",
             "---",
             "",
@@ -1241,8 +1340,8 @@ class MatchStateEngine:
             "| Feature Category | Features Included | Downstream Safety Status |",
             "| :--- | :--- | :--- |",
             "| **Tier 1: Safe For Downstream Models** | Striker runs, legal balls bowled/faced, wickets, dismissal attribution, player ID, match metadata, phase, balls remaining | **100% Verified & Safe.** Independently validated; zero dependency on unconfirmed extras. |",
-            "| **Tier 2: Score-Dependent Features** | `runs_required_exact`, `required_run_rate_exact`, `cumulative_team_runs_exact`, exact chase deficit | **Restricted to `EXACT` score states.** Strictly withheld (`null`) on `LOWER_BOUND_ONLY` states. Models must use sensitivity bounds. |",
-            "| **Tier 3: Uncertain Features** | Multi-run byes/legbyes, penalty amounts, additional wide overthrows, ambiguous `other` deliveries | **Requires Sensitivity Analysis or Exclusion.** Must compare Strict vs Permissive scenarios. |",
+            "| **Tier 2: Score-Dependent Features** | `runs_required_exact`, `required_run_rate_exact`, `cumulative_team_runs_exact`, exact chase deficit | **Restricted to `EXACT` score states.** Strictly withheld (`null`) on `LOWER_BOUND_ONLY` states and `DLS_STATUS_UNRESOLVED` matches. Models must use sensitivity bounds. |",
+            "| **Tier 3: Uncertain Features** | Multi-run byes/legbyes, penalty amounts, additional wide overthrows, ambiguous `other` deliveries, unrecorded DLS par scores | **Requires Sensitivity Analysis or Exclusion.** Must compare Strict vs Permissive scenarios. |",
             "",
             "---",
             "",
@@ -1253,8 +1352,8 @@ class MatchStateEngine:
             "- `round1_pressure/data/processed/delivery_states_permissive.parquet`: Delivery states under permissive legality (for sensitivity testing).",
             "- `round1_pressure/data/processed/innings_state_summary.parquet`: Innings-level reconstructed metrics and completeness flags.",
             "- `round1_pressure/data/processed/match_state_summary.parquet`: Match-level targets, shortened status, and innings totals.",
-            "- `round1_pressure/data/processed/match_result_reconciliation.parquet`: Match-by-match reconciliation audit for all 883 matches.",
-            "- `round1_pressure/data/processed/dls_and_revised_overs_audit.parquet`: Complete audit of all 34 shortened / DLS matches.",
+            "- `round1_pressure/data/processed/match_result_reconciliation.parquet`: Match-by-match reconciliation audit for all 883 matches across 8 mutually exclusive categories.",
+            "- `round1_pressure/data/processed/dls_and_revised_overs_audit.parquet`: Complete audit of all 38 shortened, revised overs, and DLS matches.",
             "- `round1_pressure/data/processed/excluded_innings.parquet`: Fully documented catalog of excluded matches, innings, and deliveries.",
             "- `round1_pressure/data/processed/reconstruction_audit.parquet`: Scenario reconciliation table.",
         ])
@@ -1270,7 +1369,7 @@ DOWNSTREAM_FEATURE_ELIGIBILITY_CONTRACT = MatchStateEngine.DOWNSTREAM_FEATURE_EL
 
 if __name__ == "__main__":
     print("=" * 75)
-    print("ROYALS INTELLIGENCE — MATCH-STATE RECONSTRUCTION ENGINE (R1-02 & R1-02.1)")
+    print("ROYALS INTELLIGENCE — MATCH-STATE RECONSTRUCTION ENGINE (R1-02, R1-02.1 & R1-02.2)")
     print("=" * 75)
     engine = MatchStateEngine()
     results = engine.run_reconstruction()

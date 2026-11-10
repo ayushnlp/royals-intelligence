@@ -153,7 +153,42 @@ Task R1-02.1 performed a focused integrity audit and targeted remediation to ens
 
 ---
 
-## 8. Pending Decisions for R1-03 (Pressure Index & Quantification Engine)
+## 8. R1-02.2 DLS Classification & Match-Reconciliation Consistency Audit
+
+Task R1-02.2 resolved the discrepancy between the 23 matches with `revised_target > 0` and the 26 matches classified under `DLS_REVISED_TARGET` in R1-02.1, and established unambiguous classification definitions:
+
+1. **Resolution of the 23-vs-26 Discrepancy:**
+   - **Root Cause:** In R1-02.1, regex classification matched `"D/L"` or `"DLS"` in result strings before checking match outcome status:
+     - 22 completed chases with `revised_target > 0` were included.
+     - 4 matches (Matches 20182, 23674, 24822, 28334) had DLS in their result text, but both `revised_target` and revised overs were completely absent (NaN) from the schema.
+     - 1 match (Match 17765: SA in IND 2022) had `revised_target = 130.0`, but was abandoned as `"No Result"` after 25 balls in Innings 2, routing to `NO_RESULT_OR_ABANDONED` (-1).
+   - **Formula:** `23 recorded target - 1 abandoned (17765) + 4 unrecorded target matches = 26 matches` (net: `+3`).
+2. **The 5 Authoritative Audit Concepts & Exact Counts:**
+   - **`REVISED_TARGET_RECORDED` (23 matches):** Explicitly recorded `revised_target > 0` in `matches.csv`.
+   - **`REVISED_OVERS_RECORDED` (34 matches):** Explicitly recorded `first_inn_revised_overs` or `second_inn_revised_overs`.
+   - **`DLS_TARGET_APPLICABLE` (22 matches):** Positive revised target applicable to a concluded second-innings chase.
+   - **`CURTAILED_WITHOUT_REVISED_TARGET` (11 matches):** Shortened matches without a recorded revised target: 2 completed 11-over standard chases (Matches 16753, 19959) where both innings were equally curtailed before play, plus 9 matches abandoned during Innings 1.
+   - **`DLS_STATUS_UNRESOLVED` (4 matches):** Matches 20182, 23674, 24822, 28334. Result mentions D/L or DLS method, but target and overs are absent from schema.
+3. **8 Mutually Exclusive Match Reconciliation Categories (Sum = 883):**
+   - `WICKET_WIN_NO_OFFICIAL_TOTAL_IN_SCHEMA`: 394 matches
+   - `INCOMPLETE_EXTRAS_RUN_WIN`: 382 matches
+   - `NO_RESULT_OR_ABANDONED`: 39 matches (includes Match 17765)
+   - `OTHER_RESULT`: 30 matches (Ties, Super Overs, bowl-outs)
+   - `REVISED_TARGET_RECORDED`: 23 matches (official revised targets)
+   - `EXACT_BOTH_INNS_MARGIN_MISMATCH`: 6 matches (exact deliveries, boundary multi-run extras discrepancy)
+   - `EXACT_BOTH_INNS_MARGIN_MATCH`: 5 matches (exact mathematical match)
+   - `DLS_STATUS_UNRESOLVED`: 4 matches (Matches 20182, 23674, 24822, 28334)
+   - **Total:** Exactly **883 matches** (100% coverage, 0 overlap).
+4. **Target Assignment & Invariants:**
+   - First-innings target is ALWAYS `null` (`target_exact = None`, `runs_required_exact = None`, `required_run_rate_exact = None`).
+   - Ordinary second-innings chase target is `cumulative_team_runs_exact(Innings 1) + 1`. If Innings 1 is `LOWER_BOUND_ONLY`, exact chase metrics are strictly withheld.
+   - For `DLS_STATUS_UNRESOLVED` matches, `target_source = 'DLS_METHOD_UNRECORDED_TARGET'` and exact chase metrics are strictly withheld. Never fabricate or guess unrecorded DLS par targets.
+5. **Comprehensive Verification:**
+   - 34 dedicated unit tests in `test_match_state.py` (49 tests in `round1_pressure`, 61 in `backend`, 110 total across workspace, 100% passing).
+
+---
+
+## 9. Pending Decisions for R1-03 (Pressure Index & Quantification Engine)
 
 With match state reconstructed and audited immediately before and after every delivery, the system is ready for Task R1-03:
 1. **Multidimensional Pressure Index $\Psi(t)$:**

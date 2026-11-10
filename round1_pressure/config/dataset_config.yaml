@@ -264,3 +264,46 @@ match_state_audit_r1_02_1:
     dls_revised_target_matches: 23
     target_applicability: "INNINGS_2_CHASE_ONLY"
 
+# Task R1-02.2: DLS Classification & Match-Reconciliation Consistency Audit
+match_state_audit_r1_02_2:
+  discrepancy_resolution_23_vs_26:
+    revised_target_recorded_count: 23
+    unrecorded_dls_target_matches: [20182, 23674, 24822, 28334] # 4 matches with DLS in result string but target/overs NaN
+    abandoned_recorded_target_matches: [17765]                   # 1 match with revised_target=130 but abandoned
+    net_difference: "+3 matches (23 - 1 + 4 = 26 in R1-02.1)"
+  
+  audit_concepts:
+    REVISED_TARGET_RECORDED:
+      count: 23
+      definition: "Matches with matches.csv revised_target > 0 explicitly recorded."
+    REVISED_OVERS_RECORDED:
+      count: 34
+      definition: "Matches with first_inn_revised_overs or second_inn_revised_overs explicitly recorded."
+    DLS_TARGET_APPLICABLE:
+      count: 22
+      definition: "Matches where positive revised target was applicable to a concluded second-innings chase."
+    CURTAILED_WITHOUT_REVISED_TARGET:
+      count: 11
+      definition: "Matches with revised overs recorded but revised_target is NaN (2 completed 11-over standard chases [16753, 19959] + 9 abandoned in Innings 1)."
+    DLS_STATUS_UNRESOLVED:
+      count: 4
+      matches: [20182, 23674, 24822, 28334]
+      definition: "Matches whose result string references DLS/D-L, but revised_target and revised_overs are NaN in schema."
+
+  mutually_exclusive_reconciliation_883:
+    WICKET_WIN_NO_OFFICIAL_TOTAL_IN_SCHEMA: 394
+    INCOMPLETE_EXTRAS_RUN_WIN: 382
+    NO_RESULT_OR_ABANDONED: 39
+    OTHER_RESULT: 30
+    REVISED_TARGET_RECORDED: 23
+    EXACT_BOTH_INNS_MARGIN_MISMATCH: 6
+    EXACT_BOTH_INNS_MARGIN_MATCH: 5
+    DLS_STATUS_UNRESOLVED: 4
+    total: 883
+
+  downstream_r1_03_contract:
+    exact_target_withholding_unresolved_dls: true
+    unresolved_dls_target_source: "DLS_METHOD_UNRECORDED_TARGET"
+    zero_fabrication_policy: "Never interpolate or guess unrecorded DLS par/target scores; withhold runs_required_exact and required_run_rate_exact."
+
+

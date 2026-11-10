@@ -1,7 +1,7 @@
-# ROYALS INTELLIGENCE — MATCH-STATE RECONSTRUCTION REPORT (R1-02 & R1-02.1)
-**Generated:** 2026-11-10T20:42:47.113051+00:00  
+# ROYALS INTELLIGENCE — MATCH-STATE RECONSTRUCTION REPORT (R1-02, R1-02.1 & R1-02.2)
+**Generated:** 2026-11-10T21:18:08.356165+00:00  
 **Architecture:** ROYALS INTELLIGENCE v4.1  
-**Tasks:** R1-02 & R1-02.1 Match-State Integrity Audit & Remediation  
+**Tasks:** R1-02, R1-02.1 & R1-02.2 Match-State Integrity & DLS Consistency Audit  
 **Status:** `MATCH_STATE_RECONSTRUCTION_ACCEPTED_AND_AUDITED`  
 
 ---
@@ -62,22 +62,34 @@
 > [!IMPORTANT]
 > **Schema Limitation:** The supplied `matches.csv` schema contains ONLY a text `result` field (e.g. 'India Won by 7 wickets', 'Won by 20 runs'). **The dataset does NOT contain independent official innings score fields** (`inn1_runs`, `inn2_runs`). Therefore, absolute score reconciliation against independent official totals cannot be performed from the supplied schema without external data.
 
-### Reconciliation Breakdown Across All 883 Matches:
-- **`EXACT_BOTH_INNS_MARGIN_MATCH`:** 5 matches — both innings had zero unconfirmed extras, match won by runs, and reconstructed margin matches stated margin exactly.
-- **`EXACT_BOTH_INNS_MARGIN_MISMATCH`:** 6 matches — both innings had zero unconfirmed byes/legbyes, but stated margin differs by 1–4 runs (likely unrecorded multi-run wides/overthrows).
-- **`INCOMPLETE_EXTRAS_RUN_WIN`:** 382 matches — match won by runs, but one or both innings contain unconfirmed extras.
+### Reconciliation Breakdown Across All 883 Matches (Mutually Exclusive):
 - **`WICKET_WIN_NO_OFFICIAL_TOTAL_IN_SCHEMA`:** 394 matches — match won by wickets; official team totals absent from schema.
-- **`DLS_REVISED_TARGET`:** 26 matches — match curtailed under DLS revised target.
-- **`NO_RESULT_OR_ABANDONED`:** 40 matches — match abandoned or no result.
+- **`INCOMPLETE_EXTRAS_RUN_WIN`:** 382 matches — match won by runs, but one or both innings contain unconfirmed extras.
+- **`NO_RESULT_OR_ABANDONED`:** 39 matches — match abandoned or no result without a recorded revised target.
 - **`OTHER_RESULT`:** 30 matches — tied matches / Super Overs.
+- **`REVISED_TARGET_RECORDED`:** 23 matches — positive revised target explicitly recorded in `matches.csv`.
+- **`DLS_STATUS_UNRESOLVED`:** 4 matches — match decided by DLS/DL method per text result, but target was unrecorded in schema.
+- **`EXACT_BOTH_INNS_MARGIN_MISMATCH`:** 6 matches — both innings had zero unconfirmed byes/legbyes, but stated margin differs by 1–4 runs (likely unrecorded multi-run wides/overthrows).
+- **`EXACT_BOTH_INNS_MARGIN_MATCH`:** 5 matches — both innings had zero unconfirmed extras, match won by runs, and reconstructed margin matches stated margin exactly.
+- **Total Matches Audited:** 883 (100.0% match-level coverage, exactly 883 matches).
 
 ---
 
-## 6. Revised Overs, Shortened Matches & DLS Coverage
+## 6. Revised Overs, Shortened Matches & DLS Coverage (R1-02.2 Resolution)
 
-- **Verified Unit:** Across all 34 matches with revised overs, `first_inn_revised_overs` and `second_inn_revised_overs` store **scheduled legal balls** (e.g. 48.0 = 8.0 overs, 66.0 = 11.0 overs, 90.0 = 15.0 overs, 114.0 = 19.0 overs), verified by max overs bowled in ball-by-ball records.
-- **All 23 DLS Matches Audited:** In all 23 matches with `revised_target`, the target applies exclusively to **Innings 2** (the chasing team), paired with verified scheduled balls.
-- **11 Non-Target Shortened Matches:** 9 were abandoned in Innings 1 (No Result); 2 were pre-match agreed 11-over matches (Matches 16753 & 19959) where standard target = Inn1 + 1 applied.
+### Resolution of the 23-versus-26 Discrepancy:
+The initial R1-02.1 audit noted 23 matches with `revised_target > 0` versus 26 matches labeled `DLS_REVISED_TARGET`. The source investigation established the exact mathematical reason:
+1. **23 matches** in `matches.csv` explicitly record a positive `revised_target` (22 decisive chases + 1 abandoned chase, Match 17765).
+2. **4 matches** (Matches 20182, 23674, 24822, 28334) had `revised_target == NaN` and `revised_overs == NaN`, but their text `result` strings contained `'(D/L Method)'` or `'(DLS method)'`.
+3. In R1-02.1, the reconciliation classifier evaluated `NO_RESULT_OR_ABANDONED` first, routing Match 17765 to abandonment (-1), while routing the 4 unrecorded DLS matches to `DLS_REVISED_TARGET` (+4).
+4. **Net Discrepancy:** 22 + 4 = 26 matches. Net difference = 26 - 23 = +3 matches (+4 unrecorded minus 1 abandoned).
+
+### Explicit R1-02.2 Classification Concepts:
+- **`REVISED_TARGET_RECORDED` (23 matches):** Source explicitly provides a positive `revised_target` in `matches.csv`.
+- **`REVISED_OVERS_RECORDED` (34 matches):** Source provides revised scheduled-ball metadata (`first_inn_revised_overs` or `second_inn_revised_overs`). Unit verified as legal balls (integers divisible by 6, range 30 to 114).
+- **`DLS_TARGET_APPLICABLE` (22 matches):** Positive revised target is validated as applicable to a concluded second-innings chase.
+- **`CURTAILED_WITHOUT_REVISED_TARGET` (11 matches):** Scheduled overs shortened without a recorded revised target (2 pre-match 11-over standard target matches [16753, 19959], 9 abandoned in Innings 1).
+- **`DLS_STATUS_UNRESOLVED` (4 matches):** Result string states DLS was applied, but target and overs metadata were omitted from schema (Matches 20182, 23674, 24822, 28334). Target provenance is unresolved; exact target/RRR is strictly withheld.
 
 ---
 
@@ -86,8 +98,8 @@
 | Feature Category | Features Included | Downstream Safety Status |
 | :--- | :--- | :--- |
 | **Tier 1: Safe For Downstream Models** | Striker runs, legal balls bowled/faced, wickets, dismissal attribution, player ID, match metadata, phase, balls remaining | **100% Verified & Safe.** Independently validated; zero dependency on unconfirmed extras. |
-| **Tier 2: Score-Dependent Features** | `runs_required_exact`, `required_run_rate_exact`, `cumulative_team_runs_exact`, exact chase deficit | **Restricted to `EXACT` score states.** Strictly withheld (`null`) on `LOWER_BOUND_ONLY` states. Models must use sensitivity bounds. |
-| **Tier 3: Uncertain Features** | Multi-run byes/legbyes, penalty amounts, additional wide overthrows, ambiguous `other` deliveries | **Requires Sensitivity Analysis or Exclusion.** Must compare Strict vs Permissive scenarios. |
+| **Tier 2: Score-Dependent Features** | `runs_required_exact`, `required_run_rate_exact`, `cumulative_team_runs_exact`, exact chase deficit | **Restricted to `EXACT` score states.** Strictly withheld (`null`) on `LOWER_BOUND_ONLY` states and `DLS_STATUS_UNRESOLVED` matches. Models must use sensitivity bounds. |
+| **Tier 3: Uncertain Features** | Multi-run byes/legbyes, penalty amounts, additional wide overthrows, ambiguous `other` deliveries, unrecorded DLS par scores | **Requires Sensitivity Analysis or Exclusion.** Must compare Strict vs Permissive scenarios. |
 
 ---
 
@@ -98,7 +110,7 @@ All output tables are stored in snappy-compressed Parquet format:
 - `round1_pressure/data/processed/delivery_states_permissive.parquet`: Delivery states under permissive legality (for sensitivity testing).
 - `round1_pressure/data/processed/innings_state_summary.parquet`: Innings-level reconstructed metrics and completeness flags.
 - `round1_pressure/data/processed/match_state_summary.parquet`: Match-level targets, shortened status, and innings totals.
-- `round1_pressure/data/processed/match_result_reconciliation.parquet`: Match-by-match reconciliation audit for all 883 matches.
-- `round1_pressure/data/processed/dls_and_revised_overs_audit.parquet`: Complete audit of all 34 shortened / DLS matches.
+- `round1_pressure/data/processed/match_result_reconciliation.parquet`: Match-by-match reconciliation audit for all 883 matches across 8 mutually exclusive categories.
+- `round1_pressure/data/processed/dls_and_revised_overs_audit.parquet`: Complete audit of all 38 shortened, revised overs, and DLS matches.
 - `round1_pressure/data/processed/excluded_innings.parquet`: Fully documented catalog of excluded matches, innings, and deliveries.
 - `round1_pressure/data/processed/reconstruction_audit.parquet`: Scenario reconciliation table.

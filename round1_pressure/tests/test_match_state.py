@@ -424,12 +424,12 @@ def test_markdown_report_generated(engine):
     with open(report_path, "r", encoding="utf-8") as f:
         content = f.read()
 
-    assert "ROYALS INTELLIGENCE — MATCH-STATE RECONSTRUCTION REPORT (R1-02 & R1-02.1)" in content
+    assert "ROYALS INTELLIGENCE — MATCH-STATE RECONSTRUCTION REPORT (R1-02, R1-02.1 & R1-02.2)" in content
     assert "Strict vs. Permissive Scenario Comparison" in content
     assert "Score Reconstruction & Exact vs. Lower-Bound Semantics" in content
     assert "Empirical Inference of `extras_2_runs`" in content
     assert "Match-Result Reconciliation & Official Schema Limitations" in content
-    assert "Revised Overs, Shortened Matches & DLS Coverage" in content
+    assert "Revised Overs, Shortened Matches & DLS Coverage (R1-02.2 Resolution)" in content
     assert "Downstream Feature-Eligibility Contract (for R1-03)" in content
 
 
@@ -648,21 +648,28 @@ def test_dataset_exact_chase_metrics_mathematical_consistency(engine):
 
 def test_dataset_dls_target_applicability_all_23_matches(engine):
     """
-    Scenario 9: DLS target applicability across all 23 matches.
+    Scenario 9: DLS target applicability across all 23 matches with recorded revised targets.
     Verifies dls_and_revised_overs_audit.parquet:
-    - Exactly 23 matches with official revised targets
-    - In all 23 matches, target_applicability is INNINGS_2_CHASE_TARGET
+    - Exactly 23 matches with official revised targets recorded (is_dls_target_recorded == True)
+    - 22 matches have target_applicability == 'DLS_TARGET_APPLICABLE' (chased to completion)
+    - 1 match (17765) has target_applicability == 'DLS_ABANDONED_INCOMPLETE_CHASE' (abandoned after 25 balls)
     - Target is strictly greater than 0
     - Second innings scheduled balls > 0
     """
     dls_df = engine.dls_audit_df
 
-    assert len(dls_df) == 34
-    dls_23 = dls_df[dls_df["is_dls_target_match"]]
+    assert len(dls_df) == 38
+    dls_23 = dls_df[dls_df["is_dls_target_recorded"]]
     assert len(dls_23) == 23
-    assert (dls_23["target_applicability"] == "INNINGS_2_CHASE_TARGET").all()
     assert (dls_23["revised_target"] > 0).all()
     assert (dls_23["second_inn_scheduled_balls"] > 0).all()
+
+    # 22 applicable chases + 1 abandoned incomplete chase
+    app_22 = dls_23[dls_23["target_applicability"] == "DLS_TARGET_APPLICABLE"]
+    assert len(app_22) == 22
+    abandoned_1 = dls_23[dls_23["target_applicability"] == "DLS_ABANDONED_INCOMPLETE_CHASE"]
+    assert len(abandoned_1) == 1
+    assert abandoned_1["match_id"].iloc[0] == 17765
 
 
 def test_dataset_strict_vs_permissive_5_out_of_scope_reconciliation(engine):
@@ -696,11 +703,18 @@ def test_dataset_strict_vs_permissive_5_out_of_scope_reconciliation(engine):
 
 def test_dataset_match_result_reconciliation_table_coverage(engine):
     """
-    Scenario 11: Match-result reconciliation table verification.
+    Scenario 11: Match-result reconciliation table verification (R1-02.2).
     Verifies match_result_reconciliation.parquet:
-    - Covers exactly 883 matches
-    - Accurately declares that matches.csv schema lacks independent official innings scores
-    - Categorizes all 883 matches cleanly across the 7 reconciliation outcomes.
+    - Covers exactly 883 matches across 8 mutually exclusive categories
+    - REVISED_TARGET_RECORDED: 23 matches
+    - DLS_STATUS_UNRESOLVED: 4 matches
+    - NO_RESULT_OR_ABANDONED: 39 matches
+    - WICKET_WIN_NO_OFFICIAL_TOTAL_IN_SCHEMA: 394 matches
+    - INCOMPLETE_EXTRAS_RUN_WIN: 382 matches
+    - OTHER_RESULT: 30 matches
+    - EXACT_BOTH_INNS_MARGIN_MISMATCH: 6 matches
+    - EXACT_BOTH_INNS_MARGIN_MATCH: 5 matches
+    - Total sums to exactly 883 matches.
     """
     recon_df = engine.reconciliation_df
 
@@ -709,9 +723,10 @@ def test_dataset_match_result_reconciliation_table_coverage(engine):
 
     assert counts["WICKET_WIN_NO_OFFICIAL_TOTAL_IN_SCHEMA"] == 394
     assert counts["INCOMPLETE_EXTRAS_RUN_WIN"] == 382
-    assert counts["NO_RESULT_OR_ABANDONED"] == 40
+    assert counts["NO_RESULT_OR_ABANDONED"] == 39
     assert counts["OTHER_RESULT"] == 30
-    assert counts["DLS_REVISED_TARGET"] == 26
+    assert counts["REVISED_TARGET_RECORDED"] == 23
+    assert counts["DLS_STATUS_UNRESOLVED"] == 4
     assert counts["EXACT_BOTH_INNS_MARGIN_MISMATCH"] == 6
     assert counts["EXACT_BOTH_INNS_MARGIN_MATCH"] == 5
     assert counts.sum() == 883
@@ -719,14 +734,14 @@ def test_dataset_match_result_reconciliation_table_coverage(engine):
 
 def test_dataset_revised_overs_legal_balls_unit_verified(engine):
     """
-    Scenario 12: Revised overs and DLS audit verification.
+    Scenario 12: Revised overs and DLS audit verification (R1-02.2).
     Verifies dls_and_revised_overs_audit.parquet:
-    - Covers all 34 matches
+    - Covers all 38 matches involving DLS or revised overs
     - Proves revised overs fields store legal balls (not overs)
     """
     dls_df = engine.dls_audit_df
 
-    assert len(dls_df) == 34
+    assert len(dls_df) == 38
     first_rev = dls_df[dls_df["first_inn_revised_raw"].notna()]
     second_rev = dls_df[dls_df["second_inn_revised_raw"].notna()]
 
@@ -738,6 +753,137 @@ def test_dataset_revised_overs_legal_balls_unit_verified(engine):
         assert val % 6 == 0 and 30.0 <= val <= 114.0
     for val in second_rev["second_inn_revised_raw"]:
         assert val % 6 == 0 and 30.0 <= val <= 114.0
+
+
+# ==============================================================================
+# PART 4: R1-02.2 DLS CLASSIFICATION & TARGET RECONCILIATION AUDIT TESTS
+# ==============================================================================
+
+def test_23_explicitly_recorded_revised_target_matches(engine):
+    """
+    R1-02.2 Audit: Verifies all 23 matches with positive revised_target in matches.csv:
+    - Exactly 23 matches have revised_target > 0
+    - 22 matches are decisive chases (DLS_TARGET_APPLICABLE)
+    - 1 match (Match 17765) was abandoned as No Result (DLS_ABANDONED_INCOMPLETE_CHASE)
+    - All 23 are classified as REVISED_TARGET_RECORDED in match_result_reconciliation
+    """
+    dls_df = engine.dls_audit_df
+    recon_df = engine.reconciliation_df
+
+    recorded_23 = dls_df[dls_df["dls_audit_concept"] == "REVISED_TARGET_RECORDED"]
+    assert len(recorded_23) == 23
+    assert (recorded_23["is_dls_target_recorded"] == True).all()
+
+    # Applicable vs Abandoned
+    assert (recorded_23["target_applicability"] == "DLS_TARGET_APPLICABLE").sum() == 22
+    assert (recorded_23["target_applicability"] == "DLS_ABANDONED_INCOMPLETE_CHASE").sum() == 1
+
+    # Match 17765 specific check
+    m17765 = recorded_23[recorded_23["match_id"] == 17765].iloc[0]
+    assert m17765["result"] == "No Result"
+    assert m17765["revised_target"] == 130.0
+    assert m17765["target_applicability"] == "DLS_ABANDONED_INCOMPLETE_CHASE"
+
+    # In reconciliation table, exactly 23 matches have REVISED_TARGET_RECORDED
+    recon_rev = recon_df[recon_df["reconciliation_outcome"] == "REVISED_TARGET_RECORDED"]
+    assert len(recon_rev) == 23
+    assert set(recon_rev["match_id"]) == set(recorded_23["match_id"])
+
+
+def test_revised_overs_without_revised_target_matches(engine):
+    """
+    R1-02.2 Audit: Verifies all 11 matches with revised overs but no revised target:
+    - Exactly 11 matches in CURTAILED_WITHOUT_REVISED_TARGET
+    - 2 pre-match shortened 11-over games (Matches 16753 & 19959) with standard targets
+    - 9 abandoned matches in Innings 1 (No Result / Abandoned)
+    """
+    dls_df = engine.dls_audit_df
+
+    curtailed_11 = dls_df[dls_df["dls_audit_concept"] == "CURTAILED_WITHOUT_REVISED_TARGET"]
+    assert len(curtailed_11) == 11
+    assert curtailed_11["revised_target"].isna().all()
+
+    # 2 pre-match shortened games
+    standard_curtailed = curtailed_11[curtailed_11["target_applicability"] == "CURTAILED_STANDARD_TARGET"]
+    assert len(standard_curtailed) == 2
+    assert set(standard_curtailed["match_id"]) == {16753, 19959}
+    assert (standard_curtailed["first_inn_revised_raw"] == 66.0).all()  # 11 overs each
+
+    # 9 abandoned in Innings 1
+    abandoned_9 = curtailed_11[curtailed_11["target_applicability"] == "CURTAILED_ABANDONED_INNINGS_1"]
+    assert len(abandoned_9) == 9
+    assert (abandoned_9["result"].isin(["No Result", "Match Abandoned"])).all()
+
+
+def test_unresolved_dls_matches_and_exact_withholding(engine):
+    """
+    R1-02.2 Audit: Verifies the 4 matches where DLS was applied per result text,
+    but revised_target and revised_overs were omitted from matches.csv:
+    - Matches 20182, 23674, 24822, 28334
+    - Categorized as DLS_STATUS_UNRESOLVED in reconciliation and DLS audit tables
+    - In delivery_states_strict.parquet: target_source == 'DLS_METHOD_UNRECORDED_TARGET'
+    - target_exact is strictly NaN, target_is_exact == False
+    - runs_required_exact_before and after are strictly NaN (withheld)
+    """
+    dls_df = engine.dls_audit_df
+    recon_df = engine.reconciliation_df
+    df_strict = engine.delivery_states_strict
+
+    unresolved_4 = dls_df[dls_df["dls_audit_concept"] == "DLS_STATUS_UNRESOLVED"]
+    assert len(unresolved_4) == 4
+    assert set(unresolved_4["match_id"]) == {20182, 23674, 24822, 28334}
+    assert unresolved_4["revised_target"].isna().all()
+    assert unresolved_4["first_inn_revised_raw"].isna().all()
+
+    # In reconciliation table
+    recon_unres = recon_df[recon_df["reconciliation_outcome"] == "DLS_STATUS_UNRESOLVED"]
+    assert len(recon_unres) == 4
+    assert set(recon_unres["match_id"]) == {20182, 23674, 24822, 28334}
+
+    # In delivery states (Innings 2 deliveries)
+    for mid in [20182, 23674, 24822, 28334]:
+        sub = df_strict[(df_strict["match_id"] == mid) & (df_strict["innings"] == 2)]
+        assert len(sub) > 0
+        assert (sub["target_source"] == "DLS_METHOD_UNRECORDED_TARGET").all()
+        assert sub["target_exact"].isna().all()
+        assert (sub["target_is_exact"] == False).all()
+        assert sub["runs_required_exact_before"].isna().all()
+        assert sub["required_run_rate_exact_before"].isna().all()
+
+
+def test_correct_second_innings_target_assignment(engine):
+    """
+    R1-02.2 Audit: Verifies second innings target assignment across all scenario archetypes:
+    1. Verified revised target (Match 21586): DLS_REVISED_TARGET, exact=171.0
+    2. Unresolved DLS match (Match 24822): DLS_METHOD_UNRECORDED_TARGET, exact=NaN
+    3. Standard match with exact 1st inn: FIRST_INNINGS_EXACT_PLUS_ONE, exact=populated
+    4. Standard match with incomplete 1st inn: FIRST_INNINGS_LOWER_BOUND_PLUS_ONE, exact=NaN
+    """
+    df_strict = engine.delivery_states_strict
+
+    # Case 1: Verified DLS Match 21586
+    m21586 = df_strict[(df_strict["match_id"] == 21586) & (df_strict["innings"] == 2)]
+    assert (m21586["target_source"] == "DLS_REVISED_TARGET").all()
+    assert (m21586["target_exact"] == 171.0).all()
+    assert (m21586["target_is_exact"] == True).all()
+
+    # Case 2: Unresolved DLS Match 24822
+    m24822 = df_strict[(df_strict["match_id"] == 24822) & (df_strict["innings"] == 2)]
+    assert (m24822["target_source"] == "DLS_METHOD_UNRECORDED_TARGET").all()
+    assert m24822["target_exact"].isna().all()
+    assert (m24822["target_is_exact"] == False).all()
+
+    # Case 3: First Innings Exact Match
+    exact_targets = df_strict[(df_strict["innings"] == 2) & (df_strict["target_source"] == "FIRST_INNINGS_EXACT_PLUS_ONE")]
+    assert len(exact_targets) > 0
+    assert exact_targets["target_exact"].notna().all()
+    assert (exact_targets["target_is_exact"] == True).all()
+
+    # Case 4: First Innings Lower Bound Match
+    lower_targets = df_strict[(df_strict["innings"] == 2) & (df_strict["target_source"] == "FIRST_INNINGS_LOWER_BOUND_PLUS_ONE")]
+    assert len(lower_targets) > 0
+    assert lower_targets["target_exact"].isna().all()
+    assert (lower_targets["target_is_exact"] == False).all()
 
 
 def test_dataset_no_silent_zero_substitution_invariant(engine):
