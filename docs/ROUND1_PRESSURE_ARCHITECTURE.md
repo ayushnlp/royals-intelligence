@@ -110,25 +110,52 @@ Task R1-02 delivers a deterministic, independently tested delivery-level match-s
   - 30 Emerging tournament matches (6,985 deliveries) and 6 Super Over matches (38 deliveries) segregated into `excluded_innings.parquet`.
   - 16 abandoned matches documented.
 - **Score Completeness Governance:**
-  - 329 innings verified as `SCORE_COMPLETE` (zero unconfirmed extras).
-  - 1,395 innings flagged as `SCORE_INCOMPLETE` due to unconfirmed bye/legbye/penalty run amounts.
+  - 329 innings verified as `EXACT` (zero unconfirmed extras).
+  - 1,395 innings flagged as `LOWER_BOUND_ONLY` due to unconfirmed bye/legbye/penalty run amounts.
   - No synthetic runs fabricated.
 - **Parquet Datasets Saved:**
   - `delivery_states_strict.parquet`
   - `delivery_states_permissive.parquet`
   - `innings_state_summary.parquet`
   - `match_state_summary.parquet`
+  - `match_result_reconciliation.parquet`
+  - `dls_and_revised_overs_audit.parquet`
   - `excluded_innings.parquet`
   - `reconstruction_audit.parquet`
-- **Testing Verification:**
-  - 16 focused test cases in `test_match_state.py` (miniature fixtures + full dataset invariants).
-  - 31 total Round 1 tests passing; 61 backend tests passing (92/92 total passing).
 
 ---
 
-## 7. Pending Decisions for R1-03 (Pressure Index & Quantification Engine)
+## 7. R1-02.1 Match-State Integrity Audit & Remediation
 
-With match state reconstructed immediately before and after every delivery, the system is ready for Task R1-03:
+Task R1-02.1 performed a focused integrity audit and targeted remediation to ensure zero false mathematical precision:
+1. **Score Disentanglement & Strict Withholding:**
+   - Cumulative team scores are segregated into lower bounds (`cumulative_team_runs_lower_bound`) and exact scores (`cumulative_team_runs_exact`).
+   - Exact chase metrics (`runs_required_exact`, `required_run_rate_exact`) are strictly set to `null` on `LOWER_BOUND_ONLY` innings to prevent downstream mathematical corruption.
+   - Robust bounding metrics (`runs_required_upper_bound`, `required_run_rate_upper_bound`) remain populated for all innings.
+2. **Empirical Inference Status of `extras_2_runs`:**
+   - Present on 36 deliveries (0.018%) with values `1` or `4` on no-balls.
+   - Classified as an empirical inference rather than an official schema specification, preserving documented uncertainty.
+3. **Match-Result Reconciliation Across All 883 Matches:**
+   - Established that `matches.csv` contains NO independent official innings score fields (`inn1_runs`, `inn2_runs`). Only text `result`.
+   - Reconciled all 883 matches across 7 mutually exclusive categories in `match_result_reconciliation.parquet`.
+4. **Revised Overs & DLS Audit Across All 34 Curtailed Matches:**
+   - Proved that revised overs fields store legal balls (integers divisible by 6, range 30 to 114 balls).
+   - Confirmed all 23 DLS targets apply exclusively to Innings 2. Cataloged in `dls_and_revised_overs_audit.parquet`.
+5. **Strict vs. Permissive Reconciliation (The 5 Out-of-Scope Ambiguous Deliveries):**
+   - Accounted for all 264 ambiguous `other` deliveries: 259 in primary scope, 3 in Emerging Teams Asia Cup 2024 (Matches 37088, 37090, 37093), 1 in Asia Cup Rising Stars 2025 (Match 48015), and 1 in IPL 2025 Super Over (Match 40725, Innings 3).
+6. **Downstream Feature-Eligibility Contract (R1-03 Transition):**
+   - **Tier 1 (Safe for All Deliveries):** Striker runs, legal balls bowled/faced, wickets, bowler attribution, balls remaining, match metadata, phase.
+   - **Tier 2 (Score-Dependent):** `runs_required_exact`, `required_run_rate_exact`, `cumulative_team_runs_exact` (restricted strictly to `EXACT` score subsets; models on partial matches must use bounded intervals).
+   - **Tier 3 (Uncertain / Sensitivity Required):** Multi-run byes/legbyes, penalty amounts, ambiguous `other` deliveries (must evaluate Strict vs Permissive scenarios).
+7. **Comprehensive Test Suite:**
+   - Expanded from 16 to 30 tests in `test_match_state.py` covering miniature fixtures and dataset-wide invariants.
+   - 45/45 tests passing in `round1_pressure`; 61/61 backend tests passing (106/106 total passing across repository).
+
+---
+
+## 8. Pending Decisions for R1-03 (Pressure Index & Quantification Engine)
+
+With match state reconstructed and audited immediately before and after every delivery, the system is ready for Task R1-03:
 1. **Multidimensional Pressure Index $\Psi(t)$:**
    - Innings phase leverage (Death overs vs Middle vs Powerplay).
    - Chase leverage (RRR vs CRR delta, runs required, balls remaining).

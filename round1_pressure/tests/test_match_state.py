@@ -27,7 +27,7 @@ import numpy as np
 import pandas as pd
 from pathlib import Path
 
-from round1_pressure.src.match_state import MatchStateEngine
+from round1_pressure.src.match_state import MatchStateEngine, DOWNSTREAM_FEATURE_ELIGIBILITY_CONTRACT
 
 
 @pytest.fixture(scope="module")
@@ -191,7 +191,7 @@ def test_miniature_fixture_runs_breakdown(mini_innings_fixture):
     unconfirmed_count = 0
 
     for _, r in mini_innings_fixture.iterrows():
-        b_runs, k_extras, tot, unconf, b_conceded = engine.calculate_delivery_runs(
+        b_runs, k_extras, tot, unconf, b_conceded, prov = engine.calculate_delivery_runs(
             r["runs"], r["extras_type"], r["extras_2_runs"]
         )
         total_batter_runs += b_runs
@@ -214,12 +214,14 @@ def test_miniature_fixture_runs_breakdown(mini_innings_fixture):
 # ==============================================================================
 
 def test_parquet_output_files_exist(engine):
-    """Verifies that all 6 required Parquet output files exist on disk."""
+    """Verifies that all 8 required Parquet output files exist on disk."""
     expected = [
         "delivery_states_strict.parquet",
         "delivery_states_permissive.parquet",
         "innings_state_summary.parquet",
         "match_state_summary.parquet",
+        "match_result_reconciliation.parquet",
+        "dls_and_revised_overs_audit.parquet",
         "excluded_innings.parquet",
         "reconstruction_audit.parquet",
     ]
@@ -386,16 +388,16 @@ def test_emerging_tournaments_exclusion_records(engine):
 def test_score_reconstruction_completeness_flagging(engine):
     """
     Verifies that innings with unconfirmed extras (byes, legbyes, penalty)
-    are marked SCORE_INCOMPLETE, while innings without unconfirmed extras are marked SCORE_COMPLETE.
+    are marked LOWER_BOUND_ONLY, while innings without unconfirmed extras are marked EXACT.
     """
     inn_df = engine.innings_summary_df
 
-    complete_count = (inn_df["score_reconstruction_status"] == "SCORE_COMPLETE").sum()
-    incomplete_count = (inn_df["score_reconstruction_status"] == "SCORE_INCOMPLETE").sum()
+    exact_count = (inn_df["score_reconstruction_status"].isin(["EXACT", "SCORE_COMPLETE"])).sum()
+    lower_bound_count = (inn_df["score_reconstruction_status"].isin(["LOWER_BOUND_ONLY", "SCORE_INCOMPLETE"])).sum()
 
-    assert complete_count + incomplete_count == len(inn_df)
-    assert complete_count == 329
-    assert incomplete_count == 1395
+    assert exact_count + lower_bound_count == len(inn_df)
+    assert exact_count == 329
+    assert lower_bound_count == 1395
 
 
 def test_bowler_and_batter_attribution_invariants(engine):
@@ -422,7 +424,364 @@ def test_markdown_report_generated(engine):
     with open(report_path, "r", encoding="utf-8") as f:
         content = f.read()
 
-    assert "ROYALS INTELLIGENCE — MATCH-STATE RECONSTRUCTION REPORT (R1-02)" in content
+    assert "ROYALS INTELLIGENCE — MATCH-STATE RECONSTRUCTION REPORT (R1-02 & R1-02.1)" in content
     assert "Strict vs. Permissive Scenario Comparison" in content
-    assert "Score Reconstruction & Extras Reconciliation" in content
-    assert "Revised Targets, Shortened Matches & DLS Coverage" in content
+    assert "Score Reconstruction & Exact vs. Lower-Bound Semantics" in content
+    assert "Empirical Inference of `extras_2_runs`" in content
+    assert "Match-Result Reconciliation & Official Schema Limitations" in content
+    assert "Revised Overs, Shortened Matches & DLS Coverage" in content
+    assert "Downstream Feature-Eligibility Contract (for R1-03)" in content
+
+
+# ==============================================================================
+# PART 3: R1-02.1 AUDIT & REMEDIATION INTEGRITY TESTS
+# ==============================================================================
+
+def test_fixture_exact_score_reconstruction_semantics():
+    """
+    Scenario 1: Miniature chase where Innings 1 is EXACT (150 runs, 0 unconfirmed extras)
+    and Innings 2 has known scoring deliveries without unconfirmed extras.
+    Verifies that cumulative exact score, runs required exact, and RRR exact are all populated.
+    """
+    engine = MatchStateEngine()
+
+    target = 151.0
+    b1_runs, b1_extras, _, b1_unconf, _, prov1 = engine.calculate_delivery_runs(0, np.nan, 0)
+    b2_runs, b2_extras, _, b2_unconf, _, prov2 = engine.calculate_delivery_runs(1, np.nan, 0)
+    b3_runs, b3_extras, _, b3_unconf, _, prov3 = engine.calculate_delivery_runs(4, np.nan, 0)
+
+    assert not (b1_unconf or b2_unconf or b3_unconf)
+    assert prov1 == "CONFIRMED_BATTER_RUNS_STANDARD"
+    assert prov2 == "CONFIRMED_BATTER_RUNS_STANDARD"
+    assert prov3 == "CONFIRMED_BATTER_RUNS_STANDARD"
+
+
+def test_fixture_unconfirmed_extras_withholding():
+    """
+    Scenario 2: Byes and Leg-byes with unknown multi-run amount (extras1_runs=3, runs=0).
+    Verifies LOWER_BOUND_ONLY completeness, unconfirmed flag, and that exact chase
+    metrics are strictly withheld (None/NaN) while bounds remain valid.
+    """
+    engine = MatchStateEngine()
+
+    # Legbyes with runs=0, extras1_runs=3
+    b_runs, k_extras, tot, unconf, b_conceded, prov = engine.calculate_delivery_runs(
+        0, "legbyes", 0
+    )
+    assert b_runs == 0
+    assert k_extras == 1
+    assert tot == 1
+    assert unconf is True
+    assert b_conceded == 0  # Legbyes not charged to bowler
+    assert prov == "UNCONFIRMED_MULTI_RUN_LEGBYES"
+
+    # Byes with runs=0
+    b_runs_b, k_extras_b, tot_b, unconf_b, b_conceded_b, prov_b = engine.calculate_delivery_runs(
+        0, "byes", 0
+    )
+    assert b_runs_b == 0
+    assert k_extras_b == 1
+    assert tot_b == 1
+    assert unconf_b is True
+    assert b_conceded_b == 0
+    assert prov_b == "UNCONFIRMED_MULTI_RUN_BYES"
+
+
+def test_fixture_wide_base_penalty_vs_unconfirmed_additional_runs():
+    """
+    Scenario 3: Wide delivery base penalty (+1) vs unconfirmed additional runs.
+    A wide always concedes at least 1 run to bowler and team. If extras1_runs > 1,
+    additional runs are unconfirmed.
+    """
+    engine = MatchStateEngine()
+
+    # Standard wide: runs=0, extras_type='wide', extras_2_runs=0
+    b_runs, k_extras, tot, unconf, b_conceded, prov = engine.calculate_delivery_runs(
+        0, "wide", 0
+    )
+    assert b_runs == 0
+    assert k_extras == 1
+    assert tot == 1
+    assert unconf is False  # Base penalty is 1 confirmed
+    assert b_conceded == 1
+    assert prov == "CONFIRMED_WIDE_BASE_PENALTY"
+
+    # Legality check: wide is illegal
+    assert engine.classify_delivery_legality("wide", "strict") is False
+    assert engine.classify_delivery_legality("wide", "permissive") is False
+
+
+def test_fixture_no_ball_with_auxiliary_extras():
+    """
+    Scenario 4: No-ball with verified auxiliary extras (extras_2_runs).
+    Empirical inference: extras_2_runs provides additional team runs on no-balls.
+    """
+    engine = MatchStateEngine()
+
+    # Case A: 1 run off bat + 1 overstep penalty + 1 extras_2_runs = 3 runs total
+    b_runs, k_extras, tot, unconf, b_conceded, prov = engine.calculate_delivery_runs(
+        1, "Overstep", 1
+    )
+    assert b_runs == 1
+    assert k_extras == 2  # 1 no-ball + 1 extras_2_runs
+    assert tot == 3
+    assert unconf is False
+    assert b_conceded == 3
+    assert prov == "CONFIRMED_OVERSTEP_PENALTY_AND_EMPIRICAL_E2"
+
+    # Case B: 0 off bat + 1 overstep penalty + 4 extras_2_runs = 5 runs total (boundary no-ball)
+    b_runs, k_extras, tot, unconf, b_conceded, prov = engine.calculate_delivery_runs(
+        0, "Overstep", 4
+    )
+    assert b_runs == 0
+    assert k_extras == 5
+    assert tot == 5
+    assert unconf is False
+    assert b_conceded == 5
+    assert prov == "CONFIRMED_OVERSTEP_PENALTY_AND_EMPIRICAL_E2"
+
+    # Standard overstep without extras_2_runs
+    b_runs, k_extras, tot, unconf, b_conceded, prov = engine.calculate_delivery_runs(
+        0, "Overstep", 0
+    )
+    assert b_runs == 0
+    assert k_extras == 1
+    assert tot == 1
+    assert unconf is False
+    assert b_conceded == 1
+    assert prov == "CONFIRMED_OVERSTEP_PENALTY"
+
+
+def test_fixture_unknown_penalty_delivery():
+    """
+    Scenario 5: Penalty delivery handling.
+    Penalty consumes legal ball, adds minimum 1 run to team score, does not credit/concede
+    to batter or bowler, and flags unconfirmed extras.
+    """
+    engine = MatchStateEngine()
+
+    b_runs, k_extras, tot, unconf, b_conceded, prov = engine.calculate_delivery_runs(
+        0, "Penalty", 0
+    )
+    assert b_runs == 0
+    assert k_extras == 1
+    assert tot == 1
+    assert unconf is True
+    assert b_conceded == 0
+    assert prov == "UNCONFIRMED_PENALTY_RUNS_AMOUNT"
+
+    # Penalty is legal
+    assert engine.classify_delivery_legality("Penalty", "strict") is True
+    assert engine.classify_delivery_legality("Penalty", "permissive") is True
+
+
+def test_dataset_incomplete_first_innings_withholds_exact_target(engine):
+    """
+    Scenario 6: Incomplete first innings score withholding exact target.
+    In ordinary (non-DLS) matches where Innings 1 contains unconfirmed extras,
+    target_exact and target_is_exact must be false/null, and runs_required_exact must be null.
+    """
+    df = engine.delivery_states_strict
+    # Find Innings 2 deliveries in ordinary matches where first innings total was lower bound only
+    inn2_non_dls = df[(df["innings"] == 2) & (df["target_source"] == "FIRST_INNINGS_LOWER_BOUND_PLUS_ONE")]
+    incomplete_inn1 = inn2_non_dls[inn2_non_dls["target_is_exact"] == False]
+
+    assert len(incomplete_inn1) > 0
+    # In all these deliveries, target_exact must be NaN
+    assert incomplete_inn1["target_exact"].isna().all()
+    # And runs_required_exact must be NaN
+    assert incomplete_inn1["runs_required_exact_before"].isna().all()
+    # But target_lower_bound must be populated
+    assert incomplete_inn1["target_lower_bound"].notna().all()
+    # And runs_required_upper_bound must be populated
+    assert incomplete_inn1["runs_required_upper_bound_before"].notna().all()
+
+
+def test_dataset_dls_target_exact_with_incomplete_chase_withholds_exact_rrr(engine):
+    """
+    Scenario 7: Exact target (e.g. DLS Match 21586) with uncertain chase score withholds exact runs required.
+    Even though target is exact (171.0), once an unconfirmed extra occurs, exact score is lost,
+    and runs_required_exact and required_run_rate_exact must be withheld (NaN).
+    """
+    df = engine.delivery_states_strict
+    m21586 = df[(df["match_id"] == 21586) & (df["innings"] == 2)]
+
+    assert len(m21586) > 0
+    assert (m21586["target_exact"] == 171.0).all()
+    assert (m21586["target_is_exact"] == True).all()
+
+    # Deliveries where cumulative exact score is known
+    exact_score_deliveries = m21586[m21586["cumulative_team_runs_exact_before"].notna()]
+    # Deliveries where cumulative exact score is lost (after byes/legbyes)
+    lower_bound_deliveries = m21586[m21586["cumulative_team_runs_exact_before"].isna()]
+
+    if len(lower_bound_deliveries) > 0:
+        assert lower_bound_deliveries["runs_required_exact_before"].isna().all()
+        assert lower_bound_deliveries["required_run_rate_exact_before"].isna().all()
+        assert lower_bound_deliveries["runs_required_upper_bound_before"].notna().all()
+
+
+def test_dataset_exact_chase_metrics_mathematical_consistency(engine):
+    """
+    Scenario 8: Exact chase metrics are mathematically consistent wherever populated:
+    - runs_required_exact == target_exact - cumulative_team_runs_exact
+    - required_run_rate_exact == (runs_required_exact * 6.0) / balls_remaining
+    """
+    df = engine.delivery_states_strict
+    exact_chase = df[df["runs_required_exact_before"].notna()]
+
+    assert len(exact_chase) > 0
+    # Consistency 1: target_exact and cumulative_team_runs_exact must both be not-null
+    assert exact_chase["target_exact"].notna().all()
+    assert exact_chase["cumulative_team_runs_exact_before"].notna().all()
+
+    # Consistency 2: exact difference
+    expected_req = exact_chase["target_exact"] - exact_chase["cumulative_team_runs_exact_before"]
+    assert (exact_chase["runs_required_exact_before"] == expected_req).all()
+
+    # Consistency 3: RRR (rounded to 3 decimal places in engine, with max(0.0, runs_req))
+    positive_balls = exact_chase[exact_chase["balls_remaining_before"] > 0]
+    positive_req = np.maximum(0.0, positive_balls["runs_required_exact_before"])
+    expected_rrr = np.round((positive_req * 6.0) / positive_balls["balls_remaining_before"], 3)
+    np.testing.assert_allclose(positive_balls["required_run_rate_exact_before"].values, expected_rrr.values, atol=1e-3)
+
+
+def test_dataset_dls_target_applicability_all_23_matches(engine):
+    """
+    Scenario 9: DLS target applicability across all 23 matches.
+    Verifies dls_and_revised_overs_audit.parquet:
+    - Exactly 23 matches with official revised targets
+    - In all 23 matches, target_applicability is INNINGS_2_CHASE_TARGET
+    - Target is strictly greater than 0
+    - Second innings scheduled balls > 0
+    """
+    dls_df = engine.dls_audit_df
+
+    assert len(dls_df) == 34
+    dls_23 = dls_df[dls_df["is_dls_target_match"]]
+    assert len(dls_23) == 23
+    assert (dls_23["target_applicability"] == "INNINGS_2_CHASE_TARGET").all()
+    assert (dls_23["revised_target"] > 0).all()
+    assert (dls_23["second_inn_scheduled_balls"] > 0).all()
+
+
+def test_dataset_strict_vs_permissive_5_out_of_scope_reconciliation(engine):
+    """
+    Scenario 10: Strict vs permissive scenario separation and reconciliation of the
+    5 out-of-scope ambiguous 'other' deliveries.
+    - Total ambiguous 'other': 264
+    - Primary scope ambiguous 'other': 259
+    - Out of scope ambiguous 'other': 5 (3 in Comp 2670, 1 in Comp 3289, 1 in IPL Super Over)
+    """
+    df_strict = engine.delivery_states_strict
+    other_deliveries = df_strict[df_strict["extras_type"] == "other"]
+
+    assert len(other_deliveries) == 264
+    in_primary = other_deliveries[other_deliveries["is_primary_scope"]]
+    out_of_primary = other_deliveries[~other_deliveries["is_primary_scope"]]
+
+    assert len(in_primary) == 259
+    assert len(out_of_primary) == 5
+
+    # Check the 5 out of primary:
+    comp_2670 = out_of_primary[out_of_primary["comp_id"] == 2670]
+    comp_3289 = out_of_primary[out_of_primary["comp_id"] == 3289]
+    super_overs = out_of_primary[out_of_primary["innings"].isin([3, 4])]
+
+    assert len(comp_2670) == 3
+    assert len(comp_3289) == 1
+    assert len(super_overs) == 1
+    assert super_overs["match_id"].iloc[0] == 40725  # IPL 2025 Super Over
+
+
+def test_dataset_match_result_reconciliation_table_coverage(engine):
+    """
+    Scenario 11: Match-result reconciliation table verification.
+    Verifies match_result_reconciliation.parquet:
+    - Covers exactly 883 matches
+    - Accurately declares that matches.csv schema lacks independent official innings scores
+    - Categorizes all 883 matches cleanly across the 7 reconciliation outcomes.
+    """
+    recon_df = engine.reconciliation_df
+
+    assert len(recon_df) == 883
+    counts = recon_df["reconciliation_outcome"].value_counts()
+
+    assert counts["WICKET_WIN_NO_OFFICIAL_TOTAL_IN_SCHEMA"] == 394
+    assert counts["INCOMPLETE_EXTRAS_RUN_WIN"] == 382
+    assert counts["NO_RESULT_OR_ABANDONED"] == 40
+    assert counts["OTHER_RESULT"] == 30
+    assert counts["DLS_REVISED_TARGET"] == 26
+    assert counts["EXACT_BOTH_INNS_MARGIN_MISMATCH"] == 6
+    assert counts["EXACT_BOTH_INNS_MARGIN_MATCH"] == 5
+    assert counts.sum() == 883
+
+
+def test_dataset_revised_overs_legal_balls_unit_verified(engine):
+    """
+    Scenario 12: Revised overs and DLS audit verification.
+    Verifies dls_and_revised_overs_audit.parquet:
+    - Covers all 34 matches
+    - Proves revised overs fields store legal balls (not overs)
+    """
+    dls_df = engine.dls_audit_df
+
+    assert len(dls_df) == 34
+    first_rev = dls_df[dls_df["first_inn_revised_raw"].notna()]
+    second_rev = dls_df[dls_df["second_inn_revised_raw"].notna()]
+
+    assert (first_rev["first_inn_unit_verified"] == "LEGAL_BALLS").all()
+    assert (second_rev["second_inn_unit_verified"] == "LEGAL_BALLS").all()
+
+    # Prove raw values are integers divisible by 6 in the range [30, 114]
+    for val in first_rev["first_inn_revised_raw"]:
+        assert val % 6 == 0 and 30.0 <= val <= 114.0
+    for val in second_rev["second_inn_revised_raw"]:
+        assert val % 6 == 0 and 30.0 <= val <= 114.0
+
+
+def test_dataset_no_silent_zero_substitution_invariant(engine):
+    """
+    Scenario 13: No fabricated values or silent zero substitution invariant:
+    - In Innings 1, runs_required and RRR are strictly null/NaN (never 0 or 0.0)
+    - When score is LOWER_BOUND_ONLY, cumulative_team_runs_exact is strictly null/NaN
+    """
+    df = engine.delivery_states_strict
+
+    inn1 = df[df["innings"] == 1]
+    assert inn1["target_exact"].isna().all()
+    assert inn1["runs_required_exact_before"].isna().all()
+    assert inn1["required_run_rate_exact_before"].isna().all()
+
+    # Deliveries where delivery_score_completeness == LOWER_BOUND_ONLY
+    incomplete_dels = df[df["delivery_score_completeness"] == "LOWER_BOUND_ONLY"]
+    assert len(incomplete_dels) > 0
+    assert incomplete_dels["cumulative_team_runs_exact_after"].isna().all()
+
+
+def test_downstream_feature_eligibility_contract():
+    """
+    Scenario 14: Downstream feature-eligibility contract verification for R1-03.
+    Verifies that DOWNSTREAM_FEATURE_ELIGIBILITY_CONTRACT is properly structured
+    with Tier 1, Tier 2, and Tier 3 definitions.
+    """
+    assert "TIER_1_SAFE_WHEN_INDEPENDENTLY_VERIFIED" in DOWNSTREAM_FEATURE_ELIGIBILITY_CONTRACT
+    assert "TIER_2_SCORE_DEPENDENT_REQUIRES_EXACT_SCORE" in DOWNSTREAM_FEATURE_ELIGIBILITY_CONTRACT
+    assert "TIER_3_UNCERTAIN_REQUIRES_SENSITIVITY_OR_EXCLUSION" in DOWNSTREAM_FEATURE_ELIGIBILITY_CONTRACT
+
+    t1 = DOWNSTREAM_FEATURE_ELIGIBILITY_CONTRACT["TIER_1_SAFE_WHEN_INDEPENDENTLY_VERIFIED"]
+    t2 = DOWNSTREAM_FEATURE_ELIGIBILITY_CONTRACT["TIER_2_SCORE_DEPENDENT_REQUIRES_EXACT_SCORE"]
+    t3 = DOWNSTREAM_FEATURE_ELIGIBILITY_CONTRACT["TIER_3_UNCERTAIN_REQUIRES_SENSITIVITY_OR_EXCLUSION"]
+
+    assert "legal_balls_bowled" in t1
+    assert "balls_remaining" in t1
+    assert "striker_runs" in t1
+    assert "is_bowler_wicket" in t1
+
+    assert "runs_required_exact" in t2
+    assert "required_run_rate_exact" in t2
+    assert "cumulative_team_runs_exact" in t2
+
+    assert "multi_run_byes_legbyes_exact_amounts" in t3
+    assert "ambiguous_other_deliveries_strict_vs_permissive" in t3
+

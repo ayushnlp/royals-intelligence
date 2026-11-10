@@ -15,6 +15,8 @@ paths:
   delivery_states_permissive_parquet: "round1_pressure/data/processed/delivery_states_permissive.parquet"
   innings_state_summary_parquet: "round1_pressure/data/processed/innings_state_summary.parquet"
   match_state_summary_parquet: "round1_pressure/data/processed/match_state_summary.parquet"
+  match_result_reconciliation_parquet: "round1_pressure/data/processed/match_result_reconciliation.parquet"
+  dls_and_revised_overs_audit_parquet: "round1_pressure/data/processed/dls_and_revised_overs_audit.parquet"
   excluded_innings_parquet: "round1_pressure/data/processed/excluded_innings.parquet"
   reconstruction_audit_parquet: "round1_pressure/data/processed/reconstruction_audit.parquet"
   match_state_report_md: "round1_pressure/reports/match_state_reconstruction_report.md"
@@ -231,4 +233,34 @@ match_state_reconstruction:
   score_completeness:
     unconfirmed_extras_types: ["byes", "legbyes", "Penalty"]
     fallback_policy: "RETAIN_VALID_PARTIAL_METRICS_FLAG_SCORE_INCOMPLETE"
+    exact_innings_expected: 329
+    lower_bound_innings_expected: 1395
+
+# Task R1-02.1: Match-State Integrity Audit & Remediation Governance
+match_state_audit_r1_02_1:
+  score_disentanglement:
+    exact_status: "EXACT"
+    lower_bound_status: "LOWER_BOUND_ONLY"
+    chase_withholding_rule: "runs_required_exact and required_run_rate_exact MUST be null when score is LOWER_BOUND_ONLY"
+    bounds_preservation: "cumulative_team_runs_lower_bound and runs_required_upper_bound remain valid"
+
+  extras_2_runs_governance:
+    classification: "EMPIRICAL_INFERENCE"
+    non_zero_count: 36
+    total_deliveries: 200999
+    percentage: 0.018
+    uncertainty_policy: "DOCUMENTED_EMPIRICAL_INFERENCE_RETAIN_UNCERTAINTY"
+
+  schema_limitations:
+    matches_csv:
+      official_innings_scores_present: false
+      margin_field_only: true
+      reconciliation_outcome_categories: 7
+      total_matches_audited: 883
+
+  revised_overs_governance:
+    unit: "LEGAL_BALLS"
+    total_matches_audited: 34
+    dls_revised_target_matches: 23
+    target_applicability: "INNINGS_2_CHASE_ONLY"
 

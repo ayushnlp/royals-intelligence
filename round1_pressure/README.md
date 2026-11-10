@@ -27,12 +27,14 @@ round1_pressure/
 │   │   ├── delivery_states_permissive.parquet
 │   │   ├── innings_state_summary.parquet
 │   │   ├── match_state_summary.parquet
+│   │   ├── match_result_reconciliation.parquet # R1-02.1: 883-match reconciliation audit
+│   │   ├── dls_and_revised_overs_audit.parquet # R1-02.1: 34-match shortened/DLS audit
 │   │   ├── excluded_innings.parquet
 │   │   └── reconstruction_audit.parquet
 │   └── outputs/                    # QA summary JSON, validation logs, deterministic outputs
 ├── reports/
 │   ├── data_quality_report.md      # Auto-generated comprehensive data audit and domain trap report
-│   └── match_state_reconstruction_report.md # Deterministic match-state reconstruction report (R1-02)
+│   └── match_state_reconstruction_report.md # Deterministic match-state reconstruction report (R1-02 & R1-02.1)
 ├── src/
 │   ├── __init__.py
 │   ├── load_qa.py                  # Core DatasetQAEngine profiling and validation class
@@ -41,7 +43,7 @@ round1_pressure/
 │   └── 02_reconstruct_match_state.py # Executable deterministic match-state reconstruction runner
 ├── tests/
 │   ├── test_data_qa.py             # 15 focused pytest test cases validating data integrity and delivery legality
-│   └── test_match_state.py         # 16 focused pytest test cases validating match-state reconstruction
+│   └── test_match_state.py         # 30 focused pytest test cases validating match-state reconstruction & R1-02.1 audit
 ├── requirements.txt                # Lightweight dependencies (pandas, numpy, pyyaml, pytest, pyarrow)
 └── README.md                       # Package documentation and usage guide
 ```
@@ -92,8 +94,8 @@ round1_pressure/
    - **Abandoned Matches:** 16 matches with 0 deliveries.
    - All exclusions are cataloged in `excluded_innings.parquet`.
 3. **Score Completeness Governance:**
-   - Innings with zero unconfirmed extras (or exact mathematical match) are flagged `SCORE_COMPLETE` (329 innings).
-   - Innings with unconfirmed extras (byes, legbyes, penalty) are flagged `SCORE_INCOMPLETE` (1,395 innings).
+   - Innings with zero unconfirmed extras (or exact mathematical match) are flagged `EXACT` (329 innings).
+   - Innings with unconfirmed extras (byes, legbyes, penalty) are flagged `LOWER_BOUND_ONLY` (1,395 innings).
    - Valid partial metrics (batter runs, bowler wickets, balls bowled, balls remaining) are fully preserved without fabricating synthetic runs.
 4. **Chase & DLS Rules:**
    - 23 matches with official revised DLS targets use the verified `revised_target` from `matches.csv`.
@@ -102,7 +104,41 @@ round1_pressure/
 
 ---
 
-## 5. Execution & Verification Commands
+## 5. Match-State Integrity Audit & Targeted Remediation (R1-02.1)
+
+1. **Score Disentanglement & Strict Withholding:**
+   - Cumulative team scores are segregated into `cumulative_team_runs_lower_bound` (always populated) and `cumulative_team_runs_exact` (strictly `null` on `LOWER_BOUND_ONLY` innings).
+   - Lower-bound scores are NEVER exposed as exact scores to downstream models.
+   - On `LOWER_BOUND_ONLY` innings, `runs_required_exact` and `required_run_rate_exact` are strictly withheld (`null`) to eliminate false precision.
+   - Robust bounding metrics (`runs_required_upper_bound` and `required_run_rate_upper_bound`) remain available for all innings.
+2. **Empirical Inference Status of `extras_2_runs`:**
+   - Non-zero on exactly 36 of 200,999 deliveries (0.018%). In all 36 deliveries, `runs == 0` and values are 1 (19 times) or 4 (17 times) on no-balls/beamers.
+   - Explicitly categorized as an **empirical inference**, rather than an official schema standard, preserving documented uncertainty for downstream models.
+3. **Match-Result Reconciliation Across All 883 Matches:**
+   - Documented critical schema limitation: `matches.csv` contains NO independent official innings score fields (`inn1_runs`, `inn2_runs`). Only text `result` (margins in runs or wickets).
+   - Categorized all 883 matches cleanly into 7 mutually exclusive groups in `match_result_reconciliation.parquet`:
+     - `WICKET_WIN_NO_OFFICIAL_TOTAL_IN_SCHEMA`: 394 matches
+     - `INCOMPLETE_EXTRAS_RUN_WIN`: 382 matches
+     - `NO_RESULT_OR_ABANDONED`: 40 matches
+     - `OTHER_RESULT` (Ties/Super Overs): 30 matches
+     - `DLS_REVISED_TARGET`: 26 matches
+     - `EXACT_BOTH_INNS_MARGIN_MISMATCH`: 6 matches (1–4 run discrepancies from unrecorded multi-run extras)
+     - `EXACT_BOTH_INNS_MARGIN_MATCH`: 5 matches (exact margin match)
+4. **Revised Overs & DLS Audit Across All 34 Shortened Matches:**
+   - Verified that `first_inn_revised_overs` and `second_inn_revised_overs` store **legal balls** (integers divisible by 6, range 30 to 114 balls).
+   - All 23 `revised_target` matches apply exclusively to **Innings 2** (the chase).
+   - Cataloged in `dls_and_revised_overs_audit.parquet`.
+5. **Strict vs. Permissive Reconciliation (The 5 Out-of-Scope Records):**
+   - Exactly 264 deliveries with `extras_type == 'other'` across entire dataset; 259 are in primary scope.
+   - The remaining 5 are accounted for: 3 in Emerging Teams Asia Cup 2024 (Matches 37088, 37090, 37093), 1 in Asia Cup Rising Stars 2025 (Match 48015), and 1 in IPL 2025 Super Over (Match 40725, Innings 3).
+6. **Downstream Feature-Eligibility Contract (R1-03 Transition):**
+   - **Tier 1 (Safe for All Deliveries):** Striker runs, legal balls bowled/faced, wickets, bowler attribution, balls remaining, match metadata, phase.
+   - **Tier 2 (Score-Dependent):** `runs_required_exact`, `required_run_rate_exact`, `cumulative_team_runs_exact` (restricted strictly to `EXACT` score subsets; models on partial matches must use bounded intervals).
+   - **Tier 3 (Uncertain / Sensitivity Required):** Multi-run byes/legbyes, penalty amounts, ambiguous `other` deliveries (must evaluate Strict vs Permissive scenarios).
+
+---
+
+## 6. Execution & Verification Commands
 
 ### Run Data QA (R1-01.1):
 ```bash
@@ -110,7 +146,7 @@ python round1_pressure/src/01_load_qa.py
 pytest round1_pressure/tests/test_data_qa.py -v
 ```
 
-### Run Match-State Reconstruction (R1-02):
+### Run Match-State Reconstruction & Audit (R1-02 & R1-02.1):
 ```bash
 python round1_pressure/src/02_reconstruct_match_state.py
 pytest round1_pressure/tests/test_match_state.py -v
