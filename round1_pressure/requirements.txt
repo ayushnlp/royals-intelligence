@@ -1,0 +1,6 @@
+# Royals Intelligence - Round 1 Pressure Analysis Requirements
+# Standalone, light-dependency profile
+pandas>=2.2.0
+numpy>=1.26.0
+pyyaml>=6.0.0
+pytest>=8.0.0

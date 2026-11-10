@@ -77,6 +77,15 @@ data/external/**/*
 data/proprietary/**/*
 !data/proprietary/**/.gitkeep
 !data/proprietary/**/
+round1_pressure/data/raw/**/*
+!round1_pressure/data/raw/**/.gitkeep
+!round1_pressure/data/raw/**/
+round1_pressure/data/processed/**/*
+!round1_pressure/data/processed/**/.gitkeep
+!round1_pressure/data/processed/**/
+round1_pressure/data/outputs/**/*
+!round1_pressure/data/outputs/**/.gitkeep
+!round1_pressure/data/outputs/**/
 
 # Generated Reports & Exports
 reports/generated/*

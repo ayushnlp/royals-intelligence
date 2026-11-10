@@ -1,0 +1,188 @@
+# ==============================================================================
+# ROYALS INTELLIGENCE — SupeRR Selector Season 2 (Round 1) Dataset Configuration
+# Objective: Identify the Most Reliable Players Under Pressure
+# ==============================================================================
+
+paths:
+  raw_data_dir: "round1_pressure/data/raw"
+  processed_data_dir: "round1_pressure/data/processed"
+  outputs_dir: "round1_pressure/data/outputs"
+  reports_dir: "round1_pressure/reports"
+  qa_summary_json: "round1_pressure/data/outputs/qa_summary.json"
+  qa_report_md: "round1_pressure/reports/data_quality_report.md"
+
+expected_files:
+  ball_by_ball: "ball_by_ball.csv"
+  matches: "matches.csv"
+  competitions: "competitions.csv"
+  teams: "teams.csv"
+  playing_eleven: "playing_eleven.csv"
+  competition_team_player_mapping: "competition_team_player_mapping.csv"
+
+schemas:
+  competitions:
+    primary_key: ["comp_id"]
+    required_columns:
+      - comp_id
+      - comp_name
+      - match_format
+      - season
+
+  teams:
+    primary_key: ["comp_id", "team_id"]
+    required_columns:
+      - comp_id
+      - team_id
+      - team_name
+
+  matches:
+    primary_key: ["match_id"]
+    foreign_keys:
+      comp_id: "competitions.comp_id"
+      home_team_id: "teams.team_id"
+      away_team_id: "teams.team_id"
+    required_columns:
+      - match_id
+      - comp_id
+      - match_number
+      - match_date
+      - stage
+      - venue_id
+      - venue_country
+      - home_team_id
+      - home_team
+      - away_team_id
+      - away_team
+      - home_team_captain_id
+      - away_team_captain_id
+      - toss_win_team_id
+      - toss_opted
+      - man_of_the_match
+      - first_inn_revised_overs
+      - second_inn_revised_overs
+      - revised_target
+      - knock_out
+      - win_team_id
+      - result
+
+  playing_eleven:
+    primary_key: ["match_id", "player_id"]
+    foreign_keys:
+      match_id: "matches.match_id"
+      team_id: "teams.team_id"
+    required_columns:
+      - match_id
+      - team_id
+      - player_id
+      - batting_order
+      - is_played
+      - is_captain
+      - is_wk
+      - is_impact
+      - is_impact_off
+
+  competition_team_player_mapping:
+    primary_key: ["comp_id", "team_id", "player_id"]
+    foreign_keys:
+      comp_id: "competitions.comp_id"
+      team_id: "teams.team_id"
+    required_columns:
+      - comp_id
+      - comp_name
+      - team_id
+      - team_name
+      - player_id
+      - player_name
+
+  ball_by_ball:
+    primary_key: ["match_id", "innings", "overid", "over_ball_num"]
+    foreign_keys:
+      match_id: "matches.match_id"
+      batting_team_id: "teams.team_id"
+      bowling_team_id: "teams.team_id"
+      striker_id: "competition_team_player_mapping.player_id"
+      bowler_id: "competition_team_player_mapping.player_id"
+    required_columns:
+      - match_id
+      - innings
+      - overid
+      - over_ball_num
+      - innings_ball_num
+      - batting_team_id
+      - bowling_team_id
+      - striker_id
+      - striker_name
+      - non_striker_id
+      - non_striker_name
+      - bowler_id
+      - bowler_name
+      - batting_type
+      - bowling_type
+      - batting_order
+      - runs
+      - is_four
+      - is_six
+      - is_wicket
+      - dismissal_type_id
+      - dismissal_type
+      - dismissed_player_id
+      - extras_type
+      - extras1_runs
+      - extras_2_runs
+      - pace_or_spin
+      - bowl_speed
+      - stroke
+      - delivery_style
+      - over_or_around
+      - on_or_off
+      - delivery_ist_time
+
+# Cricket Domain Interpretation Rules
+cricket_rules:
+  # extras1_runs is a categorical mapping of extras_type, NOT run values!
+  extras_code_mapping:
+    1: "Overstep"
+    2: "wide"
+    3: "legbyes"
+    4: "byes"
+    5: "other"
+    6: "NONE"
+    7: "Penalty"
+
+  # Legal delivery definitions:
+  # Deliveries where extras_type is in illegal_extras must be re-bowled and do not consume a legal ball.
+  illegal_extras:
+    - "wide"
+    - "Overstep"
+    - "other"
+
+  # Legal extras (ball counts toward the over, bowler is NOT credited with wicket, runs are not off bat)
+  legal_extras:
+    - "legbyes"
+    - "byes"
+
+  # Bowler wicket attribution
+  bowler_credited_dismissals:
+    - "Bowled"
+    - "Caught"
+    - "LBW"
+    - "Stump"
+    - "Hit Wicket"
+
+  non_bowler_dismissals:
+    - "RunOut"
+    - "Retire Out"
+    - "Obstracting the field"
+    - "Obstructing the field"
+
+  # Competition classification filters
+  competition_categories:
+    ipl:
+      patterns: ["IPL", "Indian Premier League"]
+      tier: "Tier-1 Franchise League"
+    t20i:
+      patterns: ["T20I", "Twenty20 International", "T20 International"]
+      tier: "Senior International"
+    emerging:
+      patterns: ["Emerging", "Rising Stars"]
+      tier: "Feeder / A-Team Tournament"
