@@ -264,46 +264,64 @@ match_state_audit_r1_02_1:
     dls_revised_target_matches: 23
     target_applicability: "INNINGS_2_CHASE_ONLY"
 
-# Task R1-02.2: DLS Classification & Match-Reconciliation Consistency Audit
-match_state_audit_r1_02_2:
-  discrepancy_resolution_23_vs_26:
-    revised_target_recorded_count: 23
-    unrecorded_dls_target_matches: [20182, 23674, 24822, 28334] # 4 matches with DLS in result string but target/overs NaN
-    abandoned_recorded_target_matches: [17765]                   # 1 match with revised_target=130 but abandoned
-    net_difference: "+3 matches (23 - 1 + 4 = 26 in R1-02.1)"
-  
-  audit_concepts:
-    REVISED_TARGET_RECORDED:
+# Task R1-02.3: Final Match-Level Classification Integrity Closure
+match_state_audit_r1_02_3:
+  non_exclusive_metadata_flags:
+    flag_revised_target_recorded:
       count: 23
-      definition: "Matches with matches.csv revised_target > 0 explicitly recorded."
-    REVISED_OVERS_RECORDED:
+      description: "Matches with matches.csv revised_target > 0 (includes Match 17765)."
+    flag_revised_overs_recorded:
       count: 34
-      definition: "Matches with first_inn_revised_overs or second_inn_revised_overs explicitly recorded."
-    DLS_TARGET_APPLICABLE:
+      description: "Matches with first_inn_revised_overs or second_inn_revised_overs recorded."
+    flag_dls_method_in_result_text:
+      count: 19
+      description: "Matches whose text result explicitly contains D/L or DLS method."
+    flag_dls_target_applicable:
       count: 22
-      definition: "Matches where positive revised target was applicable to a concluded second-innings chase."
-    CURTAILED_WITHOUT_REVISED_TARGET:
-      count: 11
-      definition: "Matches with revised overs recorded but revised_target is NaN (2 completed 11-over standard chases [16753, 19959] + 9 abandoned in Innings 1)."
-    DLS_STATUS_UNRESOLVED:
+      description: "Matches with a positive revised target applicable to a concluded chase."
+    flag_dls_status_unresolved:
       count: 4
       matches: [20182, 23674, 24822, 28334]
-      definition: "Matches whose result string references DLS/D-L, but revised_target and revised_overs are NaN in schema."
+      description: "Matches with DLS in result string, but target/overs omitted from schema."
+    flag_match_abandoned:
+      count: 40
+      description: "Matches ending in No Result or Match Abandoned (including Match 17765 and 16 zero-delivery matches)."
 
   mutually_exclusive_reconciliation_883:
     WICKET_WIN_NO_OFFICIAL_TOTAL_IN_SCHEMA: 394
     INCOMPLETE_EXTRAS_RUN_WIN: 382
-    NO_RESULT_OR_ABANDONED: 39
+    NO_RESULT_OR_ABANDONED: 40 # Match 17765 correctly assigned here
     OTHER_RESULT: 30
-    REVISED_TARGET_RECORDED: 23
+    DLS_TARGET_APPLICABLE: 22   # Concluded chases with verified target
     EXACT_BOTH_INNS_MARGIN_MISMATCH: 6
     EXACT_BOTH_INNS_MARGIN_MATCH: 5
-    DLS_STATUS_UNRESOLVED: 4
+    DLS_STATUS_UNRESOLVED: 4   # Matches 20182, 23674, 24822, 28334
     total: 883
 
-  downstream_r1_03_contract:
-    exact_target_withholding_unresolved_dls: true
-    unresolved_dls_target_source: "DLS_METHOD_UNRECORDED_TARGET"
-    zero_fabrication_policy: "Never interpolate or guess unrecorded DLS par/target scores; withhold runs_required_exact and required_run_rate_exact."
+  edge_case_classifications:
+    match_17765:
+      reconciliation_category: "NO_RESULT_OR_ABANDONED"
+      flag_revised_target_recorded: true
+      flag_revised_overs_recorded: true
+      flag_match_abandoned: true
+      flag_dls_target_applicable: false
+      target_applicability: "DLS_ABANDONED_INCOMPLETE_CHASE"
+      reason: "Abandoned as No Result after 25 deliveries in Innings 2; target not applicable to a concluded chase."
+    unresolved_dls_matches:
+      match_ids: [20182, 23674, 24822, 28334]
+      reconciliation_category: "DLS_STATUS_UNRESOLVED"
+      flag_dls_status_unresolved: true
+      flag_dls_method_in_result_text: true
+      flag_revised_target_recorded: false
+      flag_dls_target_applicable: false
+      exact_metrics_withheld: true
+
+  downstream_score_uncertainty_contract:
+    forbid_uncertain_score_run_rate_fallback: true
+    exact_rrr_rule: "Exact RRR requires an exact score AND a valid target."
+    lower_bound_rule: "Lower-bound scores must never be represented as exact scores."
+    score_independent_features_rule: "Any proposed score-independent pressure features must be separately justified and validated in R1-03."
+    zero_invented_targets_rule: "Unresolved DLS matches must never receive invented or guessed targets."
+
 
 

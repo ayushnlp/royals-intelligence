@@ -424,11 +424,11 @@ def test_markdown_report_generated(engine):
     with open(report_path, "r", encoding="utf-8") as f:
         content = f.read()
 
-    assert "ROYALS INTELLIGENCE — MATCH-STATE RECONSTRUCTION REPORT (R1-02, R1-02.1 & R1-02.2)" in content
+    assert "ROYALS INTELLIGENCE — MATCH-STATE RECONSTRUCTION REPORT (R1-02, R1-02.1, R1-02.2 & R1-02.3)" in content
     assert "Strict vs. Permissive Scenario Comparison" in content
     assert "Score Reconstruction & Exact vs. Lower-Bound Semantics" in content
     assert "Empirical Inference of `extras_2_runs`" in content
-    assert "Match-Result Reconciliation & Official Schema Limitations" in content
+    assert "Match Metadata Flags vs. Mutually Exclusive Categories (R1-02.3)" in content
     assert "Revised Overs, Shortened Matches & DLS Coverage (R1-02.2 Resolution)" in content
     assert "Downstream Feature-Eligibility Contract (for R1-03)" in content
 
@@ -703,12 +703,12 @@ def test_dataset_strict_vs_permissive_5_out_of_scope_reconciliation(engine):
 
 def test_dataset_match_result_reconciliation_table_coverage(engine):
     """
-    Scenario 11: Match-result reconciliation table verification (R1-02.2).
+    Scenario 11: Match-result reconciliation table verification (R1-02.2 & R1-02.3).
     Verifies match_result_reconciliation.parquet:
     - Covers exactly 883 matches across 8 mutually exclusive categories
-    - REVISED_TARGET_RECORDED: 23 matches
+    - DLS_TARGET_APPLICABLE: 22 matches (concluded chases with official target)
     - DLS_STATUS_UNRESOLVED: 4 matches
-    - NO_RESULT_OR_ABANDONED: 39 matches
+    - NO_RESULT_OR_ABANDONED: 40 matches (includes Match 17765 and 16 zero-delivery matches)
     - WICKET_WIN_NO_OFFICIAL_TOTAL_IN_SCHEMA: 394 matches
     - INCOMPLETE_EXTRAS_RUN_WIN: 382 matches
     - OTHER_RESULT: 30 matches
@@ -719,13 +719,17 @@ def test_dataset_match_result_reconciliation_table_coverage(engine):
     recon_df = engine.reconciliation_df
 
     assert len(recon_df) == 883
-    counts = recon_df["reconciliation_outcome"].value_counts()
+    assert recon_df["match_id"].nunique() == 883
+    assert recon_df["match_id"].duplicated().sum() == 0
+    assert recon_df["reconciliation_category"].notna().all()
+
+    counts = recon_df["reconciliation_category"].value_counts()
 
     assert counts["WICKET_WIN_NO_OFFICIAL_TOTAL_IN_SCHEMA"] == 394
     assert counts["INCOMPLETE_EXTRAS_RUN_WIN"] == 382
-    assert counts["NO_RESULT_OR_ABANDONED"] == 39
+    assert counts["NO_RESULT_OR_ABANDONED"] == 40
     assert counts["OTHER_RESULT"] == 30
-    assert counts["REVISED_TARGET_RECORDED"] == 23
+    assert counts["DLS_TARGET_APPLICABLE"] == 22
     assert counts["DLS_STATUS_UNRESOLVED"] == 4
     assert counts["EXACT_BOTH_INNS_MARGIN_MISMATCH"] == 6
     assert counts["EXACT_BOTH_INNS_MARGIN_MATCH"] == 5
@@ -761,11 +765,11 @@ def test_dataset_revised_overs_legal_balls_unit_verified(engine):
 
 def test_23_explicitly_recorded_revised_target_matches(engine):
     """
-    R1-02.2 Audit: Verifies all 23 matches with positive revised_target in matches.csv:
-    - Exactly 23 matches have revised_target > 0
-    - 22 matches are decisive chases (DLS_TARGET_APPLICABLE)
-    - 1 match (Match 17765) was abandoned as No Result (DLS_ABANDONED_INCOMPLETE_CHASE)
-    - All 23 are classified as REVISED_TARGET_RECORDED in match_result_reconciliation
+    R1-02.2 & R1-02.3 Audit: Verifies all 23 matches with positive revised_target in matches.csv:
+    - Exactly 23 matches have revised_target > 0 (metadata flag)
+    - 22 matches are decisive chases (DLS_TARGET_APPLICABLE category and flag)
+    - 1 match (Match 17765) was abandoned as No Result (NO_RESULT_OR_ABANDONED category)
+    - Retains flag_revised_target_recorded == True across all 23 matches
     """
     dls_df = engine.dls_audit_df
     recon_df = engine.reconciliation_df
@@ -774,20 +778,25 @@ def test_23_explicitly_recorded_revised_target_matches(engine):
     assert len(recorded_23) == 23
     assert (recorded_23["is_dls_target_recorded"] == True).all()
 
-    # Applicable vs Abandoned
+    # Applicable vs Abandoned in DLS audit
     assert (recorded_23["target_applicability"] == "DLS_TARGET_APPLICABLE").sum() == 22
     assert (recorded_23["target_applicability"] == "DLS_ABANDONED_INCOMPLETE_CHASE").sum() == 1
 
-    # Match 17765 specific check
-    m17765 = recorded_23[recorded_23["match_id"] == 17765].iloc[0]
-    assert m17765["result"] == "No Result"
-    assert m17765["revised_target"] == 130.0
-    assert m17765["target_applicability"] == "DLS_ABANDONED_INCOMPLETE_CHASE"
+    # In reconciliation table, exactly 23 matches have flag_revised_target_recorded
+    assert recon_df["flag_revised_target_recorded"].sum() == 23
+    assert set(recon_df[recon_df["flag_revised_target_recorded"]]["match_id"]) == set(recorded_23["match_id"])
 
-    # In reconciliation table, exactly 23 matches have REVISED_TARGET_RECORDED
-    recon_rev = recon_df[recon_df["reconciliation_outcome"] == "REVISED_TARGET_RECORDED"]
-    assert len(recon_rev) == 23
-    assert set(recon_rev["match_id"]) == set(recorded_23["match_id"])
+    # 22 matches have mutually exclusive category DLS_TARGET_APPLICABLE
+    assert (recon_df["reconciliation_category"] == "DLS_TARGET_APPLICABLE").sum() == 22
+
+    # Match 17765 specific check: single category NO_RESULT_OR_ABANDONED, but retained metadata flags
+    m17765 = recon_df[recon_df["match_id"] == 17765].iloc[0]
+    assert m17765["result"] == "No Result"
+    assert m17765["reconciliation_category"] == "NO_RESULT_OR_ABANDONED"
+    assert m17765["flag_revised_target_recorded"] == True
+    assert m17765["flag_match_abandoned"] == True
+    assert m17765["flag_dls_target_applicable"] == False
+    assert m17765["target_applicability"] == "DLS_ABANDONED_INCOMPLETE_CHASE"
 
 
 def test_revised_overs_without_revised_target_matches(engine):
@@ -930,4 +939,149 @@ def test_downstream_feature_eligibility_contract():
 
     assert "multi_run_byes_legbyes_exact_amounts" in t3
     assert "ambiguous_other_deliveries_strict_vs_permissive" in t3
+
+
+# ==============================================================================
+# PART 5: R1-02.3 FINAL MATCH-LEVEL CLASSIFICATION INTEGRITY CLOSURE TESTS
+# ==============================================================================
+
+def test_r1_02_3_match_17765_single_category_and_retained_metadata_flags(engine):
+    """
+    R1-02.3 Audit: Match 17765 must be classified under NO_RESULT_OR_ABANDONED,
+    while its source-recorded revised target remains visible as a metadata flag.
+    - reconciliation_category == 'NO_RESULT_OR_ABANDONED'
+    - flag_revised_target_recorded == True (130.0 runs)
+    - flag_revised_overs_recorded == True (72 balls / 12 overs)
+    - flag_match_abandoned == True
+    - flag_dls_target_applicable == False
+    - target_applicability == 'DLS_ABANDONED_INCOMPLETE_CHASE'
+    """
+    recon_df = engine.reconciliation_df
+    m17765 = recon_df[recon_df["match_id"] == 17765].iloc[0]
+
+    assert m17765["reconciliation_category"] == "NO_RESULT_OR_ABANDONED"
+    assert m17765["result"] == "No Result"
+    assert m17765["flag_revised_target_recorded"] == True
+    assert m17765["flag_revised_overs_recorded"] == True
+    assert m17765["flag_match_abandoned"] == True
+    assert m17765["flag_dls_target_applicable"] == False
+    assert m17765["target_applicability"] == "DLS_ABANDONED_INCOMPLETE_CHASE"
+
+
+def test_r1_02_3_23_recorded_target_flags_vs_22_applicable_chases(engine):
+    """
+    R1-02.3 Audit: Distinguishes between 23 source-recorded revised targets
+    and 22 applicable completed DLS chases:
+    - flag_revised_target_recorded.sum() == 23
+    - flag_dls_target_applicable.sum() == 22
+    - (reconciliation_category == 'DLS_TARGET_APPLICABLE').sum() == 22
+    - The difference of 1 is exactly Match 17765 (abandoned)
+    """
+    recon_df = engine.reconciliation_df
+
+    assert recon_df["flag_revised_target_recorded"].sum() == 23
+    assert recon_df["flag_dls_target_applicable"].sum() == 22
+    assert (recon_df["reconciliation_category"] == "DLS_TARGET_APPLICABLE").sum() == 22
+
+    diff = set(recon_df[recon_df["flag_revised_target_recorded"]]["match_id"]) - set(recon_df[recon_df["flag_dls_target_applicable"]]["match_id"])
+    assert diff == {17765}
+
+
+def test_r1_02_3_four_unresolved_dls_matches_integrity(engine):
+    """
+    R1-02.3 Audit: Verifies the four unresolved DLS matches (20182, 23674, 24822, 28334):
+    - reconciliation_category == 'DLS_STATUS_UNRESOLVED' (exactly 4 matches)
+    - flag_dls_status_unresolved == True
+    - flag_dls_method_in_result_text == True
+    - flag_revised_target_recorded == False
+    - flag_dls_target_applicable == False
+    """
+    recon_df = engine.reconciliation_df
+    unresolved_mids = {20182, 23674, 24822, 28334}
+
+    unres = recon_df[recon_df["reconciliation_category"] == "DLS_STATUS_UNRESOLVED"]
+    assert len(unres) == 4
+    assert set(unres["match_id"]) == unresolved_mids
+
+    assert (unres["flag_dls_status_unresolved"] == True).all()
+    assert (unres["flag_dls_method_in_result_text"] == True).all()
+    assert (unres["flag_revised_target_recorded"] == False).all()
+    assert (unres["flag_dls_target_applicable"] == False).all()
+
+
+def test_r1_02_3_all_883_records_row_level_integrity(engine):
+    """
+    R1-02.3 Audit: Row-level verification across all 883 match records:
+    - Exactly 883 unique match IDs (no duplicates, no missing match IDs)
+    - Exactly one reconciliation category per match (non-null, mutually exclusive)
+    - Category counts sum to exactly 883
+    - Metadata flags remain independently queryable boolean series
+    """
+    recon_df = engine.reconciliation_df
+    matches_csv = engine.matches_df if engine.matches_df is not None else pd.read_csv(engine.data_dir / "matches.csv")
+
+    # 1. Exactly 883 unique match IDs
+    assert len(recon_df) == 883
+    assert recon_df["match_id"].nunique() == 883
+    assert recon_df["match_id"].duplicated().sum() == 0
+    assert set(recon_df["match_id"]) == set(matches_csv["match_id"])
+
+    # 2. Exactly one reconciliation category per match
+    assert recon_df["reconciliation_category"].notna().all()
+    valid_categories = {
+        "WICKET_WIN_NO_OFFICIAL_TOTAL_IN_SCHEMA",
+        "INCOMPLETE_EXTRAS_RUN_WIN",
+        "NO_RESULT_OR_ABANDONED",
+        "OTHER_RESULT",
+        "DLS_TARGET_APPLICABLE",
+        "EXACT_BOTH_INNS_MARGIN_MISMATCH",
+        "EXACT_BOTH_INNS_MARGIN_MATCH",
+        "DLS_STATUS_UNRESOLVED",
+    }
+    assert set(recon_df["reconciliation_category"].unique()).issubset(valid_categories)
+
+    # 3. Category totals sum to exactly 883
+    counts = recon_df["reconciliation_category"].value_counts()
+    assert counts.sum() == 883
+
+    # 4. Metadata flags independently queryable
+    flags = [
+        "flag_revised_target_recorded",
+        "flag_revised_overs_recorded",
+        "flag_dls_method_in_result_text",
+        "flag_dls_target_applicable",
+        "flag_dls_status_unresolved",
+        "flag_match_abandoned",
+    ]
+    for f in flags:
+        assert f in recon_df.columns
+        assert recon_df[f].dtype == bool or recon_df[f].dtype == "bool"
+
+
+def test_r1_02_3_no_exact_rrr_when_score_or_target_uncertain(engine):
+    """
+    R1-02.3 Audit: Score uncertainty protection rule:
+    - Exact RRR must be null/NaN when cumulative score is LOWER_BOUND_ONLY
+    - Exact RRR must be null/NaN when target is unrecorded (DLS_METHOD_UNRECORDED_TARGET)
+    - Exact RRR must be null/NaN during Innings 1 (target setting)
+    - Lower bounds must never be represented as exact
+    """
+    df_strict = engine.delivery_states_strict
+
+    # 1. Innings 1 deliveries: exact RRR strictly NaN
+    inn1 = df_strict[df_strict["innings"] == 1]
+    assert inn1["required_run_rate_exact_before"].isna().all()
+    assert inn1["required_run_rate_exact_after"].isna().all()
+
+    # 2. Unresolved DLS matches (Innings 2): exact RRR strictly NaN
+    unres_inn2 = df_strict[(df_strict["match_id"].isin([20182, 23674, 24822, 28334])) & (df_strict["innings"] == 2)]
+    assert len(unres_inn2) > 0
+    assert unres_inn2["required_run_rate_exact_before"].isna().all()
+    assert unres_inn2["required_run_rate_exact_after"].isna().all()
+
+    # 3. Any delivery where cumulative score is LOWER_BOUND_ONLY: exact RRR strictly NaN
+    uncertain_score = df_strict[(df_strict["innings"] == 2) & (df_strict["cumulative_team_runs_exact_before"].isna())]
+    assert len(uncertain_score) > 0
+    assert uncertain_score["required_run_rate_exact_before"].isna().all()
+
 

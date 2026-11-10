@@ -153,38 +153,42 @@ Task R1-02.1 performed a focused integrity audit and targeted remediation to ens
 
 ---
 
-## 8. R1-02.2 DLS Classification & Match-Reconciliation Consistency Audit
+## 8. R1-02.2 & R1-02.3 Final Match-Level Classification Integrity Closure
 
-Task R1-02.2 resolved the discrepancy between the 23 matches with `revised_target > 0` and the 26 matches classified under `DLS_REVISED_TARGET` in R1-02.1, and established unambiguous classification definitions:
+Tasks R1-02.2 and R1-02.3 resolved the discrepancy between the 23 matches with source-recorded revised targets and the completed DLS chases, separating non-exclusive metadata flags from mutually exclusive match-level categories across all 883 matches:
 
-1. **Resolution of the 23-vs-26 Discrepancy:**
-   - **Root Cause:** In R1-02.1, regex classification matched `"D/L"` or `"DLS"` in result strings before checking match outcome status:
-     - 22 completed chases with `revised_target > 0` were included.
-     - 4 matches (Matches 20182, 23674, 24822, 28334) had DLS in their result text, but both `revised_target` and revised overs were completely absent (NaN) from the schema.
-     - 1 match (Match 17765: SA in IND 2022) had `revised_target = 130.0`, but was abandoned as `"No Result"` after 25 balls in Innings 2, routing to `NO_RESULT_OR_ABANDONED` (-1).
-   - **Formula:** `23 recorded target - 1 abandoned (17765) + 4 unrecorded target matches = 26 matches` (net: `+3`).
-2. **The 5 Authoritative Audit Concepts & Exact Counts:**
-   - **`REVISED_TARGET_RECORDED` (23 matches):** Explicitly recorded `revised_target > 0` in `matches.csv`.
-   - **`REVISED_OVERS_RECORDED` (34 matches):** Explicitly recorded `first_inn_revised_overs` or `second_inn_revised_overs`.
-   - **`DLS_TARGET_APPLICABLE` (22 matches):** Positive revised target applicable to a concluded second-innings chase.
-   - **`CURTAILED_WITHOUT_REVISED_TARGET` (11 matches):** Shortened matches without a recorded revised target: 2 completed 11-over standard chases (Matches 16753, 19959) where both innings were equally curtailed before play, plus 9 matches abandoned during Innings 1.
-   - **`DLS_STATUS_UNRESOLVED` (4 matches):** Matches 20182, 23674, 24822, 28334. Result mentions D/L or DLS method, but target and overs are absent from schema.
-3. **8 Mutually Exclusive Match Reconciliation Categories (Sum = 883):**
-   - `WICKET_WIN_NO_OFFICIAL_TOTAL_IN_SCHEMA`: 394 matches
-   - `INCOMPLETE_EXTRAS_RUN_WIN`: 382 matches
-   - `NO_RESULT_OR_ABANDONED`: 39 matches (includes Match 17765)
-   - `OTHER_RESULT`: 30 matches (Ties, Super Overs, bowl-outs)
-   - `REVISED_TARGET_RECORDED`: 23 matches (official revised targets)
-   - `EXACT_BOTH_INNS_MARGIN_MISMATCH`: 6 matches (exact deliveries, boundary multi-run extras discrepancy)
-   - `EXACT_BOTH_INNS_MARGIN_MATCH`: 5 matches (exact mathematical match)
-   - `DLS_STATUS_UNRESOLVED`: 4 matches (Matches 20182, 23674, 24822, 28334)
-   - **Total:** Exactly **883 matches** (100% coverage, 0 overlap).
-4. **Target Assignment & Invariants:**
-   - First-innings target is ALWAYS `null` (`target_exact = None`, `runs_required_exact = None`, `required_run_rate_exact = None`).
-   - Ordinary second-innings chase target is `cumulative_team_runs_exact(Innings 1) + 1`. If Innings 1 is `LOWER_BOUND_ONLY`, exact chase metrics are strictly withheld.
-   - For `DLS_STATUS_UNRESOLVED` matches, `target_source = 'DLS_METHOD_UNRECORDED_TARGET'` and exact chase metrics are strictly withheld. Never fabricate or guess unrecorded DLS par targets.
+1. **Separation of Non-Exclusive Metadata Flags (Can Overlap):**
+   - **`flag_revised_target_recorded` (23 matches):** Source explicitly provides a positive `revised_target` in `matches.csv` (includes Match 17765).
+   - **`flag_revised_overs_recorded` (34 matches):** Source provides revised scheduled-ball metadata (`first_inn_revised_overs` or `second_inn_revised_overs`). Unit verified as legal balls (integers divisible by 6, range 30 to 114).
+   - **`flag_dls_method_in_result_text` (19 matches):** Matches whose `result` text contains `'D/L'` or `'DLS'`.
+   - **`flag_dls_target_applicable` (22 matches):** Matches where positive revised target was applicable to a concluded chase (excludes Match 17765).
+   - **`flag_dls_status_unresolved` (4 matches):** Matches 20182, 23674, 24822, 28334 (DLS stated in result, target/overs omitted from schema).
+   - **`flag_match_abandoned` (40 matches):** Matches ending in 'No Result' or 'Match Abandoned' (including Match 17765 and 16 zero-delivery matches).
+
+2. **8 Mutually Exclusive Match Reconciliation Categories (Sum = 883):**
+   - `WICKET_WIN_NO_OFFICIAL_TOTAL_IN_SCHEMA`: 394 matches (44.6%)
+   - `INCOMPLETE_EXTRAS_RUN_WIN`: 382 matches (43.3%)
+   - `NO_RESULT_OR_ABANDONED`: 40 matches (4.5%) [Match 17765 assigned here]
+   - `OTHER_RESULT`: 30 matches (3.4%) [Ties, Super Overs]
+   - `DLS_TARGET_APPLICABLE`: 22 matches (2.5%) [Concluded chases with verified target]
+   - `EXACT_BOTH_INNS_MARGIN_MISMATCH`: 6 matches (0.7%)
+   - `EXACT_BOTH_INNS_MARGIN_MATCH`: 5 matches (0.6%)
+   - `DLS_STATUS_UNRESOLVED`: 4 matches (0.5%) [Matches 20182, 23674, 24822, 28334]
+   - **Total:** Exactly **883 matches** (100.0% coverage, 0 overlap).
+
+3. **Classification Integrity for Edge Cases:**
+   - **Match 17765 (IND vs SA 2022):** Single category `NO_RESULT_OR_ABANDONED`. Retains metadata flags `flag_revised_target_recorded = True` (130.0), `flag_revised_overs_recorded = True` (72 balls), `flag_match_abandoned = True`, `flag_dls_target_applicable = False`. Chase was incomplete (abandoned after 25 balls).
+   - **Four Unresolved DLS Matches (20182, 23674, 24822, 28334):** Single category `DLS_STATUS_UNRESOLVED`. Exact metrics strictly withheld (`target_source = 'DLS_METHOD_UNRECORDED_TARGET'`, `target_exact = None`, `runs_required_exact = None`, `required_run_rate_exact = None`). Zero invented targets.
+
+4. **Score Uncertainty Protection Rule (Downstream Contract for R1-03):**
+   - Do NOT authorize any fallback pressure formula that relies on uncertain current score or current run rate.
+   - Exact RRR requires both an exact score AND a valid target.
+   - Lower-bound scores must never be represented as exact scores.
+   - Any proposed score-independent pressure features (e.g. phase leverage, wickets in hand, balls remaining) must be separately justified and validated in R1-03.
+   - Unresolved DLS matches must never receive invented or guessed targets.
+
 5. **Comprehensive Verification:**
-   - 34 dedicated unit tests in `test_match_state.py` (49 tests in `round1_pressure`, 61 in `backend`, 110 total across workspace, 100% passing).
+   - 39 dedicated unit tests in `test_match_state.py` (54 tests in `round1_pressure`, 61 in `backend`, 115 total across workspace, 100% passing).
 
 ---
 

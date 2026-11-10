@@ -1,7 +1,7 @@
-# ROYALS INTELLIGENCE — MATCH-STATE RECONSTRUCTION REPORT (R1-02, R1-02.1 & R1-02.2)
-**Generated:** 2026-11-10T21:18:08.356165+00:00  
+# ROYALS INTELLIGENCE — MATCH-STATE RECONSTRUCTION REPORT (R1-02, R1-02.1, R1-02.2 & R1-02.3)
+**Generated:** 2026-11-10T22:24:07.878410+00:00  
 **Architecture:** ROYALS INTELLIGENCE v4.1  
-**Tasks:** R1-02, R1-02.1 & R1-02.2 Match-State Integrity & DLS Consistency Audit  
+**Tasks:** R1-02, R1-02.1, R1-02.2 & R1-02.3 Final Match-Level Classification Integrity Closure  
 **Status:** `MATCH_STATE_RECONSTRUCTION_ACCEPTED_AND_AUDITED`  
 
 ---
@@ -57,21 +57,36 @@
 
 ---
 
-## 5. Match-Result Reconciliation & Official Schema Limitations
+## 5. Match Metadata Flags vs. Mutually Exclusive Categories (R1-02.3)
 
-> [!IMPORTANT]
-> **Schema Limitation:** The supplied `matches.csv` schema contains ONLY a text `result` field (e.g. 'India Won by 7 wickets', 'Won by 20 runs'). **The dataset does NOT contain independent official innings score fields** (`inn1_runs`, `inn2_runs`). Therefore, absolute score reconciliation against independent official totals cannot be performed from the supplied schema without external data.
+### A. Non-Exclusive Match Metadata Flags (Can Overlap):
+- **`REVISED_TARGET_RECORDED`:** 23 matches — matches with explicit `revised_target > 0` in `matches.csv` (includes Match 17765).
+- **`REVISED_OVERS_RECORDED`:** 34 matches — matches with explicit revised overs metadata.
+- **`DLS_METHOD_IN_RESULT_TEXT`:** 19 matches — matches whose `result` string contains `'D/L'` or `'DLS'`.
+- **`DLS_TARGET_APPLICABLE`:** 22 matches — matches where positive revised target was applicable to a concluded chase.
+- **`DLS_STATUS_UNRESOLVED`:** 4 matches — matches 20182, 23674, 24822, 28334 where DLS is stated in result, but target/overs are omitted.
+- **`MATCH_ABANDONED`:** 40 matches — matches ending in 'No Result' or 'Match Abandoned' (including Match 17765 and 16 zero-delivery fixtures).
 
-### Reconciliation Breakdown Across All 883 Matches (Mutually Exclusive):
+### B. Exactly One Mutually Exclusive Category per Match (Sums to Exactly 883):
 - **`WICKET_WIN_NO_OFFICIAL_TOTAL_IN_SCHEMA`:** 394 matches — match won by wickets; official team totals absent from schema.
 - **`INCOMPLETE_EXTRAS_RUN_WIN`:** 382 matches — match won by runs, but one or both innings contain unconfirmed extras.
-- **`NO_RESULT_OR_ABANDONED`:** 39 matches — match abandoned or no result without a recorded revised target.
+- **`NO_RESULT_OR_ABANDONED`:** 40 matches — match abandoned or no result (includes Match 17765).
 - **`OTHER_RESULT`:** 30 matches — tied matches / Super Overs.
-- **`REVISED_TARGET_RECORDED`:** 23 matches — positive revised target explicitly recorded in `matches.csv`.
-- **`DLS_STATUS_UNRESOLVED`:** 4 matches — match decided by DLS/DL method per text result, but target was unrecorded in schema.
+- **`DLS_TARGET_APPLICABLE`:** 22 matches — concluded 2nd innings chase with verified official DLS target.
 - **`EXACT_BOTH_INNS_MARGIN_MISMATCH`:** 6 matches — both innings had zero unconfirmed byes/legbyes, but stated margin differs by 1–4 runs (likely unrecorded multi-run wides/overthrows).
 - **`EXACT_BOTH_INNS_MARGIN_MATCH`:** 5 matches — both innings had zero unconfirmed extras, match won by runs, and reconstructed margin matches stated margin exactly.
+- **`DLS_STATUS_UNRESOLVED`:** 4 matches — match decided by DLS/DL method per text result, but target was unrecorded in schema.
 - **Total Matches Audited:** 883 (100.0% match-level coverage, exactly 883 matches).
+
+### Classification Integrity for Key Edge Cases:
+1. **Match 17765:**
+   - **Mutually Exclusive Category:** `NO_RESULT_OR_ABANDONED`.
+   - **Retained Metadata Flags:** `flag_revised_target_recorded = True` (130.0), `flag_revised_overs_recorded = True` (72 balls), `flag_match_abandoned = True`, `flag_dls_target_applicable = False`.
+   - **Explanation:** Although a revised target was recorded, rain intervened after 25 deliveries in Innings 2, terminating the chase without a decisive result. Categorized as abandoned to prevent duplicate counting while retaining all metadata flags.
+2. **Four Unresolved DLS Matches (20182, 23674, 24822, 28334):**
+   - **Mutually Exclusive Category:** `DLS_STATUS_UNRESOLVED`.
+   - **Retained Metadata Flags:** `flag_dls_method_in_result_text = True`, `flag_dls_status_unresolved = True`, `flag_revised_target_recorded = False`.
+   - **Exact Metric Withholding:** `target_source = 'DLS_METHOD_UNRECORDED_TARGET'`, `target_exact = None`, `runs_required_exact = None`, `required_run_rate_exact = None` across all 598 deliveries. Zero target fabrication.
 
 ---
 
@@ -95,11 +110,18 @@ The initial R1-02.1 audit noted 23 matches with `revised_target > 0` versus 26 m
 
 ## 7. Downstream Feature-Eligibility Contract (for R1-03)
 
+> [!CAUTION]
+> **Score Uncertainty Protection Rule:** Do NOT authorize a fallback pressure formula that relies on uncertain current score or current run rate.
+> - **Exact RRR requires an exact score AND a valid target.**
+> - **Lower-bound scores must NEVER be represented as exact scores.**
+> - **Any proposed score-independent pressure features (e.g. phase leverage, wickets down / wickets in hand, balls remaining) must be separately justified and validated in R1-03.**
+> - **Unresolved DLS matches must NEVER receive invented or guessed targets.**
+
 | Feature Category | Features Included | Downstream Safety Status |
 | :--- | :--- | :--- |
 | **Tier 1: Safe For Downstream Models** | Striker runs, legal balls bowled/faced, wickets, dismissal attribution, player ID, match metadata, phase, balls remaining | **100% Verified & Safe.** Independently validated; zero dependency on unconfirmed extras. |
-| **Tier 2: Score-Dependent Features** | `runs_required_exact`, `required_run_rate_exact`, `cumulative_team_runs_exact`, exact chase deficit | **Restricted to `EXACT` score states.** Strictly withheld (`null`) on `LOWER_BOUND_ONLY` states and `DLS_STATUS_UNRESOLVED` matches. Models must use sensitivity bounds. |
-| **Tier 3: Uncertain Features** | Multi-run byes/legbyes, penalty amounts, additional wide overthrows, ambiguous `other` deliveries, unrecorded DLS par scores | **Requires Sensitivity Analysis or Exclusion.** Must compare Strict vs Permissive scenarios. |
+| **Tier 2: Score-Dependent Features** | `runs_required_exact`, `required_run_rate_exact`, `cumulative_team_runs_exact`, exact chase deficit | **Restricted strictly to `EXACT` score states.** Strictly withheld (`null`) on `LOWER_BOUND_ONLY` states and `DLS_STATUS_UNRESOLVED` matches. |
+| **Tier 3: Uncertain Features** | Multi-run byes/legbyes, penalty amounts, additional wide overthrows, ambiguous `other` deliveries, unrecorded DLS par scores | **Requires Sensitivity Analysis or Exclusion.** Must compare Strict vs Permissive scenarios; never synthesize par scores. |
 
 ---
 
