@@ -192,13 +192,63 @@ Tasks R1-02.2 and R1-02.3 resolved the discrepancy between the 23 matches with s
 
 ---
 
-## 9. Pending Decisions for R1-03 (Pressure Index & Quantification Engine)
+## 9. R1-03 Pressure Detection and Situation Classification Engine
 
-With match state reconstructed and audited immediately before and after every delivery, the system is ready for Task R1-03:
-1. **Multidimensional Pressure Index $\Psi(t)$:**
-   - Innings phase leverage (Death overs vs Middle vs Powerplay).
-   - Chase leverage (RRR vs CRR delta, runs required, balls remaining).
-   - Wicket leverage (wickets in hand impact).
-   - Target setting leverage (1st innings score acceleration pressure).
-2. **Competition Weighting Matrix:** Calibration between IPL (Tier-1 Franchise) and Senior T20I.
-3. **Qualification Thresholds:** Minimum legal balls faced / bowled under pressure for ranking inclusion.
+Task R1-03 implements a reproducible, evidence-driven Pressure Detection Engine that establishes objective, domain-grounded pressure events independently for batters and bowlers before any player ranking or Bayesian scoring is computed:
+
+1. **Discipline Independence & Tactical Asymmetry:**
+   - Batting and bowling pressure situations are modeled independently.
+   - Tactical asymmetry is rigorously respected:
+     - *Death overs with $\ge 6$ wickets in hand:* **HIGH pressure for bowler** (boundary assault hazard), but **LOW pressure for batter** (freedom to attack with abundant wickets).
+     - *Powerplay with 3 wickets lost:* **HIGH pressure for batter** (collapse salvage required), but **LOW pressure for bowler** (attacking dominance with huge margin for error).
+   - In primary scope: 33,005 batting pressure deliveries (17.01%, 692 batters) vs 39,436 bowling pressure deliveries (20.33%, 480 bowlers).
+
+2. **Empirical Distribution Quantiles & Threshold Selection:**
+   - Exact chase RRR distribution on verified subset ($N = 6,748$):
+     - Median ($p_{50}$): 9.64
+     - 75th percentile ($p_{75}$): 11.48 ($\approx 11.5$)
+     - 85th percentile ($p_{85}$): 12.99 ($\approx 13.0$)
+     - 90th percentile ($p_{90}$): 14.35 ($\approx 14.5$)
+   - Structural leverage points:
+     - `BAT_COLLAPSE_EARLY_W3`: $\ge 3$ wickets lost in Powerplay (top 6.2% severe collapses, 3,797 balls, 336 matches).
+     - `BAT_DEPLETED_WICKETS_W3`: $\le 3$ wickets in hand in Middle/Death (top 9.7% depleted states, 12,921 balls, 619 matches).
+     - `BAT_DEATH_ACCEL_W5`: Overs 16–20 with $\le 5$ wickets in hand (26,130 balls, 774 matches).
+     - `BOWL_ASSAULT_HIGH_WICKETS_DEATH`: Overs 16–20 with $\ge 6$ batting wickets in hand (17,373 balls, 667 matches).
+     - `BOWL_DEATH_FINAL18`: Overs 18–20 final 18 balls high leverage (24,729 balls, 811 matches).
+     - `BOWL_PP_DAMAGE_CONTROL_W0`: Overs 5–6 with 0 wickets taken (4,860 balls, 443 matches).
+
+3. **Zero Outcome Leakage Guarantee:**
+   - Pressure classifications depend exclusively on pre-delivery match context (`state_before`).
+   - Outcome variables (`runs`, `is_wicket`, `delivery_bowler_conceded_runs`, `dismissals`, `extras`) are strictly forbidden from pressure classification rules.
+
+4. **Score Uncertainty Contract Enforcement & Provenance:**
+   - In accordance with R1-02.3, exact chase RRR is strictly withheld (`null`) on `LOWER_BOUND_ONLY` score states and unresolved DLS matches.
+   - Vectorized dimension tracking records `dimensions_available` and `dimensions_withheld` for every delivery.
+   - Score-independent structural dimensions (`PHASE`, `BALLS_REM`, `WKTS_REM`, `LEGAL_BALLS`) provide complete, uncorrupted match-state pressure detection across all 193,988 primary deliveries.
+
+5. **Operational Candidate Definitions & Coverage:**
+   - **Primary Batting Definition (`BAT_COMPOSITE_MODERATE`):** 33,005 deliveries (17.01%) across 692 batters.
+   - **Primary Bowling Definition (`BOWL_COMPOSITE_MODERATE`):** 39,436 deliveries (20.33%) across 480 bowlers.
+   - Sensitivity analysis across Strict vs Permissive scenarios demonstrates zero variance in batting (0.000%) and 80 deliveries variance in bowling (0.041%), confirming robust model stability.
+
+6. **Generated Datasets & Reports:**
+   - `batting_pressure_events_strict.parquet`
+   - `bowling_pressure_events_strict.parquet`
+   - `batting_pressure_events_permissive.parquet`
+   - `bowling_pressure_events_permissive.parquet`
+   - `pressure_definition_comparison.parquet`
+   - `pressure_coverage_summary.parquet`
+   - `pressure_detection_report.md`
+
+7. **Test Verification:**
+   - 17 dedicated unit tests in `test_pressure_detection.py` (71/71 in `round1_pressure`, 61/61 in `backend`, 132/132 total passing across workspace).
+
+---
+
+## 10. Downstream Roadmap for R1-04 (Performance Baselines & Reliability Modeling)
+
+With pressure events deterministically identified and independently profiled for batters and bowlers, the next analytical stages will construct:
+1. **Contextual Baselines:** Expected Runs Added (ERA), Expected Wickets, and phase-adjusted baseline performance.
+2. **Performance Under Pressure vs. Baseline:** Differential execution ($\Delta \text{SR}$, $\Delta \text{Econ}$, Dot Ball %, Boundary Hazard Resistance).
+3. **Bayesian Reliability Scoring:** Sample size shrinkage, hierarchical empirical priors, credibility intervals.
+4. **Final Top 10 Rankings:** Independent rankings for Top 10 Batters and Top 10 Bowlers under pressure.

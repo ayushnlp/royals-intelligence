@@ -20,6 +20,13 @@ paths:
   excluded_innings_parquet: "round1_pressure/data/processed/excluded_innings.parquet"
   reconstruction_audit_parquet: "round1_pressure/data/processed/reconstruction_audit.parquet"
   match_state_report_md: "round1_pressure/reports/match_state_reconstruction_report.md"
+  batting_pressure_events_strict_parquet: "round1_pressure/data/processed/batting_pressure_events_strict.parquet"
+  bowling_pressure_events_strict_parquet: "round1_pressure/data/processed/bowling_pressure_events_strict.parquet"
+  batting_pressure_events_permissive_parquet: "round1_pressure/data/processed/batting_pressure_events_permissive.parquet"
+  bowling_pressure_events_permissive_parquet: "round1_pressure/data/processed/bowling_pressure_events_permissive.parquet"
+  pressure_definition_comparison_parquet: "round1_pressure/data/processed/pressure_definition_comparison.parquet"
+  pressure_coverage_summary_parquet: "round1_pressure/data/processed/pressure_coverage_summary.parquet"
+  pressure_detection_report_md: "round1_pressure/reports/pressure_detection_report.md"
 
 expected_files:
   ball_by_ball: "ball_by_ball.csv"
@@ -322,6 +329,68 @@ match_state_audit_r1_02_3:
     lower_bound_rule: "Lower-bound scores must never be represented as exact scores."
     score_independent_features_rule: "Any proposed score-independent pressure features must be separately justified and validated in R1-03."
     zero_invented_targets_rule: "Unresolved DLS matches must never receive invented or guessed targets."
+
+# Task R1-03: Pressure Detection and Situation Classification Governance
+pressure_detection_r1_03:
+  primary_analysis_scope:
+    competitions: [2673, 2674, 2675] # Senior Men T20 (IPL & T20I)
+    innings: [1, 2]                  # Ordinary completed/curtailed innings
+    total_deliveries: 193988
+    excluded_super_overs_deliveries: 38
+    excluded_emerging_tournaments_deliveries: 6985
+
+  discipline_independence_and_asymmetry:
+    batting_vs_bowling_independent: true
+    asymmetry_principles:
+      death_overs_with_wickets_in_hand:
+        batting_pressure: "LOW (abundant wickets in hand; freedom to attack)"
+        bowling_pressure: "HIGH (boundary assault hazard; defending narrow margin)"
+      top_order_powerplay_collapse:
+        batting_pressure: "HIGH (3+ wickets lost; innings salvage required)"
+        bowling_pressure: "LOW (attacking dominance; margin for error)"
+
+  empirical_benchmarks:
+    exact_chase_rrr_quantiles:
+      p50: 9.64
+      p75: 11.48
+      p85: 12.99
+      p90: 14.35
+    structural_event_quantiles:
+      bat_collapse_early_w3: "Top 6.2% most severe top-order collapses (3,797 balls, 336 matches)"
+      bat_depleted_wickets_w3: "Top 9.7% most depleted middle/death states (12,921 balls, 619 matches)"
+      bat_death_accel_w5: "Overs 16-20 with <= 5 wickets in hand (26,130 balls, 774 matches)"
+      bowl_assault_high_wickets_death: "Overs 16-20 with >= 6 batting wickets in hand (17,373 balls, 667 matches)"
+      bowl_death_final18: "Overs 18-20 final 18 balls high leverage (24,729 balls, 811 matches)"
+      bowl_pp_damage_control_w0: "Overs 5-6 with 0 wickets taken (4,860 balls, 443 matches)"
+
+  operational_definitions:
+    batting_primary: "BAT_COMPOSITE_MODERATE"
+    bowling_primary: "BOWL_COMPOSITE_MODERATE"
+    total_batting_primary_deliveries: 33005
+    total_bowling_primary_deliveries: 39436
+    total_batters_covered: 692
+    total_bowlers_covered: 480
+
+  zero_leakage_policy:
+    enforce_pre_delivery_state_only: true
+    forbidden_features_in_rules:
+      - runs
+      - is_wicket
+      - delivery_bowler_conceded_runs
+      - dismissals
+      - extras
+
+  score_uncertainty_handling:
+    exact_metrics_withheld_on_lower_bound: true
+    score_independent_structural_rules:
+      - PHASE
+      - BALLS_REM
+      - WKTS_REM
+      - LEGAL_BALLS
+    vectorized_dimension_tracking:
+      - dimensions_available
+      - dimensions_withheld
+
 
 
 

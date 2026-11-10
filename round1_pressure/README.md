@@ -30,20 +30,30 @@ round1_pressure/
 │   │   ├── match_result_reconciliation.parquet # R1-02.1: 883-match reconciliation audit
 │   │   ├── dls_and_revised_overs_audit.parquet # R1-02.1: 34-match shortened/DLS audit
 │   │   ├── excluded_innings.parquet
-│   │   └── reconstruction_audit.parquet
+│   │   ├── reconstruction_audit.parquet
+│   │   ├── batting_pressure_events_strict.parquet     # R1-03: Batting pressure classifications
+│   │   ├── bowling_pressure_events_strict.parquet     # R1-03: Bowling pressure classifications
+│   │   ├── batting_pressure_events_permissive.parquet # R1-03: Sensitivity analysis
+│   │   ├── bowling_pressure_events_permissive.parquet # R1-03: Sensitivity analysis
+│   │   ├── pressure_definition_comparison.parquet     # R1-03: 22 candidate definitions comparison
+│   │   └── pressure_coverage_summary.parquet          # R1-03: Match & player coverage metrics
 │   └── outputs/                    # QA summary JSON, validation logs, deterministic outputs
 ├── reports/
 │   ├── data_quality_report.md      # Auto-generated comprehensive data audit and domain trap report
-│   └── match_state_reconstruction_report.md # Deterministic match-state reconstruction report (R1-02 & R1-02.1)
+│   ├── match_state_reconstruction_report.md # Deterministic match-state reconstruction report (R1-02 & R1-02.1)
+│   └── pressure_detection_report.md         # R1-03: Pressure detection & situation classification report
 ├── src/
 │   ├── __init__.py
 │   ├── load_qa.py                  # Core DatasetQAEngine profiling and validation class
 │   ├── 01_load_qa.py               # Executable deterministic data quality runner script
 │   ├── match_state.py              # Core MatchStateEngine delivery-level state reconstruction
-│   └── 02_reconstruct_match_state.py # Executable deterministic match-state reconstruction runner
+│   ├── 02_reconstruct_match_state.py # Executable deterministic match-state reconstruction runner
+│   ├── pressure_detection.py       # R1-03: Core PressureDetectionEngine class
+│   └── 03_detect_pressure.py       # R1-03: Executable deterministic pressure classification runner
 ├── tests/
 │   ├── test_data_qa.py             # 15 focused pytest test cases validating data integrity and delivery legality
-│   └── test_match_state.py         # 30 focused pytest test cases validating match-state reconstruction & R1-02.1 audit
+│   ├── test_match_state.py         # 39 focused pytest test cases validating match-state reconstruction & audits
+│   └── test_pressure_detection.py  # 17 focused pytest test cases validating pressure rules & invariants
 ├── requirements.txt                # Lightweight dependencies (pandas, numpy, pyyaml, pytest, pyarrow)
 └── README.md                       # Package documentation and usage guide
 ```
@@ -168,7 +178,54 @@ round1_pressure/
 
 ---
 
-## 7. Execution & Verification Commands
+## 7. Pressure Detection & Situation Classification Engine (R1-03)
+
+Task R1-03 delivers a reproducible, evidence-driven Pressure Detection Engine that identifies high-pressure match situations independently for batters and bowlers without introducing subjective weights or performance outcome leakage.
+
+### 1. Architectural Principles:
+1. **Discipline Independence & Tactical Asymmetry:**
+   - Batting and bowling pressure situations are modeled independently.
+   - Tactical asymmetry is rigorously respected:
+     - *Death overs with $\ge 6$ wickets in hand:* **HIGH pressure for bowler** (boundary assault hazard), but **LOW pressure for batter** (freedom to attack with abundant wickets).
+     - *Powerplay with 3 wickets lost:* **HIGH pressure for batter** (collapse salvage required), but **LOW pressure for bowler** (attacking dominance with huge margin for error).
+2. **Zero Outcome Leakage:**
+   - Pressure classification strictly evaluates match context *before* the delivery occurs (`state_before`).
+   - Outcome variables (`runs`, `is_wicket`, `delivery_bowler_conceded_runs`, `dismissals`, `extras`) are strictly forbidden from pressure rules.
+3. **Score Uncertainty Contract Enforcement:**
+   - Where cumulative score is `LOWER_BOUND_ONLY` or DLS target is unrecorded, exact RRR is strictly withheld (`null`).
+   - Deliveries retain transparent metadata flags: `dimensions_available` and `dimensions_withheld`.
+   - Score-independent structural dimensions (`PHASE`, `BALLS_REM`, `WKTS_REM`, `LEGAL_BALLS`) provide complete, uncorrupted match-state pressure detection across all 193,988 primary deliveries.
+4. **Primary Analysis Scope Segregation:**
+   - Evaluates Senior Men's T20 cricket (IPL & Senior T20I, comps 2673, 2674, 2675; innings 1 & 2; 193,988 primary deliveries).
+   - Super Overs (38 deliveries) and Emerging Tournaments (6,985 deliveries) are classified with explicit reasons and excluded from primary pressure rankings.
+
+### 2. Empirical Quantile Benchmarks:
+- **Chase RRR Distribution (Exact Subset, N = 6,748):**
+  - 50th percentile (Median): 9.64
+  - 75th percentile: 11.48 ($\approx 11.5$)
+  - 85th percentile: 12.99 ($\approx 13.0$)
+  - 90th percentile: 14.35 ($\approx 14.5$)
+- **Structural Collapses & Leverage Points:**
+  - `BAT_COLLAPSE_EARLY_W3`: $\ge 3$ wickets lost in Powerplay represents top 6.2% most severe top-order collapses (3,797 deliveries, 336 matches).
+  - `BAT_DEPLETED_WICKETS_W3`: $\le 3$ wickets in hand in Middle/Death represents top 9.7% most depleted states (12,921 deliveries, 619 matches).
+  - `BAT_DEATH_ACCEL_W5`: Death overs with $\le 5$ wickets in hand (26,130 deliveries, 774 matches).
+  - `BOWL_ASSAULT_HIGH_WICKETS_DEATH`: Death overs with $\ge 6$ batting wickets in hand (17,373 deliveries, 667 matches).
+  - `BOWL_DEATH_FINAL18`: Overs 18–20 final 18 balls high leverage (24,729 deliveries, 811 matches).
+  - `BOWL_PP_DAMAGE_CONTROL_W0`: Overs 5–6 with 0 wickets lost (4,860 deliveries, 443 matches).
+
+### 3. Primary Candidate Definitions & Coverage:
+- **Batting Primary Definition (`BAT_COMPOSITE_MODERATE`):**
+  - Captures 33,005 deliveries (17.01% of primary scope) across 692 unique batters.
+  - Combines top-order collapse salvage, depleted-wicket middle/death defense, and high-RRR chases ($\text{RRR} \ge 11.5$).
+- **Bowling Primary Definition (`BOWL_COMPOSITE_MODERATE`):**
+  - Captures 39,436 deliveries (20.33% of primary scope) across 480 unique bowlers.
+  - Combines death over boundary assault defense, late-death final 18 balls, Powerplay damage control, and defending tight death chases ($\text{RRR} \le 11.5$).
+- **Strict vs Permissive Sensitivity:**
+  - Strict vs Permissive scenario yields exactly 0 batting difference (0.000%) and 80 bowling deliveries difference (0.041%) out of 193,988 primary deliveries, proving complete structural stability against ambiguous delivery interpretations.
+
+---
+
+## 8. Execution & Verification Commands
 
 ### Run Data QA (R1-01.1):
 ```bash
@@ -180,6 +237,12 @@ pytest round1_pressure/tests/test_data_qa.py -v
 ```bash
 python round1_pressure/src/02_reconstruct_match_state.py
 pytest round1_pressure/tests/test_match_state.py -v
+```
+
+### Run Pressure Detection & Classification Engine (R1-03):
+```bash
+python round1_pressure/src/03_detect_pressure.py
+pytest round1_pressure/tests/test_pressure_detection.py -v
 ```
 
 ### Run Full Test Suite:
