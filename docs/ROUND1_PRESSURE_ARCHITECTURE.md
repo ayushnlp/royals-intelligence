@@ -98,14 +98,41 @@ The R1-01 and R1-01.1 audits established critical domain truths:
 
 ---
 
-## 6. Pending Decisions for R1-02 (Match-State & Pressure Foundation)
+## 6. R1-02 Match-State Reconstruction Baseline
 
-Before implementing the Match-State Engine in task R1-02, the following methodological decisions must be finalized:
-1. **Pressure Metric Definition:** Formulate the multidimensional pressure index $\Psi(t)$ combining:
-   - Innings phase (Death overs vs Middle vs Powerplay).
-   - Required Run Rate (RRR) leverage vs Current Run Rate (CRR).
-   - Wickets in hand (Win Probability impact of next dismissal).
-   - Chase leverage in 2nd innings vs target setting in 1st innings.
-2. **Competition Weighting Matrix:** Calibration of weights between IPL (Tier-1 franchise) and Senior T20I matches (or whether to report them jointly and separately).
-3. **Emerging Asia Cup Segregation:** Formalize exclusion of the 30 Emerging Teams Asia Cup matches from the primary IPL/T20I ranking dataset.
-4. **Sample Size Qualification Thresholds:** Minimum legal balls faced under pressure (batters) and minimum legal balls bowled under pressure (bowlers) for Top 10 ranking eligibility.
+Task R1-02 delivers a deterministic, independently tested delivery-level match-state reconstruction engine:
+- **Dual Scenarios Implemented:**
+  - **Scenario A (Strict):** 192,445 legal deliveries (`other` treated as illegal/re-bowled per sequence evidence).
+  - **Scenario B (Permissive):** 192,709 legal deliveries (`other` treated as legal for sensitivity analysis).
+- **Explicit `state_before` and `state_after`:** Tracked across cumulative runs, wickets, legal balls, balls remaining, CRR, RRR, and completion status.
+- **Scope Segregation:**
+  - 193,988 primary deliveries across IPL & Senior T20I matches.
+  - 30 Emerging tournament matches (6,985 deliveries) and 6 Super Over matches (38 deliveries) segregated into `excluded_innings.parquet`.
+  - 16 abandoned matches documented.
+- **Score Completeness Governance:**
+  - 329 innings verified as `SCORE_COMPLETE` (zero unconfirmed extras).
+  - 1,395 innings flagged as `SCORE_INCOMPLETE` due to unconfirmed bye/legbye/penalty run amounts.
+  - No synthetic runs fabricated.
+- **Parquet Datasets Saved:**
+  - `delivery_states_strict.parquet`
+  - `delivery_states_permissive.parquet`
+  - `innings_state_summary.parquet`
+  - `match_state_summary.parquet`
+  - `excluded_innings.parquet`
+  - `reconstruction_audit.parquet`
+- **Testing Verification:**
+  - 16 focused test cases in `test_match_state.py` (miniature fixtures + full dataset invariants).
+  - 31 total Round 1 tests passing; 61 backend tests passing (92/92 total passing).
+
+---
+
+## 7. Pending Decisions for R1-03 (Pressure Index & Quantification Engine)
+
+With match state reconstructed immediately before and after every delivery, the system is ready for Task R1-03:
+1. **Multidimensional Pressure Index $\Psi(t)$:**
+   - Innings phase leverage (Death overs vs Middle vs Powerplay).
+   - Chase leverage (RRR vs CRR delta, runs required, balls remaining).
+   - Wicket leverage (wickets in hand impact).
+   - Target setting leverage (1st innings score acceleration pressure).
+2. **Competition Weighting Matrix:** Calibration between IPL (Tier-1 Franchise) and Senior T20I.
+3. **Qualification Thresholds:** Minimum legal balls faced / bowled under pressure for ranking inclusion.

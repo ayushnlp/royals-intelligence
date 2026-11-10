@@ -11,6 +11,13 @@ paths:
   reports_dir: "round1_pressure/reports"
   qa_summary_json: "round1_pressure/data/outputs/qa_summary.json"
   qa_report_md: "round1_pressure/reports/data_quality_report.md"
+  delivery_states_strict_parquet: "round1_pressure/data/processed/delivery_states_strict.parquet"
+  delivery_states_permissive_parquet: "round1_pressure/data/processed/delivery_states_permissive.parquet"
+  innings_state_summary_parquet: "round1_pressure/data/processed/innings_state_summary.parquet"
+  match_state_summary_parquet: "round1_pressure/data/processed/match_state_summary.parquet"
+  excluded_innings_parquet: "round1_pressure/data/processed/excluded_innings.parquet"
+  reconstruction_audit_parquet: "round1_pressure/data/processed/reconstruction_audit.parquet"
+  match_state_report_md: "round1_pressure/reports/match_state_reconstruction_report.md"
 
 expected_files:
   ball_by_ball: "ball_by_ball.csv"
@@ -203,3 +210,25 @@ cricket_rules:
     emerging:
       patterns: ["Emerging", "Rising Stars"]
       tier: "Feeder / A-Team Tournament"
+
+# Task R1-02: Match-State Reconstruction Governance
+match_state_reconstruction:
+  scenarios:
+    strict:
+      legal_rule: "extras_type not in ['wide', 'Overstep', 'other']"
+      other_treatment: "AMBIGUOUS_UNRESOLVED_EXCLUDED"
+      expected_legal_deliveries: 192445
+    permissive:
+      legal_rule: "extras_type not in ['wide', 'Overstep']"
+      other_treatment: "AMBIGUOUS_FLAGGED_LEGAL"
+      expected_legal_deliveries: 192709
+
+  scope_filters:
+    excluded_comp_ids: [2670, 3289] # Emerging Teams Asia Cup 2024, Rising Stars 2025
+    excluded_innings: [3, 4]        # Super Overs
+    primary_scope_expected_deliveries: 193988
+
+  score_completeness:
+    unconfirmed_extras_types: ["byes", "legbyes", "Penalty"]
+    fallback_policy: "RETAIN_VALID_PARTIAL_METRICS_FLAG_SCORE_INCOMPLETE"
+

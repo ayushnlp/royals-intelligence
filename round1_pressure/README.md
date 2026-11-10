@@ -22,17 +22,27 @@ round1_pressure/
 │   └── dataset_config.yaml         # Dataset paths, expected schemas, cricket rules, extras code mapping
 ├── data/
 │   ├── raw/                        # Raw competition CSV files (strictly ignored by .gitignore)
-│   ├── processed/                  # Normalized match-state & pressure delivery tables (.gitignored)
+│   ├── processed/                  # Normalized match-state Parquet tables (.gitignored)
+│   │   ├── delivery_states_strict.parquet
+│   │   ├── delivery_states_permissive.parquet
+│   │   ├── innings_state_summary.parquet
+│   │   ├── match_state_summary.parquet
+│   │   ├── excluded_innings.parquet
+│   │   └── reconstruction_audit.parquet
 │   └── outputs/                    # QA summary JSON, validation logs, deterministic outputs
 ├── reports/
-│   └── data_quality_report.md      # Auto-generated comprehensive data audit and domain trap report
+│   ├── data_quality_report.md      # Auto-generated comprehensive data audit and domain trap report
+│   └── match_state_reconstruction_report.md # Deterministic match-state reconstruction report (R1-02)
 ├── src/
 │   ├── __init__.py
 │   ├── load_qa.py                  # Core DatasetQAEngine profiling and validation class
-│   └── 01_load_qa.py               # Executable deterministic data quality runner script
+│   ├── 01_load_qa.py               # Executable deterministic data quality runner script
+│   ├── match_state.py              # Core MatchStateEngine delivery-level state reconstruction
+│   └── 02_reconstruct_match_state.py # Executable deterministic match-state reconstruction runner
 ├── tests/
-│   └── test_data_qa.py             # 15 focused pytest test cases validating data integrity and delivery legality
-├── requirements.txt                # Lightweight dependencies (pandas, numpy, pyyaml, pytest)
+│   ├── test_data_qa.py             # 15 focused pytest test cases validating data integrity and delivery legality
+│   └── test_match_state.py         # 16 focused pytest test cases validating match-state reconstruction
+├── requirements.txt                # Lightweight dependencies (pandas, numpy, pyyaml, pytest, pyarrow)
 └── README.md                       # Package documentation and usage guide
 ```
 
@@ -69,14 +79,44 @@ round1_pressure/
 
 ---
 
-## 4. How to Run R1-01 Data QA
+## 4. Match-State Reconstruction Governance (R1-02)
 
-### Run QA Profiling & Report Generation:
+1. **Dual Scenarios (Strict vs Permissive):**
+   - **Scenario A (Strict):** Treats ambiguous `other` deliveries as illegal/re-bowled. Confirmed legal balls: **192,445**.
+   - **Scenario B (Permissive):** Treats ambiguous `other` deliveries as legal for sensitivity analysis. Permissive legal balls: **192,709**.
+   - Both scenarios are fully generated as independent Parquet tables with explicit `state_before` and `state_after` for all variables.
+2. **Scope Segregation:**
+   - **Primary Analysis Scope:** 193,988 deliveries across IPL (2022–2026) and Senior T20I (2022–2026) ordinary innings.
+   - **Excluded Tournaments:** 30 matches (6,985 deliveries) from Emerging Teams Asia Cup 2024 and Rising Stars 2025.
+   - **Excluded Super Overs:** 38 deliveries across 6 matches.
+   - **Abandoned Matches:** 16 matches with 0 deliveries.
+   - All exclusions are cataloged in `excluded_innings.parquet`.
+3. **Score Completeness Governance:**
+   - Innings with zero unconfirmed extras (or exact mathematical match) are flagged `SCORE_COMPLETE` (329 innings).
+   - Innings with unconfirmed extras (byes, legbyes, penalty) are flagged `SCORE_INCOMPLETE` (1,395 innings).
+   - Valid partial metrics (batter runs, bowler wickets, balls bowled, balls remaining) are fully preserved without fabricating synthetic runs.
+4. **Chase & DLS Rules:**
+   - 23 matches with official revised DLS targets use the verified `revised_target` from `matches.csv`.
+   - Ordinary 2nd innings use `target = first_innings_total + 1`.
+   - 34 shortened matches use verified scheduled balls (e.g. 30, 48, 66, 90 balls).
+
+---
+
+## 5. Execution & Verification Commands
+
+### Run Data QA (R1-01.1):
 ```bash
 python round1_pressure/src/01_load_qa.py
+pytest round1_pressure/tests/test_data_qa.py -v
 ```
 
-### Run QA Test Suite:
+### Run Match-State Reconstruction (R1-02):
 ```bash
-pytest round1_pressure/tests/test_data_qa.py -v
+python round1_pressure/src/02_reconstruct_match_state.py
+pytest round1_pressure/tests/test_match_state.py -v
+```
+
+### Run Full Test Suite:
+```bash
+pytest round1_pressure/tests -v
 ```
