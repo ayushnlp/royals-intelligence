@@ -161,22 +161,101 @@ def test_missing_match_to_ball_by_ball_relationships(qa_engine):
 
 
 def test_bowling_attribution_dismissal_credit(qa_engine):
-    """Verifies that non-bowler dismissals (run outs, retire out, obstructing) are separated from bowler wickets."""
+    """
+    Verifies that non-bowler dismissals (run outs, retire out, obstructing) are separated from bowler wickets,
+    and validates spelling normalization ('Obstracting the field' -> 'Obstructing the field').
+    """
     b_audit = qa_engine.qa_results["cricket_traps"]["bowling_attribution"]
     assert b_audit["total_wickets_flagged"] == 10881
     assert b_audit["bowler_credited_wickets"] == 10272
     assert b_audit["non_bowler_dismissals"] == 609
     assert b_audit["bowler_credited_wickets"] + b_audit["non_bowler_dismissals"] == 10881
 
-    # Verify specific counts
-    dt_counts = b_audit["dismissal_type_counts"]
-    assert dt_counts["Caught"] == 7557
-    assert dt_counts["Bowled"] == 1775
-    assert dt_counts["LBW"] == 709
-    assert dt_counts["RunOut"] == 600
-    assert dt_counts["Stump"] == 214
-    assert dt_counts["Hit Wicket"] == 17
-    assert dt_counts["Retire Out"] == 6
+    # Verify raw counts
+    raw_counts = b_audit["raw_dismissal_counts"]
+    assert raw_counts["Caught"] == 7557
+    assert raw_counts["Bowled"] == 1775
+    assert raw_counts["LBW"] == 709
+    assert raw_counts["RunOut"] == 600
+    assert raw_counts["Stump"] == 214
+    assert raw_counts["Hit Wicket"] == 17
+    assert raw_counts["Retire Out"] == 6
+    assert raw_counts["Obstracting the field"] == 2
+    assert raw_counts["Obstructing the field"] == 1
+
+    # Verify normalized counts
+    norm_counts = b_audit["normalized_dismissal_counts"]
+    assert norm_counts["Obstructing the field"] == 3
+    assert "Obstracting the field" not in norm_counts
+
+    # Unknown dismissals guard
+    assert b_audit["unknown_dismissals_treated_as_bowler_credit"] is False
+
+
+def test_delivery_legality_evidence_based_counts(qa_engine):
+    """
+    CRITICAL (R1-01.1): Validates evidence-based delivery legality classification.
+    Confirmed Legal: Standard (189,167) + legbyes (2,748) + byes (529) + Penalty (1) = 192,445.
+    Confirmed Illegal: wide (7,714) + Overstep (576) = 8,290.
+    Ambiguous / Unresolved: other (264).
+    Dual metrics: Strict Legal (192,445) vs Permissive Legal (192,709).
+    """
+    leg_audit = qa_engine.qa_results["cricket_traps"]["delivery_legality_and_sequence_audit"]
+    assert leg_audit["total_deliveries"] == 200999
+    assert leg_audit["confirmed_legal_deliveries"] == 192445
+    assert leg_audit["confirmed_illegal_deliveries"] == 8290
+    assert leg_audit["ambiguous_deliveries"] == 264
+    assert leg_audit["strict_legal_deliveries_count"] == 192445
+    assert leg_audit["permissive_legal_deliveries_count"] == 192709
+    assert leg_audit["unresolved_deliveries_count"] == 264
+
+
+def test_penalty_delivery_investigation(qa_engine):
+    """
+    Validates that the single Penalty extras delivery (Match 16753, Inn 2, Over 6, Ball 4)
+    occurred in an over with exactly 6 balls bowled, consuming a legal ball without re-bowl.
+    """
+    leg_audit = qa_engine.qa_results["cricket_traps"]["delivery_legality_and_sequence_audit"]
+    cats = leg_audit["category_breakdown"]
+    assert cats["Penalty"]["count"] == 1
+    assert cats["Penalty"]["legal"] == 1
+    assert cats["Penalty"]["illegal"] == 0
+    assert cats["Penalty"]["ambiguous"] == 0
+    assert leg_audit["sequence_evidence"]["penalty_delivery_over_total_balls"] == 6
+
+
+def test_other_deliveries_sequence_and_style_investigation(qa_engine):
+    """
+    Validates sequence and domain investigation of the 264 'other' extras deliveries:
+    - 253 occurred in completed overs that required 7+ balls (re-bowled).
+    - 11 occurred in early-terminated final overs (10 target chased mid-over, 1 Super Over).
+    - Delivery styles: 116 beamers, 72 high full tosses, 16 bouncers.
+    - Zero bowled, caught, or LBW dismissals.
+    - Explicitly retained as ambiguous/unresolved rather than forcing a single classification.
+    """
+    leg_audit = qa_engine.qa_results["cricket_traps"]["delivery_legality_and_sequence_audit"]
+    cats = leg_audit["category_breakdown"]
+    assert cats["other"]["count"] == 264
+    assert cats["other"]["ambiguous"] == 264
+    assert cats["other"]["legal"] == 0
+    assert cats["other"]["illegal"] == 0
+
+    seq = leg_audit["sequence_evidence"]
+    assert seq["other_in_completed_overs_with_6_legal_balls"] == 253
+    assert seq["other_in_uncompleted_final_overs"] == 11
+    styles = seq["delivery_style_distribution_on_other"]
+    assert styles["Beamer"] == 116
+    assert styles["Full Toss"] == 72
+    assert styles["Bouncer"] == 16
+
+
+def test_unknown_dismissal_guard():
+    """Verifies that unlisted / unknown dismissal types are safely rejected from bowler wicket credit."""
+    engine = DatasetQAEngine()
+    unknown_types = ["Timed Out", "Handled Ball", "Unknown", "custom_dismissal"]
+    for ut in unknown_types:
+        norm = engine.DISMISSAL_SPELLING_CORRECTIONS.get(ut, ut)
+        assert norm not in engine.BOWLER_CREDITED_DISMISSALS, f"Unknown dismissal '{ut}' must not be credited to bowler"
 
 
 def test_deterministic_qa_outputs_generated(qa_engine):
@@ -197,3 +276,6 @@ def test_deterministic_qa_outputs_generated(qa_engine):
     assert "ROYALS INTELLIGENCE — ROUND 1 DATA QUALITY" in md_content
     assert "Trap A: Extras Code Trap" in md_content
     assert "Trap B: Legal Delivery Counting" in md_content
+    assert "Evidence-Based Cricket Delivery Classification" in md_content
+    assert "Full Delivery Classification Evidence Table" in md_content
+

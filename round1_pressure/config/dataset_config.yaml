@@ -1,6 +1,7 @@
 # ==============================================================================
 # ROYALS INTELLIGENCE — SupeRR Selector Season 2 (Round 1) Dataset Configuration
 # Objective: Identify the Most Reliable Players Under Pressure
+# Task R1-01.1: Evidence-Backed Cricket Delivery Legality & Attribution
 # ==============================================================================
 
 paths:
@@ -137,7 +138,7 @@ schemas:
       - on_or_off
       - delivery_ist_time
 
-# Cricket Domain Interpretation Rules
+# Cricket Domain Interpretation Rules (R1-01.1 Updated)
 cricket_rules:
   # extras1_runs is a categorical mapping of extras_type, NOT run values!
   extras_code_mapping:
@@ -149,17 +150,29 @@ cricket_rules:
     6: "NONE"
     7: "Penalty"
 
-  # Legal delivery definitions:
-  # Deliveries where extras_type is in illegal_extras must be re-bowled and do not consume a legal ball.
-  illegal_extras:
-    - "wide"
-    - "Overstep"
-    - "other"
+  # Evidence-Based Delivery Legality Classification:
+  # Confirmed Legal: Standard deliveries (189,167), legbyes (2,748), byes (529), Penalty (1) = 192,445
+  # Confirmed Illegal: wide (7,714), Overstep (576) = 8,290
+  # Ambiguous / Unresolved: other (264)
+  delivery_legality:
+    confirmed_legal_extras:
+      - "legbyes"
+      - "byes"
+      - "Penalty"
+    confirmed_illegal_extras:
+      - "wide"
+      - "Overstep"
+    ambiguous_extras:
+      - "other"
 
-  # Legal extras (ball counts toward the over, bowler is NOT credited with wicket, runs are not off bat)
-  legal_extras:
-    - "legbyes"
-    - "byes"
+  # Delivery Count Benchmarks:
+  delivery_counts:
+    total_deliveries: 200999
+    confirmed_legal: 192445
+    confirmed_illegal: 8290
+    ambiguous_unresolved: 264
+    strict_legal_total: 192445
+    permissive_legal_total: 192709
 
   # Bowler wicket attribution
   bowler_credited_dismissals:
@@ -174,6 +187,10 @@ cricket_rules:
     - "Retire Out"
     - "Obstracting the field"
     - "Obstructing the field"
+
+  # Dismissal spelling normalization
+  dismissal_spelling_corrections:
+    "Obstracting the field": "Obstructing the field"
 
   # Competition classification filters
   competition_categories:

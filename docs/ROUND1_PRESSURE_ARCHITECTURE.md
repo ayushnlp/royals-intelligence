@@ -59,25 +59,41 @@ round1_pressure/
 
 ---
 
-## 4. Data-Quality Dependencies & Findings (R1-01)
+## 4. Data-Quality Dependencies & Findings (R1-01 & R1-01.1)
 
-The R1-01 audit established 6 critical domain truths:
+The R1-01 and R1-01.1 audits established critical domain truths:
 1. **Extras Code Trap:** `extras1_runs` is a categorical code (1: Overstep, 2: wide, 3: legbyes, 4: byes, 5: other, 6: NONE, 7: Penalty), NOT numerical runs. `runs` is strictly runs off the bat.
-2. **Legal Balls:** `over_ball_num` is a sequential delivery counter (up to 13). Legal balls must be derived: `extras_type not in ['wide', 'Overstep', 'other']`.
-3. **Bowling Credit:** 10,272 bowler wickets vs 609 non-bowler dismissals (RunOut, Retire Out, Obstructing).
+2. **Evidence-Based Delivery Legality & Sequence Verification (R1-01.1):**
+   - **Confirmed Legal Deliveries (192,445):** Standard deliveries (189,167), `legbyes` (2,748), `byes` (529), and `Penalty` (1).
+   - **Penalty Investigation:** Match 16753, Inn 2, Over 6, Ball 4. Exactly 6 deliveries bowled in over (`over_ball_num` 1–6). Consumed 1 legal ball without re-bowl. Confirmed Legal.
+   - **Confirmed Illegal Extras (8,290):** `wide` (7,714) and `Overstep` (576). Always re-bowled.
+   - **Ambiguous Extras (`other` - 264 records):**
+     - Delivery styles: 116 beamers (above waist), 72 high full tosses, 16 bouncers, 60 other.
+     - Dismissals: 0 bowled, 0 caught, 0 LBW (261 NaN, 3 run outs) — proving batters cannot be caught/bowled on these deliveries under no-ball laws.
+     - Sequence behavior: In 253 of 264 overs, the over reached 6 legal balls excluding `other` (re-bowled). In remaining 11 instances, the innings ended early (10 target chased mid-over, 1 Super Over).
+     - Retained as ambiguous rather than forcing an artificial single classification.
+     - Dual Metrics: Strict Legal Total: 192,445 vs Permissive Legal Total: 192,709 (`unresolved_deliveries_count: 264`).
+3. **Bowling Credit & Dismissal Spelling Normalization:**
+   - 10,272 bowler wickets vs 609 non-bowler dismissals (RunOut: 600, Retire Out: 6, Obstructing: 3).
+   - Typo `'Obstracting the field'` (2) normalized with `'Obstructing the field'` (1) to 3 total.
+   - Unknown dismissals guard rejects any unlisted dismissal type from bowler credit.
 4. **Super Overs:** 38 deliveries across 6 matches segregated from ordinary innings play.
 5. **Bowling Speed Cleaning:** 38.7% zeroes and sensor corruptions (-1.0, 1456.1 kph) require rigorous cleaning.
 6. **Canonical `player_id`:** Exactly 7 player names belong to multiple distinct cricketers (e.g. Abdul Samad, Rashid Khan). `player_id` must be the sole canonical key.
 
 ---
 
-## 5. R1-01 Acceptance Verification
+## 5. R1-01 & R1-01.1 Acceptance Verification
 
 - [x] Full repository audit conducted without modifying existing Stage 0–4 code or Git history.
 - [x] Standalone package `round1_pressure/` established with `.gitignore` data protection.
 - [x] Profiling completed for all 6 CSV files (200,999 deliveries, 883 matches, 141 competitions, 353 teams, 28,381 playing XI rows, 6,413 player mappings).
-- [x] 11 focused test cases implemented in `test_data_qa.py` (100% passing).
-- [x] Full backend regression verified (61/61 backend tests passing; 72/72 total tests passing).
+- [x] Evidence-based delivery legality classification implemented with full sequence investigation.
+- [x] `Penalty` delivery investigated in full over context: confirmed legal (6 balls in over, no re-bowl).
+- [x] `other` deliveries (264 records) investigated: 253 re-bowled in completed overs, 0 bowled/caught dismissals; retained as explicitly ambiguous with dual reporting.
+- [x] Dismissal spelling normalization (`Obstracting` $\to$ `Obstructing`) and unknown dismissal guard implemented.
+- [x] 15 focused test cases implemented in `test_data_qa.py` (100% passing).
+- [x] Full backend regression verified (61/61 backend tests passing; 76/76 total tests passing).
 - [x] Machine-readable `qa_summary.json` and human-readable `data_quality_report.md` generated deterministically.
 
 ---

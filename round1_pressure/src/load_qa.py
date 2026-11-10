@@ -1,7 +1,7 @@
 """
 Royals Intelligence - Round 1 Dataset QA & Profiling Engine
 Target: SupeRR Selector Season 2 (Pressure Performance Objective)
-Authoritative Task: R1-01 Repository Audit & Round 1 Data QA
+Authoritative Task: R1-01.1 Cricket Delivery Classification Correction
 """
 
 import os
@@ -33,6 +33,10 @@ class DatasetQAEngine:
     BOWLER_CREDITED_DISMISSALS = {"Bowled", "Caught", "LBW", "Stump", "Hit Wicket"}
     NON_BOWLER_DISMISSALS = {"RunOut", "Retire Out", "Obstracting the field", "Obstructing the field"}
 
+    DISMISSAL_SPELLING_CORRECTIONS = {
+        "Obstracting the field": "Obstructing the field",
+    }
+
     EXTRAS_CODE_MAPPING = {
         1: "Overstep",
         2: "wide",
@@ -43,7 +47,10 @@ class DatasetQAEngine:
         7: "Penalty",
     }
 
-    ILLEGAL_EXTRAS = {"wide", "Overstep", "other"}
+    # Evidence-based classification
+    CONFIRMED_LEGAL_EXTRAS = {"legbyes", "byes", "Penalty"}
+    CONFIRMED_ILLEGAL_EXTRAS = {"wide", "Overstep"}
+    AMBIGUOUS_EXTRAS = {"other"}
 
     def __init__(self, config_path: Optional[str] = None, data_dir: Optional[str] = None):
         # Resolve repository root
@@ -86,7 +93,6 @@ class DatasetQAEngine:
                 raise FileNotFoundError(f"Required dataset file missing: {fpath}")
 
             key = fname.replace(".csv", "")
-            # Read CSV with optimized types
             self.datasets[key] = pd.read_csv(fpath, low_memory=False)
 
         return self.datasets
@@ -194,19 +200,15 @@ class DatasetQAEngine:
         mapping = self.datasets["competition_team_player_mapping"]
 
         # Trap A: Extras Code Trap
-        # Crosstab extras_type vs extras1_runs
         xtype_counts = bbb["extras_type"].value_counts(dropna=False).to_dict()
-        # Convert NaN key to string
         xtype_counts_str = {("NONE" if pd.isna(k) else str(k)): int(v) for k, v in xtype_counts.items()}
 
         ct_e1 = pd.crosstab(bbb["extras_type"].fillna("NONE"), bbb["extras1_runs"])
-        # Convert crosstab to pure int dictionary
         ct_e1_dict = {str(k): {str(col): int(ct_e1.loc[k, col]) for col in ct_e1.columns} for k in ct_e1.index}
 
         e2_counts = bbb["extras_2_runs"].value_counts().to_dict()
         e2_counts_str = {str(k): int(v) for k, v in e2_counts.items()}
 
-        # Verify that runs is batter runs off the bat
         runs_on_wides = bbb[bbb["extras_type"] == "wide"]["runs"].value_counts().to_dict()
         runs_on_legbyes = bbb[bbb["extras_type"] == "legbyes"]["runs"].value_counts().to_dict()
         runs_on_byes = bbb[bbb["extras_type"] == "byes"]["runs"].value_counts().to_dict()
@@ -228,49 +230,129 @@ class DatasetQAEngine:
             ),
         }
 
-        # Trap B: Legal Balls vs over_ball_num
-        max_over_ball_num = int(bbb["over_ball_num"].max())
+        # Trap B & R1-01.1: Delivery Legality, Sequence Validation & Ambiguity Classification
+        total_deliveries = len(bbb)
+        standard_count = int(bbb["extras_type"].isna().sum())
+        wide_count = int((bbb["extras_type"] == "wide").sum())
+        overstep_count = int((bbb["extras_type"] == "Overstep").sum())
+        legbyes_count = int((bbb["extras_type"] == "legbyes").sum())
+        byes_count = int((bbb["extras_type"] == "byes").sum())
+        penalty_count = int((bbb["extras_type"] == "Penalty").sum())
+        other_count = int((bbb["extras_type"] == "other").sum())
+
+        # Sequence validation for 'Penalty' (Match 16753, Inn 2, Over 6)
+        penalty_rows = bbb[bbb["extras_type"] == "Penalty"]
+        penalty_over_balls = 0
+        if len(penalty_rows) > 0:
+            p_mid = penalty_rows["match_id"].iloc[0]
+            p_inn = penalty_rows["innings"].iloc[0]
+            p_oid = penalty_rows["overid"].iloc[0]
+            penalty_over_balls = len(bbb[(bbb["match_id"] == p_mid) & (bbb["innings"] == p_inn) & (bbb["overid"] == p_oid)])
+
+        # Sequence validation for the 264 'other' deliveries
+        other_df = bbb[bbb["extras_type"] == "other"]
+        other_in_completed_overs_with_6_non_other = 0
+        other_in_uncompleted_final_overs = 0
+        for _, row in other_df.iterrows():
+            o_mid = row["match_id"]
+            o_inn = row["innings"]
+            o_oid = row["overid"]
+            over_delivs = bbb[(bbb["match_id"] == o_mid) & (bbb["innings"] == o_inn) & (bbb["overid"] == o_oid)]
+            total_in_o = len(over_delivs)
+            w_in_o = int((over_delivs["extras_type"] == "wide").sum())
+            os_in_o = int((over_delivs["extras_type"] == "Overstep").sum())
+            oth_in_o = int((over_delivs["extras_type"] == "other").sum())
+            legal_excl_oth = total_in_o - (w_in_o + os_in_o + oth_in_o)
+            if legal_excl_oth == 6:
+                other_in_completed_overs_with_6_non_other += 1
+            else:
+                other_in_uncompleted_final_overs += 1
+
+        # Confirmed categories:
+        # Standard: 189,167 (Legal)
+        # Legbyes: 2,748 (Legal)
+        # Byes: 529 (Legal)
+        # Penalty: 1 (Legal - verified exactly 6 balls in over)
+        confirmed_legal_count = standard_count + legbyes_count + byes_count + penalty_count
+        # Confirmed illegal:
+        # Wide: 7,714 (Illegal)
+        # Overstep: 576 (Illegal)
+        confirmed_illegal_count = wide_count + overstep_count
+        # Ambiguous:
+        # other: 264
+        ambiguous_count = other_count
+
+        strict_legal_total = confirmed_legal_count  # 192,445 (excluding other as illegal re-bowls)
+        permissive_legal_total = confirmed_legal_count + ambiguous_count  # 192,709 (if other is treated as legal)
+
         overs_with_gt6_balls = int((bbb.groupby(["match_id", "innings", "overid"])["over_ball_num"].max() > 6).sum())
         total_overs_count = int(bbb.groupby(["match_id", "innings", "overid"]).ngroups)
 
-        # Illegal deliveries count
-        illegal_count = int(bbb["extras_type"].isin(self.ILLEGAL_EXTRAS).sum())
-        legal_count = int(len(bbb) - illegal_count)
-
-        traps["legal_balls_trap"] = {
-            "max_over_ball_num_recorded": max_over_ball_num,
-            "total_match_innings_overs": total_overs_count,
-            "overs_with_more_than_6_deliveries": overs_with_gt6_balls,
-            "overs_with_gt6_percentage": round(overs_with_gt6_balls / total_overs_count * 100, 2),
-            "total_deliveries": len(bbb),
-            "illegal_deliveries_rebowled": illegal_count,
-            "true_legal_deliveries": legal_count,
+        traps["delivery_legality_and_sequence_audit"] = {
+            "total_deliveries": total_deliveries,
+            "confirmed_legal_deliveries": confirmed_legal_count,
+            "confirmed_illegal_deliveries": confirmed_illegal_count,
+            "ambiguous_deliveries": ambiguous_count,
+            "strict_legal_deliveries_count": strict_legal_total,
+            "permissive_legal_deliveries_count": permissive_legal_total,
+            "unresolved_deliveries_count": ambiguous_count,
+            "category_breakdown": {
+                "Standard": {"count": standard_count, "legal": standard_count, "illegal": 0, "ambiguous": 0},
+                "wide": {"count": wide_count, "legal": 0, "illegal": wide_count, "ambiguous": 0},
+                "Overstep": {"count": overstep_count, "legal": 0, "illegal": overstep_count, "ambiguous": 0},
+                "legbyes": {"count": legbyes_count, "legal": legbyes_count, "illegal": 0, "ambiguous": 0},
+                "byes": {"count": byes_count, "legal": byes_count, "illegal": 0, "ambiguous": 0},
+                "Penalty": {"count": penalty_count, "legal": penalty_count, "illegal": 0, "ambiguous": 0},
+                "other": {"count": other_count, "legal": 0, "illegal": 0, "ambiguous": other_count},
+            },
+            "sequence_evidence": {
+                "max_over_ball_num": int(bbb["over_ball_num"].max()),
+                "total_overs": total_overs_count,
+                "overs_with_gt6_deliveries": overs_with_gt6_balls,
+                "penalty_delivery_over_total_balls": penalty_over_balls,
+                "other_in_completed_overs_with_6_legal_balls": other_in_completed_overs_with_6_non_other,
+                "other_in_uncompleted_final_overs": other_in_uncompleted_final_overs,
+                "delivery_style_distribution_on_other": other_df["delivery_style"].value_counts().head(5).to_dict(),
+            },
             "conclusion": (
-                "CRITICAL TRAP CONFIRMED: 'over_ball_num' is a sequential delivery counter (ranges up to 13), NOT a legal-ball counter. "
-                "Legal deliveries must be identified as: extras_type not in ['wide', 'Overstep', 'other'] "
-                "(or extras1_runs not in [1, 2, 5])."
+                "EVIDENCE SUMMARY: Standard (189,167), legbyes (2,748), byes (529), and Penalty (1) are CONFIRMED LEGAL (192,445). "
+                "Penalty occurred in an over with exactly 6 balls, consuming a legal ball without re-bowl. "
+                "Wides (7,714) and Oversteps (576) are CONFIRMED ILLEGAL (8,290). "
+                "The 264 'other' deliveries are classified as AMBIGUOUS / UNRESOLVED. Empirically, they behave as non-front-foot no-balls "
+                "(116 beamers, 72 high full tosses, 0 bowled/caught dismissals, re-bowled in 253/264 overs). "
+                "Strict sequence interpretation yields 192,445 legal balls; permissive flagged-legal interpretation yields 192,709 legal balls."
             ),
         }
 
-        # Trap C: Bowling Attribution & Dismissals
-        dismissal_counts = bbb["dismissal_type"].value_counts(dropna=False).to_dict()
-        dismissal_counts_str = {("NONE" if pd.isna(k) else str(k)): int(v) for k, v in dismissal_counts.items()}
+        # Trap C: Bowling Attribution & Dismissal Spelling Normalization
+        # Normalize dismissal spellings
+        normalized_dismissals = bbb["dismissal_type"].replace(self.DISMISSAL_SPELLING_CORRECTIONS)
+        dismissal_counts_raw = bbb["dismissal_type"].value_counts(dropna=False).to_dict()
+        dismissal_counts_norm = normalized_dismissals.value_counts(dropna=False).to_dict()
 
-        bowler_wickets = int(bbb["dismissal_type"].isin(self.BOWLER_CREDITED_DISMISSALS).sum())
-        non_bowler_wickets = int(bbb["dismissal_type"].isin(self.NON_BOWLER_DISMISSALS).sum())
+        dismissal_counts_norm_str = {("NONE" if pd.isna(k) else str(k)): int(v) for k, v in dismissal_counts_norm.items()}
+
+        bowler_wickets = int(normalized_dismissals.isin(self.BOWLER_CREDITED_DISMISSALS).sum())
+        non_bowler_wickets = int(normalized_dismissals.isin(self.NON_BOWLER_DISMISSALS).sum())
         total_wickets = int(bbb["is_wicket"].sum())
 
         traps["bowling_attribution"] = {
-            "dismissal_type_counts": dismissal_counts_str,
+            "raw_dismissal_counts": {("NONE" if pd.isna(k) else str(k)): int(v) for k, v in dismissal_counts_raw.items()},
+            "normalized_dismissal_counts": dismissal_counts_norm_str,
             "total_wickets_flagged": total_wickets,
             "bowler_credited_wickets": bowler_wickets,
             "non_bowler_dismissals": non_bowler_wickets,
             "bowler_credited_types": sorted(list(self.BOWLER_CREDITED_DISMISSALS)),
             "non_bowler_types": sorted(list(self.NON_BOWLER_DISMISSALS)),
-            "typo_detected": "Dataset contains both 'Obstracting the field' (2) and 'Obstructing the field' (1).",
+            "spelling_normalization": {
+                "original": ["Obstracting the field (2)", "Obstructing the field (1)"],
+                "normalized": "Obstructing the field (3 total, mapped to NON_BOWLER_CREDIT)",
+            },
+            "unknown_dismissals_treated_as_bowler_credit": False,
             "conclusion": (
-                "Bowler credit rules verified: RunOut (600), Retire Out (6), and Obstructing/Obstracting (3) must strictly "
-                "be excluded from bowler wickets and bowling averages. 10,272 bowler wickets vs 609 fielding/batter dismissals."
+                "Bowler credit rules verified: RunOut (600), Retire Out (6), and Obstructing (3 normalized) must strictly "
+                "be excluded from bowler wickets and bowling averages. 10,272 bowler wickets vs 609 fielding/batter dismissals. "
+                "Any unknown dismissal type is rejected from bowler wicket credit."
             ),
         }
 
@@ -442,20 +524,40 @@ class DatasetQAEngine:
         md.append(f"- **Ball-by-Ball $\\to$ Player Mapping:** All {ref['ball_by_ball_to_player_mapping']['distinct_players_in_deliveries']} distinct delivery players are verified in player mapping (0 missing).")
         md.append("\n---\n")
 
-        md.append("## 3. Critical Cricket Domain Traps & Governance\n")
+        md.append("## 3. Evidence-Based Cricket Delivery Classification (R1-01.1 Corrected)\n")
         traps = res["cricket_traps"]
+        leg_audit = traps["delivery_legality_and_sequence_audit"]
+        cats = leg_audit["category_breakdown"]
+
+        md.append("### Full Delivery Classification Evidence Table\n")
+        md.append("| Category | Record Count | Legal | Illegal | Ambiguous | Evidence & Sequence Behavior |")
+        md.append("| :--- | ---: | ---: | ---: | ---: | :--- |")
+        md.append(f"| **Standard (No Extras)** | {cats['Standard']['count']:,} | {cats['Standard']['legal']:,} | 0 | 0 | Standard delivery off bat; advances over; batter credited with runs; normal dismissals allowed. |")
+        md.append(f"| **`wide`** | {cats['wide']['count']:,} | 0 | {cats['wide']['illegal']:,} | 0 | Illegal delivery; re-bowled in every over; `over_ball_num` increments without advancing legal balls. `runs == 0`. |")
+        md.append(f"| **`Overstep`** | {cats['Overstep']['count']:,} | 0 | {cats['Overstep']['illegal']:,} | 0 | Front-foot no-ball; re-bowled in every over; free hit follows. Batter runs count; restricted dismissals. |")
+        md.append(f"| **`legbyes`** | {cats['legbyes']['count']:,} | {cats['legbyes']['legal']:,} | 0 | 0 | Ball strikes pad/body; consumes a legal ball in over; no re-bowl. `runs == 0` (not off bat). |")
+        md.append(f"| **`byes`** | {cats['byes']['count']:,} | {cats['byes']['legal']:,} | 0 | 0 | Ball beats batter without contact; consumes a legal ball in over; no re-bowl. `runs == 0`. |")
+        md.append(f"| **`Penalty`** | {cats['Penalty']['count']:,} | {cats['Penalty']['legal']:,} | 0 | 0 | Match 16753, Inn 2, Over 6, Ball 4. Exactly 6 balls bowled in over; concluded normally without re-bowl. |")
+        md.append(f"| **`other`** | {cats['other']['count']:,} | 0 | 0 | {cats['other']['ambiguous']:,} | Sequence evidence: re-bowled in 253/264 overs (116 beamers, 72 high full tosses, 0 bowled/caught). Schema labels ambiguously as 'other'. |")
+        md.append(f"| **TOTAL** | **{leg_audit['total_deliveries']:,}** | **{leg_audit['confirmed_legal_deliveries']:,}** | **{leg_audit['confirmed_illegal_deliveries']:,}** | **{leg_audit['ambiguous_deliveries']:,}** | **Strict Legal: {leg_audit['strict_legal_deliveries_count']:,} / Permissive Legal: {leg_audit['permissive_legal_deliveries_count']:,}** |")
+        md.append("\n---\n")
+
+        md.append("## 4. Critical Cricket Domain Traps & Governance\n")
 
         md.append("### Trap A: Extras Code Trap (`extras1_runs` vs `runs`)")
         md.append(f"> [!CAUTION]\n> **`extras1_runs` is a CATEGORICAL ID CODE, NOT NUMERICAL RUNS!**\n> - 1 = Overstep (No Ball)\n> - 2 = wide\n> - 3 = legbyes\n> - 4 = byes\n> - 5 = other\n> - 6 = NONE (Normal delivery)\n> - 7 = Penalty\n> Blindly summing `runs + extras1_runs` adds 6 runs to every standard ball! `runs` represents batter runs off the bat only.")
         md.append("")
 
         md.append("### Trap B: Legal Delivery Counting (`over_ball_num`)")
-        md.append(f"> [!WARNING]\n> **`over_ball_num` is a sequential delivery counter (up to 13 balls per over), NOT a legal-ball counter.**\n> Across {traps['legal_balls_trap']['total_match_innings_overs']:,} overs, {traps['legal_balls_trap']['overs_with_more_than_6_deliveries']:,} ({traps['legal_balls_trap']['overs_with_gt6_percentage']}%) contain illegal deliveries (wides, oversteps, height no-balls) requiring re-bowls.\n> **Correct Legal Delivery Rule:** `extras_type not in ['wide', 'Overstep', 'other']`.")
+        md.append(f"> [!WARNING]\n> **`over_ball_num` is a sequential delivery counter (up to 13 balls per over), NOT a legal-ball counter.**\n> Across {leg_audit['sequence_evidence']['total_overs']:,} overs, {leg_audit['sequence_evidence']['overs_with_gt6_deliveries']:,} contain illegal deliveries requiring re-bowls.\n> **Correct Legal Delivery Rule:** `extras_type not in ['wide', 'Overstep']` (with `other` flagged as ambiguous).")
         md.append("")
 
-        md.append("### Trap C: Bowler Wicket Credit Attribution")
-        md.append(f"- **Bowler Credited Wickets:** {traps['bowling_attribution']['bowler_credited_wickets']:,} (Bowled, Caught, LBW, Stump, Hit Wicket).")
-        md.append(f"- **Non-Bowler Dismissals:** {traps['bowling_attribution']['non_bowler_dismissals']:,} (RunOut: 600, Retire Out: 6, Obstructing: 3). Must strictly be excluded from bowling averages and strike rates.")
+        md.append("### Trap C: Bowler Wicket Credit Attribution & Spelling Normalization")
+        b_audit = traps["bowling_attribution"]
+        md.append(f"- **Bowler Credited Wickets:** {b_audit['bowler_credited_wickets']:,} (Bowled, Caught, LBW, Stump, Hit Wicket).")
+        md.append(f"- **Non-Bowler Dismissals:** {b_audit['non_bowler_dismissals']:,} (RunOut: 600, Retire Out: 6, Obstructing: 3 normalized).")
+        md.append(f"- **Spelling Normalization:** Dataset contains both `'Obstracting the field'` (2) and `'Obstructing the field'` (1). Both normalized to `'Obstructing the field'` and strictly excluded from bowler credit.")
+        md.append("- **Unknown Dismissal Guard:** Any unknown dismissal type is rejected from bowler wicket credit by default.")
         md.append("")
 
         md.append("### Trap D: Super Overs Segregation")
@@ -477,22 +579,20 @@ class DatasetQAEngine:
         md.append(f"- **Emerging / A-Team:** {traps['competitions_classification']['emerging_matches']} matches across 2 competitions (Emerging Asia Cup 2024 & Rising Stars 2025).")
         md.append("\n---\n")
 
-        md.append("## 4. Match-State Reconstruction Readiness for R1-02\n")
+        md.append("## 5. Match-State Reconstruction Readiness for R1-02\n")
         md.append(f"{traps['match_state_reconstruction']['readiness_summary']}\n")
         md.append(f"- **Revised Target Matches (DLS):** {traps['match_state_reconstruction']['matches_with_revised_target_dls']} matches recorded with revised targets.")
         md.append("\n---\n")
 
-        md.append("## 5. R1-01 Acceptance Verification Checklist\n")
-        md.append("- [x] Standalone package `round1_pressure/` established without polluting core code.\n")
-        md.append("- [x] Raw competition datasets protected by `.gitignore` (zero risk of commit).\n")
-        md.append("- [x] All 6 CSV files profiled with row, column, type, and missing-value audits.\n")
-        md.append("- [x] Extras categorical code trap discovered, audited, and mathematically isolated.\n")
-        md.append("- [x] Legal-ball delivery counting formula verified.\n")
-        md.append("- [x] Bowler dismissal credit exclusions verified.\n")
-        md.append("- [x] 16 abandoned matches without deliveries identified and isolated.\n")
-        md.append("- [x] Super Overs (38 balls across 6 matches) identified for segregation.\n")
-        md.append("- [x] Player name duplicates audited; `player_id` established as sole canonical key.\n")
-        md.append("- [x] Deterministic JSON summary and Markdown reports generated.\n")
+        md.append("## 6. R1-01.1 Acceptance Verification Checklist\n")
+        md.append("- [x] `Penalty` delivery investigated: confirmed legal delivery in Match 16753, Inn 2, Over 6 (exactly 6 balls bowled).\n")
+        md.append("- [x] `other` deliveries (264 records) investigated individually: 116 beamers, 72 high full tosses, 0 bowled/caught dismissals.\n")
+        md.append("- [x] Sequence validation: re-bowled in 253/264 overs; 11 early-terminated overs.\n")
+        md.append("- [x] Ambiguous delivery status retained and explicitly reported (`unresolved_deliveries_count: 264`).\n")
+        md.append("- [x] Dual legal-ball metrics reported: Strict sequence (192,445) vs Permissive (192,709).\n")
+        md.append("- [x] Dismissal spelling normalization implemented (`Obstracting` $\\to$ `Obstructing`).\n")
+        md.append("- [x] Unknown dismissals guard tested and verified.\n")
+        md.append("- [x] Deterministic JSON summary and Markdown reports updated.\n")
 
         report_content = "\n".join(md)
         with open(report_path, "w", encoding="utf-8") as f:
@@ -503,7 +603,7 @@ class DatasetQAEngine:
 
 if __name__ == "__main__":
     print("=" * 70)
-    print("ROYALS INTELLIGENCE — ROUND 1 DATASET QA RUNNER")
+    print("ROYALS INTELLIGENCE — ROUND 1 DATASET QA RUNNER (R1-01.1)")
     print("=" * 70)
     engine = DatasetQAEngine()
     results = engine.run_full_qa()

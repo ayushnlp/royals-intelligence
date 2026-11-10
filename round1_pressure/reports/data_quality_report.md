@@ -1,5 +1,5 @@
 # ROYALS INTELLIGENCE — ROUND 1 DATA QUALITY & REPOSITORY AUDIT REPORT
-**Generated:** 2026-11-10T18:04:35.346342+00:00  
+**Generated:** 2026-11-10T18:35:02.950563+00:00  
 **Competition Target:** SupeRR Selector Season 2 — Round 1  
 **Core Objective:** *Identify the Most Reliable Players Under Pressure*  
 **Audit Status:** `DATASET_QA_PASSED_WITH_CRITICAL_TRAPS_DOCUMENTED`  
@@ -28,7 +28,24 @@
 
 ---
 
-## 3. Critical Cricket Domain Traps & Governance
+## 3. Evidence-Based Cricket Delivery Classification (R1-01.1 Corrected)
+
+### Full Delivery Classification Evidence Table
+
+| Category | Record Count | Legal | Illegal | Ambiguous | Evidence & Sequence Behavior |
+| :--- | ---: | ---: | ---: | ---: | :--- |
+| **Standard (No Extras)** | 189,167 | 189,167 | 0 | 0 | Standard delivery off bat; advances over; batter credited with runs; normal dismissals allowed. |
+| **`wide`** | 7,714 | 0 | 7,714 | 0 | Illegal delivery; re-bowled in every over; `over_ball_num` increments without advancing legal balls. `runs == 0`. |
+| **`Overstep`** | 576 | 0 | 576 | 0 | Front-foot no-ball; re-bowled in every over; free hit follows. Batter runs count; restricted dismissals. |
+| **`legbyes`** | 2,748 | 2,748 | 0 | 0 | Ball strikes pad/body; consumes a legal ball in over; no re-bowl. `runs == 0` (not off bat). |
+| **`byes`** | 529 | 529 | 0 | 0 | Ball beats batter without contact; consumes a legal ball in over; no re-bowl. `runs == 0`. |
+| **`Penalty`** | 1 | 1 | 0 | 0 | Match 16753, Inn 2, Over 6, Ball 4. Exactly 6 balls bowled in over; concluded normally without re-bowl. |
+| **`other`** | 264 | 0 | 0 | 264 | Sequence evidence: re-bowled in 253/264 overs (116 beamers, 72 high full tosses, 0 bowled/caught). Schema labels ambiguously as 'other'. |
+| **TOTAL** | **200,999** | **192,445** | **8,290** | **264** | **Strict Legal: 192,445 / Permissive Legal: 192,709** |
+
+---
+
+## 4. Critical Cricket Domain Traps & Governance
 
 ### Trap A: Extras Code Trap (`extras1_runs` vs `runs`)
 > [!CAUTION]
@@ -45,12 +62,14 @@
 ### Trap B: Legal Delivery Counting (`over_ball_num`)
 > [!WARNING]
 > **`over_ball_num` is a sequential delivery counter (up to 13 balls per over), NOT a legal-ball counter.**
-> Across 32,350 overs, 6,710 (20.74%) contain illegal deliveries (wides, oversteps, height no-balls) requiring re-bowls.
-> **Correct Legal Delivery Rule:** `extras_type not in ['wide', 'Overstep', 'other']`.
+> Across 32,350 overs, 6,710 contain illegal deliveries requiring re-bowls.
+> **Correct Legal Delivery Rule:** `extras_type not in ['wide', 'Overstep']` (with `other` flagged as ambiguous).
 
-### Trap C: Bowler Wicket Credit Attribution
+### Trap C: Bowler Wicket Credit Attribution & Spelling Normalization
 - **Bowler Credited Wickets:** 10,272 (Bowled, Caught, LBW, Stump, Hit Wicket).
-- **Non-Bowler Dismissals:** 609 (RunOut: 600, Retire Out: 6, Obstructing: 3). Must strictly be excluded from bowling averages and strike rates.
+- **Non-Bowler Dismissals:** 609 (RunOut: 600, Retire Out: 6, Obstructing: 3 normalized).
+- **Spelling Normalization:** Dataset contains both `'Obstracting the field'` (2) and `'Obstructing the field'` (1). Both normalized to `'Obstructing the field'` and strictly excluded from bowler credit.
+- **Unknown Dismissal Guard:** Any unknown dismissal type is rejected from bowler wicket credit by default.
 
 ### Trap D: Super Overs Segregation
 - Standard Innings: Innings 1 (105,727 balls) & Innings 2 (95,234 balls).
@@ -71,7 +90,7 @@
 
 ---
 
-## 4. Match-State Reconstruction Readiness for R1-02
+## 5. Match-State Reconstruction Readiness for R1-02
 
 Match-state reconstruction is fully supported: Innings score, wickets, and legal balls can be derived from cumulative sums of legal deliveries. Chasing target = 1st innings total + 1 (or revised_target for the 23 DLS matches). Balls remaining = (20.0 * 6) - legal_balls_bowled (or revised_overs * 6). Runs required = target - current_score.
 
@@ -79,24 +98,20 @@ Match-state reconstruction is fully supported: Innings score, wickets, and legal
 
 ---
 
-## 5. R1-01 Acceptance Verification Checklist
+## 6. R1-01.1 Acceptance Verification Checklist
 
-- [x] Standalone package `round1_pressure/` established without polluting core code.
+- [x] `Penalty` delivery investigated: confirmed legal delivery in Match 16753, Inn 2, Over 6 (exactly 6 balls bowled).
 
-- [x] Raw competition datasets protected by `.gitignore` (zero risk of commit).
+- [x] `other` deliveries (264 records) investigated individually: 116 beamers, 72 high full tosses, 0 bowled/caught dismissals.
 
-- [x] All 6 CSV files profiled with row, column, type, and missing-value audits.
+- [x] Sequence validation: re-bowled in 253/264 overs; 11 early-terminated overs.
 
-- [x] Extras categorical code trap discovered, audited, and mathematically isolated.
+- [x] Ambiguous delivery status retained and explicitly reported (`unresolved_deliveries_count: 264`).
 
-- [x] Legal-ball delivery counting formula verified.
+- [x] Dual legal-ball metrics reported: Strict sequence (192,445) vs Permissive (192,709).
 
-- [x] Bowler dismissal credit exclusions verified.
+- [x] Dismissal spelling normalization implemented (`Obstracting` $\to$ `Obstructing`).
 
-- [x] 16 abandoned matches without deliveries identified and isolated.
+- [x] Unknown dismissals guard tested and verified.
 
-- [x] Super Overs (38 balls across 6 matches) identified for segregation.
-
-- [x] Player name duplicates audited; `player_id` established as sole canonical key.
-
-- [x] Deterministic JSON summary and Markdown reports generated.
+- [x] Deterministic JSON summary and Markdown reports updated.
