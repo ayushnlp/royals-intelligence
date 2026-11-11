@@ -27,6 +27,13 @@ paths:
   pressure_definition_comparison_parquet: "round1_pressure/data/processed/pressure_definition_comparison.parquet"
   pressure_coverage_summary_parquet: "round1_pressure/data/processed/pressure_coverage_summary.parquet"
   pressure_detection_report_md: "round1_pressure/reports/pressure_detection_report.md"
+  batting_ordinary_baseline_parquet: "round1_pressure/data/processed/batting_ordinary_baseline.parquet"
+  bowling_ordinary_baseline_parquet: "round1_pressure/data/processed/bowling_ordinary_baseline.parquet"
+  batting_pressure_differentials_parquet: "round1_pressure/data/processed/batting_pressure_differentials.parquet"
+  bowling_pressure_differentials_parquet: "round1_pressure/data/processed/bowling_pressure_differentials.parquet"
+  bayesian_shrinkage_summary_parquet: "round1_pressure/data/processed/bayesian_shrinkage_summary.parquet"
+  chronological_validation_results_parquet: "round1_pressure/data/processed/chronological_validation_results.parquet"
+  expected_performance_report_md: "round1_pressure/reports/expected_performance_report.md"
 
 expected_files:
   ball_by_ball: "ball_by_ball.csv"
@@ -400,6 +407,33 @@ pressure_detection_r1_03:
     vectorized_dimension_tracking:
       - dimensions_available
       - dimensions_withheld
+
+  expected_performance_and_bayesian:
+    stratification_cells: 12
+    stratification_keys:
+      - comp_tier
+      - innings
+      - innings_phase
+    qualification_threshold_legal_balls: 30
+    batting:
+      metric: "diff_strike_rate"
+      ordinary_population_legal_balls: 154529
+      total_players: 691
+      qualified_players: 278
+      prior_mean_mu: -34.24
+      between_player_tau: 32.94
+      median_reliability: 0.747
+      chronological_val_mse_reduction_pct: 19.8
+    bowling:
+      metric: "diff_economy"
+      ordinary_population_legal_balls: 148678
+      total_players: 479
+      qualified_players: 239
+      prior_mean_mu: 1.82
+      between_player_tau: 0.77
+      median_reliability: 0.296
+      chronological_val_mse_reduction_pct: 39.4
+
 
 
 

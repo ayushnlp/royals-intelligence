@@ -238,7 +238,62 @@ Task R1-03 delivers a reproducible, evidence-driven Pressure Detection Engine th
 
 ---
 
-## 8. Execution & Verification Commands
+## 8. Expected Performance Baselines & Bayesian Reliability Foundation (R1-04)
+
+### 1. Stratified Ordinary Baselines (12 Cells):
+To establish true player skill differentials under pressure, expected performance is measured against ordinary (non-pressure) deliveries partitioned into 12 mutually exclusive context cells:
+$$\text{Cell} = \text{comp\_tier (IPL, T20I)} \times \text{innings (1, 2)} \times \text{innings\_phase (Powerplay, Middle, Death)}$$
+- **Batting Baseline Population:** 154,529 legal ordinary deliveries (83.2% of primary scope).
+- **Bowling Baseline Population:** 148,678 legal ordinary deliveries (80.1% of primary scope).
+- **Independence:** Batting and bowling baselines are independently computed and never co-mingled.
+
+### 2. Simpson's Paradox Discovery in Pressure Batting:
+- Raw ordinary strike rate is **139.7**, while raw pressured strike rate is **140.9** (+1.2 SR points).
+- **The Paradox:** Naive unstratified analysis suggests batters hit faster under pressure.
+- **The Reality:** 79.3% of pressure deliveries occur in the Death phase, where the ordinary baseline strike rate is **176.5**.
+- **Within-Phase Degradation Under Pressure:**
+  - Death Phase: Strike rate plunges from **176.5 to 149.2** (-27.3 points; 15.5% drop).
+  - Middle Phase: Strike rate plunges from **134.3 to 104.3** (-30.0 points; 22.3% drop).
+  - Powerplay Phase: Strike rate plunges from **137.2 to 113.3** (-23.9 points; 17.4% drop).
+- **Context-Weighted Expectation:** Each player's expected performance under pressure is weighted by their exact delivery allocation across the 12 cells:
+  $$E[M_i] = \sum_{c \in \text{Cells}} w_{i,c} \cdot B_{c,M}$$
+  This completely removes phase-distribution bias and guarantees unbiased differential measurement.
+
+### 3. Bowling Degradation Under Pressure:
+- Ordinary overall economy is **7.98 RPO**, jumping to **10.07 RPO** under pressure (+2.08 RPO increase in runs conceded).
+- Powerplay Overs 5–6 with 0 wickets lost: Economy jumps from **7.95 to 10.33 RPO** (+2.38 RPO).
+- Death overs: Economy jumps from **7.98 to 10.03 RPO** (+2.05 RPO).
+
+### 4. Hierarchical Empirical Bayes Shrinkage (DerSimonian-Laird):
+Observed sample differentials $y_i = \text{Observed}_i - E[M_i]$ are separated into true talent differentials and sampling noise using empirical Bayes shrinkage:
+$$\theta_i = r_i y_i + (1 - r_i) \mu, \quad r_i = \frac{\tau^2}{\tau^2 + \sigma_i^2}$$
+- **Batting Strike Rate Differential:**
+  - Prior Population Mean $\mu = -34.24$ SR points.
+  - Between-Player Variance $\tau^2 = 1,084.89$ ($\tau = 32.94$ SR points).
+  - Minimum sample qualification: $\ge 30$ legal balls under pressure (278 qualified batters of 691).
+  - Median reliability $r_i = 0.747$ (range: 0.436 to 0.955).
+- **Bowling Economy Differential:**
+  - Prior Population Mean $\mu = +1.82$ RPO.
+  - Between-Player Variance $\tau^2 = 0.59$ ($\tau = 0.77$ RPO).
+  - Minimum sample qualification: $\ge 30$ legal balls under pressure (239 qualified bowlers of 479).
+  - Median reliability $r_i = 0.296$ (range: 0.088 to 0.841). Bowling economy has substantially higher noise per ball, requiring greater shrinkage toward the population mean.
+
+### 5. Chronological Out-of-Sample Validation:
+- Model trained strictly on past seasons **2022–2024** (111,323 legal balls); tested on future seasons **2025–2026** (74,369 legal balls).
+- **Batting Out-of-Sample Performance ($N = 108$ overlapping players):**
+  - Raw Sample MSE: 1,240.03 $\to$ Shrunk Posterior MSE: 994.00 (**19.8% MSE reduction**).
+  - Cross-era correlation: Raw $r = 0.549 \to$ Shrunk $r = 0.570$.
+- **Bowling Out-of-Sample Performance ($N = 115$ overlapping players):**
+  - Raw Sample MSE: 4.57 $\to$ Shrunk Posterior MSE: 2.77 (**39.4% MSE reduction**).
+  - Cross-era correlation: Raw $r = 0.136 \to$ Shrunk $r = 0.185$.
+- **Conclusion:** Shrinkage dramatically outperforms raw differentials across chronological boundaries, especially for bowling where random over-level variance is high.
+
+### 6. Strict Scope Boundary Invariant:
+No player rankings, Top 10 lists, or composite pressure index $\Psi$ are constructed in R1-04.
+
+---
+
+## 9. Execution & Verification Commands
 
 ### Run Data QA (R1-01.1):
 ```bash
@@ -252,13 +307,19 @@ python round1_pressure/src/02_reconstruct_match_state.py
 pytest round1_pressure/tests/test_match_state.py -v
 ```
 
-### Run Pressure Detection & Classification Engine (R1-03):
+### Run Pressure Detection & Classification Engine (R1-03 & R1-03.1):
 ```bash
 python round1_pressure/src/03_detect_pressure.py
 pytest round1_pressure/tests/test_pressure_detection.py -v
 ```
 
-### Run Full Test Suite:
+### Run Expected Performance & Bayesian Shrinkage Engine (R1-04):
+```bash
+python round1_pressure/src/04_expected_performance.py
+pytest round1_pressure/tests/test_expected_performance.py -v
+```
+
+### Run Full Test Suite (All 90 Round 1 Tests):
 ```bash
 pytest round1_pressure/tests -v
 ```

@@ -246,10 +246,78 @@ Task R1-03 implements a reproducible, evidence-driven Pressure Detection Engine 
 
 ---
 
-## 10. Downstream Roadmap for R1-04 (Performance Baselines & Reliability Modeling)
+## 10. R1-04 Expected Performance Baselines & Bayesian Reliability Foundation
 
-With pressure events deterministically identified and independently profiled for batters and bowlers, the next analytical stages will construct:
-1. **Contextual Baselines:** Expected Runs Added (ERA), Expected Wickets, and phase-adjusted baseline performance.
-2. **Performance Under Pressure vs. Baseline:** Differential execution ($\Delta \text{SR}$, $\Delta \text{Econ}$, Dot Ball %, Boundary Hazard Resistance).
-3. **Bayesian Reliability Scoring:** Sample size shrinkage, hierarchical empirical priors, credibility intervals.
-4. **Final Top 10 Rankings:** Independent rankings for Top 10 Batters and Top 10 Bowlers under pressure.
+Task R1-04 establishes statistically defensible player performance baselines under ordinary conditions, calculates player-level pressure-versus-ordinary differentials, and implements hierarchical Empirical Bayes shrinkage:
+
+1. **Stratified Ordinary Baselines (12 Context Cells):**
+   - Ordinary (non-pressure) deliveries are partitioned into 12 mutually exclusive strata:
+     $$\text{Cell} = \text{comp\_tier (IPL, T20I)} \times \text{innings (1, 2)} \times \text{innings\_phase (Powerplay, Middle, Death)}$$
+   - Batting baseline population: **154,529** legal ordinary deliveries (83.2% of primary scope).
+   - Bowling baseline population: **148,678** legal ordinary deliveries (80.1% of primary scope).
+   - Baselines are evaluated independently for batters and bowlers, preventing cross-discipline contamination.
+
+2. **Simpson's Paradox Discovery in Pressure Batting:**
+   - Raw overall ordinary strike rate is **139.7**, while raw pressured strike rate is **140.9** (+1.2 SR points).
+   - **The Confounding:** 79.3% of pressure deliveries occur in the Death phase, where the ordinary baseline strike rate is **176.5**.
+   - **True Within-Phase Degradation Under Pressure:**
+     - Death: Strike rate drops from **176.5 to 149.2** (-27.3 points; 15.5% drop).
+     - Middle: Strike rate drops from **134.3 to 104.3** (-30.0 points; 22.3% drop).
+     - Powerplay: Strike rate drops from **137.2 to 113.3** (-23.9 points; 17.4% drop).
+   - **Context-Weighted Expectations:** Every player's expectation under pressure is computed as:
+     $$E[M_i] = \sum_{c} w_{i,c} \cdot B_{c,M}$$
+     where $w_{i,c}$ is player $i$'s empirical proportion of pressure deliveries in cell $c$. This eliminates phase-distribution confounding.
+
+3. **Bowling Degradation Under Pressure:**
+   - Ordinary overall economy is **7.98 RPO**, jumping to **10.07 RPO** under pressure (+2.08 RPO increase in runs conceded).
+   - Powerplay Overs 5–6 with 0 wickets lost: Economy surges from **7.95 to 10.33 RPO** (+2.38 RPO).
+   - Death overs: Economy surges from **7.98 to 10.03 RPO** (+2.05 RPO).
+
+4. **Hierarchical Empirical Bayes Shrinkage (DerSimonian-Laird):**
+   - Observed sample differentials $y_i = \text{Observed}_i - E[M_i]$ are separated into true talent differentials and sampling noise:
+     $$\theta_i = r_i y_i + (1 - r_i) \mu, \quad r_i = \frac{\tau^2}{\tau^2 + \sigma_i^2}$$
+   - **Batting Strike Rate Differential:**
+     - Prior Population Mean $\mu = -34.24$ SR points.
+     - Between-Player Variance $\tau^2 = 1,084.89$ ($\tau = 32.94$ SR points).
+     - Minimum qualification threshold: $\ge 30$ legal balls under pressure (278 qualified batters of 691).
+     - Median reliability $r_i = 0.747$ (range: 0.436 to 0.955).
+   - **Bowling Economy Differential:**
+     - Prior Population Mean $\mu = +1.82$ RPO.
+     - Between-Player Variance $\tau^2 = 0.59$ ($\tau = 0.77$ RPO).
+     - Minimum qualification threshold: $\ge 30$ legal balls under pressure (239 qualified bowlers of 479).
+     - Median reliability $r_i = 0.296$ (range: 0.088 to 0.841). Bowling economy exhibits much higher per-ball variance, appropriately requiring stronger shrinkage toward the population mean.
+
+5. **Chronological Out-of-Sample Validation:**
+   - Train on past seasons **2022–2024** (111,323 legal balls); test on future seasons **2025–2026** (74,369 legal balls).
+   - **Batting ($N = 108$ overlapping players):**
+     - Raw Sample MSE: 1,240.03 $\to$ Shrunk Posterior MSE: 994.00 (**19.8% MSE reduction**).
+     - Cross-era correlation: Raw $r = 0.549 \to$ Shrunk $r = 0.570$.
+   - **Bowling ($N = 115$ overlapping players):**
+     - Raw Sample MSE: 4.57 $\to$ Shrunk Posterior MSE: 2.77 (**39.4% MSE reduction**).
+     - Cross-era correlation: Raw $r = 0.136 \to$ Shrunk $r = 0.185$.
+   - Shrunk differentials demonstrably improve predictive accuracy and stability over raw observed statistics.
+
+6. **Strict Scope Boundary Invariant:**
+   - In accordance with task constraints, NO composite rankings, Top 10 lists, or final Pressure Index $\Psi$ are constructed in R1-04.
+
+7. **Generated Datasets & Reports:**
+   - `batting_ordinary_baseline.parquet`
+   - `bowling_ordinary_baseline.parquet`
+   - `batting_pressure_differentials.parquet`
+   - `bowling_pressure_differentials.parquet`
+   - `bayesian_shrinkage_summary.parquet`
+   - `chronological_validation_results.parquet`
+   - `expected_performance_report.md`
+
+8. **Test Verification:**
+   - 14 dedicated unit tests in `test_expected_performance.py` (90/90 in `round1_pressure`, 61/61 in `backend`, 151/151 total passing across workspace).
+
+---
+
+## 11. Downstream Roadmap for R1-05 (Player Reliability Scoring & Final Rankings)
+
+With statistical baselines established, differentials contextualized, and Empirical Bayes shrinkage validated out-of-sample, the final analytical stage (R1-05) will construct:
+1. **Multi-Metric Composite Reliability:** Synthesizing shrunk differentials (Strike Rate, Dot %, Boundary %, Dismissal % for batters; Economy, Wicket %, Dot %, Boundary Conceded % for bowlers).
+2. **Context Leverage Weighting:** Combining frequency-based sample reliability with leverage-weighted pressure exposure.
+3. **Credibility Bounds:** Incorporating 95% Credible Intervals to guard against sample size fragility.
+4. **Final Top 10 Rankings:** Publishing reproducible, fully audited Top 10 Most Reliable Batters and Top 10 Most Reliable Bowlers Under Pressure.
