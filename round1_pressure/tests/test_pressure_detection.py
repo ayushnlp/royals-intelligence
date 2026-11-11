@@ -401,3 +401,215 @@ def test_deterministic_repeated_runs(engine):
     assert (run1_bat["is_pressure_event"] == run2_bat["is_pressure_event"]).all()
     assert (run1_bat["pressure_definition_id"] == run2_bat["pressure_definition_id"]).all()
     assert (run1_bat["dimensions_available"] == run2_bat["dimensions_available"]).all()
+
+
+# ==============================================================================
+# PART 9: R1-03.1 TARGETED AUDIT AND RECONCILIATION INVARIANTS
+# ==============================================================================
+
+def test_audit_a_primary_delivery_population_reconciliation(engine):
+    """
+    Audit A: Verifies exact mathematical reconciliation of delivery populations:
+    - Total raw deliveries = 200,999.
+    - Excluded Emerging Tournaments (comps 2670, 3289) = 6,985.
+    - Excluded Super Overs in Senior comps = 26 (comps 2542: 5, 2725: 10, 3133: 7, 3298: 4).
+    - Total excluded = 7,011.
+    - Primary scope deliveries = 193,988.
+    - Strict legal deliveries in primary scope = 185,692.
+    - Strict illegal deliveries in primary scope = 8,296.
+    - Permissive legal deliveries in primary scope = 185,951.
+    - Permissive illegal deliveries in primary scope = 8,037.
+    - Ambiguous 'other' delta = exactly 259 deliveries in primary scope.
+    """
+    df_s = engine.delivery_states_strict
+    df_p = engine.delivery_states_permissive
+
+    assert len(df_s) == 200999
+    assert len(df_p) == 200999
+
+    is_emerging = df_s["comp_id"].isin([2670, 3289])
+    assert is_emerging.sum() == 6985
+
+    is_so = df_s["innings"].isin([3, 4])
+    assert is_so.sum() == 38  # 26 in senior comps + 12 in comp 3289
+
+    is_senior_so = (~is_emerging) & is_so
+    assert is_senior_so.sum() == 26
+
+    excluded = is_emerging | is_senior_so
+    assert excluded.sum() == 7011
+    assert (~df_s["is_primary_scope"]).sum() == 7011
+    assert df_s["is_primary_scope"].sum() == 193988
+
+    # Strict legal vs illegal in primary scope
+    primary_s = df_s[df_s["is_primary_scope"]]
+    assert primary_s["is_legal"].sum() == 185692
+    assert (~primary_s["is_legal"]).sum() == 8296
+
+    # Permissive legal vs illegal in primary scope
+    primary_p = df_p[df_p["is_primary_scope"]]
+    assert primary_p["is_legal"].sum() == 185951
+    assert (~primary_p["is_legal"]).sum() == 8037
+
+    # Delta of ambiguous deliveries
+    assert primary_p["is_legal"].sum() - primary_s["is_legal"].sum() == 259
+
+
+def test_audit_b_score_completeness_reconciliation(engine):
+    """
+    Audit B: Verifies exact score completeness and chase demand reconciliation:
+    - Primary scope = 193,988 deliveries across 837 matches.
+    - Innings 1 = 102,054 (45,536 EXACT, 56,518 LOWER_BOUND_ONLY).
+    - Innings 2 = 91,934 (41,369 EXACT, 50,565 LOWER_BOUND_ONLY).
+    - Total EXACT = 86,905 deliveries.
+    - Total LOWER_BOUND_ONLY = 107,083 deliveries.
+    - Exact Chase Deliveries (RRR Available) = 6,748 deliveries.
+    - Deliveries where Exact Chase Metrics are Withheld = 187,240 deliveries.
+    """
+    df_s = engine.delivery_states_strict[engine.delivery_states_strict["is_primary_scope"]]
+
+    inn1 = df_s[df_s["innings"] == 1]
+    inn2 = df_s[df_s["innings"] == 2]
+
+    assert len(inn1) == 102054
+    assert len(inn2) == 91934
+    assert len(df_s) == 193988
+
+    assert (inn1["score_reconstruction_status"] == "EXACT").sum() == 45536
+    assert (inn1["score_reconstruction_status"] == "LOWER_BOUND_ONLY").sum() == 56518
+
+    assert (inn2["score_reconstruction_status"] == "EXACT").sum() == 41369
+    assert (inn2["score_reconstruction_status"] == "LOWER_BOUND_ONLY").sum() == 50565
+
+    assert (df_s["score_reconstruction_status"] == "EXACT").sum() == 86905
+    assert (df_s["score_reconstruction_status"] == "LOWER_BOUND_ONLY").sum() == 107083
+
+    # Exact chase demand
+    exact_chase_mask = (df_s["innings"] == 2) & df_s["target_is_exact"] & (df_s["score_reconstruction_status"] == "EXACT")
+    assert exact_chase_mask.sum() == 6748
+    assert df_s["required_run_rate_exact_before"].notna().sum() == 6748
+    assert df_s["required_run_rate_exact_before"].isna().sum() == 187240
+    assert 6748 + 187240 == 193988
+
+
+def test_audit_c_batting_composite_inclusion_exclusion_union(engine):
+    """
+    Audit C: Verifies exact set-theoretic inclusion-exclusion union of BAT_COMPOSITE_HIGH:
+    Components:
+    - C1: COLLAPSE_W3 = 3,797
+    - C2: DEPLETED_W3 = 12,921
+    - C3: CHASE_P85 = 1,011
+    - C4: DEATH_ACCEL_W5 = 26,130
+    Overlaps:
+    - C1 & C2 = 0
+    - C1 & C3 = 23
+    - C1 & C4 = 0
+    - C2 & C3 = 194
+    - C2 & C4 = 10,465
+    - C3 & C4 = 300
+    - C2 & C3 & C4 = 128
+    Exact Union = 43,859 - 10,982 + 128 = 33,005.
+    Phase distribution: Death = 26,185, Powerplay = 3,924, Middle = 2,896.
+    """
+    df = engine.batting_events_strict[engine.batting_events_strict["is_primary_scope"]]
+
+    c1 = df["is_bat_collapse_early_w3"]
+    c2 = df["is_bat_depleted_wickets_w3"]
+    c3 = df["is_bat_chase_rrr_p85"]
+    c4 = df["is_bat_death_accel_w5"]
+
+    assert c1.sum() == 3797
+    assert c2.sum() == 12921
+    assert c3.sum() == 1011
+    assert c4.sum() == 26130
+
+    assert (c1 & c2).sum() == 0
+    assert (c1 & c3).sum() == 23
+    assert (c1 & c4).sum() == 0
+    assert (c2 & c3).sum() == 194
+    assert (c2 & c4).sum() == 10465
+    assert (c3 & c4).sum() == 300
+    assert (c2 & c3 & c4).sum() == 128
+
+    union = c1 | c2 | c3 | c4
+    assert union.sum() == 33005
+    assert df["is_bat_composite_high"].sum() == 33005
+    assert df["is_pressure_event"].sum() == 33005
+
+    # Phase breakdown
+    assert df[union]["innings_phase"].value_counts()["DEATH"] == 26185
+    assert df[union]["innings_phase"].value_counts()["POWERPLAY"] == 3924
+    assert df[union]["innings_phase"].value_counts()["MIDDLE"] == 2896
+    assert 26185 + 3924 + 2896 == 33005
+
+
+def test_audit_d_bowling_composite_inclusion_exclusion_union(engine):
+    """
+    Audit D: Verifies exact set-theoretic inclusion-exclusion union of BOWL_COMPOSITE_HIGH:
+    Components:
+    - B1: ASSAULT_DEATH = 17,373
+    - B2: FINAL18 = 24,729
+    - B3: PP_W0 = 4,860
+    - B4: DEF_P85 = 148
+    Overlaps:
+    - B1 & B2 = 7,535
+    - B1 & B3 = 0
+    - B1 & B4 = 134
+    - B2 & B3 = 0
+    - B2 & B4 = 49
+    - B3 & B4 = 0
+    - B1 & B2 & B4 = 44
+    Exact Union = 47,110 - 7,718 + 44 = 39,436.
+    Phase distribution: Death = 34,576, Powerplay = 4,860, Middle = 0.
+    """
+    df = engine.bowling_events_strict[engine.bowling_events_strict["is_primary_scope"]]
+
+    b1 = df["is_bowl_assault_high_wickets_death"]
+    b2 = df["is_bowl_death_final18"]
+    b3 = df["is_bowl_pp_damage_control_w0"]
+    b4 = df["is_bowl_defend_tight_death_p85"]
+
+    assert b1.sum() == 17373
+    assert b2.sum() == 24729
+    assert b3.sum() == 4860
+    assert b4.sum() == 148
+
+    assert (b1 & b2).sum() == 7535
+    assert (b1 & b3).sum() == 0
+    assert (b1 & b4).sum() == 134
+    assert (b2 & b3).sum() == 0
+    assert (b2 & b4).sum() == 49
+    assert (b3 & b4).sum() == 0
+    assert (b1 & b2 & b4).sum() == 44
+
+    union = b1 | b2 | b3 | b4
+    assert union.sum() == 39436
+    assert df["is_bowl_composite_high"].sum() == 39436
+    assert df["is_pressure_event"].sum() == 39436
+
+    # Phase breakdown
+    assert df[union]["innings_phase"].value_counts()["DEATH"] == 34576
+    assert df[union]["innings_phase"].value_counts()["POWERPLAY"] == 4860
+    assert "MIDDLE" not in df[union]["innings_phase"].values
+    assert 34576 + 4860 == 39436
+
+
+def test_audit_e_event_level_sensitivity_mechanism(engine):
+    """
+    Audit E: Verifies that batting pressure is 100% invariant between Strict and Permissive scenarios,
+    and bowling pressure differs by exactly 80 deliveries in Over 17 due to balls_remaining_before.
+    """
+    bat_s = engine.batting_events_strict[engine.batting_events_strict["is_primary_scope"]]["is_pressure_event"]
+    bat_p = engine.batting_events_permissive[engine.batting_events_permissive["is_primary_scope"]]["is_pressure_event"]
+    assert (bat_s != bat_p).sum() == 0
+
+    bowl_s = engine.bowling_events_strict[engine.bowling_events_strict["is_primary_scope"]]["is_pressure_event"]
+    bowl_p = engine.bowling_events_permissive[engine.bowling_events_permissive["is_primary_scope"]]["is_pressure_event"]
+    assert (bowl_s != bowl_p).sum() == 80
+
+    # Differences occur in Over 17 (72 balls, final 18 boundary) and Over 4 (8 balls, PP damage control boundary)
+    diff_mask = (bowl_s != bowl_p)
+    diff_overs = engine.delivery_states_strict[engine.delivery_states_strict["is_primary_scope"]].loc[diff_mask.index[diff_mask], "overid"]
+    assert set(diff_overs.unique()) == {4, 17}
+    assert (diff_overs == 17).sum() == 72
+    assert (diff_overs == 4).sum() == 8

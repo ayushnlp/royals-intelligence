@@ -227,9 +227,10 @@ Task R1-03 implements a reproducible, evidence-driven Pressure Detection Engine 
    - Score-independent structural dimensions (`PHASE`, `BALLS_REM`, `WKTS_REM`, `LEGAL_BALLS`) provide complete, uncorrupted match-state pressure detection across all 193,988 primary deliveries.
 
 5. **Operational Candidate Definitions & Coverage:**
-   - **Primary Batting Definition (`BAT_COMPOSITE_MODERATE`):** 33,005 deliveries (17.01%) across 692 batters.
-   - **Primary Bowling Definition (`BOWL_COMPOSITE_MODERATE`):** 39,436 deliveries (20.33%) across 480 bowlers.
-   - Sensitivity analysis across Strict vs Permissive scenarios demonstrates zero variance in batting (0.000%) and 80 deliveries variance in bowling (0.041%), confirming robust model stability.
+   - **Primary Batting Definition (`BAT_COMPOSITE_HIGH`):** 33,005 deliveries (17.01%) across 692 unique batters and 794 matches. Formulated as $\text{CHASE\_P85} \lor \text{COLLAPSE\_W3} \lor \text{DEPLETED\_W3} \lor \text{DEATH\_ACCEL\_W5}$ with exact inclusion-exclusion union verified.
+   - **Primary Bowling Definition (`BOWL_COMPOSITE_HIGH`):** 39,436 deliveries (20.33%) across 480 unique bowlers and 822 matches. Formulated as $\text{ASSAULT\_DEATH} \lor \text{FINAL18} \lor \text{PP\_W0} \lor \text{DEF\_P85}$ with exact inclusion-exclusion union verified.
+   - Sensitivity analysis across Strict vs Permissive scenarios demonstrates zero variance in batting (0.000%) and 80 deliveries variance in bowling (0.041%), physically isolated to cumulative legal ball boundary shifts in Over 17 (72 balls) and Over 4 (8 balls).
+   - Reconciled population metrics: 200,999 raw total = 193,988 primary bowled deliveries + 7,011 excluded (6,985 Emerging + 26 Senior Super Overs). Strict legal is 185,692; Permissive legal is 185,951. Score completeness: 86,905 EXACT + 107,083 LOWER_BOUND_ONLY = 193,988; exact chase demand available on 6,748 deliveries, withheld on 187,240 deliveries.
 
 6. **Generated Datasets & Reports:**
    - `batting_pressure_events_strict.parquet`
@@ -241,7 +242,7 @@ Task R1-03 implements a reproducible, evidence-driven Pressure Detection Engine 
    - `pressure_detection_report.md`
 
 7. **Test Verification:**
-   - 17 dedicated unit tests in `test_pressure_detection.py` (71/71 in `round1_pressure`, 61/61 in `backend`, 132/132 total passing across workspace).
+   - 22 dedicated unit tests in `test_pressure_detection.py` (76/76 in `round1_pressure`, 61/61 in `backend`, 137/137 total passing across workspace).
 
 ---
 

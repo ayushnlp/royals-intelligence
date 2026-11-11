@@ -364,12 +364,22 @@ pressure_detection_r1_03:
       bowl_pp_damage_control_w0: "Overs 5-6 with 0 wickets taken (4,860 balls, 443 matches)"
 
   operational_definitions:
-    batting_primary: "BAT_COMPOSITE_MODERATE"
-    bowling_primary: "BOWL_COMPOSITE_MODERATE"
+    batting_primary: "BAT_COMPOSITE_HIGH"
+    bowling_primary: "BOWL_COMPOSITE_HIGH"
     total_batting_primary_deliveries: 33005
     total_bowling_primary_deliveries: 39436
     total_batters_covered: 692
     total_bowlers_covered: 480
+    population_reconciliation:
+      raw_total_deliveries: 200999
+      primary_scope_bowled_deliveries: 193988
+      strict_primary_legal_deliveries: 185692
+      permissive_primary_legal_deliveries: 185951
+      excluded_emerging_and_super_overs: 7011
+      score_exact_deliveries: 86905
+      score_lower_bound_deliveries: 107083
+      exact_chase_rrr_available_deliveries: 6748
+      exact_chase_rrr_withheld_deliveries: 187240
 
   zero_leakage_policy:
     enforce_pre_delivery_state_only: true

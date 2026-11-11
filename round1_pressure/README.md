@@ -53,7 +53,7 @@ round1_pressure/
 ├── tests/
 │   ├── test_data_qa.py             # 15 focused pytest test cases validating data integrity and delivery legality
 │   ├── test_match_state.py         # 39 focused pytest test cases validating match-state reconstruction & audits
-│   └── test_pressure_detection.py  # 17 focused pytest test cases validating pressure rules & invariants
+│   └── test_pressure_detection.py  # 22 focused pytest test cases validating pressure rules, audits & invariants
 ├── requirements.txt                # Lightweight dependencies (pandas, numpy, pyyaml, pytest, pyarrow)
 └── README.md                       # Package documentation and usage guide
 ```
@@ -213,15 +213,28 @@ Task R1-03 delivers a reproducible, evidence-driven Pressure Detection Engine th
   - `BOWL_DEATH_FINAL18`: Overs 18–20 final 18 balls high leverage (24,729 deliveries, 811 matches).
   - `BOWL_PP_DAMAGE_CONTROL_W0`: Overs 5–6 with 0 wickets lost (4,860 deliveries, 443 matches).
 
-### 3. Primary Candidate Definitions & Coverage:
-- **Batting Primary Definition (`BAT_COMPOSITE_MODERATE`):**
-  - Captures 33,005 deliveries (17.01% of primary scope) across 692 unique batters.
-  - Combines top-order collapse salvage, depleted-wicket middle/death defense, and high-RRR chases ($\text{RRR} \ge 11.5$).
-- **Bowling Primary Definition (`BOWL_COMPOSITE_MODERATE`):**
-  - Captures 39,436 deliveries (20.33% of primary scope) across 480 unique bowlers.
-  - Combines death over boundary assault defense, late-death final 18 balls, Powerplay damage control, and defending tight death chases ($\text{RRR} \le 11.5$).
-- **Strict vs Permissive Sensitivity:**
-  - Strict vs Permissive scenario yields exactly 0 batting difference (0.000%) and 80 bowling deliveries difference (0.041%) out of 193,988 primary deliveries, proving complete structural stability against ambiguous delivery interpretations.
+### 3. Primary Candidate Definitions & Inclusion-Exclusion Union:
+- **Batting Primary Definition (`BAT_COMPOSITE_HIGH`):**
+  - Captures **33,005** deliveries (17.01% of primary scope) across **692** unique batters and **794** matches.
+  - Formulated as the 4-component union:
+    $$\text{BAT\_COMPOSITE\_HIGH} = \text{CHASE\_P85} \lor \text{COLLAPSE\_W3} \lor \text{DEPLETED\_W3} \lor \text{DEATH\_ACCEL\_W5}$$
+  - Exact Inclusion-Exclusion: $\sum S_1 (43,859) - \sum S_2 (10,982) + \sum S_3 (128) - S_4 (0) = 33,005$.
+  - Phase breakdown: Death = 26,185, Powerplay = 3,924, Middle = 2,896.
+- **Bowling Primary Definition (`BOWL_COMPOSITE_HIGH`):**
+  - Captures **39,436** deliveries (20.33% of primary scope) across **480** unique bowlers and **822** matches.
+  - Formulated as the 4-component union:
+    $$\text{BOWL\_COMPOSITE\_HIGH} = \text{ASSAULT\_DEATH} \lor \text{FINAL18} \lor \text{PP\_W0} \lor \text{DEF\_P85}$$
+  - Exact Inclusion-Exclusion: $\sum S_1 (47,110) - \sum S_2 (7,718) + \sum S_3 (44) - S_4 (0) = 39,436$.
+  - Phase breakdown: Death = 34,576, Powerplay = 4,860, Middle = 0.
+- **Strict vs Permissive Sensitivity (Event-Level Investigation):**
+  - Batting: 0 deliveries difference (**0.000% variance**; 100% invariant).
+  - Bowling: 80 deliveries difference (**0.041% variance**; < 0.1% threshold) occurring strictly on cumulative legal ball boundary transitions: (1) 72 balls in Over 17 crossing `balls_remaining_before <= 18` (`BOWL_DEATH_FINAL18`) one delivery earlier in Permissive mode; and (2) 8 balls in Over 4 crossing `legal_balls_bowled_before >= 24` (`BOWL_PP_DAMAGE_CONTROL_W0`) one delivery earlier in Permissive mode.
+
+### 4. Population & Score Completeness Reconciliation (R1-03.1):
+- **Population Reconciled:** 200,999 total raw deliveries = 193,988 primary scope deliveries + 7,011 excluded deliveries (6,985 Emerging + 26 Senior Super Overs).
+- **Legal Deliveries Reconciled:** Within primary scope (193,988 bowled), Strict legal is 185,692 (with 8,296 illegal balls); Permissive legal is 185,951 (with 8,037 illegal balls). The 259 difference represents ambiguous `other` deliveries.
+- **Score Completeness Reconciled:** 193,988 primary deliveries = 86,905 EXACT score + 107,083 LOWER_BOUND_ONLY score.
+- **Exact Chase Reconciled:** Exact RRR is available on exactly 6,748 chase deliveries (both target exact and score exact). In all other 187,240 deliveries, exact chase metrics are strictly withheld (`null`).
 
 ---
 
