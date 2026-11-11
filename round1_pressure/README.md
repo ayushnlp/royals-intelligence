@@ -433,7 +433,62 @@ This milestone closes all validation gaps identified during R1-05.1 through targ
 
 ---
 
-## 12. Execution & Verification Commands
+## 12. Player Reliability Intelligence & Ranking Engine (Task R1-06)
+
+Task R1-06 implements the evidence-backed candidate selection engine answering the competition challenge: **Identify the Most Reliable Players Under Pressure**.
+
+### 1. Population & Qualification Accounting:
+- **Batters (824 total evaluated):**
+  - **Qualified ($\ge 30$ legal pressure balls):** 278 batters (Large Sample $\ge 150$: 57; Medium Sample $60-149$: 100; Small Sample $30-59$: 121).
+  - **Non-Qualified:** 546 batters (413 with $1-29$ balls; 133 with 0 pressure deliveries). Zero silent dropping; 100% reason documented.
+- **Bowlers (596 total evaluated):**
+  - **Qualified ($\ge 30$ legal pressure balls):** 239 bowlers (Large Sample $\ge 150$: 79; Medium Sample $60-149$: 80; Small Sample $30-59$: 80).
+  - **Non-Qualified:** 357 bowlers (240 with $1-29$ balls; 117 with 0 pressure deliveries).
+
+### 2. Primary Diagnostic Metrics (Natural Units):
+- **Batting:** $\text{BAT\_CONSERVATIVE} = \hat{\theta}_{\text{SR}} - \text{SE}_{\text{post}}$ (Value-at-Risk Strike Rate points vs baseline).
+- **Bowling:** $\text{BOWL\_CONSERVATIVE} = -\hat{\theta}_{\text{Econ}} - \text{SE}_{\text{post}}$ (Conservative runs saved per over vs baseline).
+
+### 3. Official Shortlists & Evidence Tiers:
+- **Batting `STRONG_EVIDENCE` (12 Candidates):**
+  1. **Nicholas Pooran (#1):** $+2.2$ SR pts ($\hat{\theta} = +16.2 \pm 14.0$, 212 balls, 26 matches, 5 seasons, BOTH: 144 IPL, 68 T20I).
+  2. **Donovan Ferreira (#2):** $+0.9$ SR pts ($\hat{\theta} = +20.7 \pm 19.8$, 84 balls, 13 matches, 4 seasons, IPL: 55, T20I: 29).
+  3. **Tim David (#3):** $-2.5$ SR pts ($\hat{\theta} = +9.6 \pm 12.1$, 292 balls, 32 matches, 5 seasons, BOTH: 153 IPL, 139 T20I).
+  4. **Dinesh Karthik (#4):** $-2.7$ SR pts ($\hat{\theta} = +9.3 \pm 11.9$, 301 balls, 31 matches, 5 seasons, BOTH: 269 IPL, 32 T20I).
+  5. **Ashutosh Sharma (#5):** $-3.6$ SR pts ($\hat{\theta} = +13.5 \pm 17.1$, 117 balls, 11 matches, 2 seasons, IPL: 117).
+  6. **Marcus Stoinis (#6):** $-5.8$ SR pts ($\hat{\theta} = +6.0 \pm 11.8$, 305 balls, 41 matches, 5 seasons, BOTH: 185 IPL, 120 T20I).
+  7. **Naman Dhir (#7):** $-6.9$ SR pts ($\hat{\theta} = +11.8 \pm 18.7$, 94 balls, 10 matches, 2 seasons, IPL: 94).
+  8. **Rinku Singh (#8):** $-7.0$ SR pts ($\hat{\theta} = +4.5 \pm 11.5$, 324 balls, 35 matches, 5 seasons, BOTH: 184 IPL, 140 T20I).
+  9. **Tristan Stubbs (#9):** $-8.2$ SR pts ($\hat{\theta} = +4.6 \pm 12.8$, 259 balls, 28 matches, 4 seasons, BOTH: 157 IPL, 102 T20I).
+  10. **Sherfane Rutherford (#10):** $-8.2$ SR pts ($\hat{\theta} = +4.9 \pm 13.1$, 247 balls, 29 matches, 4 seasons, BOTH: 104 IPL, 143 T20I).
+  11. **Rovman Powell (#11):** $-8.8$ SR pts ($\hat{\theta} = +3.3 \pm 12.1$, 294 balls, 32 matches, 5 seasons, BOTH: 122 IPL, 172 T20I).
+  12. **Aiden Markram (#12):** $-9.0$ SR pts ($\hat{\theta} = +2.6 \pm 11.6$, 321 balls, 39 matches, 5 seasons, BOTH: 130 IPL, 191 T20I).
+  - *Credible Interval Overlap Note:* Only Pooran and Ferreira establish positive 1-sigma lower bounds. Candidates #3 through #12 have heavily overlapping 95% CIs.
+- **Bowling `STRONG_EVIDENCE` (11 Candidates):**
+  1. **Jasprit Bumrah (#1):** $-0.16$ RPO runs saved ($\hat{\theta} = -0.20 \pm 0.36$ RPO, 521 balls, 60 matches, 5 seasons, BOTH: 388 IPL, 133 T20I). The only qualified bowler conceding fewer runs under pressure (8.94 RPO) than ordinary baseline (9.70 RPO).
+  2. **Sunil Narine (#2):** $-0.94$ RPO runs saved ($\hat{\theta} = +0.39 \pm 0.55$ RPO, 153 balls, 24 matches, IPL: 153).
+  3. **Maheesh Theekshana (#3):** $-0.96$ RPO runs saved ($\hat{\theta} = +0.55 \pm 0.41$ RPO, 421 balls, 58 matches, BOTH: 179 IPL, 242 T20I).
+  4. **Matheesha Pathirana (#4):** $-1.05$ RPO runs saved ($\hat{\theta} = +0.63 \pm 0.41$ RPO, 440 balls, 44 matches, BOTH: 336 IPL, 104 T20I).
+  5. **Shaheen Afridi (#5):** $-1.43$ RPO runs saved ($\hat{\theta} = +0.93 \pm 0.50$ RPO, 191 balls, 29 matches, BOTH: 30 IPL, 161 T20I).
+  6. **Mustafizur Rahman (#6):** $-1.47$ RPO runs saved ($\hat{\theta} = +1.11 \pm 0.36$ RPO, 578 balls, 61 matches, BOTH: 236 IPL, 342 T20I).
+  7. **Richard Ngarava (#7):** $-1.56$ RPO runs saved ($\hat{\theta} = +1.11 \pm 0.45$ RPO, 287 balls, 36 matches, T20I: 287).
+  8. **Lungi Ngidi (#8):** $-1.65$ RPO runs saved ($\hat{\theta} = +1.18 \pm 0.47$ RPO, 222 balls, 32 matches, BOTH: 39 IPL, 183 T20I).
+  9. **Ravichandran Ashwin (#9):** $-1.67$ RPO runs saved ($\hat{\theta} = +1.11 \pm 0.56$ RPO, 147 balls, 23 matches, IPL: 147).
+  10. **Hasan Mahmud (#10):** $-1.69$ RPO runs saved ($\hat{\theta} = +1.03 \pm 0.66$ RPO, 90 balls, 15 matches, T20I: 90).
+  11. **Nathan Ellis (#11):** $-1.71$ RPO runs saved ($\hat{\theta} = +1.28 \pm 0.43$ RPO, 347 balls, 43 matches, BOTH: 191 IPL, 156 T20I).
+
+### 4. Promising Candidates Watchlist:
+- **Batters:** Cooper Connolly (+11.9 SR mean, 50 balls, $\pm 22.6$), Ishan Kishan (+2.0 SR mean, 52 balls), Rahul Tewatia (+1.7 SR mean, 195 balls), Shashank Singh (+1.3 SR mean, 199 balls), Andre Russell (+1.2 SR mean, 294 balls), Suryakumar Yadav (+1.4 SR mean, 199 balls).
+- **Bowlers:** Nasum Ahmed (+0.70 RPO mean, 47 balls, $\pm 0.63$), Vipraj Nigam (+0.91 RPO mean, 46 balls, $\pm 0.63$), Ramon Simmonds (+0.98 RPO mean, 30 balls, $\pm 0.74$).
+
+### 5. Multi-Configuration Robustness Properties:
+- **Sample Threshold ($N \ge 60$):** 10/10 Top 10 overlap (100% Jaccard) for batting; 8/10 for bowling.
+- **Posterior Mean vs Conservative Bound:** Rank correlation $r_s = 0.9842$ (batting) and $r_s = 0.9749$ (bowling).
+- **PRI with TCF:** Top 10 overlap drops to 4/10 (25% Jaccard) due to $(S/4)^{0.35}$ penalizing newer players, confirming experimental status.
+
+---
+
+## 13. Execution & Verification Commands
 
 ### Run Data QA (R1-01.1):
 ```bash
@@ -477,7 +532,13 @@ python round1_pressure/src/r1_05_2_validation_closure.py
 pytest round1_pressure/tests/test_r1_05_2_validation_closure.py -v
 ```
 
-### Run Full Round 1 Test Suite (All 128 Pressure Tests):
+### Run Player Reliability Intelligence & Ranking Engine (R1-06):
+```bash
+python r1_06_player_intelligence.py
+pytest round1_pressure/tests/test_r1_06_player_intelligence.py -v
+```
+
+### Run Full Round 1 Test Suite (All 140 Pressure Tests):
 ```bash
 pytest round1_pressure/tests -v
 ```

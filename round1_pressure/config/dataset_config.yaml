@@ -54,6 +54,20 @@ paths:
   validation_transferability_parquet: "round1_pressure/data/processed/validation_transferability.parquet"
   validation_probability_calibration_parquet: "round1_pressure/data/processed/validation_probability_calibration.parquet"
   validation_closure_report_md: "round1_pressure/reports/r1_05_2_validation_closure_report.md"
+  batting_intelligence_parquet: "round1_pressure/data/processed/batting_intelligence.parquet"
+  bowling_intelligence_parquet: "round1_pressure/data/processed/bowling_intelligence.parquet"
+  qualified_candidates_parquet: "round1_pressure/data/processed/qualified_candidates.parquet"
+  non_qualified_candidates_parquet: "round1_pressure/data/processed/non_qualified_candidates.parquet"
+  batting_leaderboard_parquet: "round1_pressure/data/processed/batting_leaderboard.parquet"
+  bowling_leaderboard_parquet: "round1_pressure/data/processed/bowling_leaderboard.parquet"
+  batting_evidence_profiles_parquet: "round1_pressure/data/processed/batting_evidence_profiles.parquet"
+  bowling_evidence_profiles_parquet: "round1_pressure/data/processed/bowling_evidence_profiles.parquet"
+  shortlist_robustness_comparison_parquet: "round1_pressure/data/processed/shortlist_robustness_comparison.parquet"
+  competition_candidate_views_parquet: "round1_pressure/data/processed/competition_candidate_views.parquet"
+  r1_06_player_intelligence_report_md: "round1_pressure/reports/r1_06_player_intelligence_report.md"
+  r1_06_batting_shortlist_md: "round1_pressure/reports/r1_06_batting_shortlist.md"
+  r1_06_bowling_shortlist_md: "round1_pressure/reports/r1_06_bowling_shortlist.md"
+  r1_06_methodology_and_limitations_md: "round1_pressure/reports/r1_06_methodology_and_limitations.md"
 
 expected_files:
   ball_by_ball: "ball_by_ball.csv"
@@ -544,6 +558,39 @@ pressure_detection_r1_03:
       tier_2_exploratory: "Composite PRI without TCF"
       tier_3_experimental: "Composite PRI with TCF"
       tier_4_model_credibility: "Posterior Exceedance Probabilities"
+
+  player_intelligence_r1_06:
+    task: "R1-06 Evidence-Backed Player Reliability Intelligence & Ranking Engine"
+    status: "PLAYER_RELIABILITY_INTELLIGENCE_VALIDATED"
+    population_accounting:
+      batting_total: 824
+      batting_qualified: 278
+      batting_non_qualified_insufficient_sample: 413
+      batting_non_qualified_zero_pressure: 133
+      bowling_total: 596
+      bowling_qualified: 239
+      bowling_non_qualified_insufficient_sample: 240
+      bowling_non_qualified_zero_pressure: 117
+    primary_diagnostics:
+      batting:
+        metric_name: "BAT_CONSERVATIVE"
+        formula: "posterior_mean_SR - posterior_SE_SR"
+        unit: "Strike Rate Points (+/- SR vs baseline)"
+        leader: "Nicholas Pooran (+2.2 SR points, 212 balls, 26 matches, 5 seasons)"
+      bowling:
+        metric_name: "BOWL_CONSERVATIVE"
+        formula: "-posterior_mean_economy_diff - posterior_SE_economy"
+        unit: "Runs Saved per Over (RPO vs baseline)"
+        leader: "Jasprit Bumrah (-0.16 RPO runs saved, 521 balls, 60 matches, 5 seasons)"
+    evidence_tiers:
+      batting_strong_evidence_count: 12
+      batting_promising_count: 9
+      bowling_strong_evidence_count: 11
+      bowling_promising_count: 88
+    dual_competition_candidates:
+      batters_with_ge_30_both: ["Nicholas Pooran", "Tim David", "Marcus Stoinis", "Rinku Singh", "Tristan Stubbs", "Sherfane Rutherford", "Rovman Powell", "Aiden Markram"]
+      bowlers_with_ge_30_both: ["Jasprit Bumrah", "Maheesh Theekshana", "Matheesha Pathirana", "Shaheen Afridi", "Mustafizur Rahman", "Richard Ngarava", "Lungi Ngidi", "Nathan Ellis"]
+
 
 
 
