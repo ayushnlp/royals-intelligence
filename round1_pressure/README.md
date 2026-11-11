@@ -278,18 +278,19 @@ $$\theta_i = r_i y_i + (1 - r_i) \mu, \quad r_i = \frac{\tau^2}{\tau^2 + \sigma_
   - Minimum sample qualification: $\ge 30$ legal balls under pressure (239 qualified bowlers of 479).
   - Median reliability $r_i = 0.296$ (range: 0.088 to 0.841). Bowling economy has substantially higher noise per ball, requiring greater shrinkage toward the population mean.
 
-### 5. Chronological Out-of-Sample Validation:
-- Model trained strictly on past seasons **2022–2024** (111,323 legal balls); tested on future seasons **2025–2026** (74,369 legal balls).
-- **Batting Out-of-Sample Performance ($N = 108$ overlapping players):**
-  - Raw Sample MSE: 1,240.03 $\to$ Shrunk Posterior MSE: 994.00 (**19.8% MSE reduction**).
-  - Cross-era correlation: Raw $r = 0.549 \to$ Shrunk $r = 0.570$.
-- **Bowling Out-of-Sample Performance ($N = 115$ overlapping players):**
-  - Raw Sample MSE: 4.57 $\to$ Shrunk Posterior MSE: 2.77 (**39.4% MSE reduction**).
-  - Cross-era correlation: Raw $r = 0.136 \to$ Shrunk $r = 0.185$.
-- **Conclusion:** Shrinkage dramatically outperforms raw differentials across chronological boundaries, especially for bowling where random over-level variance is high.
+### 5. Chronological Out-of-Sample Validation & Statistical Audit (R1-04.1):
+- Model trained strictly on past seasons **2022–2024** (111,323 legal balls); tested on future seasons **2025–2026** (74,369 legal balls). Zero future leakage into historical posteriors.
+- **Transparent Baseline Comparison:**
+  - Zero baseline MSE: Batting 1,926.65; Bowling 7.56.
+  - Population mean MSE: Batting 1,496.11; Bowling 2.85.
+  - Raw historical MSE: Batting 1,240.03; Bowling 4.57.
+  - Shrunk posterior MSE: Batting 994.00 (**+19.8% reduction**, $p = 0.0151$); Bowling 2.77 (**+39.4% reduction**, $p = 0.0052$).
+  - Cluster-robust MSE: Batting 936.79 (**+24.5% reduction** over raw).
+- **Audit Findings:** Match-level clustering causes mild standard error inflation (+8.6% batting, +13.6% bowling). Conditioning on severe wickets in ordinary baselines causes a common-support violation (12 empty cells). 30-ball qualification threshold isolates 96.4%+ pressure volume with stable hyperparameters.
+- Detailed audit report: `round1_pressure/reports/expected_performance_audit_report.md`.
 
 ### 6. Strict Scope Boundary Invariant:
-No player rankings, Top 10 lists, or composite pressure index $\Psi$ are constructed in R1-04.
+No player rankings, Top 10 lists, or composite pressure index $\Psi$ are constructed in R1-04 or R1-04.1.
 
 ---
 
@@ -313,13 +314,13 @@ python round1_pressure/src/03_detect_pressure.py
 pytest round1_pressure/tests/test_pressure_detection.py -v
 ```
 
-### Run Expected Performance & Bayesian Shrinkage Engine (R1-04):
+### Run Expected Performance & Bayesian Shrinkage Engine (R1-04 & R1-04.1):
 ```bash
 python round1_pressure/src/04_expected_performance.py
 pytest round1_pressure/tests/test_expected_performance.py -v
 ```
 
-### Run Full Test Suite (All 90 Round 1 Tests):
+### Run Full Test Suite (All 96 Round 1 Tests):
 ```bash
 pytest round1_pressure/tests -v
 ```

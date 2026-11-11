@@ -33,7 +33,9 @@ paths:
   bowling_pressure_differentials_parquet: "round1_pressure/data/processed/bowling_pressure_differentials.parquet"
   bayesian_shrinkage_summary_parquet: "round1_pressure/data/processed/bayesian_shrinkage_summary.parquet"
   chronological_validation_results_parquet: "round1_pressure/data/processed/chronological_validation_results.parquet"
+  qualification_threshold_sensitivity_parquet: "round1_pressure/data/processed/qualification_threshold_sensitivity.parquet"
   expected_performance_report_md: "round1_pressure/reports/expected_performance_report.md"
+  expected_performance_audit_report_md: "round1_pressure/reports/expected_performance_audit_report.md"
 
 expected_files:
   ball_by_ball: "ball_by_ball.csv"

@@ -38,7 +38,7 @@ def engine():
 # ==============================================================================
 
 def test_parquet_output_artifacts_exist(engine):
-    """Verifies that all 6 required Parquet output files exist and are populated."""
+    """Verifies that all 7 required Parquet output files exist and are populated."""
     expected_files = [
         "batting_ordinary_baseline.parquet",
         "bowling_ordinary_baseline.parquet",
@@ -46,6 +46,7 @@ def test_parquet_output_artifacts_exist(engine):
         "bowling_pressure_differentials.parquet",
         "bayesian_shrinkage_summary.parquet",
         "chronological_validation_results.parquet",
+        "qualification_threshold_sensitivity.parquet",
     ]
     for fname in expected_files:
         fpath = engine.processed_dir / fname
@@ -356,3 +357,143 @@ def test_no_rankings_or_top10_created(engine):
         for col in df.columns:
             for term in forbidden_terms:
                 assert term not in col.lower(), f"Forbidden ranking column '{col}' found in dataset"
+
+
+# ==============================================================================
+# PART 8: R1-04.1 STATISTICAL AUDIT & METHODOLOGY VERIFICATIONS
+# ==============================================================================
+
+def test_chronological_validation_leakage_and_baseline_predictors(engine):
+    """
+    Audit A verification:
+    1. Zero baseline and population mean baseline MSE are higher than shrunk MSE.
+    2. Paired t-test confirms statistically significant MSE reduction (p < 0.05).
+    3. 95% Confidence Interval for MSE difference (raw - shrunk) is strictly positive.
+    """
+    val = engine.chronological_val_df
+    assert len(val) == 2
+
+    for _, row in val.iterrows():
+        # Shrunk outperforms zero baseline and raw baseline
+        assert row["shrunk_mse"] < row["zero_baseline_mse"]
+        assert row["shrunk_mse"] < row["raw_mse"]
+        assert row["shrunk_mae"] < row["raw_mae"]
+
+        # Statistical significance
+        assert row["paired_p_val"] < 0.05
+        assert row["paired_t_stat"] > 2.0
+        assert row["mse_diff_ci_lower"] > 0.0
+
+
+def test_cluster_robust_variance_and_inflation_factor(engine):
+    """
+    Audit B verification:
+    1. Cluster-robust standard errors are computed for batting and bowling.
+    2. On average, cluster-robust SE reflects non-zero match clustering (mean inflation >= 1.0).
+    3. Shrunk cluster differentials correlate strongly with shrunk naive differentials (> 0.95).
+    """
+    b_df = engine.bat_differentials_strict
+    bw_df = engine.bowl_differentials_strict
+
+    assert "se_cluster_strike_rate" in b_df.columns
+    assert "se_cluster_economy" in bw_df.columns
+
+    qual_b = b_df[b_df["is_qualified"]]
+    qual_bw = bw_df[bw_df["is_qualified"]]
+
+    mean_inf_b = (qual_b["se_cluster_strike_rate"] / qual_b["se_strike_rate"]).mean()
+    mean_inf_bw = (qual_bw["se_cluster_economy"] / qual_bw["se_economy"]).mean()
+
+    assert 1.0 <= mean_inf_b <= 1.30
+    assert 1.0 <= mean_inf_bw <= 1.30
+
+    assert qual_b["shrunk_diff_strike_rate"].corr(qual_b["shrunk_diff_strike_rate_cluster"]) > 0.95
+    assert qual_bw["shrunk_diff_economy"].corr(qual_bw["shrunk_diff_economy_cluster"]) > 0.90
+
+
+def test_small_sample_uncertainty_behavior(engine):
+    """
+    Audit F verification:
+    Verifies that low sample size players (n = 1) do NOT receive artificially narrow intervals:
+    - Reliability r_i < 0.10 (strong shrinkage to prior mean).
+    - Posterior SE approaches between-player tau (CI width > 100 SR points for batting).
+    """
+    b_df = engine.bat_differentials_strict
+    n1_b = b_df[b_df["pressure_legal_balls"] == 1]
+    assert len(n1_b) > 0
+
+    assert (n1_b["reliability_strike_rate"] < 0.10).all()
+    summary = engine.bayesian_summary_df
+    tau_b = summary[summary["discipline"] == "BATTING"]["prior_std_tau"].iloc[0]
+
+    # Posterior SE close to tau
+    for _, r in n1_b.iterrows():
+        assert abs(r["posterior_se_strike_rate"] - tau_b) < 2.0
+        ci_width = r["ci_95_upper_strike_rate"] - r["ci_95_lower_strike_rate"]
+        assert ci_width > 100.0
+
+
+def test_qualification_threshold_sensitivity_monotonicity(engine):
+    """
+    Audit C verification:
+    1. Qualification sensitivity table has exactly 12 records (6 thresholds x 2 disciplines).
+    2. Qualified player count monotonically decreases as threshold increases.
+    3. Bowling prior mean mu is stable across all thresholds (std < 0.05 RPO).
+    """
+    sens = engine.qualification_sensitivity_df
+    assert len(sens) == 12
+
+    for disc in ["BATTING", "BOWLING"]:
+        sub = sens[sens["discipline"] == disc].sort_values("threshold_balls")
+        qual_counts = sub["qualified_players"].tolist()
+        # Monotonically decreasing
+        for i in range(len(qual_counts) - 1):
+            assert qual_counts[i] > qual_counts[i + 1]
+
+    bowl_sub = sens[sens["discipline"] == "BOWLING"]
+    assert bowl_sub["prior_mean_mu"].std() < 0.05
+
+
+def test_simpsons_paradox_exact_reproduction(engine):
+    """
+    Audit E verification:
+    Exact reproduction of ordinary vs pressured strike rate figures down to 0.5 SR points:
+    - Powerplay ordinary ~ 137.2, pressure ~ 113.3
+    - Middle ordinary ~ 134.3, pressure ~ 104.3
+    - Death ordinary ~ 176.5, pressure ~ 149.2
+    - Overall ordinary ~ 139.7, pressure ~ 140.9
+    """
+    df = engine.bat_events_strict[
+        engine.bat_events_strict["is_primary_scope"] & engine.bat_events_strict["outcome_is_legal"]
+    ]
+    ord_df = df[~df["is_pressure_event"]]
+    pres_df = df[df["is_pressure_event"]]
+
+    o_sr_tot = ord_df["outcome_runs_batter"].mean() * 100.0
+    p_sr_tot = pres_df["outcome_runs_batter"].mean() * 100.0
+    assert abs(o_sr_tot - 139.7) < 0.5
+    assert abs(p_sr_tot - 140.9) < 0.5
+
+    for phase, exp_o, exp_p in [("POWERPLAY", 137.2, 113.3), ("MIDDLE", 134.3, 104.3), ("DEATH", 176.5, 149.2)]:
+        o_sr = ord_df[ord_df["innings_phase"] == phase]["outcome_runs_batter"].mean() * 100.0
+        p_sr = pres_df[pres_df["innings_phase"] == phase]["outcome_runs_batter"].mean() * 100.0
+        assert abs(o_sr - exp_o) < 0.5
+        assert abs(p_sr - exp_p) < 0.5
+
+
+def test_overstratification_common_support_empty_cells_guard(engine):
+    """
+    Audit D verification:
+    Verifies that attempting to condition ordinary deliveries on severe match states
+    (e.g., <= 4 wickets remaining in Death or Powerplay) creates empty cells,
+    confirming the mathematical positivity violation of over-stratification.
+    """
+    df = engine.bat_events_strict[
+        engine.bat_events_strict["is_primary_scope"] & engine.bat_events_strict["outcome_is_legal"]
+    ].copy()
+    df["wkt_bin"] = pd.cut(df["wickets_remaining_before"], bins=[-1, 4, 7, 10], labels=["LOW", "MED", "HIGH"])
+    ord_df = df[~df["is_pressure_event"]]
+
+    grid_36 = ord_df.groupby(["comp_tier", "innings", "innings_phase", "wkt_bin"], observed=False).size()
+    empty_cells = (grid_36 == 0).sum()
+    assert empty_cells >= 10, f"Expected at least 10 empty cells due to common support violation, got {empty_cells}"

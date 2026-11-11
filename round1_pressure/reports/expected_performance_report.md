@@ -1,5 +1,5 @@
 # ROYALS INTELLIGENCE — ROUND 1 EXPECTED PERFORMANCE BASELINES & BAYESIAN RELIABILITY REPORT
-**Generated:** 2026-11-11T11:03:58.409500+00:00  
+**Generated:** 2026-11-11T12:24:05.108958+00:00  
 **Architecture:** ROYALS INTELLIGENCE v4.1  
 **Task:** R1-04 — Expected Performance Baselines & Bayesian Reliability Foundation  
 **Status:** `BASELINES_AND_BAYESIAN_SHRINKAGE_VALIDATED`  
@@ -81,14 +81,14 @@ $$V_i = \frac{s_i^2 \tau^2}{s_i^2 + \tau^2}, \quad \text{SE}_{\text{post}, i} = 
 
 ---
 
-## 5. Chronological Out-of-Sample Validation
+## 5. Chronological Out-of-Sample Validation & Statistical Audit
 
 Models were trained strictly on historical seasons (2022–2024; 111,323 legal balls) and evaluated on subsequent out-of-sample seasons (2025–2026; 74,369 legal balls). Evaluated across players with >= 20 pressure balls in both periods:
 
-| Discipline | Predicted Differential | Overlapping Players | Raw MSE | Shrunk MSE | MSE Reduction % | Raw Correlation | Shrunk Correlation |
-| :--- | :--- | ---: | ---: | ---: | ---: | ---: | ---: |
-| **BATTING** | Strike Rate Differential | 108 | 1240.03 | 994.00 | **19.8%** | 0.549 | **0.570** |
-| **BOWLING** | Economy Differential | 115 | 4.57 | 2.77 | **39.4%** | 0.136 | **0.185** |
+| Discipline | Metric | N | Zero MSE | Mean MSE | Raw MSE | Shrunk MSE | Cluster MSE | MSE Red % | Raw MAE | Shrunk MAE | Raw r | Shrunk r | Paired t | p-value |
+| :--- | :--- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| **BATTING** | Strike Rate Differential | 108 | 1926.65 | 1496.11 | 1240.03 | **994.00** | 936.79 | **19.8%** | 27.25 | **24.58** | 0.549 | **0.570** | 2.47 | **0.0151** |
+| **BOWLING** | Economy Differential | 115 | 7.56 | 2.85 | 4.57 | **2.77** | 2.80 | **39.4%** | 1.62 | **1.31** | 0.136 | **0.185** | 2.85 | **0.0052** |
 
 ---
 
@@ -131,7 +131,28 @@ This confirms that delivery classification ambiguity does not meaningfully alter
 
 ---
 
-## 8. Output Artifacts Generated
+## 8. Qualification Threshold Sensitivity Analysis
+
+Evaluation of Empirical Bayes hyperparameters and player coverage across qualification thresholds (10 to 100 legal pressure balls):
+
+| Discipline | Min Balls | Qualified | Excluded | Prior Mean $\mu$ | Prior Std $\tau$ | Median Reliability | Median Post SE | IPL Covered | T20I Covered | Both Covered |
+| :--- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| **BATTING** | 10 | 477 | 214 | -46.19 | 40.94 | 0.749 | 20.52 | 239 | 386 | 148 |
+| **BATTING** | 20 | 351 | 340 | -39.20 | 36.96 | 0.756 | 18.27 | 197 | 289 | 135 |
+| **BATTING** | 30 | 278 | 413 | -34.24 | 32.94 | 0.747 | 16.57 | 171 | 230 | 123 |
+| **BATTING** | 50 | 181 | 510 | -27.65 | 28.56 | 0.749 | 14.31 | 125 | 151 | 95 |
+| **BATTING** | 75 | 126 | 565 | -25.20 | 27.36 | 0.760 | 13.40 | 91 | 108 | 73 |
+| **BATTING** | 100 | 94 | 597 | -24.21 | 28.66 | 0.806 | 12.61 | 69 | 83 | 58 |
+| **BOWLING** | 10 | 363 | 116 | 1.78 | 0.94 | 0.269 | 0.80 | 191 | 292 | 120 |
+| **BOWLING** | 20 | 275 | 204 | 1.83 | 0.80 | 0.274 | 0.68 | 161 | 228 | 114 |
+| **BOWLING** | 30 | 239 | 240 | 1.82 | 0.77 | 0.296 | 0.65 | 152 | 198 | 111 |
+| **BOWLING** | 50 | 183 | 296 | 1.81 | 0.66 | 0.298 | 0.56 | 126 | 156 | 99 |
+| **BOWLING** | 75 | 139 | 340 | 1.81 | 0.71 | 0.395 | 0.55 | 108 | 119 | 88 |
+| **BOWLING** | 100 | 112 | 367 | 1.81 | 0.72 | 0.443 | 0.54 | 92 | 97 | 77 |
+
+---
+
+## 9. Output Artifacts Generated
 
 - `round1_pressure/data/processed/batting_ordinary_baseline.parquet`: 12-cell stratified ordinary batting baseline.
 - `round1_pressure/data/processed/bowling_ordinary_baseline.parquet`: 12-cell stratified ordinary bowling baseline.
@@ -139,3 +160,4 @@ This confirms that delivery classification ambiguity does not meaningfully alter
 - `round1_pressure/data/processed/bowling_pressure_differentials.parquet`: Player-level observed, expected, and shrunk bowling differentials.
 - `round1_pressure/data/processed/bayesian_shrinkage_summary.parquet`: Hyperparameter estimates and reliability distributions.
 - `round1_pressure/data/processed/chronological_validation_results.parquet`: Temporal validation predictive accuracy comparison.
+- `round1_pressure/data/processed/qualification_threshold_sensitivity.parquet`: Sensitivity across qualification volume thresholds.

@@ -57,6 +57,7 @@ def main():
     print("[4/5] Executing Chronological Out-of-Sample Validation & Hyperparameter Summary...")
     engine.build_bayesian_hyperparameter_summary()
     engine.run_chronological_validation()
+    engine.compute_qualification_sensitivity()
 
     print("[5/5] Saving Parquet Output Datasets & Generating Report...")
     saved_paths = engine.save_parquet_outputs()

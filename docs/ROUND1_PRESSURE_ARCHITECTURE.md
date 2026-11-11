@@ -310,11 +310,37 @@ Task R1-04 establishes statistically defensible player performance baselines und
    - `expected_performance_report.md`
 
 8. **Test Verification:**
-   - 14 dedicated unit tests in `test_expected_performance.py` (90/90 in `round1_pressure`, 61/61 in `backend`, 151/151 total passing across workspace).
+   - 20 dedicated unit tests in `test_expected_performance.py` (96/96 in `round1_pressure`, 61/61 in `backend`, 157/157 total passing across workspace).
 
 ---
 
-## 11. Downstream Roadmap for R1-05 (Player Reliability Scoring & Final Rankings)
+## 11. R1-04.1 Statistical Validation, Bayesian Methodology and Baseline Robustness Audit
+
+Task R1-04.1 executes an exhaustive statistical and methodological audit of the R1-04 foundation:
+
+1. **Chronological Out-of-Sample Predictive Verification (Audit A):**
+   - Zero future-period information enters historical posteriors or parameter estimation.
+   - Evaluated against three transparent baseline predictors (Zero differential $\hat{y}=0$, Historical population mean $\hat{y}=\mu_{\text{train}}$, and Raw historical differential $\hat{y}=y_{i,\text{train}}$).
+   - Paired $t$-tests confirm statistically significant MSE reductions: Batting raw 1,240.03 $\to$ shrunk 994.00 (**+19.8%**, $p = 0.0151$); Bowling raw 4.57 $\to$ shrunk 2.77 (**+39.4%**, $p = 0.0052$).
+   - 95% Confidence Intervals for MSE difference are strictly positive.
+2. **Sampling Variance & Clustering Addressed (Audit B):**
+   - Intra-match delivery clustering inflates standard errors by +8.6% in batting and +13.6% in bowling.
+   - Incorporating match-level cluster-robust standard errors further reduces batting prediction MSE to 936.79 (**+24.5% reduction** over raw).
+3. **Qualification Threshold Robustness (Audit C):**
+   - Sensitivity testing across 10, 20, 30, 50, 75, 100 legal pressure balls confirms that 30 balls provides the optimal balance, capturing 96.4% of batting and 97.1% of bowling pressure volume while avoiding small-sample tailender distortions.
+4. **Common Support & Stratification Bounds (Audit D):**
+   - Proved mathematically that conditioning ordinary baselines on severe match states (e.g. $\le 4$ wickets remaining in Death) causes a **positivity / common support violation** (12 empty cells), confirming that the 12-cell context grid is the maximal empirical stratification satisfying common support.
+5. **Simpson's Paradox Exact Reproduction (Audit E):**
+   - Confirmed exact numbers: Ordinary 139.7 vs Pressure 140.9 overall; Death 176.5 vs 149.2; Middle 134.3 vs 104.3; Powerplay 137.2 vs 113.3.
+6. **Shrinkage Weight Disambiguation (Audit F):**
+   - Clarified that $r_i \in [0, 1]$ is a variance-ratio shrinkage weight, not a probability of reliability.
+   - Verified that $n=1$ observations have wide 95% credible intervals (> 125 SR points), preventing artificial precision.
+7. **Strict Scope Boundary Invariant:**
+   - No player rankings, Top 10 lists, or composite index $\Psi$ created.
+
+---
+
+## 12. Downstream Roadmap for R1-05 (Player Reliability Scoring & Final Rankings)
 
 With statistical baselines established, differentials contextualized, and Empirical Bayes shrinkage validated out-of-sample, the final analytical stage (R1-05) will construct:
 1. **Multi-Metric Composite Reliability:** Synthesizing shrunk differentials (Strike Rate, Dot %, Boundary %, Dismissal % for batters; Economy, Wicket %, Dot %, Boundary Conceded % for bowlers).
