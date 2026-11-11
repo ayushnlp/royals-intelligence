@@ -36,6 +36,11 @@ paths:
   qualification_threshold_sensitivity_parquet: "round1_pressure/data/processed/qualification_threshold_sensitivity.parquet"
   expected_performance_report_md: "round1_pressure/reports/expected_performance_report.md"
   expected_performance_audit_report_md: "round1_pressure/reports/expected_performance_audit_report.md"
+  batting_pressure_reliability_parquet: "round1_pressure/data/processed/batting_pressure_reliability.parquet"
+  bowling_pressure_reliability_parquet: "round1_pressure/data/processed/bowling_pressure_reliability.parquet"
+  all_rounder_pressure_reliability_parquet: "round1_pressure/data/processed/all_rounder_pressure_reliability.parquet"
+  scoring_methodology_comparison_parquet: "round1_pressure/data/processed/scoring_methodology_comparison.parquet"
+  player_reliability_report_md: "round1_pressure/reports/player_reliability_report.md"
 
 expected_files:
   ball_by_ball: "ball_by_ball.csv"
@@ -435,6 +440,45 @@ pressure_detection_r1_03:
       between_player_tau: 0.77
       median_reliability: 0.296
       chronological_val_mse_reduction_pct: 39.4
+
+  player_pressure_reliability_scoring:
+    task: "R1-05 Explainable Player Pressure Reliability Scoring Engine"
+    qualification_threshold_legal_balls: 30
+    temporal_stability:
+      min_seasons: 2
+      min_matches: 5
+    batting:
+      total_players: 691
+      qualified_players: 278
+      conservative_bound_k: 1.0
+      conservative_bound_95_k: 1.645
+      composite_pri_weights:
+        conservative_bound: 0.45
+        boundary_pct_diff: 0.20
+        dot_pct_suppression: 0.20
+        dismissal_pct_suppression: 0.15
+    bowling:
+      total_players: 479
+      qualified_players: 239
+      conservative_bound_k: 1.0
+      conservative_bound_95_k: 1.645
+      composite_pri_weights:
+        conservative_runs_saved: 0.45
+        wicket_pct_diff: 0.20
+        dot_pct_diff: 0.20
+        boundary_pct_suppression: 0.15
+    all_rounder_overlap:
+      qualified_two_way_players: 139
+      combination_methods:
+        - "harmonic_mean"
+        - "arithmetic_mean"
+    governance:
+      strict_discipline_separation: true
+      canonical_id_preserved: true
+      prohibited_scopes:
+        - "auction_valuation"
+        - "squad_fit_optimization"
+        - "price_discovery"
 
 
 

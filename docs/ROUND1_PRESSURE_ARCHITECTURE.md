@@ -340,10 +340,78 @@ Task R1-04.1 executes an exhaustive statistical and methodological audit of the 
 
 ---
 
-## 12. Downstream Roadmap for R1-05 (Player Reliability Scoring & Final Rankings)
+## 12. R1-05 Explainable Player Pressure Reliability Scoring Engine
 
-With statistical baselines established, differentials contextualized, and Empirical Bayes shrinkage validated out-of-sample, the final analytical stage (R1-05) will construct:
-1. **Multi-Metric Composite Reliability:** Synthesizing shrunk differentials (Strike Rate, Dot %, Boundary %, Dismissal % for batters; Economy, Wicket %, Dot %, Boundary Conceded % for bowlers).
-2. **Context Leverage Weighting:** Combining frequency-based sample reliability with leverage-weighted pressure exposure.
-3. **Credibility Bounds:** Incorporating 95% Credible Intervals to guard against sample size fragility.
-4. **Final Top 10 Rankings:** Publishing reproducible, fully audited Top 10 Most Reliable Batters and Top 10 Most Reliable Bowlers Under Pressure.
+Task R1-05 constructs an explainable, statistically grounded player pressure reliability scoring engine to answer the SupeRR Selector Season 2 — Round 1 objective: *Identify the Most Reliable Players Under Pressure*.
+
+### 1. Architectural Scope & Methodological Principles:
+- **Discipline Independence:** Batting and bowling reliability models operate completely independently and are never co-mingled in primary evaluation.
+- **Population Evaluated:** All 691 batters (278 qualified $\ge 30$ legal pressure balls) and 479 bowlers (239 qualified $\ge 30$ legal pressure balls).
+- **Two-Way All-Rounder Synthesis:** Exactly 139 players qualify in both disciplines; analyzed using dual combination methods (Harmonic and Arithmetic Means) while fully preserving separate discipline scores.
+- **Anti-Simplification Mandate:** Reliability is not defined by naive raw strike rates or economy rates. True reliability integrates:
+  1. Context-adjusted expected performance (controlling for phase, innings, tier).
+  2. Hierarchical Empirical Bayes shrinkage (DerSimonian-Laird estimation).
+  3. Posterior estimation uncertainty (penalizing small-sample volatility via credible lower bounds).
+  4. Multi-season temporal consistency (rewarding sustained multi-year reliability and penalizing inter-season volatility).
+
+### 2. Implemented Candidate Scoring Formulations:
+To guarantee transparent explainability and verify sensitivity across model choices, five distinct formulations were evaluated:
+1. **Conservative Credibility Bound (Value-at-Risk, 84.1% One-Sided Lower Bound):**
+   - Batting: $\text{Score}_{\text{bat, cons}} = \hat{\theta}_{i, \text{SR}} - 1.0 \times \text{SE}_{\text{post}, i}$
+   - Bowling: $\text{Score}_{\text{bowl, cons}} = -\hat{\theta}_{i, \text{Econ}} - 1.0 \times \text{SE}_{\text{post}, i}$
+2. **Conservative 95% One-Sided Lower Bound:**
+   - Evaluates lower tail under 95% credibility: $\hat{\theta} - 1.645 \times \text{SE}_{\text{post}}$.
+3. **Posterior Exceedance Probability vs Ordinary Baseline:**
+   - Batting: $P(\theta_i > 0 \mid y) = \Phi\left(\frac{\hat{\theta}_{i, \text{SR}}}{\text{SE}_{\text{post}, i}}\right)$
+   - Bowling: $P(\theta_i < 0 \mid y) = \Phi\left(\frac{-\hat{\theta}_{i, \text{Econ}}}{\text{SE}_{\text{post}, i}}\right)$
+4. **Posterior Exceedance Probability vs Pressured Peers:**
+   - Batting: $P(\theta_i > \mu_{\text{bat}} \mid y) = \Phi\left(\frac{\hat{\theta}_{i, \text{SR}} - \mu_{\text{bat}}}{\text{SE}_{\text{post}, i}}\right)$ where $\mu_{\text{bat}} = -34.24$ SR pts.
+   - Bowling: $P(\theta_i < \mu_{\text{bowl}} \mid y) = \Phi\left(\frac{\mu_{\text{bowl}} - \hat{\theta}_{i, \text{Econ}}}{\text{SE}_{\text{post}, i}}\right)$ where $\mu_{\text{bowl}} = +1.82$ RPO.
+5. **Multi-Dimensional Composite Pressure Reliability Index ($\text{PRI} \in [0, 100]$):**
+   - Integrates primary scoring/containment ($45\%$), boundary hazard control ($20\%$), dot-ball control ($20\%$), and dismissal/wicket threat ($15\%$), scaled by a **Temporal Consistency Factor (TCF)**:
+     $$\text{TCF}_i = \left(\frac{\min(S_i, 4)}{4}\right)^{0.35} \times \left(1 - 0.25 \times \min\left(1.0, \frac{\sigma_{\text{season}, i}}{\text{Scale}_\sigma}\right)\right)$$
+
+### 3. Pairwise Methodological Agreement:
+Pairwise Spearman rank correlations across all candidate scoring formulations confirm methodological consistency:
+- Batting: Pairwise correlations between Conservative Lower Bound, 95% Bound, Exceedance Probabilities, and Composite PRI range from **0.884 to 0.995**.
+- Bowling: Correlations between Conservative Runs Saved and Composite PRI range from **0.781 to 0.990**.
+- **Floor Effect in Bowling Baseline Exceedance:** In bowling, ordinary economy is 7.98 RPO while pressure economy is 10.07 RPO. Only Jasprit Bumrah maintains a shrunk differential below ordinary baseline ($\hat{\theta} = -0.20$ RPO, $P(\theta < 0) = 71.1\%$), causing floor compression for $P(\theta < 0)$ across all other bowlers. In contrast, evaluating against pressured peers ($P(\theta < \mu)$) and using Conservative Runs Saved per Over provides smooth, continuous differentiation across the entire population.
+
+### 4. Key Empirical Benchmarks:
+- **Top Batters Under Pressure (Diagnostic Conservative Bound):**
+  - **Nicholas Pooran:** 212 balls, 26 matches, 5 seasons (135 death balls). Shrunk diff **+16.2 $\pm$ 14.0** (95% CI: [-11.2, +43.6]). Cons. 84% Bound: **+2.2 SR pts**, $P(\text{Beat Baseline}) = 87.7\%$, Composite PRI = **83.4**.
+  - **Donovan Ferreira:** 84 balls, 13 matches, 4 seasons. Shrunk diff **+20.7 $\pm$ 19.8**. Cons. Bound: **+0.9 SR pts**, $P(\text{Beat Baseline}) = 85.2\%$, PRI = **94.7**.
+  - **Tim David:** 290 balls, 33 matches, 5 seasons (261 death balls). Shrunk diff **+9.6 $\pm$ 12.1**. Cons. Bound: **-2.5 SR pts**, $P(\text{Beat Baseline}) = 78.6\%$, PRI = **95.5**.
+  - **Dinesh Karthik:** 260 balls, 30 matches, 3 seasons (253 death balls). Shrunk diff **+9.2 $\pm$ 11.9**. Cons. Bound: **-2.7 SR pts**, PRI = **86.9**.
+  - **Ashutosh Sharma:** 191 balls, 20 matches, 3 seasons (179 death balls). Shrunk diff **+10.3 $\pm$ 13.9**. Cons. Bound: **-3.6 SR pts**, PRI = **87.5**.
+  - **Marcus Stoinis:** 220 balls, 32 matches, 5 seasons. Shrunk diff **+7.1 $\pm$ 12.9**, Cons. Bound: **-5.8 SR pts**, PRI = **78.8**.
+  - **Rinku Singh:** 363 balls, 48 matches, 5 seasons. Shrunk diff **+3.4 $\pm$ 10.4**, Cons. Bound: **-7.0 SR pts**, PRI = **93.4**.
+  - **Tristan Stubbs:** 266 balls, 33 matches, 5 seasons. Shrunk diff **+2.4 $\pm$ 10.5**, Cons. Bound: **-8.2 SR pts**, PRI = **86.5**.
+- **Top Bowlers Under Pressure (Diagnostic Conservative Runs Saved):**
+  - **Jasprit Bumrah:** 521 balls, 60 matches, 5 seasons (454 death balls). Raw Econ 8.94 vs Exp 9.70 (-0.76 RPO). Shrunk diff **-0.20 $\pm$ 0.36 RPO** (95% CI: [-0.90, +0.50]). Conservative Runs Saved: **-0.16 RPO** (the ONLY qualified bowler conceding fewer runs than ordinary baseline under pressure). $P(\text{Beat Baseline}) = 71.1\%$, $P(\text{Beat Peers}) = 100.0\%$, Composite PRI = **79.7**.
+  - **Sunil Narine:** 153 balls, 24 matches, 5 seasons (120 death balls). Shrunk diff **+0.39 $\pm$ 0.55 RPO**. Cons. Runs Saved: **-0.94 RPO**, $P(\text{Beat Peers}) = 99.5\%$, PRI = **67.3**.
+  - **Maheesh Theekshana:** 421 balls, 58 matches, 5 seasons. Shrunk diff **+0.55 $\pm$ 0.41 RPO**. Cons. Runs Saved: **-0.96 RPO**, PRI = **63.5**.
+  - **Matheesha Pathirana:** 440 balls, 44 matches, 5 seasons (440 death balls). Shrunk diff **+0.63 $\pm$ 0.41 RPO**. Cons. Runs Saved: **-1.05 RPO**, PRI = **66.1**.
+  - **Mustafizur Rahman:** 578 balls, 61 matches, 5 seasons (521 death balls). Shrunk diff **+1.09 $\pm$ 0.38 RPO**. Cons. Runs Saved: **-1.47 RPO**, PRI = **56.8**.
+- **Two-Way All-Rounder Evaluation ($N = 139$):**
+  - Top performers by Harmonic PRI (penalizes single-discipline skew): Sunil Narine (Harmonic PRI: 77.2; Bat PRI 90.5, Bowl PRI 67.3), Ravindra Jadeja, Rashid Khan, Romario Shepherd, Andre Russell, Axar Patel, Sam Curran.
+
+### 5. Strict Governance & Boundaries:
+- **Zero Raw Data Commits:** All raw CSVs and generated Parquet files remain untracked in `.gitignore`.
+- **No Auction or Squad Optimization:** No player prices, auction values, purse optimization, team optimizers, or API alterations.
+- **No Unstratified Definitive Top 10:** Results are presented as diagnostic reliability profiles with full estimation uncertainty (credible intervals) and explainability records.
+
+---
+
+## 13. Test Verification & Verification Summary
+
+| Test Suite | Files | Test Count | Status | Execution Time |
+| :--- | :--- | :---: | :---: | :---: |
+| Data QA (R1-01.1) | `test_data_qa.py` | 15 | PASSED | ~4s |
+| Match-State Reconstruction (R1-02 to R1-02.3) | `test_match_state.py` | 42 | PASSED | ~18s |
+| Pressure Detection (R1-03 to R1-03.1) | `test_pressure_detection.py` | 19 | PASSED | ~12s |
+| Expected Performance & Bayesian (R1-04 to R1-04.1) | `test_expected_performance.py` | 20 | PASSED | ~16s |
+| Player Pressure Reliability Engine (R1-05) | `test_player_reliability.py` | 15 | PASSED | ~17s |
+| **Total Round 1 Pressure Tests** | **5 suites** | **111** | **ALL PASSED** | **~50s** |
+| Existing Backend Regression Suite | `backend/tests/` | 61 | **ALL PASSED** | **~40s** |
+| **Workspace Combined Total** | | **172** | **ALL PASSED** | |
