@@ -170,7 +170,7 @@ def test_promising_candidate_selection_audit():
 
     # Verify Riley Meredith and Sakib Hussain are at boundary 1.82
     meredith = bowl_lead[bowl_lead["player_name"] == "Riley Meredith"].iloc[0]
-    assert meredith["posterior_mean"] == 1.82
+    assert round(meredith["posterior_mean"], 2) == 1.82
     assert meredith["evidence_classification"] == "NEGATIVE_EVIDENCE"
 
 

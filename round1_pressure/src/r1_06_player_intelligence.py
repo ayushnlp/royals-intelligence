@@ -195,18 +195,22 @@ class PlayerIntelligenceEngine:
             balls = int(r["pressure_legal_balls"])
             is_qual = bool(r["is_qualified"])
 
-            # Evidence volume tier
+            # Evidence volume tier (Dimension B standard)
             if balls >= 150:
-                vol_tier = "Large Sample (>=150 balls)"
+                vol_tier = "HIGH_VOLUME"
+                legacy_vol_tier = "Large Sample (>=150 balls)"
                 unc_level = "LOW"
             elif balls >= 60:
-                vol_tier = "Medium Sample (60-149 balls)"
+                vol_tier = "MEDIUM_VOLUME"
+                legacy_vol_tier = "Medium Sample (60-149 balls)"
                 unc_level = "MEDIUM"
             elif balls >= 30:
-                vol_tier = "Small Sample (30-59 balls)"
+                vol_tier = "LOW_VOLUME"
+                legacy_vol_tier = "Small Sample (30-59 balls)"
                 unc_level = "HIGH"
             else:
-                vol_tier = "Insufficient (<30 balls)"
+                vol_tier = "NO_QUALIFYING_EXPOSURE"
+                legacy_vol_tier = "Insufficient (<30 balls)"
                 unc_level = "VERY_HIGH"
 
             # Qualification status and reason
@@ -217,9 +221,21 @@ class PlayerIntelligenceEngine:
                 qual_status = "NOT_QUALIFIED"
                 qual_reason = f"BELOW_MIN_PRESSURE_BALLS: {balls} of 30 required balls"
 
-            # Competition coverage
+            # Candidate sample qualification (DEF-04 fix: >=60 balls OR (>=50 balls and >=10 matches))
+            cand_qual = bool((balls >= 60) or (balls >= 50 and int(r["pressure_matches"]) >= 10))
+
+            # Competition coverage and qualification (DEF-05 remediation)
             ipl_b = int(r["ipl_legal_balls"])
             t20i_b = int(r["t20i_legal_balls"])
+            if ipl_b >= 30 and t20i_b >= 30:
+                comp_qual = "DUAL_TOURNAMENT_QUALIFIED"
+            elif ipl_b >= 30:
+                comp_qual = "IPL_QUALIFIED"
+            elif t20i_b >= 30:
+                comp_qual = "T20I_QUALIFIED"
+            else:
+                comp_qual = "AGGREGATE_ONLY_QUALIFIED (<30 balls in either isolated tournament)"
+
             if ipl_b >= 20 and t20i_b >= 20:
                 comp_cov = "BOTH"
             elif ipl_b > 0 and t20i_b == 0:
@@ -245,19 +261,22 @@ class PlayerIntelligenceEngine:
                 "is_qualified": is_qual,
                 "qualification_status": qual_status,
                 "qualification_reason": qual_reason,
+                "is_candidate_qualified": cand_qual,
                 "evidence_volume_tier": vol_tier,
+                "legacy_evidence_volume_tier": legacy_vol_tier,
                 "uncertainty_level": unc_level,
                 "primary_diagnostic_name": "BAT_CONSERVATIVE",
-                "primary_diagnostic_value": round(float(cons_bound), 2) if pd.notna(cons_bound) else np.nan,
+                "primary_diagnostic_value": float(cons_bound) if pd.notna(cons_bound) else np.nan,
                 "primary_diagnostic_unit": "SR_POINTS",
-                "posterior_mean": round(float(post_mean), 2) if pd.notna(post_mean) else np.nan,
-                "posterior_se": round(float(post_se), 2) if pd.notna(post_se) else np.nan,
-                "ci_95_lower": round(float(r["ci_95_lower_strike_rate"]), 2) if pd.notna(r["ci_95_lower_strike_rate"]) else np.nan,
-                "ci_95_upper": round(float(r["ci_95_upper_strike_rate"]), 2) if pd.notna(r["ci_95_upper_strike_rate"]) else np.nan,
-                "ci_95_width": round(float(r["ci_95_upper_strike_rate"] - r["ci_95_lower_strike_rate"]), 2) if pd.notna(r["ci_95_lower_strike_rate"]) else np.nan,
-                "shrinkage_weight": round(float(r["reliability_strike_rate"]), 3) if pd.notna(r["reliability_strike_rate"]) else np.nan,
-                "prob_exceed_baseline": round(float(r["prob_exceed_baseline"]), 3) if pd.notna(r["prob_exceed_baseline"]) else np.nan,
-                "prob_exceed_peers": round(float(r["prob_exceed_peer_mean"]), 3) if pd.notna(r["prob_exceed_peer_mean"]) else np.nan,
+                "posterior_mean": float(post_mean) if pd.notna(post_mean) else np.nan,
+                "posterior_se": float(post_se) if pd.notna(post_se) else np.nan,
+                "ci_95_lower": float(r["ci_95_lower_strike_rate"]) if pd.notna(r["ci_95_lower_strike_rate"]) else np.nan,
+                "ci_95_upper": float(r["ci_95_upper_strike_rate"]) if pd.notna(r["ci_95_upper_strike_rate"]) else np.nan,
+                "ci_95_width": float(r["ci_95_upper_strike_rate"] - r["ci_95_lower_strike_rate"]) if pd.notna(r["ci_95_lower_strike_rate"]) else np.nan,
+                "shrinkage_weight": float(r["reliability_strike_rate"]) if pd.notna(r["reliability_strike_rate"]) else np.nan,
+                "prob_exceed_baseline": float(r["prob_exceed_baseline"]) if pd.notna(r["prob_exceed_baseline"]) else np.nan,
+                "prob_exceed_peers": float(r["prob_exceed_peer_mean"]) if pd.notna(r["prob_exceed_peer_mean"]) else np.nan,
+                "prob_exceed_league_mean": float(r["prob_exceed_peer_mean"]) if pd.notna(r["prob_exceed_peer_mean"]) else np.nan,
                 "observed_strike_rate": round(float(r["observed_strike_rate"]), 2),
                 "expected_strike_rate": round(float(r["expected_strike_rate"]), 2),
                 "diff_strike_rate": round(float(r["diff_strike_rate"]), 2),
@@ -275,12 +294,13 @@ class PlayerIntelligenceEngine:
                 "ipl_legal_balls": ipl_b,
                 "t20i_legal_balls": t20i_b,
                 "competition_coverage": comp_cov,
+                "competition_qualification": comp_qual,
                 "ipl_conservative_metric": comp_data.get("ipl_conservative_metric"),
                 "t20i_conservative_metric": comp_data.get("t20i_conservative_metric"),
                 "cross_comp_transferable": (ipl_b >= 30 and t20i_b >= 30),
-                "exploratory_pri_no_tcf": round(float(r["exploratory_pri_no_tcf"]), 1) if pd.notna(r["exploratory_pri_no_tcf"]) else np.nan,
-                "experimental_pri_with_tcf": round(float(r["composite_pri"]), 1) if pd.notna(r["composite_pri"]) else np.nan,
-                "temporal_consistency_score": round(float(r["temporal_consistency_score"]), 3) if pd.notna(r["temporal_consistency_score"]) else np.nan,
+                "exploratory_pri_no_tcf": float(r["exploratory_pri_no_tcf"]) if pd.notna(r["exploratory_pri_no_tcf"]) else np.nan,
+                "experimental_pri_with_tcf": float(r["composite_pri"]) if pd.notna(r["composite_pri"]) else np.nan,
+                "temporal_consistency_score": float(r["temporal_consistency_score"]) if pd.notna(r["temporal_consistency_score"]) else np.nan,
             })
 
         # Append zero-pressure batters
@@ -292,7 +312,9 @@ class PlayerIntelligenceEngine:
                 "is_qualified": False,
                 "qualification_status": "NOT_QUALIFIED",
                 "qualification_reason": "ZERO_PRESSURE_DELIVERIES_FACED (faced non-pressure balls only)",
-                "evidence_volume_tier": "Insufficient (<30 balls)",
+                "is_candidate_qualified": False,
+                "evidence_volume_tier": "NO_QUALIFYING_EXPOSURE",
+                "legacy_evidence_volume_tier": "Insufficient (<30 balls)",
                 "uncertainty_level": "VERY_HIGH",
                 "primary_diagnostic_name": "BAT_CONSERVATIVE",
                 "primary_diagnostic_value": np.nan,
@@ -305,6 +327,7 @@ class PlayerIntelligenceEngine:
                 "shrinkage_weight": np.nan,
                 "prob_exceed_baseline": np.nan,
                 "prob_exceed_peers": np.nan,
+                "prob_exceed_league_mean": np.nan,
                 "observed_strike_rate": np.nan,
                 "expected_strike_rate": np.nan,
                 "diff_strike_rate": np.nan,
@@ -322,6 +345,7 @@ class PlayerIntelligenceEngine:
                 "ipl_legal_balls": 0,
                 "t20i_legal_balls": 0,
                 "competition_coverage": "NONE",
+                "competition_qualification": "AGGREGATE_ONLY_QUALIFIED (<30 balls in either isolated tournament)",
                 "ipl_conservative_metric": None,
                 "t20i_conservative_metric": None,
                 "cross_comp_transferable": False,
@@ -365,17 +389,22 @@ class PlayerIntelligenceEngine:
             balls = int(r["pressure_legal_balls"])
             is_qual = bool(r["is_qualified"])
 
+            # Evidence volume tier (Dimension B standard)
             if balls >= 150:
-                vol_tier = "Large Sample (>=150 balls)"
+                vol_tier = "HIGH_VOLUME"
+                legacy_vol_tier = "Large Sample (>=150 balls)"
                 unc_level = "LOW"
             elif balls >= 60:
-                vol_tier = "Medium Sample (60-149 balls)"
+                vol_tier = "MEDIUM_VOLUME"
+                legacy_vol_tier = "Medium Sample (60-149 balls)"
                 unc_level = "MEDIUM"
             elif balls >= 30:
-                vol_tier = "Small Sample (30-59 balls)"
+                vol_tier = "LOW_VOLUME"
+                legacy_vol_tier = "Small Sample (30-59 balls)"
                 unc_level = "HIGH"
             else:
-                vol_tier = "Insufficient (<30 balls)"
+                vol_tier = "NO_QUALIFYING_EXPOSURE"
+                legacy_vol_tier = "Insufficient (<30 balls)"
                 unc_level = "VERY_HIGH"
 
             if is_qual:
@@ -385,8 +414,21 @@ class PlayerIntelligenceEngine:
                 qual_status = "NOT_QUALIFIED"
                 qual_reason = f"BELOW_MIN_PRESSURE_BALLS: {balls} of 30 required balls"
 
+            # Candidate sample qualification (DEF-04 fix: >=60 balls OR (>=50 balls and >=10 matches))
+            cand_qual = bool((balls >= 60) or (balls >= 50 and int(r["pressure_matches"]) >= 10))
+
+            # Competition coverage and qualification (DEF-05 remediation)
             ipl_b = int(r["ipl_legal_balls"])
             t20i_b = int(r["t20i_legal_balls"])
+            if ipl_b >= 30 and t20i_b >= 30:
+                comp_qual = "DUAL_TOURNAMENT_QUALIFIED"
+            elif ipl_b >= 30:
+                comp_qual = "IPL_QUALIFIED"
+            elif t20i_b >= 30:
+                comp_qual = "T20I_QUALIFIED"
+            else:
+                comp_qual = "AGGREGATE_ONLY_QUALIFIED (<30 balls in either isolated tournament)"
+
             if ipl_b >= 20 and t20i_b >= 20:
                 comp_cov = "BOTH"
             elif ipl_b > 0 and t20i_b == 0:
@@ -412,19 +454,22 @@ class PlayerIntelligenceEngine:
                 "is_qualified": is_qual,
                 "qualification_status": qual_status,
                 "qualification_reason": qual_reason,
+                "is_candidate_qualified": cand_qual,
                 "evidence_volume_tier": vol_tier,
+                "legacy_evidence_volume_tier": legacy_vol_tier,
                 "uncertainty_level": unc_level,
                 "primary_diagnostic_name": "BOWL_CONSERVATIVE",
-                "primary_diagnostic_value": round(float(cons_bound), 2) if pd.notna(cons_bound) else np.nan,
+                "primary_diagnostic_value": float(cons_bound) if pd.notna(cons_bound) else np.nan,
                 "primary_diagnostic_unit": "RUNS_SAVED_PER_OVER",
-                "posterior_mean": round(float(post_mean), 2) if pd.notna(post_mean) else np.nan,
-                "posterior_se": round(float(post_se), 2) if pd.notna(post_se) else np.nan,
-                "ci_95_lower": round(float(r["ci_95_lower_economy"]), 2) if pd.notna(r["ci_95_lower_economy"]) else np.nan,
-                "ci_95_upper": round(float(r["ci_95_upper_economy"]), 2) if pd.notna(r["ci_95_upper_economy"]) else np.nan,
-                "ci_95_width": round(float(r["ci_95_upper_economy"] - r["ci_95_lower_economy"]), 2) if pd.notna(r["ci_95_lower_economy"]) else np.nan,
-                "shrinkage_weight": round(float(r["reliability_economy"]), 3) if pd.notna(r["reliability_economy"]) else np.nan,
-                "prob_exceed_baseline": round(float(r["prob_exceed_baseline"]), 3) if pd.notna(r["prob_exceed_baseline"]) else np.nan,
-                "prob_exceed_peers": round(float(r["prob_exceed_peer_mean"]), 3) if pd.notna(r["prob_exceed_peer_mean"]) else np.nan,
+                "posterior_mean": float(post_mean) if pd.notna(post_mean) else np.nan,
+                "posterior_se": float(post_se) if pd.notna(post_se) else np.nan,
+                "ci_95_lower": float(r["ci_95_lower_economy"]) if pd.notna(r["ci_95_lower_economy"]) else np.nan,
+                "ci_95_upper": float(r["ci_95_upper_economy"]) if pd.notna(r["ci_95_upper_economy"]) else np.nan,
+                "ci_95_width": float(r["ci_95_upper_economy"] - r["ci_95_lower_economy"]) if pd.notna(r["ci_95_lower_economy"]) else np.nan,
+                "shrinkage_weight": float(r["reliability_economy"]) if pd.notna(r["reliability_economy"]) else np.nan,
+                "prob_exceed_baseline": float(r["prob_exceed_baseline"]) if pd.notna(r["prob_exceed_baseline"]) else np.nan,
+                "prob_exceed_peers": float(r["prob_exceed_peer_mean"]) if pd.notna(r["prob_exceed_peer_mean"]) else np.nan,
+                "prob_exceed_league_mean": float(r["prob_exceed_peer_mean"]) if pd.notna(r["prob_exceed_peer_mean"]) else np.nan,
                 "observed_economy": round(float(r["observed_economy"]), 2),
                 "expected_economy": round(float(r["expected_economy"]), 2),
                 "diff_economy": round(float(r["diff_economy"]), 2),
@@ -442,12 +487,13 @@ class PlayerIntelligenceEngine:
                 "ipl_legal_balls": ipl_b,
                 "t20i_legal_balls": t20i_b,
                 "competition_coverage": comp_cov,
+                "competition_qualification": comp_qual,
                 "ipl_conservative_metric": comp_data.get("ipl_conservative_metric"),
                 "t20i_conservative_metric": comp_data.get("t20i_conservative_metric"),
                 "cross_comp_transferable": (ipl_b >= 30 and t20i_b >= 30),
-                "exploratory_pri_no_tcf": round(float(r["exploratory_pri_no_tcf"]), 1) if pd.notna(r["exploratory_pri_no_tcf"]) else np.nan,
-                "experimental_pri_with_tcf": round(float(r["composite_pri"]), 1) if pd.notna(r["composite_pri"]) else np.nan,
-                "temporal_consistency_score": round(float(r["temporal_consistency_score"]), 3) if pd.notna(r["temporal_consistency_score"]) else np.nan,
+                "exploratory_pri_no_tcf": float(r["exploratory_pri_no_tcf"]) if pd.notna(r["exploratory_pri_no_tcf"]) else np.nan,
+                "experimental_pri_with_tcf": float(r["composite_pri"]) if pd.notna(r["composite_pri"]) else np.nan,
+                "temporal_consistency_score": float(r["temporal_consistency_score"]) if pd.notna(r["temporal_consistency_score"]) else np.nan,
             })
 
         # Append zero-pressure bowlers
@@ -459,7 +505,9 @@ class PlayerIntelligenceEngine:
                 "is_qualified": False,
                 "qualification_status": "NOT_QUALIFIED",
                 "qualification_reason": "ZERO_PRESSURE_DELIVERIES_BOWLED (bowled non-pressure balls only)",
-                "evidence_volume_tier": "Insufficient (<30 balls)",
+                "is_candidate_qualified": False,
+                "evidence_volume_tier": "NO_QUALIFYING_EXPOSURE",
+                "legacy_evidence_volume_tier": "Insufficient (<30 balls)",
                 "uncertainty_level": "VERY_HIGH",
                 "primary_diagnostic_name": "BOWL_CONSERVATIVE",
                 "primary_diagnostic_value": np.nan,
@@ -472,6 +520,7 @@ class PlayerIntelligenceEngine:
                 "shrinkage_weight": np.nan,
                 "prob_exceed_baseline": np.nan,
                 "prob_exceed_peers": np.nan,
+                "prob_exceed_league_mean": np.nan,
                 "observed_economy": np.nan,
                 "expected_economy": np.nan,
                 "diff_economy": np.nan,
@@ -489,6 +538,7 @@ class PlayerIntelligenceEngine:
                 "ipl_legal_balls": 0,
                 "t20i_legal_balls": 0,
                 "competition_coverage": "NONE",
+                "competition_qualification": "AGGREGATE_ONLY_QUALIFIED (<30 balls in either isolated tournament)",
                 "ipl_conservative_metric": None,
                 "t20i_conservative_metric": None,
                 "cross_comp_transferable": False,

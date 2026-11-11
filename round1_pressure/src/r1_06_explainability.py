@@ -83,20 +83,28 @@ class ExplainabilityEngine:
         ipl_b = row["ipl_legal_balls"]
         t20i_b = row["t20i_legal_balls"]
         comp_cov = row["competition_coverage"]
+        comp_qual = row.get("competition_qualification", "N/A")
         classification = row["evidence_classification"]
+        dim_a = row.get("performance_evidence_status", "N/A")
+        dim_b = row.get("evidence_volume_tier", vol_tier)
+        two_dim = row.get("two_dimensional_classification", f"{dim_a} ({dim_b})")
+        cohort = row.get("watchlist_cohort", "N/A")
+        cand_qual = bool(row.get("is_candidate_qualified", True))
         p_base = row["prob_exceed_baseline"]
         p_peer = row["prob_exceed_peers"]
+        p_league = float(row.get("prob_exceed_league_mean", p_peer))
 
         unit_str = "SR pts" if is_batting else "RPO"
 
         # Question 1: Why considered?
         q1 = (
             f"Ranked #{rank} in {row['discipline'].capitalize()} with a conservative diagnostic value of {diag_val:+.2f} {unit_str}. "
-            f"Classified as '{classification}' based on context-adjusted overperformance under pressure."
+            f"Two-Dimensional Classification: '{two_dim}' (Evidence Status: `{dim_a}`, Volume: `{dim_b}`, Cohort: `{cohort}`). "
+            f"Sample qualification: {'QUALIFIED' if cand_qual else 'EXCEPTION_PENDING'} (legacy: '{classification}')."
         )
 
         # Question 2: Sample size?
-        q2 = f"{balls} legal pressure deliveries bowled/faced, categorized in '{vol_tier}'."
+        q2 = f"{balls} legal pressure deliveries bowled/faced, categorized in '{dim_b}' (Volume Tier B)."
 
         # Question 3: Matches and seasons?
         q3 = f"Demonstrated across {matches} unique pressure matches and {seasons} active seasons (Distribution: {season_dist})."
@@ -123,8 +131,9 @@ class ExplainabilityEngine:
 
         # Question 9: Competition support?
         q9 = (
-            f"Coverage: {comp_cov} ({ipl_b} balls in IPL, {t20i_b} balls in Senior T20I). "
-            f"{'Supported by substantial sample in both competitions.' if row['cross_comp_transferable'] else 'Limited cross-competition sample overlap.'}"
+            f"Coverage: {comp_cov} ({ipl_b} balls in IPL, {t20i_b} balls in Senior T20I | Classification: `{comp_qual}`). "
+            f"{'Supported by substantial sample in both competitions.' if row['cross_comp_transferable'] else 'Limited cross-competition sample overlap.'} "
+            "Note: Dual-tournament qualification indicates sample exposure availability in both competitions, NOT statistical proof of cross-competition skill transferability."
         )
 
         # Question 10: Major limitations?
@@ -140,9 +149,12 @@ class ExplainabilityEngine:
         q10 = "; ".join(limitations) + "."
 
         # Question 11: Sensitivity to assumptions?
+        ref_mean_str = "-34.24 SR pts" if is_batting else "+1.82 RPO"
         q11 = (
             f"Under unpenalized posterior mean, performance is {post_mean:+.2f} {unit_str}. "
-            f"Model credibility against baseline: {p_base*100:.1f}%; against peers: {p_peer*100:.1f}%. "
+            f"Model credibility against baseline: {p_base*100:.1f}%; "
+            f"against league-wide pressure mean (prior mean $\\mu = {ref_mean_str}$): {p_league*100:.1f}%. "
+            f"Exceeding league average under pressure compares against degraded match conditions, NOT fellow shortlisted candidates. "
             f"Exploratory PRI without TCF: {row['exploratory_pri_no_tcf']:.1f}; Experimental PRI with TCF: {row['experimental_pri_with_tcf']:.1f}."
         )
 
@@ -152,6 +164,12 @@ class ExplainabilityEngine:
             "discipline": row["discipline"],
             "rank": rank,
             "evidence_classification": classification,
+            "performance_evidence_status": dim_a,
+            "evidence_volume_tier": dim_b,
+            "two_dimensional_classification": two_dim,
+            "watchlist_cohort": cohort,
+            "is_candidate_qualified": cand_qual,
+            "prob_exceed_league_mean": p_league,
             "q1_why_considered": q1,
             "q2_pressure_deliveries": q2,
             "q3_matches_and_seasons": q3,
@@ -201,45 +219,57 @@ class ExplainabilityEngine:
         # ----------------------------------------------------------------------
         bat_report_path = self.reports_dir / "r1_06_batting_shortlist.md"
         top_bat = self.bat_leaderboard.head(12)
-        prom_bat = self.bat_leaderboard[self.bat_leaderboard["evidence_classification"] == "PROMISING_CANDIDATE"].head(9)
+        prom_emerging_bat = self.bat_leaderboard[self.bat_leaderboard["watchlist_cohort"] == "EMERGING_HIGH_UPSIDE"]
+        prom_estab_bat = self.bat_leaderboard[self.bat_leaderboard["watchlist_cohort"] == "ESTABLISHED_MARGINAL_PERFORMER"]
 
         bat_lines = [
             "# ROYALS INTELLIGENCE — ROUND 1 BATTING PRESSURE RELIABILITY SHORTLIST",
             f"**Generated:** {now_iso}  ",
             "**Architecture:** ROYALS INTELLIGENCE v4.1  ",
-            "**Task:** R1-06 Evidence-Backed Player Reliability Intelligence & Ranking Engine  ",
+            "**Task:** R1-06 / R1-06.2 Candidate Classification & Evidence Governance Remediation  ",
             "**Primary Metric:** Conservative Lower Credible Bound `BAT_CONSERVATIVE = posterior_mean_SR - posterior_SE_SR` (SR Points)  ",
             "",
             "---",
             "",
             "## 1. Executive Shortlist Overview",
             "",
-            "The Batting Pressure Reliability Shortlist identifies batters who consistently overperform context-adjusted expectations "
-            "under high-leverage match conditions, penalized by posterior estimation uncertainty. "
-            "Exactly **12 batters satisfy all Strong Evidence criteria** (conservative bound $\\ge -10.0$ SR pts, positive posterior mean $\\ge 0.0$ SR pts, "
-            "and $\\ge 60$ legal pressure balls across $\\ge 10$ matches).",
+            "The Batting Pressure Reliability Shortlist evaluates batters under high-leverage match conditions, penalized by posterior estimation uncertainty. "
+            "Under the remediated **Two-Dimensional Classification System** (Task R1-06.2):",
+            "- **Dimension A (Performance Evidence Status):** Separates candidates whose conservative bound is strictly positive from those with positive estimated effect but unresolved uncertainty.",
+            "- **Dimension B (Evidence Volume Tier):** HIGH_VOLUME ($\\ge 150$ balls), MEDIUM_VOLUME ($60-149$ balls), LOW_VOLUME ($30-59$ balls).",
             "",
-            "### Batting Leaderboard (Top 12 Candidates Meeting Strong Evidence):",
+            "> [!IMPORTANT]",
+            "> **Conservative Lower Bound & Statistical Evidence:**",
+            "> - **Exactly 2 qualified batters** establish strictly positive conservative lower bounds (`POSITIVE_CONSERVATIVE_EVIDENCE`): **Nicholas Pooran (+2.2 SR pts)** and **Donovan Ferreira (+0.9 SR pts)**.",
+            "> - Candidates ranked #3 through #12 exhibit positive posterior means ($\\hat{\\theta} > 0.0$), but their 84% conservative lower bounds are non-positive ($L \\le 0$). They are classified as `NEGATIVE_CONSERVATIVE_ESTIMATE` (positive estimated effect with unresolved uncertainty spanning zero), NOT negative performance.",
+            "> - Candidates ranked #3 through #12 have heavily overlapping 95% credible intervals (e.g. Tim David: [-14.1, +33.3], Dinesh Karthik: [-14.0, +32.5], Ashutosh Sharma: [-17.0, +37.6]). Small ranking differences among these players reflect empirical sample variance rather than proven qualitative superiority.",
             "",
-            "| Rank | Batter Name | BAT_CONSERVATIVE (SR pts) | Posterior Mean $\\hat{\\theta}$ | Posterior SE | 95% Credible Interval | Pressure Balls | Matches | Seasons | Comp Coverage | P(Beat Base) | P(Beat Peers) | Evidence Class |",
-            "| :--- | :--- | ---: | ---: | ---: | :---: | ---: | ---: | ---: | :--- | ---: | ---: | :--- |",
+            "> [!NOTE]",
+            "> **Probability Interpretation Disclosure:**",
+            "> `P(Exceed League Avg Under Pressure)` evaluates exceedance over the league-wide pressure prior mean ($\\mu_b = -34.24$ SR pts). Because league-wide batting strike rates collapse by ~34 points under pressure, achieving 90%+ probability of exceeding the league pressure average is a much lower hurdle than beating ordinary baseline expectation ($P(\\text{Beat Base})$).",
+            "",
+            "### Batting Leaderboard (Top 12 Candidates):",
+            "",
+            "| Rank | Batter Name | BAT_CONSERVATIVE (SR pts) | Posterior Mean $\\hat{\\theta}$ | Posterior SE | 95% Credible Interval | Pressure Balls | Matches | Comp Qual | P(Beat Base) | P(Exceed League Avg Under Pressure) | Dim A (Evidence Status) | Dim B (Volume) | Watchlist Cohort |",
+            "| :--- | :--- | ---: | ---: | ---: | :---: | ---: | ---: | :--- | ---: | ---: | :--- | :--- | :--- |",
         ]
 
         for _, r in top_bat.iterrows():
             ci_str = f"[{r['ci_95_lower']:+.1f}, {r['ci_95_upper']:+.1f}]"
+            comp_q = r.get("competition_qualification", r["competition_coverage"])
+            dim_a_val = r.get("performance_evidence_status", r["evidence_classification"])
+            dim_b_val = r.get("evidence_volume_tier", "MEDIUM_VOLUME")
+            cohort_val = r.get("watchlist_cohort", "N/A")
+            p_lg = r.get("prob_exceed_league_mean", r["prob_exceed_peers"])
             bat_lines.append(
                 f"| **{r['rank']}** | **{r['player_name']}** | **{r['primary_diagnostic_value']:+.1f}** | "
                 f"{r['posterior_mean']:+.1f} | $\\pm${r['posterior_se']:.1f} | {ci_str} | "
-                f"{r['pressure_legal_balls']} | {r['pressure_matches']} | {r['pressure_seasons']} | "
-                f"`{r['competition_coverage']}` | {r['prob_exceed_baseline']*100:.1f}% | {r['prob_exceed_peers']*100:.1f}% | `{r['evidence_classification']}` |"
+                f"{r['pressure_legal_balls']} | {r['pressure_matches']} | "
+                f"`{comp_q}` | {r['prob_exceed_baseline']*100:.1f}% | {p_lg*100:.1f}% | "
+                f"`{dim_a_val}` | `{dim_b_val}` | `{cohort_val}` |"
             )
 
         bat_lines.extend([
-            "",
-            "> [!IMPORTANT]",
-            "> **Statistical Uncertainty & CI Overlap:**",
-            "> - The top 2 candidates (**Nicholas Pooran: +2.2 SR pts** and **Donovan Ferreira: +0.9 SR pts**) are the only two qualified batters whose 84% conservative lower bound is strictly positive relative to ordinary baseline.",
-            "> - Candidates ranked #3 through #12 have heavily overlapping 95% credible intervals (e.g. Tim David: [-14.1, +33.3], Dinesh Karthik: [-14.0, +32.5], Ashutosh Sharma: [-17.0, +37.6]). Small ranking differences among these players reflect empirical sample variance rather than proven qualitative superiority.",
             "",
             "---",
             "",
@@ -247,11 +277,10 @@ class ExplainabilityEngine:
             "",
         ])
 
-        # Evidence profile cards for top candidates
         top_profiles = self.bat_profiles_df.head(10)
         for _, p in top_profiles.iterrows():
             bat_lines.extend([
-                f"### #{p['rank']} — {p['player_name']} (`{p['evidence_classification']}`)",
+                f"### #{p['rank']} — {p['player_name']} (`{p['two_dimensional_classification']}`)",
                 f"- **Why Considered:** {p['q1_why_considered']}",
                 f"- **Evidence Volume:** {p['q2_pressure_deliveries']}",
                 f"- **Temporal Stability:** {p['q3_matches_and_seasons']}",
@@ -267,19 +296,38 @@ class ExplainabilityEngine:
         bat_lines.extend([
             "---",
             "",
-            "## 3. Promising Candidates Watchlist (Emerging Evidence)",
+            "## 3. Promising Candidates Watchlist (Emerging vs Established Cohorts)",
             "",
-            "These players exhibit positive posterior mean strike-rate differentials ($\\hat{\\theta} > 0.0$), but have smaller sample volumes ($30-59$ balls) or fewer matches ($< 10$), retaining higher estimation uncertainty:",
+            "Audit finding DEF-03 remediation: The promising cohort is explicitly separated into genuine emerging talents and established veterans with marginal effects:",
             "",
-            "| Batter Name | Posterior Mean $\\hat{\\theta}$ | Posterior SE | Conservative Bound | Pressure Balls | Matches | Limitation Reason |",
-            "| :--- | ---: | ---: | ---: | ---: | ---: | :--- |",
+            "### A. Emerging High-Upside Candidates (`EMERGING_HIGH_UPSIDE` — $30 \\le n < 60$ balls, positive posterior mean):",
+            "These emerging players have high estimated overperformance under pressure but limited exposure volume ($< 60$ balls), retaining higher estimation variance:",
+            "",
+            "| Batter Name | Posterior Mean $\\hat{\\theta}$ | Posterior SE | Conservative Bound | Pressure Balls | Matches | Volume Tier | Watchlist Cohort | Two-Dimensional Status |",
+            "| :--- | ---: | ---: | ---: | ---: | ---: | :--- | :--- | :--- |",
         ])
 
-        for _, r in prom_bat.iterrows():
+        for _, r in prom_emerging_bat.iterrows():
             bat_lines.append(
                 f"| **{r['player_name']}** | {r['posterior_mean']:+.1f} SR | $\\pm${r['posterior_se']:.1f} | "
                 f"{r['primary_diagnostic_value']:+.1f} SR | {r['pressure_legal_balls']} | {r['pressure_matches']} | "
-                f"{r['classification_reason']} |"
+                f"`{r['evidence_volume_tier']}` | `{r['watchlist_cohort']}` | `{r['two_dimensional_classification']}` |"
+            )
+
+        bat_lines.extend([
+            "",
+            "### B. Established Marginal Performers (`ESTABLISHED_MARGINAL_PERFORMER` — $n \\ge 60$ balls, positive posterior mean, conservative bound $\\le 0$):",
+            "Established multi-season veterans who maintain positive posterior strike rates but whose 1-sigma uncertainty bound crosses zero:",
+            "",
+            "| Batter Name | Posterior Mean $\\hat{\\theta}$ | Posterior SE | Conservative Bound | Pressure Balls | Matches | Volume Tier | Watchlist Cohort | Two-Dimensional Status |",
+            "| :--- | ---: | ---: | ---: | ---: | ---: | :--- | :--- | :--- |",
+        ])
+
+        for _, r in prom_estab_bat.iterrows():
+            bat_lines.append(
+                f"| **{r['player_name']}** | {r['posterior_mean']:+.1f} SR | $\\pm${r['posterior_se']:.1f} | "
+                f"{r['primary_diagnostic_value']:+.1f} SR | {r['pressure_legal_balls']} | {r['pressure_matches']} | "
+                f"`{r['evidence_volume_tier']}` | `{r['watchlist_cohort']}` | `{r['two_dimensional_classification']}` |"
             )
 
         bat_report_path.write_text("\n".join(bat_lines), encoding="utf-8")
@@ -290,46 +338,62 @@ class ExplainabilityEngine:
         # ----------------------------------------------------------------------
         bowl_report_path = self.reports_dir / "r1_06_bowling_shortlist.md"
         top_bowl = self.bowl_leaderboard.head(11)
-        prom_bowl = self.bowl_leaderboard[self.bowl_leaderboard["evidence_classification"] == "PROMISING_CANDIDATE"].head(10)
+        prom_emerging_bowl = self.bowl_leaderboard[self.bowl_leaderboard["watchlist_cohort"] == "PEER_BEATING_EMERGING"].head(10)
+        prom_estab_bowl = self.bowl_leaderboard[self.bowl_leaderboard["watchlist_cohort"] == "PEER_BEATING_ESTABLISHED"].head(10)
 
         bowl_lines = [
             "# ROYALS INTELLIGENCE — ROUND 1 BOWLING PRESSURE RELIABILITY SHORTLIST",
             f"**Generated:** {now_iso}  ",
             "**Architecture:** ROYALS INTELLIGENCE v4.1  ",
-            "**Task:** R1-06 Evidence-Backed Player Reliability Intelligence & Ranking Engine  ",
+            "**Task:** R1-06 / R1-06.2 Candidate Classification & Evidence Governance Remediation  ",
             "**Primary Metric:** Conservative Runs Saved per Over `BOWL_CONSERVATIVE = -posterior_mean_economy_diff - posterior_SE_economy` (Runs Saved/Over)  ",
             "",
             "---",
             "",
             "## 1. Executive Shortlist Overview",
             "",
-            "The Bowling Pressure Reliability Shortlist identifies bowlers who restrict run-scoring under high-leverage conditions "
-            "relative to context expectations, penalized by posterior estimation uncertainty. "
-            "Remember that average bowling economy increases by **+1.82 RPO** under pressure; therefore, conceding fewer runs than peers constitutes runs saved. "
-            "Exactly **11 bowlers satisfy all Strong Evidence criteria** (conservative runs saved $\\ge -1.75$ RPO, posterior mean differential $\\le +1.25$ RPO, "
-            "and $\\ge 60$ legal pressure balls across $\\ge 10$ matches).",
+            "The Bowling Pressure Reliability Shortlist evaluates bowler run containment under high-leverage conditions relative to context expectations, penalized by posterior estimation uncertainty. "
+            "Under the remediated **Two-Dimensional Classification System** (Task R1-06.2):",
+            "- **Dimension A (Performance Evidence Status):** Evaluates runs saved point estimate and uncertainty intervals relative to baseline expectation.",
+            "- **Dimension B (Evidence Volume Tier):** HIGH_VOLUME ($\\ge 150$ balls), MEDIUM_VOLUME ($60-149$ balls), LOW_VOLUME ($30-59$ balls).",
             "",
-            "### Bowling Leaderboard (Top 11 Candidates Meeting Strong Evidence):",
+            "> [!IMPORTANT]",
+            "> **Jasprit Bumrah Benchmark & Absolute Baseline Findings:**",
+            "> - Across all 239 qualified bowlers, **exactly 0 bowlers establish positive conservative runs saved** (`POSITIVE_CONSERVATIVE_EVIDENCE`).",
+            "> - **Jasprit Bumrah (#1: -0.16 RPO)** is the **ONLY qualified bowler in the 883-match dataset** who concedes fewer runs under pressure (8.94 RPO) than ordinary baseline (9.70 RPO), with a positive runs saved point estimate ($S = +0.20$ RPO, posterior economy diff $-0.20 \\pm 0.36$), classified as `NEGATIVE_CONSERVATIVE_ESTIMATE (HIGH_VOLUME)`.",
+            "> - **Sunil Narine (#2: -0.94 RPO)** is classified as `INCONCLUSIVE_EVIDENCE (HIGH_VOLUME)` because his posterior economy diff is $+0.39$ RPO ($S = -0.39$) with $\\text{SE} = 0.55$, giving an upper runs saved bound of $+0.16 \\ge 0$.",
+            "> - The remaining **237 qualified bowlers** are classified as `BELOW_BASELINE_EVIDENCE` because their 1-sigma uncertainty intervals fall strictly below ordinary baseline expectations.",
             "",
-            "| Rank | Bowler Name | BOWL_CONSERVATIVE (Runs Saved) | Posterior Mean Diff | Posterior SE | 95% Credible Interval | Pressure Balls | Matches | Seasons | Comp Coverage | P(Beat Base) | P(Beat Peers) | Evidence Class |",
-            "| :--- | :--- | ---: | ---: | ---: | :---: | ---: | ---: | ---: | :--- | ---: | ---: | :--- |",
+            "> [!NOTE]",
+            "> **Resolution of the 87 vs 88 Bowling Promising Discrepancy:**",
+            "> The R1-06.1 audit identified a count divergence between 87 and 88 bowlers outperforming peer average (+1.82 RPO). Full-precision unrounded investigation reveals that Sakib Hussain (`shrunk_diff_economy = 1.817738...`) is strictly below 1.82, whereas Riley Meredith (`shrunk_diff_economy = 1.821739...`) is strictly above 1.82. When code pre-rounded values to 2 decimal places, both evaluated as `1.82 < 1.82 == False`, producing 87. Under full-precision evaluation, Sakib Hussain is included (88). Against the exact prior mean $\\mu = 1.82275596$, both are below. The platform now enforces full-precision float comparisons across all pipelines.",
+            "",
+            "> [!NOTE]",
+            "> **Probability Interpretation Disclosure:**",
+            "> `P(Exceed League Avg Under Pressure)` evaluates exceedance over the league-wide pressure prior mean ($\\mu_{bw} = +1.82$ RPO). Conceding fewer than +1.82 RPO extra under pressure beats the average pressured bowler, but does NOT constitute beating ordinary baseline performance.",
+            "",
+            "### Bowling Leaderboard (Top 11 Candidates):",
+            "",
+            "| Rank | Bowler Name | BOWL_CONSERVATIVE (Runs Saved) | Posterior Mean Diff | Posterior SE | 95% Credible Interval | Pressure Balls | Matches | Comp Qual | P(Beat Base) | P(Exceed League Avg Under Pressure) | Dim A (Evidence Status) | Dim B (Volume) | Watchlist Cohort |",
+            "| :--- | :--- | ---: | ---: | ---: | :---: | ---: | ---: | :--- | ---: | ---: | :--- | :--- | :--- |",
         ]
 
         for _, r in top_bowl.iterrows():
             ci_str = f"[{r['ci_95_lower']:+.2f}, {r['ci_95_upper']:+.2f}]"
+            comp_q = r.get("competition_qualification", r["competition_coverage"])
+            dim_a_val = r.get("performance_evidence_status", r["evidence_classification"])
+            dim_b_val = r.get("evidence_volume_tier", "MEDIUM_VOLUME")
+            cohort_val = r.get("watchlist_cohort", "N/A")
+            p_lg = r.get("prob_exceed_league_mean", r["prob_exceed_peers"])
             bowl_lines.append(
                 f"| **{r['rank']}** | **{r['player_name']}** | **{r['primary_diagnostic_value']:+.2f}** | "
                 f"{r['posterior_mean']:+.2f} | $\\pm${r['posterior_se']:.2f} | {ci_str} | "
-                f"{r['pressure_legal_balls']} | {r['pressure_matches']} | {r['pressure_seasons']} | "
-                f"`{r['competition_coverage']}` | {r['prob_exceed_baseline']*100:.1f}% | {r['prob_exceed_peers']*100:.1f}% | `{r['evidence_classification']}` |"
+                f"{r['pressure_legal_balls']} | {r['pressure_matches']} | "
+                f"`{comp_q}` | {r['prob_exceed_baseline']*100:.1f}% | {p_lg*100:.1f}% | "
+                f"`{dim_a_val}` | `{dim_b_val}` | `{cohort_val}` |"
             )
 
         bowl_lines.extend([
-            "",
-            "> [!IMPORTANT]",
-            "> **Jasprit Bumrah Benchmark:**",
-            "> - **Jasprit Bumrah (#1: -0.16 RPO)** is the **ONLY qualified bowler in the 883-match dataset** who concedes fewer runs under pressure (8.94 RPO) than ordinary baseline (9.70 RPO), with $P(\\text{Beat Baseline}) = 71.1\\%$ and $P(\\text{Beat Peers}) = 100.0\\%$ across 521 pressure deliveries.",
-            "> - **Sunil Narine (#2: -0.94 RPO)**, **Maheesh Theekshana (#3: -0.96 RPO)**, and **Matheesha Pathirana (#4: -1.05 RPO)** form the elite peer-beating tier, saving approximately 0.8 to 1.4 RPO relative to the average pressured bowler.",
             "",
             "---",
             "",
@@ -340,7 +404,7 @@ class ExplainabilityEngine:
         top_bowl_profiles = self.bowl_profiles_df.head(10)
         for _, p in top_bowl_profiles.iterrows():
             bowl_lines.extend([
-                f"### #{p['rank']} — {p['player_name']} (`{p['evidence_classification']}`)",
+                f"### #{p['rank']} — {p['player_name']} (`{p['two_dimensional_classification']}`)",
                 f"- **Why Considered:** {p['q1_why_considered']}",
                 f"- **Evidence Volume:** {p['q2_pressure_deliveries']}",
                 f"- **Temporal Stability:** {p['q3_matches_and_seasons']}",
@@ -356,19 +420,37 @@ class ExplainabilityEngine:
         bowl_lines.extend([
             "---",
             "",
-            "## 3. Promising Candidates Watchlist (Emerging Evidence)",
+            "## 3. Promising Candidates Watchlist (Peer-Beaters Under Pressure)",
             "",
-            "These bowlers outperform peer averages ($\\hat{\\theta} < +1.82$ RPO), but have smaller sample volumes ($30-59$ balls) or fewer matches ($< 10$), retaining higher estimation uncertainty:",
+            "These bowlers outperform peer averages ($\\hat{\\theta} < +1.82$ RPO), saving runs relative to the degraded match environment. "
+            "They are separated into Emerging ($<60$ balls) and Established ($\\ge 60$ balls) tiers:",
             "",
-            "| Bowler Name | Posterior Mean Diff | Posterior SE | Conservative Runs Saved | Pressure Balls | Matches | Limitation Reason |",
-            "| :--- | ---: | ---: | ---: | ---: | ---: | :--- |",
+            "### A. Emerging Peer-Beating Bowlers (`PEER_BEATING_EMERGING` — $30 \\le n < 60$ balls, beating peer mean):",
+            "",
+            "| Bowler Name | Posterior Mean Diff | Posterior SE | Conservative Runs Saved | Pressure Balls | Matches | Volume Tier | Watchlist Cohort | Two-Dimensional Status |",
+            "| :--- | ---: | ---: | ---: | ---: | ---: | :--- | :--- | :--- |",
         ])
 
-        for _, r in prom_bowl.iterrows():
+        for _, r in prom_emerging_bowl.iterrows():
             bowl_lines.append(
                 f"| **{r['player_name']}** | {r['posterior_mean']:+.2f} RPO | $\\pm${r['posterior_se']:.2f} | "
                 f"{r['primary_diagnostic_value']:+.2f} RPO | {r['pressure_legal_balls']} | {r['pressure_matches']} | "
-                f"{r['classification_reason']} |"
+                f"`{r['evidence_volume_tier']}` | `{r['watchlist_cohort']}` | `{r['two_dimensional_classification']}` |"
+            )
+
+        bowl_lines.extend([
+            "",
+            "### B. Established Peer-Beating Bowlers (`PEER_BEATING_ESTABLISHED` — $n \\ge 60$ balls, beating peer mean):",
+            "",
+            "| Bowler Name | Posterior Mean Diff | Posterior SE | Conservative Runs Saved | Pressure Balls | Matches | Volume Tier | Watchlist Cohort | Two-Dimensional Status |",
+            "| :--- | ---: | ---: | ---: | ---: | ---: | :--- | :--- | :--- |",
+        ])
+
+        for _, r in prom_estab_bowl.iterrows():
+            bowl_lines.append(
+                f"| **{r['player_name']}** | {r['posterior_mean']:+.2f} RPO | $\\pm${r['posterior_se']:.2f} | "
+                f"{r['primary_diagnostic_value']:+.2f} RPO | {r['pressure_legal_balls']} | {r['pressure_matches']} | "
+                f"`{r['evidence_volume_tier']}` | `{r['watchlist_cohort']}` | `{r['two_dimensional_classification']}` |"
             )
 
         bowl_report_path.write_text("\n".join(bowl_lines), encoding="utf-8")
@@ -382,7 +464,7 @@ class ExplainabilityEngine:
             "# ROYALS INTELLIGENCE — ROUND 1 METHODOLOGY & LIMITATIONS REPORT",
             f"**Generated:** {now_iso}  ",
             "**Architecture:** ROYALS INTELLIGENCE v4.1  ",
-            "**Task:** R1-06 Evidence-Backed Player Reliability Intelligence & Ranking Engine  ",
+            "**Task:** R1-06 / R1-06.2 Candidate Classification & Evidence Governance Remediation  ",
             "",
             "---",
             "",
@@ -398,6 +480,33 @@ class ExplainabilityEngine:
             "- **Units:** Runs saved per over (RPO). Higher (less negative) indicates superior run containment.",
             "- **Rationale:** Evaluates bowler run containment under high leverage, resolving the ordinary baseline floor clustering.",
             "",
+            "### Two-Dimensional Candidate Classification System (Remediated Under Task R1-06.2)",
+            "To prevent the conflation of performance direction, statistical evidence, and exposure volume, R1-06.2 implements two orthogonal dimensions:",
+            "1. **Dimension A: Performance Evidence Status:**",
+            "   - `POSITIVE_CONSERVATIVE_EVIDENCE`: Conservative lower bound is strictly $> 0$.",
+            "   - `NEGATIVE_CONSERVATIVE_ESTIMATE`: Posterior mean is positive ($\\hat{\\theta} > 0$), but conservative lower bound is $\\le 0$ (positive estimated performance with unresolved uncertainty).",
+            "   - `BELOW_BASELINE_EVIDENCE`: Entire 1-sigma interval is below baseline ($\\hat{\\theta} + \\text{SE} < 0$ for batting; runs saved upper bound $< 0$ for bowling).",
+            "   - `INCONCLUSIVE_EVIDENCE`: Point estimate non-positive, but 1-sigma interval spans zero.",
+            "2. **Dimension B: Evidence Volume Tier:**",
+            "   - `HIGH_VOLUME`: $\\ge 150$ legal pressure deliveries.",
+            "   - `MEDIUM_VOLUME`: $60-149$ legal pressure deliveries.",
+            "   - `LOW_VOLUME`: $30-59$ legal pressure deliveries.",
+            "   - `NO_QUALIFYING_EXPOSURE`: $< 30$ legal pressure deliveries.",
+            "",
+            "### Candidate Sample Qualification Logic (DEF-04 Fix)",
+            "Candidate selection sample qualification is governed by: `(balls >= 60) or (balls >= 50 and matches >= 10)`. "
+            "This fixes the DEF-04 syntax bug where `matches >= 10` was erroneously applied to the $\\ge 60$ balls branch.",
+            "",
+            "### Competition Exposure vs Skill Transferability (DEF-05 Remediation)",
+            "`DUAL_TOURNAMENT_QUALIFIED` signifies that a candidate has accumulated $\\ge 30$ legal pressure deliveries in both IPL and Senior T20I matches. "
+            "This confirms sample availability across both competition environments, NOT statistical proof of invariant cross-competition skill transferability.",
+            "",
+            "### Probability Disclosures & Reference Prior Means (DEF-02 Remediation)",
+            "`P(Exceed League Avg Under Pressure)` evaluates candidate performance against the league-wide pressure prior mean:",
+            "- Batting prior mean: $\\mu_b = -34.24$ SR pts.",
+            "- Bowling prior mean: $\\mu_{bw} = +1.82$ RPO conceded.",
+            "Exceeding the league pressure average reflects outperforming an environment where performance degrades substantially under pressure; it is a significantly lower bar than exceeding ordinary baseline performance.",
+            "",
             "---",
             "",
             "## 2. Qualification Framework & Non-Qualification Accounting",
@@ -411,11 +520,11 @@ class ExplainabilityEngine:
             "",
             "### Full Population Accounting:",
             "- **Batting Population ($N = 824$ total batters):**",
-            "  - Qualified ($n \\ge 30$ balls): **278 batters** (12 Strong Evidence, 9 Promising, 253 Negative/Moderate).",
+            "  - Qualified ($n \\ge 30$ balls): **278 batters** (2 Positive Conservative Evidence, 19 Negative Conservative Estimate, 182 Below Baseline, 75 Inconclusive).",
             "  - Non-Qualified ($1 \\le n < 30$ balls): **413 batters** (`BELOW_MIN_PRESSURE_BALLS`).",
             "  - Non-Qualified ($0$ pressure balls): **133 batters** (`ZERO_PRESSURE_DELIVERIES_FACED`).",
             "- **Bowling Population ($N = 596$ total bowlers):**",
-            "  - Qualified ($n \\ge 30$ balls): **239 bowlers** (11 Strong Evidence, 88 Promising, 140 Negative/Moderate).",
+            "  - Qualified ($n \\ge 30$ balls): **239 bowlers** (0 Positive Conservative Evidence, 1 Negative Conservative Estimate [Bumrah], 1 Inconclusive [Narine], 237 Below Baseline).",
             "  - Non-Qualified ($1 \\le n < 30$ balls): **240 bowlers** (`BELOW_MIN_PRESSURE_BALLS`).",
             "  - Non-Qualified ($0$ pressure balls): **117 bowlers** (`ZERO_PRESSURE_DELIVERIES_BOWLED`).",
             "",
@@ -463,7 +572,7 @@ class ExplainabilityEngine:
             "# ROYALS INTELLIGENCE — ROUND 1 PLAYER RELIABILITY INTELLIGENCE REPORT",
             f"**Generated:** {now_iso}  ",
             "**Architecture:** ROYALS INTELLIGENCE v4.1  ",
-            "**Task:** R1-06 Evidence-Backed Player Reliability Intelligence & Ranking Engine  ",
+            "**Task:** R1-06 / R1-06.2 Candidate Classification & Evidence Governance Remediation  ",
             "**Status:** `PLAYER_RELIABILITY_INTELLIGENCE_VALIDATED`  ",
             "",
             "---",
@@ -472,22 +581,22 @@ class ExplainabilityEngine:
             "",
             "This report addresses the official SupeRR Selector Round 1 challenge: **Identify the Most Reliable Players Under Pressure.** "
             "By synthesizing context-stratified expected baselines (R1-04), Empirical Bayes shrinkage (R1-04.1), "
-            "and independent statistical audits (R1-05.1 & R1-05.2), the intelligence engine answers the 7 core analyst questions:",
+            "independent statistical audits (R1-05.1 & R1-05.2), and the R1-06.1 classification remediation (R1-06.2), the intelligence engine answers the 7 core analyst questions:",
             "",
             "### 1. Which batters demonstrate the strongest evidence of pressure reliability?",
             "**Nicholas Pooran** (#1: +2.2 SR conservative lower bound, +16.2 $\\pm$ 14.0 posterior mean, 212 pressure balls across 26 matches & 5 seasons) "
-            "and **Donovan Ferreira** (#2: +0.9 SR bound, +20.7 $\\pm$ 19.8 posterior mean, 84 balls) lead the cohort as the only two qualified batters with strictly positive conservative lower bounds. "
-            "They are closely followed by established multi-season closers: **Tim David** (#3: -2.5 SR bound, 290 balls), **Dinesh Karthik** (#4: -2.7 SR bound, 260 balls), "
+            "and **Donovan Ferreira** (#2: +0.9 SR bound, +20.7 $\\pm$ 19.8 posterior mean, 84 balls) lead the cohort as the only two qualified batters with strictly positive conservative lower bounds (`POSITIVE_CONSERVATIVE_EVIDENCE`). "
+            "They are closely followed by established multi-season closers classified as `NEGATIVE_CONSERVATIVE_ESTIMATE (HIGH_VOLUME)`: **Tim David** (#3: -2.5 SR bound, 290 balls), **Dinesh Karthik** (#4: -2.7 SR bound, 260 balls), "
             "**Ashutosh Sharma** (#5: -3.6 SR bound, 191 balls), and **Marcus Stoinis** (#6: -5.8 SR bound, 220 balls).",
             "",
             "### 2. Which bowlers demonstrate the strongest evidence of pressure reliability?",
             "**Jasprit Bumrah** (#1: -0.16 RPO conservative runs saved, -0.20 $\\pm$ 0.36 posterior economy diff, 521 pressure balls across 60 matches & 5 seasons) "
-            "is the standout pressure bowler in world cricket and the **only qualified bowler** conceding fewer runs under pressure (8.94 RPO) than ordinary baseline (9.70 RPO). "
-            "He is followed by elite peer-beaters: **Sunil Narine** (#2: -0.94 RPO, 153 balls), **Maheesh Theekshana** (#3: -0.96 RPO, 421 balls), "
-            "**Matheesha Pathirana** (#4: -1.05 RPO, 440 balls), and **Shaheen Afridi** (#5: -1.43 RPO, 191 balls).",
+            "is the standout pressure bowler in world cricket and the **only qualified bowler** conceding fewer runs under pressure (8.94 RPO) than ordinary baseline (9.70 RPO), classified as `NEGATIVE_CONSERVATIVE_ESTIMATE (HIGH_VOLUME)`. "
+            "Exactly 0 bowlers establish strictly positive conservative runs saved. Elite peer-beating bowlers saving runs relative to the league pressure mean include **Sunil Narine** (#2: -0.94 RPO, 153 balls, `INCONCLUSIVE_EVIDENCE`), "
+            "**Maheesh Theekshana** (#3: -0.96 RPO, 421 balls), **Matheesha Pathirana** (#4: -1.05 RPO, 440 balls), and **Shaheen Afridi** (#5: -1.43 RPO, 191 balls).",
             "",
             "### 3. How much evidence supports each player?",
-            "Evidence volume is classified into explicit sample tiers: Large Sample ($\\ge 150$ balls), Medium Sample ($60-149$ balls), and Small Sample ($30-59$ balls). "
+            "Evidence volume is classified into explicit orthogonal volume tiers: HIGH_VOLUME ($\\ge 150$ balls), MEDIUM_VOLUME ($60-149$ balls), and LOW_VOLUME ($30-59$ balls). "
             "Nicholas Pooran (212 balls), Tim David (290 balls), Jasprit Bumrah (521 balls), and Maheesh Theekshana (421 balls) are supported by extensive multi-season evidence.",
             "",
             "### 4. How uncertain is each assessment?",
@@ -496,12 +605,13 @@ class ExplainabilityEngine:
             "Smaller sample players (30–59 balls) carry approximately 1.6x wider credible intervals than veterans (150+ balls).",
             "",
             "### 5. Which players are promising but insufficiently established?",
-            "- **Batting Watchlist:** Cooper Connolly (+11.9 SR mean, 50 balls, 4 matches), Rahul Tewatia (+1.7 SR mean, 195 balls), Shashank Singh (+1.3 SR mean, 199 balls), and Andre Russell (+1.2 SR mean, 294 balls).",
-            "- **Bowling Watchlist:** Nasum Ahmed (+0.70 RPO mean, 47 balls), Vipraj Nigam (+0.91 RPO mean, 46 balls), and Ramon Simmonds (+0.98 RPO mean, 30 balls).",
+            "- **Batting Emerging High-Upside Watchlist:** Cooper Connolly (+11.9 SR mean, 50 balls, 4 matches) and Ishan Kishan (+2.0 SR mean, 52 balls, 9 matches).",
+            "- **Batting Established Marginal Performers:** Andre Russell (+1.2 SR mean, 294 balls), Suryakumar Yadav (+1.2 SR mean, 321 balls), Rahul Tewatia (+1.7 SR mean, 195 balls), and Shashank Singh (+1.3 SR mean, 199 balls).",
+            "- **Bowling Emerging Peer-Beaters:** Nasum Ahmed (+0.70 RPO mean, 47 balls), Vipraj Nigam (+0.91 RPO mean, 46 balls), and Ramon Simmonds (+0.98 RPO mean, 30 balls).",
             "",
             "### 6. Why was a particular player included or excluded from a shortlist?",
-            "Transparent decision rules: Candidates in the Strong Evidence shortlist must have $\\ge 30$ legal pressure balls, substantial sample volume ($\\ge 60$ balls or $\\ge 50$ balls across $\\ge 3$ seasons and $\\ge 10$ matches), "
-            "and primary diagnostic scores above documented thresholds (Batting $\\ge -10.0$ SR pts, Bowling $\\ge -1.75$ RPO). "
+            "Transparent decision rules: Candidates in the shortlist must satisfy candidate sample qualification (`balls >= 60` or `balls >= 50 and matches >= 10`), "
+            "and are classified using the orthogonal Two-Dimensional framework (Dimension A: Performance Evidence Status; Dimension B: Evidence Volume Tier). "
             "Excluded players ($n < 30$ balls) are documented with exact reasons.",
             "",
             "### 7. How stable is the shortlist under alternative assumptions?",
@@ -524,6 +634,11 @@ class ExplainabilityEngine:
             "- `shortlist_robustness_comparison.parquet`: Multi-configuration sensitivity tests.",
             "- `competition_candidate_views.parquet`: Competition-specific segmentations.",
         ]
+
+        intel_path.write_text("\n".join(intel_lines), encoding="utf-8")
+        reports["player_intelligence_report"] = intel_path
+
+        return reports
 
         intel_path.write_text("\n".join(intel_lines), encoding="utf-8")
         reports["player_intelligence_report"] = intel_path

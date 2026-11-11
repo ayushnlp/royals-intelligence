@@ -60,28 +60,78 @@ class CandidateSelectionEngine:
     def classify_candidates(df: pd.DataFrame, is_batting: bool) -> pd.DataFrame:
         """
         Applies transparent, evidence-based decision rules to classify candidates.
+        Implements Task R1-06.2 Two-Dimensional Classification System:
+        Dimension A: Performance Evidence Status
+        Dimension B: Evidence Volume Tier
+        Fixed qualification logic (DEF-04): >=60 balls OR (>=50 balls and >=10 matches).
+        Preserves legacy classifications for backward compatibility.
         """
         classified = df.copy()
 
         classes = []
         class_reasons = []
+        dim_a_list = []
+        dim_b_list = []
+        two_dim_list = []
+        cohort_list = []
+        cand_qual_list = []
 
         for _, r in classified.iterrows():
-            if not r["is_qualified"]:
+            balls = int(r["pressure_legal_balls"])
+            matches = int(r["pressure_matches"])
+            is_qual = bool(r["is_qualified"])
+
+            # Dimension B: Evidence Volume Tier
+            if balls >= 150:
+                dim_b = "HIGH_VOLUME"
+            elif balls >= 60:
+                dim_b = "MEDIUM_VOLUME"
+            elif balls >= 30:
+                dim_b = "LOW_VOLUME"
+            else:
+                dim_b = "NO_QUALIFYING_EXPOSURE"
+
+            # Candidate Sample Qualification (DEF-04 fix: >=60 balls OR (>=50 balls and >=10 matches))
+            has_sample = (balls >= 60) or (balls >= 50 and matches >= 10)
+            cand_qual_list.append(has_sample)
+
+            if not is_qual:
                 classes.append("INSUFFICIENT_EVIDENCE")
                 class_reasons.append(r["qualification_reason"])
+                dim_a_list.append("INSUFFICIENT_EVIDENCE")
+                dim_b_list.append(dim_b)
+                two_dim_list.append(f"INSUFFICIENT_EVIDENCE ({dim_b})")
+                cohort_list.append("NON_QUALIFIED")
                 continue
 
-            balls = r["pressure_legal_balls"]
-            matches = r["pressure_matches"]
-            cons = r["primary_diagnostic_value"]
-            mean = r["posterior_mean"]
-            se = r["posterior_se"]
+            cons = float(r["primary_diagnostic_value"])
+            mean = float(r["posterior_mean"])
+            se = float(r["posterior_se"])
 
             if is_batting:
-                # Batting criteria
-                has_sample = (balls >= 60 or (balls >= 50 and matches >= 10)) and matches >= 10
-                is_strong = has_sample and cons >= -10.0 and mean >= 0.0
+                # -------------------------------------------------------------
+                # Batting Remediated Two-Dimensional System
+                # -------------------------------------------------------------
+                upper_1sigma = mean + se
+                if cons > 0.0:
+                    dim_a = "POSITIVE_CONSERVATIVE_EVIDENCE"
+                    cohort = "CONFIRMED_POSITIVE_RELIABILITY"
+                elif mean > 0.0 and cons <= 0.0:
+                    dim_a = "NEGATIVE_CONSERVATIVE_ESTIMATE"
+                    if balls < 60:
+                        cohort = "EMERGING_HIGH_UPSIDE"
+                    else:
+                        cohort = "ESTABLISHED_MARGINAL_PERFORMER"
+                elif upper_1sigma < 0.0:
+                    dim_a = "BELOW_BASELINE_EVIDENCE"
+                    cohort = "BELOW_BASELINE"
+                else:
+                    dim_a = "INCONCLUSIVE_EVIDENCE"
+                    cohort = "INCONCLUSIVE"
+
+                # Legacy classification logic (preserved for backward compatibility)
+                legacy_has_sample = (balls >= 60 or (balls >= 50 and matches >= 10)) and matches >= 10
+                is_strong = legacy_has_sample and cons >= -10.0 and mean >= 0.0
                 is_promising = mean > 0.0 and not is_strong
                 is_negative = cons < -15.0
 
@@ -98,11 +148,39 @@ class CandidateSelectionEngine:
                     cat = "MODERATE_EVIDENCE"
                     reas = f"Intermediate performance ({mean:+.1f} SR mean, {cons:+.1f} SR bound)"
             else:
-                # Bowling criteria
-                has_sample = (balls >= 60 or (balls >= 50 and matches >= 10)) and matches >= 10
-                # Note: Peer prior mean is +1.82 RPO. Bowlers conceding <= +1.25 RPO are saving runs relative to peers.
-                is_strong = has_sample and cons >= -1.75 and mean <= 1.25
-                is_promising = mean < 1.82 and not is_strong
+                # -------------------------------------------------------------
+                # Bowling Remediated Two-Dimensional System
+                # -------------------------------------------------------------
+                # mean is shrunk_diff_economy. Runs saved point estimate is -mean.
+                # cons is -mean - se (runs saved lower bound)
+                # runs_saved_upper is -mean + se = -(mean - se)
+                runs_saved = -mean
+                runs_saved_upper = runs_saved + se
+
+                if cons > 0.0:
+                    dim_a = "POSITIVE_CONSERVATIVE_EVIDENCE"
+                    cohort = "CONFIRMED_POSITIVE_RELIABILITY"
+                elif runs_saved > 0.0 and cons <= 0.0:
+                    # mean < 0.0: bowler concedes fewer runs than baseline under pressure
+                    dim_a = "NEGATIVE_CONSERVATIVE_ESTIMATE"
+                    cohort = "OUTPERFORMING_BASELINE_ESTIMATE"
+                elif runs_saved_upper < 0.0:
+                    # mean - se > 0.0: whole 1-sigma interval concedes more runs than baseline
+                    dim_a = "BELOW_BASELINE_EVIDENCE"
+                    if mean < 1.82275596:
+                        cohort = "PEER_BEATING_EMERGING" if balls < 60 else "PEER_BEATING_ESTABLISHED"
+                    else:
+                        cohort = "BELOW_BASELINE"
+                else:
+                    # runs_saved <= 0.0 and runs_saved_upper >= 0.0 (e.g. Sunil Narine)
+                    dim_a = "INCONCLUSIVE_EVIDENCE"
+                    cohort = "INCONCLUSIVE"
+
+                # Legacy classification logic (preserved for backward compatibility)
+                legacy_has_sample = (balls >= 60 or (balls >= 50 and matches >= 10)) and matches >= 10
+                # Using 1.82 display threshold for legacy compatibility
+                is_strong = legacy_has_sample and cons >= -1.75 and round(mean, 2) <= 1.25
+                is_promising = round(mean, 2) < 1.82 and not is_strong
                 is_negative = cons < -2.25
 
                 if is_strong:
@@ -120,9 +198,19 @@ class CandidateSelectionEngine:
 
             classes.append(cat)
             class_reasons.append(reas)
+            dim_a_list.append(dim_a)
+            dim_b_list.append(dim_b)
+            two_dim_list.append(f"{dim_a} ({dim_b})")
+            cohort_list.append(cohort)
 
+        classified["legacy_evidence_classification"] = classes
         classified["evidence_classification"] = classes
         classified["classification_reason"] = class_reasons
+        classified["performance_evidence_status"] = dim_a_list
+        classified["evidence_volume_tier"] = dim_b_list
+        classified["two_dimensional_classification"] = two_dim_list
+        classified["watchlist_cohort"] = cohort_list
+        classified["is_candidate_qualified"] = cand_qual_list
         return classified
 
     def generate_leaderboards(self) -> Tuple[pd.DataFrame, pd.DataFrame]:
@@ -296,9 +384,10 @@ class CandidateSelectionEngine:
     def generate_competition_views(self) -> pd.DataFrame:
         """
         Generates competition-specific candidate segmentations:
-        - Dual-Competition Proven (>= 30 balls in both IPL & T20I)
-        - IPL Proven (>= 30 balls in IPL)
-        - T20I Proven (>= 30 balls in T20I)
+        - DUAL_TOURNAMENT_QUALIFIED (>= 30 balls in both IPL & T20I)
+        - IPL_QUALIFIED (>= 30 balls in IPL)
+        - T20I_QUALIFIED (>= 30 balls in T20I)
+        Also preserves legacy competition_segment for backward compatibility.
         """
         if self.bat_leaderboard_df is None or self.bowl_leaderboard_df is None:
             self.generate_leaderboards()
@@ -310,14 +399,19 @@ class CandidateSelectionEngine:
             ipl_b = r["ipl_legal_balls"]
             t20i_b = r["t20i_legal_balls"]
 
+            # Dual tournament qualification (DEF-05 remediation)
             if ipl_b >= 30 and t20i_b >= 30:
                 seg = "DUAL_COMPETITION_PROVEN"
+                comp_qual = "DUAL_TOURNAMENT_QUALIFIED"
             elif ipl_b >= 30:
                 seg = "IPL_PROVEN"
+                comp_qual = "IPL_QUALIFIED"
             elif t20i_b >= 30:
                 seg = "T20I_PROVEN"
+                comp_qual = "T20I_QUALIFIED"
             else:
                 seg = "AGGREGATE_ONLY (<30 balls in either isolated competition)"
+                comp_qual = "AGGREGATE_ONLY_QUALIFIED (<30 balls in either isolated tournament)"
 
             views.append({
                 "discipline": r["discipline"],
@@ -325,6 +419,12 @@ class CandidateSelectionEngine:
                 "player_id": r["player_id"],
                 "player_name": r["player_name"],
                 "competition_segment": seg,
+                "competition_qualification": comp_qual,
+                "performance_evidence_status": r["performance_evidence_status"],
+                "evidence_volume_tier": r["evidence_volume_tier"],
+                "two_dimensional_classification": r["two_dimensional_classification"],
+                "watchlist_cohort": r["watchlist_cohort"],
+                "is_candidate_qualified": r["is_candidate_qualified"],
                 "primary_diagnostic_value": r["primary_diagnostic_value"],
                 "primary_diagnostic_unit": r["primary_diagnostic_unit"],
                 "total_pressure_balls": r["pressure_legal_balls"],
