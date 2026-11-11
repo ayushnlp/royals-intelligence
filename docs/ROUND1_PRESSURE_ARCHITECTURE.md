@@ -444,7 +444,48 @@ An independent statistical audit of the R1-05 Player Pressure Reliability Scorin
 
 ---
 
-## 14. Test Verification & Verification Summary
+## 14. Task R1-05.2: Statistical Validation Closure & Methodology Reconciliation
+
+This milestone closes all validation gaps identified during R1-05.1 through targeted mathematical reconciliations, controlled cohort additions, sample-stratified Bayesian prior analyses, out-of-sample transferability evaluations, and probability calibration bounds.
+
+### 1. Strict vs Permissive Batting Count Reconciliation:
+- **Situational Pressure Exposure (R1-03.1):** Exactly 33,005 deliveries under Strict and 33,005 under Permissive (**0 delta; 100% invariant**). Pressure situations are determined strictly *before* the delivery is bowled.
+- **Legal Pressure Deliveries Bowled (R1-05.1):** 31,163 balls under Strict vs 31,257 balls under Permissive (**94 delta; 0.30% variance**).
+- **Exact Cause Traced:** Every single one of the 94 differing balls has `extras_type == 'other'`. Under Strict legality (sequence evidence), these are illegal re-bowled deliveries; under Permissive legality, they are treated as legal. Exactly 94 of the 259 primary `other` extras occurred during pressure situations.
+
+### 2. Complete Cohort Addition Perturbation Results (Isolated Fixture):
+- **Within-Range Additions:** Adding synthetic players at median, 10th percentile, or 90th percentile causes **0.0000 PRI score delta** on all existing players (1.000 rank correlation).
+- **Boundary Outliers:** Adding extreme synthetic outliers beyond current minimum/maximum values causes a minor compression shift (mean delta ~0.5 to 1.8 pts) while rank correlation remains $> 0.998$.
+- **Season Expansion:** Simulating a 25-player cohort expansion (~10% growth) across new seasons preserves 100% of Top 10 roster membership for batting ($r_s = 0.9999$) and 81.8% for bowling ($r_s = 0.9960$).
+
+### 3. Extended Bayesian Prior Sensitivity across Sample-Size Strata:
+- **Strata Evaluated:** Small Sample (30–59 balls), Medium Sample (60–149 balls), and Large Sample ($\ge 150$ balls).
+- **Invariance:** Rank orders across all sample strata remain $> 0.98$ correlated with baseline Empirical Bayes.
+- **Uncertainty Bounds:** Small-sample batters have mean posterior SE of $\pm 19.57$ SR points (95% CI width: 76.8 SR points), compared to $\pm 12.00$ SR points for large-sample veterans (95% CI width: 47.0 SR points).
+- **Exceedance Sensitivity:** Exceedance against Ordinary Baseline for small-sample batters shifts from 12.0% under $\mu=-34.24$ to 24.2% under $\mu=0.0$, demonstrating that exceedance reflects model credibility under prior assumptions, NOT an absolute match probability.
+
+### 4. Historical & Competition Transferability:
+- **Historical Transfer (2022–2024 to 2025–2026):**
+  - Evaluated on 82 qualified batters and 98 qualified bowlers.
+  - Empirical Bayes shrinkage achieves positive predictive correlation ($r = 0.498$ batting, $r = 0.179$ bowling) and reduces out-of-sample MSE by **22.3% in batting** and **27.7% in bowling** over raw historical rates.
+- **Competition Transfer (IPL to T20I and T20I to IPL):**
+  - Confirms out-of-sample MSE reductions of 14.5% to 43.1%.
+  - Sample-size limitation explicitly reported: only 47 batters and 63 bowlers qualify in both competitions with $\ge 30$ legal pressure balls.
+
+### 5. Probability Calibration & Uncertainty Assessment:
+- Brier scores across held-out testing partitions range from 0.2228 to 0.2707 against climatological baselines of 0.2165 to 0.2496.
+- Reliability curves confirm appropriate directional ordering across terciles (e.g. peer exceedance observed rates rise from 25% in Low Prob to 70% in High Prob for batting).
+- **Formal Ruling:** Exceedance probabilities are **model-derived Bayesian credibility estimates**, NOT empirical match-winning probabilities. High Poisson variance over 30–100 delivery samples precludes sharp empirical calibration.
+
+### 6. Metric Governance Hierarchy:
+- **Tier 1 (Authoritative Primary Diagnostic):** Conservative Credible Lower Bound ($\hat{\theta}_{\text{SR}} - 1.0 \times \text{SE}_{\text{post}}$ for batting; $-\hat{\theta}_{\text{Econ}} - 1.0 \times \text{SE}_{\text{post}}$ for bowling runs saved).
+- **Tier 2 (Analytical Exploratory):** Composite PRI without TCF.
+- **Tier 3 (Heuristic Experimental):** Composite PRI with TCF (tenure filter).
+- **Tier 4 (Context Credibility):** Posterior Exceedance Probabilities ($P(\theta > 0)$ and $P(\theta > \mu)$).
+
+---
+
+## 15. Test Verification & Verification Summary
 
 | Test Suite | Files | Test Count | Status | Execution Time |
 | :--- | :--- | :---: | :---: | :---: |
@@ -454,6 +495,7 @@ An independent statistical audit of the R1-05 Player Pressure Reliability Scorin
 | Expected Performance & Bayesian (R1-04 to R1-04.1) | `test_expected_performance.py` | 20 | PASSED | ~16s |
 | Player Pressure Reliability Engine (R1-05) | `test_player_reliability.py` | 15 | PASSED | ~17s |
 | Statistical Reliability Audit (R1-05.1) | `test_r1_05_1_statistical_audit.py` | 9 | PASSED | ~7s |
-| **Total Round 1 Pressure Tests** | **6 suites** | **120** | **ALL PASSED** | **~50s** |
+| Statistical Validation Closure (R1-05.2) | `test_r1_05_2_validation_closure.py` | 8 | PASSED | ~6s |
+| **Total Round 1 Pressure Tests** | **7 suites** | **128** | **ALL PASSED** | **~55s** |
 | Existing Backend Regression Suite | `backend/tests/` | 61 | **ALL PASSED** | **~40s** |
-| **Workspace Combined Total** | | **181** | **ALL PASSED** | |
+| **Workspace Combined Total** | | **189** | **ALL PASSED** | |
