@@ -41,6 +41,13 @@ paths:
   all_rounder_pressure_reliability_parquet: "round1_pressure/data/processed/all_rounder_pressure_reliability.parquet"
   scoring_methodology_comparison_parquet: "round1_pressure/data/processed/scoring_methodology_comparison.parquet"
   player_reliability_report_md: "round1_pressure/reports/player_reliability_report.md"
+  audit_normalization_perturbation_parquet: "round1_pressure/data/processed/audit_normalization_perturbation.parquet"
+  audit_pri_weight_sensitivity_parquet: "round1_pressure/data/processed/audit_pri_weight_sensitivity.parquet"
+  audit_tcf_ablation_comparison_parquet: "round1_pressure/data/processed/audit_tcf_ablation_comparison.parquet"
+  audit_strict_permissive_sensitivity_parquet: "round1_pressure/data/processed/audit_strict_permissive_sensitivity.parquet"
+  audit_bayesian_prior_sensitivity_parquet: "round1_pressure/data/processed/audit_bayesian_prior_sensitivity.parquet"
+  audit_bowling_reconciliation_parquet: "round1_pressure/data/processed/audit_bowling_reconciliation.parquet"
+  statistical_audit_report_md: "round1_pressure/reports/r1_05_1_statistical_audit_report.md"
 
 expected_files:
   ball_by_ball: "ball_by_ball.csv"
@@ -479,6 +486,31 @@ pressure_detection_r1_03:
         - "auction_valuation"
         - "squad_fit_optimization"
         - "price_discovery"
+
+  statistical_audit_r1_05_1:
+    task: "R1-05.1 Independent Statistical Audit of Player Pressure Reliability Scores"
+    status: "AUDIT_PASSED_WITH_METHODOLOGICAL_GOVERNANCE_ESTABLISHED"
+    audit_findings:
+      pri_nature: "Cohort-relative exploratory index (not an absolute probability)"
+      perturbation_stability: "Spearman rank correlation > 0.999 under 10% removal"
+      pri_weight_sensitivity:
+        equal_weights_spearman: 0.995
+        top10_jaccard_equal_weights: 0.818
+        conservative_bound_essential_anchor: true
+      temporal_consistency_factor:
+        status: "EXPERIMENTAL / HEURISTIC"
+        tenure_scaling_term: "(min(S, 4)/4)^0.35"
+        mean_rank_shift: 34.3
+      legality_policy_robustness:
+        batting_pressure_event_variance_pct: 0.0
+        bowling_pressure_event_variance_pct: 0.56
+        bowler_rank_correlation: 0.9998
+      bowling_baseline_reconciliation:
+        macro_unweighted_diff_rpo: 2.085
+        player_arithmetic_mean_diff_rpo: 2.186
+        dersimonian_laird_prior_mean_mu_rpo: 1.823
+        resolution: "Reconciled: macro conflates phase bias (87.7% death overs), DL controls context and precision"
+
 
 
 

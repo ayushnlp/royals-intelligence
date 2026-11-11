@@ -403,7 +403,48 @@ Pairwise Spearman rank correlations across all candidate scoring formulations co
 
 ---
 
-## 13. Test Verification & Verification Summary
+## 13. Task R1-05.1: Independent Statistical Audit & Metric Governance
+
+An independent statistical audit of the R1-05 Player Pressure Reliability Scoring Engine was conducted to evaluate normalization stability, weight sensitivity, temporal scaling, legality robustness, Bayesian prior choices, and bowling baseline reconciliation.
+
+### 1. PRI Normalization Architecture & Cohort Perturbation Test:
+- **Normalization Transform:** Raw components are min-max scaled to $[0, 100]$ across qualified cohorts ($N = 278$ batting, $N = 239$ bowling), weighted, multiplied by TCF, and min-max scaled a second time.
+- **Controlled Perturbation Tests:** Dropping a 10% random sample shifts existing players' PRI scores by an average of 0.401 pts (batting) and 0.584 pts (bowling), while Spearman rank correlation remains $> 0.999$.
+- **Governance Finding:** PRI is strictly a **cohort-relative index**, NOT an absolute probability or invariant score. Adding or removing players modifies other players' absolute scores.
+
+### 2. Weight Sensitivity & Essential Anchoring:
+- **Equal Weights Concordance:** Spearman rank correlation between equal weights (25/25/25/25) and baseline (45/20/20/15) is **0.9952** (batting) and **0.9925** (bowling); Top 10 roster overlap is 9 of 10 players (81.8% Jaccard).
+- **Essential Anchor:** Removing the Conservative Credible Bound drops Top 10 Jaccard overlap to **42.9%**, allowing small-sample noisy outliers to enter the top tier. The Conservative Bound is verified as the essential statistical stabilizer.
+
+### 3. Temporal Consistency Factor (TCF) Deep Dive:
+- **Rank Shift Impact:** TCF causes an average rank shift of **34.3 positions** (and up to 160 positions) against raw execution scores ($r_s = 0.8366$).
+- **Tenure Penalty:** Players with only 2 seasons receive a mandatory base scalar penalty $(2/4)^{0.35} = 0.785$, severely capping their scores regardless of per-ball performance.
+- **Noise vs Volatility:** Empirical seasonal variance conflates Poisson sampling noise with true talent volatility.
+- **Governance Classification:** TCF is formally designated as **EXPERIMENTAL / HEURISTIC**.
+
+### 4. Strict vs Permissive Legality Robustness:
+- **Batting Events:** 0 balls difference (100% invariant, $r_s = 1.000$).
+- **Bowling Events:** 208 balls difference (0.56% volume variance) restricted to Over 17 and Over 4 boundary transitions. Spearman rank correlation between Strict and Permissive bowler metrics is $> 0.9998$.
+- **Policy Invariant:** Strict delivery legality is preserved as the authoritative primary policy.
+
+### 5. Bayesian Prior Sensitivity:
+- Ranks remain highly stable across alternative priors (Zero $\mu=0$, Diffuse $2\tau$, Skeptical $0.5\tau$, Shifted $\mu \pm 10$ SR): $r_s > 0.982$.
+- Small-sample players ($n \approx 30$) shift by up to 21 SR points across priors, whereas veterans ($n \ge 250$) shift by $< 6$ SR points, validating appropriate Empirical Bayes shrinkage.
+
+### 6. Bowling Baseline Reconciliation (+2.085 RPO vs +1.823 RPO):
+- **+2.085 RPO:** Unweighted macro delivery rate difference across all 148,678 ordinary balls (7.980 RPO) vs 37,014 pressure balls (10.065 RPO). Distorted by phase-allocation bias (87.7% of pressure balls are in Death overs).
+- **+1.823 RPO:** DerSimonian-Laird random-effects population prior mean $\mu_{\text{DL}}$. Stratified against exact 12-cell context expectation $E[M_i]$ and weighted by inverse total variance $w_i = 1 / (\tau^2 + \sigma_i^2)$.
+- **Resolution:** Both metrics are mathematically sound and measure distinct analytical levels. Neither baseline was altered.
+
+### 7. Final Metric Governance:
+- **Primary Batting Diagnostic Metric:** Conservative Lower Credible Bound ($\hat{\theta}_{\text{SR}} - 1.0 \times \text{SE}_{\text{post}}$).
+- **Primary Bowling Diagnostic Metric:** Conservative Runs Saved per Over ($-\hat{\theta}_{\text{Econ}} - 1.0 \times \text{SE}_{\text{post}}$).
+- **Composite PRI:** Retained as an exploratory cohort-relative index, always presented alongside credible intervals and sample sizes.
+- **Harmonic All-Rounder PRI:** Authoritative synthesis method to prevent one-discipline masking.
+
+---
+
+## 14. Test Verification & Verification Summary
 
 | Test Suite | Files | Test Count | Status | Execution Time |
 | :--- | :--- | :---: | :---: | :---: |
@@ -412,6 +453,7 @@ Pairwise Spearman rank correlations across all candidate scoring formulations co
 | Pressure Detection (R1-03 to R1-03.1) | `test_pressure_detection.py` | 19 | PASSED | ~12s |
 | Expected Performance & Bayesian (R1-04 to R1-04.1) | `test_expected_performance.py` | 20 | PASSED | ~16s |
 | Player Pressure Reliability Engine (R1-05) | `test_player_reliability.py` | 15 | PASSED | ~17s |
-| **Total Round 1 Pressure Tests** | **5 suites** | **111** | **ALL PASSED** | **~50s** |
+| Statistical Reliability Audit (R1-05.1) | `test_r1_05_1_statistical_audit.py` | 9 | PASSED | ~7s |
+| **Total Round 1 Pressure Tests** | **6 suites** | **120** | **ALL PASSED** | **~50s** |
 | Existing Backend Regression Suite | `backend/tests/` | 61 | **ALL PASSED** | **~40s** |
-| **Workspace Combined Total** | | **172** | **ALL PASSED** | |
+| **Workspace Combined Total** | | **181** | **ALL PASSED** | |
