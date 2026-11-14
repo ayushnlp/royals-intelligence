@@ -1,7 +1,7 @@
 # ROYALS INTELLIGENCE — ROUND 1 METHODOLOGY & LIMITATIONS REPORT
-**Generated:** 2026-11-11T21:49:31.495627+00:00  
+**Generated:** 2026-11-14T00:11:41.754003+00:00  
 **Architecture:** ROYALS INTELLIGENCE v4.1  
-**Task:** R1-06 / R1-06.2 Candidate Classification & Evidence Governance Remediation  
+**Task:** R1-06 / R1-06.2.2 Leaderboard, Classification & Uncertainty Disclosure Remediation  
 
 ---
 
@@ -10,18 +10,20 @@
 ### Batting: Conservative Lower Credible Bound (Value-at-Risk)
 $$\text{BAT\_CONSERVATIVE}_i = \hat{\theta}_{\text{SR}, i} - 1.0 \times \text{SE}_{\text{post}, i}$$
 - **Units:** Strike-rate points (e.g. +2.2 SR points).
+- **Statistical Credibility & Uncertainty Disclosure:** The primary ranking metric is a **1-SE lower credible bound** ($\approx 84.1\%$ one-sided posterior credibility under approximate normality). It is explicitly **NOT a 95% credible interval**, **NOT conventional 95% statistical significance**, and **NOT an empirical guarantee**.
 - **Rationale:** Balances context-adjusted performance against sample uncertainty. A player with $+15$ SR differential across only 30 balls (SE $\pm 20$) receives a score of $-5$, whereas a veteran with $+10$ SR differential across 300 balls (SE $\pm 10$) receives $0.0$. This prevents small-sample noisy flyers from infiltrating top rankings.
 
 ### Bowling: Conservative Runs Saved per Over
 $$\text{BOWL\_CONSERVATIVE}_i = -\hat{\theta}_{\text{Econ}, i} - 1.0 \times \text{SE}_{\text{post}, i}$$
 - **Units:** Runs saved per over (RPO). Higher (less negative) indicates superior run containment.
+- **Statistical Credibility & Uncertainty Disclosure:** Represents a **1-SE lower bound** on runs saved per over relative to baseline ($\approx 84.1\%$ one-sided posterior credibility). It is **NOT a 95% credible interval**, **NOT 95% statistical significance**, and **NOT an empirical guarantee**.
 - **Rationale:** Evaluates bowler run containment under high leverage, resolving the ordinary baseline floor clustering.
 
-### Two-Dimensional Candidate Classification System (Remediated Under Task R1-06.2)
-To prevent the conflation of performance direction, statistical evidence, and exposure volume, R1-06.2 implements two orthogonal dimensions:
+### Two-Dimensional Candidate Classification System (Remediated Under Tasks R1-06.2 & R1-06.2.2)
+To prevent the conflation of performance direction, statistical evidence, and exposure volume, R1-06.2 / R1-06.2.2 implements two orthogonal dimensions:
 1. **Dimension A: Performance Evidence Status:**
    - `POSITIVE_CONSERVATIVE_EVIDENCE`: Conservative lower bound is strictly $> 0$.
-   - `NEGATIVE_CONSERVATIVE_ESTIMATE`: Posterior mean is positive ($\hat{\theta} > 0$), but conservative lower bound is $\le 0$ (positive estimated performance with unresolved uncertainty).
+   - `POSITIVE_ESTIMATE_UNRESOLVED`: Posterior mean is positive ($\hat{\theta} > 0$), but conservative lower bound is $\le 0$ (positive estimated performance with unresolved uncertainty).
    - `BELOW_BASELINE_EVIDENCE`: Entire 1-sigma interval is below baseline ($\hat{\theta} + \text{SE} < 0$ for batting; runs saved upper bound $< 0$ for bowling).
    - `INCONCLUSIVE_EVIDENCE`: Point estimate non-positive, but 1-sigma interval spans zero.
 2. **Dimension B: Evidence Volume Tier:**
@@ -55,11 +57,11 @@ Exceeding the league pressure average reflects outperforming an environment wher
 
 ### Full Population Accounting:
 - **Batting Population ($N = 824$ total batters):**
-  - Qualified ($n \ge 30$ balls): **278 batters** (2 Positive Conservative Evidence, 19 Negative Conservative Estimate, 182 Below Baseline, 75 Inconclusive).
+  - Qualified ($n \ge 30$ balls): **278 batters** (2 Positive Conservative Evidence, 19 Positive Estimate Unresolved, 182 Below Baseline, 75 Inconclusive).
   - Non-Qualified ($1 \le n < 30$ balls): **413 batters** (`BELOW_MIN_PRESSURE_BALLS`).
   - Non-Qualified ($0$ pressure balls): **133 batters** (`ZERO_PRESSURE_DELIVERIES_FACED`).
 - **Bowling Population ($N = 596$ total bowlers):**
-  - Qualified ($n \ge 30$ balls): **239 bowlers** (0 Positive Conservative Evidence, 1 Negative Conservative Estimate [Bumrah], 1 Inconclusive [Narine], 237 Below Baseline).
+  - Qualified ($n \ge 30$ balls): **239 bowlers** (0 Positive Conservative Evidence, 1 Positive Estimate Unresolved [Bumrah], 1 Inconclusive [Narine], 237 Below Baseline).
   - Non-Qualified ($1 \le n < 30$ balls): **240 bowlers** (`BELOW_MIN_PRESSURE_BALLS`).
   - Non-Qualified ($0$ pressure balls): **117 bowlers** (`ZERO_PRESSURE_DELIVERIES_BOWLED`).
 

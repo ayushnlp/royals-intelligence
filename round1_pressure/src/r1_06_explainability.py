@@ -96,11 +96,23 @@ class ExplainabilityEngine:
 
         unit_str = "SR pts" if is_batting else "RPO"
 
+        # Evidence status explanation note
+        status_note = ""
+        if dim_a == "POSITIVE_CONSERVATIVE_EVIDENCE":
+            status_note = "1-SE conservative lower bound is strictly positive (84.1% one-sided posterior credibility; 95% CI spans zero)."
+        elif dim_a == "POSITIVE_ESTIMATE_UNRESOLVED":
+            status_note = "Posterior mean is strictly positive, but 1-SE conservative lower bound spans zero/negative (positive estimated performance with unresolved uncertainty; NOT evidence of below-baseline performance)."
+        elif dim_a == "BELOW_BASELINE_EVIDENCE":
+            status_note = "1-SE upper bound falls below zero, indicating 84.1% directional credibility of below-baseline performance (NOT 95% scientific proof of underperformance)."
+        elif dim_a == "INCONCLUSIVE_EVIDENCE":
+            status_note = "Point estimate is non-positive, but 1-SE uncertainty interval crosses ordinary baseline."
+
         # Question 1: Why considered?
         q1 = (
             f"Ranked #{rank} in {row['discipline'].capitalize()} with a conservative diagnostic value of {diag_val:+.2f} {unit_str}. "
             f"Two-Dimensional Classification: '{two_dim}' (Evidence Status: `{dim_a}`, Volume: `{dim_b}`, Cohort: `{cohort}`). "
-            f"Sample qualification: {'QUALIFIED' if cand_qual else 'EXCEPTION_PENDING'} (legacy: '{classification}')."
+            f"Sample qualification: {'QUALIFIED' if cand_qual else 'EXPLORATORY_WATCHLIST'} (legacy: '{classification}'). "
+            f"{status_note}"
         )
 
         # Question 2: Sample size?
@@ -117,17 +129,22 @@ class ExplainabilityEngine:
         q5 = f"Context-adjusted expectation: {exp_rate:.2f} {rate_name}, derived from stratified 12-cell baselines across phase, tournament tier, and innings."
 
         # Question 6: Conservative diagnostic value?
+        score_desc = "posterior mean minus 1.0 SE (SR points)" if is_batting else "negative posterior economy diff minus 1.0 SE (runs saved/over)"
         q6 = (
             f"{diag_name} = {diag_val:+.2f} {unit_str}. "
-            f"Represents the 84% 1-sided credible lower bound ({'posterior mean minus 1.0 SE' if is_batting else 'conservative runs saved per over'}), "
-            "inherently penalizing estimation uncertainty."
+            f"Represents the 84.1% 1-sided posterior credible lower bound ({score_desc}). "
+            "Under a normal posterior approximation, a 1-SE directional bound corresponds to approximately 84.1% one-sided posterior credibility. "
+            "It is NOT a 95% credible interval, NOT conventional 95% statistical significance, and NOT an empirical calibration or guarantee of future performance."
         )
 
         # Question 7: Posterior uncertainty?
         q7 = f"Posterior standard error: $\\pm${post_se:.2f} {unit_str}. Shrinkage weight $r = {shrink_wt:.3f}$."
 
         # Question 8: Credible interval bounds?
-        q8 = f"95% Credible Interval: [{ci_lower:.2f}, {ci_upper:.2f}] {unit_str} (width: {ci_width:.2f} {unit_str})."
+        q8 = (
+            f"95% Credible Interval: [{ci_lower:.2f}, {ci_upper:.2f}] {unit_str} (width: {ci_width:.2f} {unit_str}). "
+            "Displayed separately from the 1-SE diagnostic score; reflects a two-sided 95% Bayesian credible region (z = 1.96)."
+        )
 
         # Question 9: Competition support?
         q9 = (
@@ -218,15 +235,19 @@ class ExplainabilityEngine:
         # REPORT 1: BATTING SHORTLIST REPORT
         # ----------------------------------------------------------------------
         bat_report_path = self.reports_dir / "r1_06_batting_shortlist.md"
-        top_bat = self.bat_leaderboard.head(12)
+        top_bat = self.bat_leaderboard[self.bat_leaderboard["is_candidate_qualified"]].head(12)
+        top_bat_ids = set(top_bat["player_id"])
         prom_emerging_bat = self.bat_leaderboard[self.bat_leaderboard["watchlist_cohort"] == "EMERGING_HIGH_UPSIDE"]
-        prom_estab_bat = self.bat_leaderboard[self.bat_leaderboard["watchlist_cohort"] == "ESTABLISHED_MARGINAL_PERFORMER"]
+        prom_estab_bat = self.bat_leaderboard[
+            (self.bat_leaderboard["watchlist_cohort"] == "ESTABLISHED_MARGINAL_PERFORMER") &
+            (~self.bat_leaderboard["player_id"].isin(top_bat_ids))
+        ]
 
         bat_lines = [
             "# ROYALS INTELLIGENCE — ROUND 1 BATTING PRESSURE RELIABILITY SHORTLIST",
             f"**Generated:** {now_iso}  ",
             "**Architecture:** ROYALS INTELLIGENCE v4.1  ",
-            "**Task:** R1-06 / R1-06.2 Candidate Classification & Evidence Governance Remediation  ",
+            "**Task:** R1-06 / R1-06.2.2 Candidate Classification & Uncertainty Disclosure Remediation  ",
             "**Primary Metric:** Conservative Lower Credible Bound `BAT_CONSERVATIVE = posterior_mean_SR - posterior_SE_SR` (SR Points)  ",
             "",
             "---",
@@ -234,27 +255,31 @@ class ExplainabilityEngine:
             "## 1. Executive Shortlist Overview",
             "",
             "The Batting Pressure Reliability Shortlist evaluates batters under high-leverage match conditions, penalized by posterior estimation uncertainty. "
-            "Under the remediated **Two-Dimensional Classification System** (Task R1-06.2):",
-            "- **Dimension A (Performance Evidence Status):** Separates candidates whose conservative bound is strictly positive from those with positive estimated effect but unresolved uncertainty.",
+            "Under the remediated **Two-Dimensional Classification System** (Task R1-06.2.2):",
+            "- **Dimension A (Performance Evidence Status):** Separates candidates whose 1-SE conservative bound is strictly positive from those with positive estimated effect but unresolved uncertainty, below baseline, or inconclusive.",
             "- **Dimension B (Evidence Volume Tier):** HIGH_VOLUME ($\\ge 150$ balls), MEDIUM_VOLUME ($60-149$ balls), LOW_VOLUME ($30-59$ balls).",
             "",
             "> [!IMPORTANT]",
-            "> **Conservative Lower Bound & Statistical Evidence:**",
-            "> - **Exactly 2 qualified batters** establish strictly positive conservative lower bounds (`POSITIVE_CONSERVATIVE_EVIDENCE`): **Nicholas Pooran (+2.2 SR pts)** and **Donovan Ferreira (+0.9 SR pts)**.",
-            "> - Candidates ranked #3 through #12 exhibit positive posterior means ($\\hat{\\theta} > 0.0$), but their 84% conservative lower bounds are non-positive ($L \\le 0$). They are classified as `NEGATIVE_CONSERVATIVE_ESTIMATE` (positive estimated effect with unresolved uncertainty spanning zero), NOT negative performance.",
+            "> **Statistical Credibility & Uncertainty Disclosure (1-SE Bound vs 95% Credible Interval):**",
+            "> - **Primary Conservative Score Formula:** `BAT_CONSERVATIVE = posterior_mean_SR - posterior_SE_SR` (SR Points).",
+            "> - **One-SE Credibility Interpretation:** Under a normal posterior approximation, a one-standard-error directional bound corresponds to approximately **84.1% one-sided posterior credibility**.",
+            "> - **Critical Distinctions:** It is **NOT** a 95% credible interval, **NOT** conventional 95% statistical significance, and **NOT** an empirical calibration or guarantee of future performance.",
+            "> - **Positive Conservative Evidence (`POSITIVE_CONSERVATIVE_EVIDENCE`):** Exactly 2 qualified batters (**Nicholas Pooran: +2.2 SR pts**, **Donovan Ferreira: +0.9 SR pts**) establish strictly positive 1-SE lower bounds ($L > 0$). However, their 95% credible intervals span zero (Pooran: `[-11.2, +43.6]`, Ferreira: `[-18.0, +59.4]`). Under a strict 95% CI standard, zero batters in the entire dataset would qualify.",
+            "> - **Positive Estimate with Unresolved Uncertainty (`POSITIVE_ESTIMATE_UNRESOLVED`):** Candidates ranked #3 through #12 exhibit positive posterior means ($\\hat{\\theta} > 0.0$), but their 84.1% conservative lower bounds are non-positive ($L \\le 0$). This reflects positive estimated performance with unresolved uncertainty spanning zero, **NOT** evidence of below-baseline performance.",
+            "> - **Below-Baseline Evidence (`BELOW_BASELINE_EVIDENCE`):** 1-SE upper bound is strictly below zero ($U < 0$), indicating 84.1% directional credibility of below-baseline performance, not 95% scientific proof of underperformance.",
             "> - Candidates ranked #3 through #12 have heavily overlapping 95% credible intervals (e.g. Tim David: [-14.1, +33.3], Dinesh Karthik: [-14.0, +32.5], Ashutosh Sharma: [-17.0, +37.6]). Small ranking differences among these players reflect empirical sample variance rather than proven qualitative superiority.",
             "",
             "> [!NOTE]",
             "> **Probability Interpretation Disclosure:**",
             "> `P(Exceed League Avg Under Pressure)` evaluates exceedance over the league-wide pressure prior mean ($\\mu_b = -34.24$ SR pts). Because league-wide batting strike rates collapse by ~34 points under pressure, achieving 90%+ probability of exceeding the league pressure average is a much lower hurdle than beating ordinary baseline expectation ($P(\\text{Beat Base})$).",
             "",
-            "### Batting Leaderboard (Top 12 Candidates):",
+            "### Batting Leaderboard (Top 12 Sample-Qualified Candidates):",
             "",
-            "| Rank | Batter Name | BAT_CONSERVATIVE (SR pts) | Posterior Mean $\\hat{\\theta}$ | Posterior SE | 95% Credible Interval | Pressure Balls | Matches | Comp Qual | P(Beat Base) | P(Exceed League Avg Under Pressure) | Dim A (Evidence Status) | Dim B (Volume) | Watchlist Cohort |",
+            "| Shortlist Rank | Batter Name | BAT_CONSERVATIVE (SR pts) | Posterior Mean $\\hat{\\theta}$ | Posterior SE | 95% Credible Interval | Pressure Balls | Matches | Comp Qual | P(Beat Base) | P(Exceed League Avg Under Pressure) | Dim A (Evidence Status) | Dim B (Volume) | Watchlist Cohort |",
             "| :--- | :--- | ---: | ---: | ---: | :---: | ---: | ---: | :--- | ---: | ---: | :--- | :--- | :--- |",
         ]
 
-        for _, r in top_bat.iterrows():
+        for idx, (_, r) in enumerate(top_bat.iterrows(), 1):
             ci_str = f"[{r['ci_95_lower']:+.1f}, {r['ci_95_upper']:+.1f}]"
             comp_q = r.get("competition_qualification", r["competition_coverage"])
             dim_a_val = r.get("performance_evidence_status", r["evidence_classification"])
@@ -262,7 +287,7 @@ class ExplainabilityEngine:
             cohort_val = r.get("watchlist_cohort", "N/A")
             p_lg = r.get("prob_exceed_league_mean", r["prob_exceed_peers"])
             bat_lines.append(
-                f"| **{r['rank']}** | **{r['player_name']}** | **{r['primary_diagnostic_value']:+.1f}** | "
+                f"| **{idx}** | **{r['player_name']}** | **{r['primary_diagnostic_value']:+.1f}** | "
                 f"{r['posterior_mean']:+.1f} | $\\pm${r['posterior_se']:.1f} | {ci_str} | "
                 f"{r['pressure_legal_balls']} | {r['pressure_matches']} | "
                 f"`{comp_q}` | {r['prob_exceed_baseline']*100:.1f}% | {p_lg*100:.1f}% | "
@@ -277,7 +302,7 @@ class ExplainabilityEngine:
             "",
         ])
 
-        top_profiles = self.bat_profiles_df.head(10)
+        top_profiles = self.bat_profiles_df[self.bat_profiles_df["is_candidate_qualified"]].head(10)
         for _, p in top_profiles.iterrows():
             bat_lines.extend([
                 f"### #{p['rank']} — {p['player_name']} (`{p['two_dimensional_classification']}`)",
@@ -296,12 +321,12 @@ class ExplainabilityEngine:
         bat_lines.extend([
             "---",
             "",
-            "## 3. Promising Candidates Watchlist (Emerging vs Established Cohorts)",
+            "## 3. Exploratory Watchlist (Promising Candidates Watchlist: Emerging vs Established Cohorts)",
             "",
-            "Audit finding DEF-03 remediation: The promising cohort is explicitly separated into genuine emerging talents and established veterans with marginal effects:",
+            "Exploratory watchlist candidates are maintained strictly separate from the sample-qualified primary leaderboard:",
             "",
-            "### A. Emerging High-Upside Candidates (`EMERGING_HIGH_UPSIDE` — $30 \\le n < 60$ balls, positive posterior mean):",
-            "These emerging players have high estimated overperformance under pressure but limited exposure volume ($< 60$ balls), retaining higher estimation variance:",
+            "### A. Emerging High-Upside Exploratory Watchlist (`EMERGING_HIGH_UPSIDE` — $30 \\le n < 60$ balls, positive posterior mean):",
+            "These emerging players have high estimated overperformance under pressure but limited exposure volume ($< 60$ balls), retaining higher estimation variance and remaining sample-disqualified for primary shortlist inclusion:",
             "",
             "| Batter Name | Posterior Mean $\\hat{\\theta}$ | Posterior SE | Conservative Bound | Pressure Balls | Matches | Volume Tier | Watchlist Cohort | Two-Dimensional Status |",
             "| :--- | ---: | ---: | ---: | ---: | ---: | :--- | :--- | :--- |",
@@ -316,8 +341,8 @@ class ExplainabilityEngine:
 
         bat_lines.extend([
             "",
-            "### B. Established Marginal Performers (`ESTABLISHED_MARGINAL_PERFORMER` — $n \\ge 60$ balls, positive posterior mean, conservative bound $\\le 0$):",
-            "Established multi-season veterans who maintain positive posterior strike rates but whose 1-sigma uncertainty bound crosses zero:",
+            "### B. Established Marginal Performers Exploratory Watchlist (`ESTABLISHED_MARGINAL_PERFORMER` — $n \\ge 60$ balls, positive posterior mean, conservative bound $\\le 0$):",
+            "*(Note: Candidates ranked in Table 1 above are primary qualified candidates; the watchlist below features additional established marginal performers outside the primary shortlist)*",
             "",
             "| Batter Name | Posterior Mean $\\hat{\\theta}$ | Posterior SE | Conservative Bound | Pressure Balls | Matches | Volume Tier | Watchlist Cohort | Two-Dimensional Status |",
             "| :--- | ---: | ---: | ---: | ---: | ---: | :--- | :--- | :--- |",
@@ -337,15 +362,19 @@ class ExplainabilityEngine:
         # REPORT 2: BOWLING SHORTLIST REPORT
         # ----------------------------------------------------------------------
         bowl_report_path = self.reports_dir / "r1_06_bowling_shortlist.md"
-        top_bowl = self.bowl_leaderboard.head(11)
+        top_bowl = self.bowl_leaderboard[self.bowl_leaderboard["is_candidate_qualified"]].head(11)
+        top_bowl_ids = set(top_bowl["player_id"])
         prom_emerging_bowl = self.bowl_leaderboard[self.bowl_leaderboard["watchlist_cohort"] == "PEER_BEATING_EMERGING"].head(10)
-        prom_estab_bowl = self.bowl_leaderboard[self.bowl_leaderboard["watchlist_cohort"] == "PEER_BEATING_ESTABLISHED"].head(10)
+        prom_estab_bowl = self.bowl_leaderboard[
+            (self.bowl_leaderboard["watchlist_cohort"] == "PEER_BEATING_ESTABLISHED") &
+            (~self.bowl_leaderboard["player_id"].isin(top_bowl_ids))
+        ].head(10)
 
         bowl_lines = [
             "# ROYALS INTELLIGENCE — ROUND 1 BOWLING PRESSURE RELIABILITY SHORTLIST",
             f"**Generated:** {now_iso}  ",
             "**Architecture:** ROYALS INTELLIGENCE v4.1  ",
-            "**Task:** R1-06 / R1-06.2 Candidate Classification & Evidence Governance Remediation  ",
+            "**Task:** R1-06 / R1-06.2.2 Candidate Classification & Uncertainty Disclosure Remediation  ",
             "**Primary Metric:** Conservative Runs Saved per Over `BOWL_CONSERVATIVE = -posterior_mean_economy_diff - posterior_SE_economy` (Runs Saved/Over)  ",
             "",
             "---",
@@ -353,16 +382,19 @@ class ExplainabilityEngine:
             "## 1. Executive Shortlist Overview",
             "",
             "The Bowling Pressure Reliability Shortlist evaluates bowler run containment under high-leverage conditions relative to context expectations, penalized by posterior estimation uncertainty. "
-            "Under the remediated **Two-Dimensional Classification System** (Task R1-06.2):",
+            "Under the remediated **Two-Dimensional Classification System** (Task R1-06.2.2):",
             "- **Dimension A (Performance Evidence Status):** Evaluates runs saved point estimate and uncertainty intervals relative to baseline expectation.",
             "- **Dimension B (Evidence Volume Tier):** HIGH_VOLUME ($\\ge 150$ balls), MEDIUM_VOLUME ($60-149$ balls), LOW_VOLUME ($30-59$ balls).",
             "",
             "> [!IMPORTANT]",
-            "> **Jasprit Bumrah Benchmark & Absolute Baseline Findings:**",
-            "> - Across all 239 qualified bowlers, **exactly 0 bowlers establish positive conservative runs saved** (`POSITIVE_CONSERVATIVE_EVIDENCE`).",
-            "> - **Jasprit Bumrah (#1: -0.16 RPO)** is the **ONLY qualified bowler in the 883-match dataset** who concedes fewer runs under pressure (8.94 RPO) than ordinary baseline (9.70 RPO), with a positive runs saved point estimate ($S = +0.20$ RPO, posterior economy diff $-0.20 \\pm 0.36$), classified as `NEGATIVE_CONSERVATIVE_ESTIMATE (HIGH_VOLUME)`.",
-            "> - **Sunil Narine (#2: -0.94 RPO)** is classified as `INCONCLUSIVE_EVIDENCE (HIGH_VOLUME)` because his posterior economy diff is $+0.39$ RPO ($S = -0.39$) with $\\text{SE} = 0.55$, giving an upper runs saved bound of $+0.16 \\ge 0$.",
-            "> - The remaining **237 qualified bowlers** are classified as `BELOW_BASELINE_EVIDENCE` because their 1-sigma uncertainty intervals fall strictly below ordinary baseline expectations.",
+            "> **Statistical Credibility & Uncertainty Disclosure (1-SE Bound vs 95% Credible Interval):**",
+            "> - **Primary Conservative Score Formula:** `BOWL_CONSERVATIVE = -posterior_mean_economy_diff - posterior_SE_economy` (Runs Saved/Over).",
+            "> - **One-SE Credibility Interpretation:** Under a normal posterior approximation, a one-standard-error directional bound corresponds to approximately **84.1% one-sided posterior credibility**.",
+            "> - **Critical Distinctions:** It is **NOT** a 95% credible interval, **NOT** conventional 95% statistical significance, and **NOT** an empirical calibration or guarantee of future performance.",
+            "> - **Positive Conservative Runs Saved (`POSITIVE_CONSERVATIVE_EVIDENCE`):** Across all 239 qualified bowlers, **exactly 0 bowlers** establish strictly positive 1-SE conservative runs saved ($L_s > 0$).",
+            "> - **Positive Estimate with Unresolved Uncertainty (`POSITIVE_ESTIMATE_UNRESOLVED`):** **Jasprit Bumrah (#1: -0.16 RPO)** is the **ONLY qualified bowler in the 883-match dataset** who concedes fewer runs under pressure (8.94 RPO) than ordinary baseline (9.70 RPO), with a positive runs saved point estimate ($S = +0.20$ RPO, posterior economy diff $-0.20 \\pm 0.36$), but a 1-SE runs saved bound of $-0.16 \\le 0$ RPO and 95% CI `[-0.90, +0.50]` RPO. He is classified as `POSITIVE_ESTIMATE_UNRESOLVED (HIGH_VOLUME)`. This must NOT be interpreted as evidence of below-baseline performance.",
+            "> - **Inconclusive Evidence (`INCONCLUSIVE_EVIDENCE`):** **Sunil Narine (#2: -0.94 RPO)** is classified as `INCONCLUSIVE_EVIDENCE (HIGH_VOLUME)` because his posterior economy diff is $+0.39$ RPO ($S = -0.39$) with $\\text{SE} = 0.55$, giving a 1-SE upper runs saved bound of $+0.16 \\ge 0$.",
+            "> - **Below-Baseline Evidence (`BELOW_BASELINE_EVIDENCE`):** The remaining **237 qualified bowlers** are classified as `BELOW_BASELINE_EVIDENCE` because their 1-sigma uncertainty intervals fall strictly below ordinary baseline expectations. 226 of them (95.4%) maintain economy inflation $> 0$ at 95% CI; 11 span zero.",
             "",
             "> [!NOTE]",
             "> **Resolution of the 87 vs 88 Bowling Promising Discrepancy:**",
@@ -372,13 +404,13 @@ class ExplainabilityEngine:
             "> **Probability Interpretation Disclosure:**",
             "> `P(Exceed League Avg Under Pressure)` evaluates exceedance over the league-wide pressure prior mean ($\\mu_{bw} = +1.82$ RPO). Conceding fewer than +1.82 RPO extra under pressure beats the average pressured bowler, but does NOT constitute beating ordinary baseline performance.",
             "",
-            "### Bowling Leaderboard (Top 11 Candidates):",
+            "### Bowling Leaderboard (Top 11 Sample-Qualified Candidates):",
             "",
-            "| Rank | Bowler Name | BOWL_CONSERVATIVE (Runs Saved) | Posterior Mean Diff | Posterior SE | 95% Credible Interval | Pressure Balls | Matches | Comp Qual | P(Beat Base) | P(Exceed League Avg Under Pressure) | Dim A (Evidence Status) | Dim B (Volume) | Watchlist Cohort |",
+            "| Shortlist Rank | Bowler Name | BOWL_CONSERVATIVE (Runs Saved) | Posterior Mean Diff | Posterior SE | 95% Credible Interval | Pressure Balls | Matches | Comp Qual | P(Beat Base) | P(Exceed League Avg Under Pressure) | Dim A (Evidence Status) | Dim B (Volume) | Watchlist Cohort |",
             "| :--- | :--- | ---: | ---: | ---: | :---: | ---: | ---: | :--- | ---: | ---: | :--- | :--- | :--- |",
         ]
 
-        for _, r in top_bowl.iterrows():
+        for idx, (_, r) in enumerate(top_bowl.iterrows(), 1):
             ci_str = f"[{r['ci_95_lower']:+.2f}, {r['ci_95_upper']:+.2f}]"
             comp_q = r.get("competition_qualification", r["competition_coverage"])
             dim_a_val = r.get("performance_evidence_status", r["evidence_classification"])
@@ -386,7 +418,7 @@ class ExplainabilityEngine:
             cohort_val = r.get("watchlist_cohort", "N/A")
             p_lg = r.get("prob_exceed_league_mean", r["prob_exceed_peers"])
             bowl_lines.append(
-                f"| **{r['rank']}** | **{r['player_name']}** | **{r['primary_diagnostic_value']:+.2f}** | "
+                f"| **{idx}** | **{r['player_name']}** | **{r['primary_diagnostic_value']:+.2f}** | "
                 f"{r['posterior_mean']:+.2f} | $\\pm${r['posterior_se']:.2f} | {ci_str} | "
                 f"{r['pressure_legal_balls']} | {r['pressure_matches']} | "
                 f"`{comp_q}` | {r['prob_exceed_baseline']*100:.1f}% | {p_lg*100:.1f}% | "
@@ -401,7 +433,7 @@ class ExplainabilityEngine:
             "",
         ])
 
-        top_bowl_profiles = self.bowl_profiles_df.head(10)
+        top_bowl_profiles = self.bowl_profiles_df[self.bowl_profiles_df["is_candidate_qualified"]].head(10)
         for _, p in top_bowl_profiles.iterrows():
             bowl_lines.extend([
                 f"### #{p['rank']} — {p['player_name']} (`{p['two_dimensional_classification']}`)",
@@ -420,12 +452,13 @@ class ExplainabilityEngine:
         bowl_lines.extend([
             "---",
             "",
-            "## 3. Promising Candidates Watchlist (Peer-Beaters Under Pressure)",
+            "## 3. Exploratory Watchlist (Promising Candidates Watchlist: Peer-Beaters Under Pressure)",
             "",
             "These bowlers outperform peer averages ($\\hat{\\theta} < +1.82$ RPO), saving runs relative to the degraded match environment. "
-            "They are separated into Emerging ($<60$ balls) and Established ($\\ge 60$ balls) tiers:",
+            "Exploratory watchlist candidates are maintained strictly separate from the sample-qualified primary leaderboard:",
             "",
-            "### A. Emerging Peer-Beating Bowlers (`PEER_BEATING_EMERGING` — $30 \\le n < 60$ balls, beating peer mean):",
+            "### A. Emerging Peer-Beating Exploratory Watchlist (`PEER_BEATING_EMERGING` — $30 \\le n < 60$ balls, beating peer mean):",
+            "*(Note: These bowlers outperform the league pressure average but lack sample qualification for the primary leaderboard; e.g. Nasum Ahmed [47b], Vipraj Nigam [46b], Ramon Simmonds [30b])*",
             "",
             "| Bowler Name | Posterior Mean Diff | Posterior SE | Conservative Runs Saved | Pressure Balls | Matches | Volume Tier | Watchlist Cohort | Two-Dimensional Status |",
             "| :--- | ---: | ---: | ---: | ---: | ---: | :--- | :--- | :--- |",
@@ -440,7 +473,8 @@ class ExplainabilityEngine:
 
         bowl_lines.extend([
             "",
-            "### B. Established Peer-Beating Bowlers (`PEER_BEATING_ESTABLISHED` — $n \\ge 60$ balls, beating peer mean):",
+            "### B. Established Peer-Beating Exploratory Watchlist (`PEER_BEATING_ESTABLISHED` — $n \\ge 60$ balls, beating peer mean):",
+            "*(Note: Primary shortlisted candidates 1–11 are detailed in Table 1 above; the watchlist below features additional established peer-beaters outside the primary shortlist)*",
             "",
             "| Bowler Name | Posterior Mean Diff | Posterior SE | Conservative Runs Saved | Pressure Balls | Matches | Volume Tier | Watchlist Cohort | Two-Dimensional Status |",
             "| :--- | ---: | ---: | ---: | ---: | ---: | :--- | :--- | :--- |",
@@ -464,7 +498,7 @@ class ExplainabilityEngine:
             "# ROYALS INTELLIGENCE — ROUND 1 METHODOLOGY & LIMITATIONS REPORT",
             f"**Generated:** {now_iso}  ",
             "**Architecture:** ROYALS INTELLIGENCE v4.1  ",
-            "**Task:** R1-06 / R1-06.2 Candidate Classification & Evidence Governance Remediation  ",
+            "**Task:** R1-06 / R1-06.2.2 Leaderboard, Classification & Uncertainty Disclosure Remediation  ",
             "",
             "---",
             "",
@@ -473,18 +507,20 @@ class ExplainabilityEngine:
             "### Batting: Conservative Lower Credible Bound (Value-at-Risk)",
             "$$\\text{BAT\\_CONSERVATIVE}_i = \\hat{\\theta}_{\\text{SR}, i} - 1.0 \\times \\text{SE}_{\\text{post}, i}$$",
             "- **Units:** Strike-rate points (e.g. +2.2 SR points).",
+            "- **Statistical Credibility & Uncertainty Disclosure:** The primary ranking metric is a **1-SE lower credible bound** ($\\approx 84.1\\%$ one-sided posterior credibility under approximate normality). It is explicitly **NOT a 95% credible interval**, **NOT conventional 95% statistical significance**, and **NOT an empirical guarantee**.",
             "- **Rationale:** Balances context-adjusted performance against sample uncertainty. A player with $+15$ SR differential across only 30 balls (SE $\\pm 20$) receives a score of $-5$, whereas a veteran with $+10$ SR differential across 300 balls (SE $\\pm 10$) receives $0.0$. This prevents small-sample noisy flyers from infiltrating top rankings.",
             "",
             "### Bowling: Conservative Runs Saved per Over",
             "$$\\text{BOWL\\_CONSERVATIVE}_i = -\\hat{\\theta}_{\\text{Econ}, i} - 1.0 \\times \\text{SE}_{\\text{post}, i}$$",
             "- **Units:** Runs saved per over (RPO). Higher (less negative) indicates superior run containment.",
+            "- **Statistical Credibility & Uncertainty Disclosure:** Represents a **1-SE lower bound** on runs saved per over relative to baseline ($\\approx 84.1\\%$ one-sided posterior credibility). It is **NOT a 95% credible interval**, **NOT 95% statistical significance**, and **NOT an empirical guarantee**.",
             "- **Rationale:** Evaluates bowler run containment under high leverage, resolving the ordinary baseline floor clustering.",
             "",
-            "### Two-Dimensional Candidate Classification System (Remediated Under Task R1-06.2)",
-            "To prevent the conflation of performance direction, statistical evidence, and exposure volume, R1-06.2 implements two orthogonal dimensions:",
+            "### Two-Dimensional Candidate Classification System (Remediated Under Tasks R1-06.2 & R1-06.2.2)",
+            "To prevent the conflation of performance direction, statistical evidence, and exposure volume, R1-06.2 / R1-06.2.2 implements two orthogonal dimensions:",
             "1. **Dimension A: Performance Evidence Status:**",
             "   - `POSITIVE_CONSERVATIVE_EVIDENCE`: Conservative lower bound is strictly $> 0$.",
-            "   - `NEGATIVE_CONSERVATIVE_ESTIMATE`: Posterior mean is positive ($\\hat{\\theta} > 0$), but conservative lower bound is $\\le 0$ (positive estimated performance with unresolved uncertainty).",
+            "   - `POSITIVE_ESTIMATE_UNRESOLVED`: Posterior mean is positive ($\\hat{\\theta} > 0$), but conservative lower bound is $\\le 0$ (positive estimated performance with unresolved uncertainty).",
             "   - `BELOW_BASELINE_EVIDENCE`: Entire 1-sigma interval is below baseline ($\\hat{\\theta} + \\text{SE} < 0$ for batting; runs saved upper bound $< 0$ for bowling).",
             "   - `INCONCLUSIVE_EVIDENCE`: Point estimate non-positive, but 1-sigma interval spans zero.",
             "2. **Dimension B: Evidence Volume Tier:**",
@@ -520,11 +556,11 @@ class ExplainabilityEngine:
             "",
             "### Full Population Accounting:",
             "- **Batting Population ($N = 824$ total batters):**",
-            "  - Qualified ($n \\ge 30$ balls): **278 batters** (2 Positive Conservative Evidence, 19 Negative Conservative Estimate, 182 Below Baseline, 75 Inconclusive).",
+            "  - Qualified ($n \\ge 30$ balls): **278 batters** (2 Positive Conservative Evidence, 19 Positive Estimate Unresolved, 182 Below Baseline, 75 Inconclusive).",
             "  - Non-Qualified ($1 \\le n < 30$ balls): **413 batters** (`BELOW_MIN_PRESSURE_BALLS`).",
             "  - Non-Qualified ($0$ pressure balls): **133 batters** (`ZERO_PRESSURE_DELIVERIES_FACED`).",
             "- **Bowling Population ($N = 596$ total bowlers):**",
-            "  - Qualified ($n \\ge 30$ balls): **239 bowlers** (0 Positive Conservative Evidence, 1 Negative Conservative Estimate [Bumrah], 1 Inconclusive [Narine], 237 Below Baseline).",
+            "  - Qualified ($n \\ge 30$ balls): **239 bowlers** (0 Positive Conservative Evidence, 1 Positive Estimate Unresolved [Bumrah], 1 Inconclusive [Narine], 237 Below Baseline).",
             "  - Non-Qualified ($1 \\le n < 30$ balls): **240 bowlers** (`BELOW_MIN_PRESSURE_BALLS`).",
             "  - Non-Qualified ($0$ pressure balls): **117 bowlers** (`ZERO_PRESSURE_DELIVERIES_BOWLED`).",
             "",
@@ -572,7 +608,7 @@ class ExplainabilityEngine:
             "# ROYALS INTELLIGENCE — ROUND 1 PLAYER RELIABILITY INTELLIGENCE REPORT",
             f"**Generated:** {now_iso}  ",
             "**Architecture:** ROYALS INTELLIGENCE v4.1  ",
-            "**Task:** R1-06 / R1-06.2 Candidate Classification & Evidence Governance Remediation  ",
+            "**Task:** R1-06 / R1-06.2.2 Leaderboard, Classification & Uncertainty Disclosure Remediation  ",
             "**Status:** `PLAYER_RELIABILITY_INTELLIGENCE_VALIDATED`  ",
             "",
             "---",
@@ -581,17 +617,17 @@ class ExplainabilityEngine:
             "",
             "This report addresses the official SupeRR Selector Round 1 challenge: **Identify the Most Reliable Players Under Pressure.** "
             "By synthesizing context-stratified expected baselines (R1-04), Empirical Bayes shrinkage (R1-04.1), "
-            "independent statistical audits (R1-05.1 & R1-05.2), and the R1-06.1 classification remediation (R1-06.2), the intelligence engine answers the 7 core analyst questions:",
+            "independent statistical audits (R1-05.1 & R1-05.2), and the governance remediations (R1-06.2 & R1-06.2.2), the intelligence engine answers the 7 core analyst questions:",
             "",
             "### 1. Which batters demonstrate the strongest evidence of pressure reliability?",
             "**Nicholas Pooran** (#1: +2.2 SR conservative lower bound, +16.2 $\\pm$ 14.0 posterior mean, 212 pressure balls across 26 matches & 5 seasons) "
             "and **Donovan Ferreira** (#2: +0.9 SR bound, +20.7 $\\pm$ 19.8 posterior mean, 84 balls) lead the cohort as the only two qualified batters with strictly positive conservative lower bounds (`POSITIVE_CONSERVATIVE_EVIDENCE`). "
-            "They are closely followed by established multi-season closers classified as `NEGATIVE_CONSERVATIVE_ESTIMATE (HIGH_VOLUME)`: **Tim David** (#3: -2.5 SR bound, 290 balls), **Dinesh Karthik** (#4: -2.7 SR bound, 260 balls), "
+            "They are closely followed by established multi-season closers classified as `POSITIVE_ESTIMATE_UNRESOLVED (HIGH_VOLUME)`: **Tim David** (#3: -2.5 SR bound, 290 balls), **Dinesh Karthik** (#4: -2.7 SR bound, 260 balls), "
             "**Ashutosh Sharma** (#5: -3.6 SR bound, 191 balls), and **Marcus Stoinis** (#6: -5.8 SR bound, 220 balls).",
             "",
             "### 2. Which bowlers demonstrate the strongest evidence of pressure reliability?",
             "**Jasprit Bumrah** (#1: -0.16 RPO conservative runs saved, -0.20 $\\pm$ 0.36 posterior economy diff, 521 pressure balls across 60 matches & 5 seasons) "
-            "is the standout pressure bowler in world cricket and the **only qualified bowler** conceding fewer runs under pressure (8.94 RPO) than ordinary baseline (9.70 RPO), classified as `NEGATIVE_CONSERVATIVE_ESTIMATE (HIGH_VOLUME)`. "
+            "is the standout pressure bowler in world cricket and the **only qualified bowler** conceding fewer runs under pressure (8.94 RPO) than ordinary baseline (9.70 RPO), classified as `POSITIVE_ESTIMATE_UNRESOLVED (HIGH_VOLUME)`. "
             "Exactly 0 bowlers establish strictly positive conservative runs saved. Elite peer-beating bowlers saving runs relative to the league pressure mean include **Sunil Narine** (#2: -0.94 RPO, 153 balls, `INCONCLUSIVE_EVIDENCE`), "
             "**Maheesh Theekshana** (#3: -0.96 RPO, 421 balls), **Matheesha Pathirana** (#4: -1.05 RPO, 440 balls), and **Shaheen Afridi** (#5: -1.43 RPO, 191 balls).",
             "",
@@ -601,6 +637,7 @@ class ExplainabilityEngine:
             "",
             "### 4. How uncertain is each assessment?",
             "Every player profile discloses posterior standard error $\\text{SE}_{\\text{post}}$ and a 95% credible interval. "
+            "Under Task R1-06.2.2 governance disclosures, the primary ranking metric is explicitly recognized as a **1-SE lower bound** ($\\approx 84.1\\%$ one-sided posterior credibility under normality), and is **NOT a 95% credible interval**, **NOT conventional 95% statistical significance**, and **NOT an empirical guarantee**. "
             "Pooran's 95% CI is [-11.2, +43.6] SR points; Bumrah's 95% CI is [-0.90, +0.50] RPO. "
             "Smaller sample players (30–59 balls) carry approximately 1.6x wider credible intervals than veterans (150+ balls).",
             "",
@@ -634,11 +671,6 @@ class ExplainabilityEngine:
             "- `shortlist_robustness_comparison.parquet`: Multi-configuration sensitivity tests.",
             "- `competition_candidate_views.parquet`: Competition-specific segmentations.",
         ]
-
-        intel_path.write_text("\n".join(intel_lines), encoding="utf-8")
-        reports["player_intelligence_report"] = intel_path
-
-        return reports
 
         intel_path.write_text("\n".join(intel_lines), encoding="utf-8")
         reports["player_intelligence_report"] = intel_path

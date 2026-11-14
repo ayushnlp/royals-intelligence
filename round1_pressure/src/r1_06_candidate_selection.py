@@ -117,7 +117,7 @@ class CandidateSelectionEngine:
                     dim_a = "POSITIVE_CONSERVATIVE_EVIDENCE"
                     cohort = "CONFIRMED_POSITIVE_RELIABILITY"
                 elif mean > 0.0 and cons <= 0.0:
-                    dim_a = "NEGATIVE_CONSERVATIVE_ESTIMATE"
+                    dim_a = "POSITIVE_ESTIMATE_UNRESOLVED"
                     if balls < 60:
                         cohort = "EMERGING_HIGH_UPSIDE"
                     else:
@@ -162,7 +162,7 @@ class CandidateSelectionEngine:
                     cohort = "CONFIRMED_POSITIVE_RELIABILITY"
                 elif runs_saved > 0.0 and cons <= 0.0:
                     # mean < 0.0: bowler concedes fewer runs than baseline under pressure
-                    dim_a = "NEGATIVE_CONSERVATIVE_ESTIMATE"
+                    dim_a = "POSITIVE_ESTIMATE_UNRESOLVED"
                     cohort = "OUTPERFORMING_BASELINE_ESTIMATE"
                 elif runs_saved_upper < 0.0:
                     # mean - se > 0.0: whole 1-sigma interval concedes more runs than baseline

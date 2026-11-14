@@ -76,11 +76,11 @@ def test_two_dimensional_classification_batting_distribution(batting_leaderboard
     assert "LOW_VOLUME" not in ct.columns or ct.loc["POSITIVE_CONSERVATIVE_EVIDENCE"].get("LOW_VOLUME", 0) == 0
     assert (df["performance_evidence_status"] == "POSITIVE_CONSERVATIVE_EVIDENCE").sum() == 2
 
-    # Negative conservative estimate (positive mean, non-positive lower bound)
-    assert ct.loc["NEGATIVE_CONSERVATIVE_ESTIMATE", "HIGH_VOLUME"] == 13
-    assert ct.loc["NEGATIVE_CONSERVATIVE_ESTIMATE", "MEDIUM_VOLUME"] == 4
-    assert ct.loc["NEGATIVE_CONSERVATIVE_ESTIMATE", "LOW_VOLUME"] == 2
-    assert (df["performance_evidence_status"] == "NEGATIVE_CONSERVATIVE_ESTIMATE").sum() == 19
+    # Positive estimate unresolved (positive mean, non-positive lower bound)
+    assert ct.loc["POSITIVE_ESTIMATE_UNRESOLVED", "HIGH_VOLUME"] == 13
+    assert ct.loc["POSITIVE_ESTIMATE_UNRESOLVED", "MEDIUM_VOLUME"] == 4
+    assert ct.loc["POSITIVE_ESTIMATE_UNRESOLVED", "LOW_VOLUME"] == 2
+    assert (df["performance_evidence_status"] == "POSITIVE_ESTIMATE_UNRESOLVED").sum() == 19
 
     # Below baseline evidence
     assert ct.loc["BELOW_BASELINE_EVIDENCE", "HIGH_VOLUME"] == 22
@@ -109,8 +109,8 @@ def test_two_dimensional_classification_bowling_distribution(bowling_leaderboard
     # Zero bowlers achieve positive conservative runs saved
     assert (df["performance_evidence_status"] == "POSITIVE_CONSERVATIVE_EVIDENCE").sum() == 0
 
-    # Exactly 1 bowler achieves negative conservative estimate (Jasprit Bumrah)
-    neg_cons = df[df["performance_evidence_status"] == "NEGATIVE_CONSERVATIVE_ESTIMATE"]
+    # Exactly 1 bowler achieves positive estimate unresolved (Jasprit Bumrah)
+    neg_cons = df[df["performance_evidence_status"] == "POSITIVE_ESTIMATE_UNRESOLVED"]
     assert len(neg_cons) == 1
     assert neg_cons.iloc[0]["player_name"] == "Jasprit Bumrah"
     assert neg_cons.iloc[0]["evidence_volume_tier"] == "HIGH_VOLUME"
@@ -302,34 +302,40 @@ def test_1_se_vs_95_ci_empirical_behavior(batting_leaderboard, bowling_leaderboa
 
 def test_bowling_shortlist_table1_defect_verification(reports_dir):
     """
-    Audit Defect Verification: DEF-R1-06.2.1-01.
+    Audit Defect Remediation: DEF-R1-06.2.1-01.
     Verifies that in r1_06_bowling_shortlist.md:
-    Table 1 currently contains Nasum Ahmed, Vipraj Nigam, and Ramon Simmonds
-    because self.bowl_leaderboard.head(11) was selected without filtering for
-    is_candidate_qualified.
-    Verifies that all three are duplicated in Section 3 Watchlist.
+    Table 1 contains only sample-qualified candidates (filtered by is_candidate_qualified).
+    Nasum Ahmed, Vipraj Nigam, and Ramon Simmonds are excluded from Table 1 into Section 3 Watchlist.
+    Ravichandran Ashwin, Hasan Mahmud, and Nathan Ellis are admitted to Table 1.
+    Zero candidates are duplicated between Table 1 and Section 3 Watchlist.
     """
     report_file = reports_dir / "r1_06_bowling_shortlist.md"
     assert report_file.exists(), f"Bowling shortlist missing at {report_file}"
     content = report_file.read_text(encoding="utf-8")
 
     # Locate Table 1 and Section 3
-    assert "### Bowling Leaderboard (Top 11 Candidates):" in content
-    assert "## 3. Promising Candidates Watchlist" in content
+    assert "### Bowling Leaderboard (Top 11 Sample-Qualified Candidates):" in content
+    assert "## 3. Exploratory Watchlist" in content
+    assert "Peer-Beaters Under Pressure" in content
 
     t1_end = content.find("## 2. In-Depth Candidate Evidence Profiles")
     table1_text = content[:t1_end]
     watchlist_text = content[t1_end:]
 
-    # Confirm that Nasum Ahmed, Vipraj Nigam, and Ramon Simmonds are present in Table 1
-    assert "Nasum Ahmed" in table1_text, "Nasum Ahmed expected in Table 1 under DEF-R1-06.2.1-01"
-    assert "Vipraj Nigam" in table1_text, "Vipraj Nigam expected in Table 1 under DEF-R1-06.2.1-01"
-    assert "Ramon Simmonds" in table1_text, "Ramon Simmonds expected in Table 1 under DEF-R1-06.2.1-01"
+    # Confirm that Nasum Ahmed, Vipraj Nigam, and Ramon Simmonds are NOT in Table 1
+    assert "Nasum Ahmed" not in table1_text, "Nasum Ahmed must be excluded from Table 1"
+    assert "Vipraj Nigam" not in table1_text, "Vipraj Nigam must be excluded from Table 1"
+    assert "Ramon Simmonds" not in table1_text, "Ramon Simmonds must be excluded from Table 1"
 
-    # Confirm that all 3 also appear in the Watchlist (duplication defect)
-    assert "Nasum Ahmed" in watchlist_text, "Nasum Ahmed duplicated in Watchlist"
-    assert "Vipraj Nigam" in watchlist_text, "Vipraj Nigam duplicated in Watchlist"
-    assert "Ramon Simmonds" in watchlist_text, "Ramon Simmonds duplicated in Watchlist"
+    # Confirm that all 3 appear in the Section 3 Watchlist
+    assert "Nasum Ahmed" in watchlist_text, "Nasum Ahmed must be in Watchlist"
+    assert "Vipraj Nigam" in watchlist_text, "Vipraj Nigam must be in Watchlist"
+    assert "Ramon Simmonds" in watchlist_text, "Ramon Simmonds must be in Watchlist"
+
+    # Confirm that qualified bowlers are admitted into Table 1
+    assert "Ravichandran Ashwin" in table1_text, "Ashwin must be admitted to Table 1"
+    assert "Hasan Mahmud" in table1_text, "Mahmud must be admitted to Table 1"
+    assert "Nathan Ellis" in table1_text, "Ellis must be admitted to Table 1"
 
 
 def test_batting_shortlist_table1_clean_qualification(reports_dir, batting_leaderboard):

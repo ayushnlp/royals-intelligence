@@ -9,7 +9,7 @@ Comprehensive test suite verifying all 16 remediation requirements:
 3. Dimension B mutual exclusivity and exhaustiveness across all qualified candidates.
 4. Correct candidate qualification syntax logic (DEF-04 fix: >=60 balls OR (>=50 balls and >=10 matches)).
 5. Positive conservative bound verification (Pooran & Ferreira only; 0 bowlers).
-6. Candidates 3-12 classified as NEGATIVE_CONSERVATIVE_ESTIMATE (positive mean, conservative bound <= 0).
+6. Candidates 3-12 classified as POSITIVE_ESTIMATE_UNRESOLVED (positive mean, conservative bound <= 0).
 7. Separation of promising watchlist into EMERGING_HIGH_UPSIDE and ESTABLISHED_MARGINAL_PERFORMER (DEF-03 fix).
 8. Bowling Bumrah benchmark (sole bowler with positive runs saved point estimate) and Narine inconclusive evidence.
 9. Resolution of the 87 vs 88 bowling promising count discrepancy using full-precision unrounded floats.
@@ -68,7 +68,7 @@ def test_batting_dimension_a_counts():
 
     dim_a_counts = df["performance_evidence_status"].value_counts().to_dict()
     assert dim_a_counts.get("POSITIVE_CONSERVATIVE_EVIDENCE", 0) == 2
-    assert dim_a_counts.get("NEGATIVE_CONSERVATIVE_ESTIMATE", 0) == 19
+    assert dim_a_counts.get("POSITIVE_ESTIMATE_UNRESOLVED", 0) == 19
     assert dim_a_counts.get("BELOW_BASELINE_EVIDENCE", 0) == 182
     assert dim_a_counts.get("INCONCLUSIVE_EVIDENCE", 0) == 75
     assert sum(dim_a_counts.values()) == 278
@@ -81,7 +81,7 @@ def test_bowling_dimension_a_counts():
 
     dim_a_counts = df["performance_evidence_status"].value_counts().to_dict()
     assert dim_a_counts.get("POSITIVE_CONSERVATIVE_EVIDENCE", 0) == 0
-    assert dim_a_counts.get("NEGATIVE_CONSERVATIVE_ESTIMATE", 0) == 1
+    assert dim_a_counts.get("POSITIVE_ESTIMATE_UNRESOLVED", 0) == 1
     assert dim_a_counts.get("INCONCLUSIVE_EVIDENCE", 0) == 1
     assert dim_a_counts.get("BELOW_BASELINE_EVIDENCE", 0) == 237
     assert sum(dim_a_counts.values()) == 239
@@ -167,11 +167,11 @@ def test_positive_conservative_bound_verification():
 # ==============================================================================
 
 def test_candidates_3_through_12_remediation():
-    """Verifies that batters #3 through #12 have NEGATIVE_CONSERVATIVE_ESTIMATE."""
+    """Verifies that batters #3 through #12 have POSITIVE_ESTIMATE_UNRESOLVED."""
     df = pd.read_parquet(PROCESSED_DIR / "batting_leaderboard.parquet")
     sub_10 = df.iloc[2:12]  # Ranks 3 through 12
     for _, r in sub_10.iterrows():
-        assert r["performance_evidence_status"] == "NEGATIVE_CONSERVATIVE_ESTIMATE"
+        assert r["performance_evidence_status"] == "POSITIVE_ESTIMATE_UNRESOLVED"
         assert r["primary_diagnostic_value"] <= 0.0
         assert r["posterior_mean"] > 0.0
 
@@ -223,7 +223,7 @@ def test_bowling_benchmarks():
     # Bumrah
     bumrah = df[df["player_name"] == "Jasprit Bumrah"].iloc[0]
     assert bumrah["rank"] == 1
-    assert bumrah["performance_evidence_status"] == "NEGATIVE_CONSERVATIVE_ESTIMATE"
+    assert bumrah["performance_evidence_status"] == "POSITIVE_ESTIMATE_UNRESOLVED"
     assert bumrah["evidence_volume_tier"] == "HIGH_VOLUME"
     assert bumrah["watchlist_cohort"] == "OUTPERFORMING_BASELINE_ESTIMATE"
     assert bumrah["posterior_mean"] < 0.0  # Concedes fewer runs under pressure than ordinary baseline
@@ -341,14 +341,14 @@ def test_updated_shortlist_markdown_reports():
     bat_rep = (REPORTS_DIR / "r1_06_batting_shortlist.md").read_text(encoding="utf-8")
     assert "Two-Dimensional Classification System" in bat_rep
     assert "POSITIVE_CONSERVATIVE_EVIDENCE" in bat_rep
-    assert "NEGATIVE_CONSERVATIVE_ESTIMATE" in bat_rep
+    assert "POSITIVE_ESTIMATE_UNRESOLVED" in bat_rep
     assert "EMERGING_HIGH_UPSIDE" in bat_rep
     assert "ESTABLISHED_MARGINAL_PERFORMER" in bat_rep
     assert "-34.24 SR pts" in bat_rep
 
     bowl_rep = (REPORTS_DIR / "r1_06_bowling_shortlist.md").read_text(encoding="utf-8")
     assert "Two-Dimensional Classification System" in bowl_rep
-    assert "NEGATIVE_CONSERVATIVE_ESTIMATE" in bowl_rep
+    assert "POSITIVE_ESTIMATE_UNRESOLVED" in bowl_rep
     assert "INCONCLUSIVE_EVIDENCE" in bowl_rep
     assert "Resolution of the 87 vs 88 Bowling Promising Discrepancy" in bowl_rep
     assert "+1.82 RPO" in bowl_rep
