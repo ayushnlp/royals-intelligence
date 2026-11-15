@@ -121,12 +121,12 @@ To prevent misinterpreting the primary ranking diagnostic as a scientific proof 
 > - **Primary Conservative Score Formula:**
 >   - Batting: `BAT_CONSERVATIVE = posterior_mean_SR - posterior_SE_SR` (SR Points)
 >   - Bowling: `BOWL_CONSERVATIVE = -posterior_mean_economy_diff - posterior_SE_economy` (Runs Saved/Over)
-> - **One-SE Credibility Interpretation:** Under approximate normal posterior distributions, a 1-standard-error directional bound corresponds to approximately **84.1% one-sided posterior credibility**.
+> - **Directional Diagnostic Interpretation:** Under an approximate normal posterior distribution, a positive one-standard-error lower bound implies posterior probability above zero greater than approximately 84.1%. This is a directional uncertainty diagnostic, not a 95% credible interval, conventional 95% statistical significance, or a guarantee of future performance.
 > - **Critical Non-Equivalences:**
 >   1. It is **NOT a 95% credible interval** (which requires $1.96 \times \text{SE}$).
 >   2. It is **NOT conventional 95% statistical significance** ($p < 0.05$).
 >   3. It is **NOT an empirical guarantee** or deterministic match prediction.
-> - **Practical Consequence:** Nicholas Pooran (+2.2 SR bound) and Donovan Ferreira (+0.9 SR bound) establish 84.1% credibility of positive value, but their 95% credible intervals span zero (Pooran: `[-11.2, +43.6]`, Ferreira: `[-18.0, +59.4]`). Under a strict 95% credible interval standard, exactly zero batters and zero bowlers in the entire dataset would qualify as strictly positive.
+> - **Practical Consequence:** Nicholas Pooran (+2.2 SR bound) and Donovan Ferreira (+0.9 SR bound) establish directional probability of positive value $> 84.1\%$, but their 95% credible intervals span zero (Pooran: `[-11.2, +43.6]`, Ferreira: `[-18.0, +59.4]`). Under a strict 95% credible interval standard, exactly zero batters and zero bowlers in the entire dataset would qualify as strictly positive.
 
 ---
 
@@ -135,7 +135,7 @@ To prevent misinterpreting the primary ranking diagnostic as a scientific proof 
 The complete multi-tiered population accounting across all 883 match records is reconciled below:
 
 ```
-Total Ball-by-Ball Records Ingested: 208,081 deliveries (883 matches)
+Total Ball-by-Ball Records Ingested: 200,999 deliveries (867 matches with ball-by-ball records, 16 abandoned matches = 883 total matches)
 ├── Evaluated Batting Population: 824 batters
 │   ├── Minimum Pressure Exposure (>= 30 balls): 278 batters
 │   │   ├── Sample-Qualified (>= 60b OR [>= 50b & >= 10m]): 161 batters

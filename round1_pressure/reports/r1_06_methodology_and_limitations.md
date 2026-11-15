@@ -1,7 +1,7 @@
 # ROYALS INTELLIGENCE — ROUND 1 METHODOLOGY & LIMITATIONS REPORT
-**Generated:** 2026-11-14T00:11:41.754003+00:00  
+**Generated:** 2026-11-14T07:21:40.280460+00:00  
 **Architecture:** ROYALS INTELLIGENCE v4.1  
-**Task:** R1-06 / R1-06.2.2 Leaderboard, Classification & Uncertainty Disclosure Remediation  
+**Task:** R1-06 / R1-06.2.3 Final Data-Count Reconciliation & Statistical Wording Correction  
 
 ---
 
@@ -10,16 +10,16 @@
 ### Batting: Conservative Lower Credible Bound (Value-at-Risk)
 $$\text{BAT\_CONSERVATIVE}_i = \hat{\theta}_{\text{SR}, i} - 1.0 \times \text{SE}_{\text{post}, i}$$
 - **Units:** Strike-rate points (e.g. +2.2 SR points).
-- **Statistical Credibility & Uncertainty Disclosure:** The primary ranking metric is a **1-SE lower credible bound** ($\approx 84.1\%$ one-sided posterior credibility under approximate normality). It is explicitly **NOT a 95% credible interval**, **NOT conventional 95% statistical significance**, and **NOT an empirical guarantee**.
+- **Statistical Credibility & Uncertainty Disclosure:** Under an approximate normal posterior distribution, a positive one-standard-error lower bound implies posterior probability above zero greater than approximately 84.1%. This is a directional uncertainty diagnostic, not a 95% credible interval, conventional 95% statistical significance, or a guarantee of future performance.
 - **Rationale:** Balances context-adjusted performance against sample uncertainty. A player with $+15$ SR differential across only 30 balls (SE $\pm 20$) receives a score of $-5$, whereas a veteran with $+10$ SR differential across 300 balls (SE $\pm 10$) receives $0.0$. This prevents small-sample noisy flyers from infiltrating top rankings.
 
 ### Bowling: Conservative Runs Saved per Over
 $$\text{BOWL\_CONSERVATIVE}_i = -\hat{\theta}_{\text{Econ}, i} - 1.0 \times \text{SE}_{\text{post}, i}$$
 - **Units:** Runs saved per over (RPO). Higher (less negative) indicates superior run containment.
-- **Statistical Credibility & Uncertainty Disclosure:** Represents a **1-SE lower bound** on runs saved per over relative to baseline ($\approx 84.1\%$ one-sided posterior credibility). It is **NOT a 95% credible interval**, **NOT 95% statistical significance**, and **NOT an empirical guarantee**.
+- **Statistical Credibility & Uncertainty Disclosure:** Under an approximate normal posterior distribution, a positive one-standard-error lower bound implies posterior probability above zero greater than approximately 84.1%. This is a directional uncertainty diagnostic, not a 95% credible interval, conventional 95% statistical significance, or a guarantee of future performance.
 - **Rationale:** Evaluates bowler run containment under high leverage, resolving the ordinary baseline floor clustering.
 
-### Two-Dimensional Candidate Classification System (Remediated Under Tasks R1-06.2 & R1-06.2.2)
+### Two-Dimensional Candidate Classification System (Remediated Under Tasks R1-06.2 & R1-06.2.3)
 To prevent the conflation of performance direction, statistical evidence, and exposure volume, R1-06.2 / R1-06.2.2 implements two orthogonal dimensions:
 1. **Dimension A: Performance Evidence Status:**
    - `POSITIVE_CONSERVATIVE_EVIDENCE`: Conservative lower bound is strictly $> 0$.

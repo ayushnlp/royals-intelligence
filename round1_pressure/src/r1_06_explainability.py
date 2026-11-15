@@ -99,11 +99,11 @@ class ExplainabilityEngine:
         # Evidence status explanation note
         status_note = ""
         if dim_a == "POSITIVE_CONSERVATIVE_EVIDENCE":
-            status_note = "1-SE conservative lower bound is strictly positive (84.1% one-sided posterior credibility; 95% CI spans zero)."
+            status_note = "Under an approximate normal posterior distribution, a positive one-standard-error lower bound implies posterior probability above zero greater than approximately 84.1%. This is a directional uncertainty diagnostic, not a 95% credible interval, conventional 95% statistical significance, or a guarantee of future performance (95% CI spans zero)."
         elif dim_a == "POSITIVE_ESTIMATE_UNRESOLVED":
             status_note = "Posterior mean is strictly positive, but 1-SE conservative lower bound spans zero/negative (positive estimated performance with unresolved uncertainty; NOT evidence of below-baseline performance)."
         elif dim_a == "BELOW_BASELINE_EVIDENCE":
-            status_note = "1-SE upper bound falls below zero, indicating 84.1% directional credibility of below-baseline performance (NOT 95% scientific proof of underperformance)."
+            status_note = "Under an approximate normal posterior distribution, a negative one-standard-error upper bound implies posterior probability below baseline greater than approximately 84.1%. This is a directional uncertainty diagnostic, not conventional 95% statistical significance or proof of underperformance."
         elif dim_a == "INCONCLUSIVE_EVIDENCE":
             status_note = "Point estimate is non-positive, but 1-SE uncertainty interval crosses ordinary baseline."
 
@@ -132,9 +132,9 @@ class ExplainabilityEngine:
         score_desc = "posterior mean minus 1.0 SE (SR points)" if is_batting else "negative posterior economy diff minus 1.0 SE (runs saved/over)"
         q6 = (
             f"{diag_name} = {diag_val:+.2f} {unit_str}. "
-            f"Represents the 84.1% 1-sided posterior credible lower bound ({score_desc}). "
-            "Under a normal posterior approximation, a 1-SE directional bound corresponds to approximately 84.1% one-sided posterior credibility. "
-            "It is NOT a 95% credible interval, NOT conventional 95% statistical significance, and NOT an empirical calibration or guarantee of future performance."
+            f"Represents the 1-SE conservative diagnostic bound ({score_desc}). "
+            "Under an approximate normal posterior distribution, a positive one-standard-error lower bound implies posterior probability above zero greater than approximately 84.1%. "
+            "This is a directional uncertainty diagnostic, not a 95% credible interval, conventional 95% statistical significance, or a guarantee of future performance."
         )
 
         # Question 7: Posterior uncertainty?
@@ -247,7 +247,7 @@ class ExplainabilityEngine:
             "# ROYALS INTELLIGENCE — ROUND 1 BATTING PRESSURE RELIABILITY SHORTLIST",
             f"**Generated:** {now_iso}  ",
             "**Architecture:** ROYALS INTELLIGENCE v4.1  ",
-            "**Task:** R1-06 / R1-06.2.2 Candidate Classification & Uncertainty Disclosure Remediation  ",
+            "**Task:** R1-06 / R1-06.2.3 Final Data-Count Reconciliation & Statistical Wording Correction  ",
             "**Primary Metric:** Conservative Lower Credible Bound `BAT_CONSERVATIVE = posterior_mean_SR - posterior_SE_SR` (SR Points)  ",
             "",
             "---",
@@ -255,18 +255,17 @@ class ExplainabilityEngine:
             "## 1. Executive Shortlist Overview",
             "",
             "The Batting Pressure Reliability Shortlist evaluates batters under high-leverage match conditions, penalized by posterior estimation uncertainty. "
-            "Under the remediated **Two-Dimensional Classification System** (Task R1-06.2.2):",
+            "Under the remediated **Two-Dimensional Classification System** (Task R1-06.2.2 / R1-06.2.3):",
             "- **Dimension A (Performance Evidence Status):** Separates candidates whose 1-SE conservative bound is strictly positive from those with positive estimated effect but unresolved uncertainty, below baseline, or inconclusive.",
             "- **Dimension B (Evidence Volume Tier):** HIGH_VOLUME ($\\ge 150$ balls), MEDIUM_VOLUME ($60-149$ balls), LOW_VOLUME ($30-59$ balls).",
             "",
             "> [!IMPORTANT]",
             "> **Statistical Credibility & Uncertainty Disclosure (1-SE Bound vs 95% Credible Interval):**",
             "> - **Primary Conservative Score Formula:** `BAT_CONSERVATIVE = posterior_mean_SR - posterior_SE_SR` (SR Points).",
-            "> - **One-SE Credibility Interpretation:** Under a normal posterior approximation, a one-standard-error directional bound corresponds to approximately **84.1% one-sided posterior credibility**.",
-            "> - **Critical Distinctions:** It is **NOT** a 95% credible interval, **NOT** conventional 95% statistical significance, and **NOT** an empirical calibration or guarantee of future performance.",
+            "> - **Statistical Interpretation & Uncertainty Diagnostic:** Under an approximate normal posterior distribution, a positive one-standard-error lower bound implies posterior probability above zero greater than approximately 84.1%. This is a directional uncertainty diagnostic, not a 95% credible interval, conventional 95% statistical significance, or a guarantee of future performance.",
             "> - **Positive Conservative Evidence (`POSITIVE_CONSERVATIVE_EVIDENCE`):** Exactly 2 qualified batters (**Nicholas Pooran: +2.2 SR pts**, **Donovan Ferreira: +0.9 SR pts**) establish strictly positive 1-SE lower bounds ($L > 0$). However, their 95% credible intervals span zero (Pooran: `[-11.2, +43.6]`, Ferreira: `[-18.0, +59.4]`). Under a strict 95% CI standard, zero batters in the entire dataset would qualify.",
-            "> - **Positive Estimate with Unresolved Uncertainty (`POSITIVE_ESTIMATE_UNRESOLVED`):** Candidates ranked #3 through #12 exhibit positive posterior means ($\\hat{\\theta} > 0.0$), but their 84.1% conservative lower bounds are non-positive ($L \\le 0$). This reflects positive estimated performance with unresolved uncertainty spanning zero, **NOT** evidence of below-baseline performance.",
-            "> - **Below-Baseline Evidence (`BELOW_BASELINE_EVIDENCE`):** 1-SE upper bound is strictly below zero ($U < 0$), indicating 84.1% directional credibility of below-baseline performance, not 95% scientific proof of underperformance.",
+            "> - **Positive Estimate with Unresolved Uncertainty (`POSITIVE_ESTIMATE_UNRESOLVED`):** Candidates ranked #3 through #12 exhibit positive posterior means ($\\hat{\\theta} > 0.0$), but their 1-SE conservative lower bounds are non-positive ($L \\le 0$). This reflects positive estimated performance with unresolved uncertainty spanning zero, **NOT** evidence of below-baseline performance.",
+            "> - **Below-Baseline Evidence (`BELOW_BASELINE_EVIDENCE`):** 1-SE upper bound is strictly below zero ($U < 0$), implying directional probability of below-baseline performance greater than approximately 84.1%, not 95% scientific proof of underperformance.",
             "> - Candidates ranked #3 through #12 have heavily overlapping 95% credible intervals (e.g. Tim David: [-14.1, +33.3], Dinesh Karthik: [-14.0, +32.5], Ashutosh Sharma: [-17.0, +37.6]). Small ranking differences among these players reflect empirical sample variance rather than proven qualitative superiority.",
             "",
             "> [!NOTE]",
@@ -374,7 +373,7 @@ class ExplainabilityEngine:
             "# ROYALS INTELLIGENCE — ROUND 1 BOWLING PRESSURE RELIABILITY SHORTLIST",
             f"**Generated:** {now_iso}  ",
             "**Architecture:** ROYALS INTELLIGENCE v4.1  ",
-            "**Task:** R1-06 / R1-06.2.2 Candidate Classification & Uncertainty Disclosure Remediation  ",
+            "**Task:** R1-06 / R1-06.2.3 Final Data-Count Reconciliation & Statistical Wording Correction  ",
             "**Primary Metric:** Conservative Runs Saved per Over `BOWL_CONSERVATIVE = -posterior_mean_economy_diff - posterior_SE_economy` (Runs Saved/Over)  ",
             "",
             "---",
@@ -382,15 +381,14 @@ class ExplainabilityEngine:
             "## 1. Executive Shortlist Overview",
             "",
             "The Bowling Pressure Reliability Shortlist evaluates bowler run containment under high-leverage conditions relative to context expectations, penalized by posterior estimation uncertainty. "
-            "Under the remediated **Two-Dimensional Classification System** (Task R1-06.2.2):",
+            "Under the remediated **Two-Dimensional Classification System** (Task R1-06.2.2 / R1-06.2.3):",
             "- **Dimension A (Performance Evidence Status):** Evaluates runs saved point estimate and uncertainty intervals relative to baseline expectation.",
             "- **Dimension B (Evidence Volume Tier):** HIGH_VOLUME ($\\ge 150$ balls), MEDIUM_VOLUME ($60-149$ balls), LOW_VOLUME ($30-59$ balls).",
             "",
             "> [!IMPORTANT]",
             "> **Statistical Credibility & Uncertainty Disclosure (1-SE Bound vs 95% Credible Interval):**",
             "> - **Primary Conservative Score Formula:** `BOWL_CONSERVATIVE = -posterior_mean_economy_diff - posterior_SE_economy` (Runs Saved/Over).",
-            "> - **One-SE Credibility Interpretation:** Under a normal posterior approximation, a one-standard-error directional bound corresponds to approximately **84.1% one-sided posterior credibility**.",
-            "> - **Critical Distinctions:** It is **NOT** a 95% credible interval, **NOT** conventional 95% statistical significance, and **NOT** an empirical calibration or guarantee of future performance.",
+            "> - **Statistical Interpretation & Uncertainty Diagnostic:** Under an approximate normal posterior distribution, a positive one-standard-error lower bound implies posterior probability above zero greater than approximately 84.1%. This is a directional uncertainty diagnostic, not a 95% credible interval, conventional 95% statistical significance, or a guarantee of future performance.",
             "> - **Positive Conservative Runs Saved (`POSITIVE_CONSERVATIVE_EVIDENCE`):** Across all 239 qualified bowlers, **exactly 0 bowlers** establish strictly positive 1-SE conservative runs saved ($L_s > 0$).",
             "> - **Positive Estimate with Unresolved Uncertainty (`POSITIVE_ESTIMATE_UNRESOLVED`):** **Jasprit Bumrah (#1: -0.16 RPO)** is the **ONLY qualified bowler in the 883-match dataset** who concedes fewer runs under pressure (8.94 RPO) than ordinary baseline (9.70 RPO), with a positive runs saved point estimate ($S = +0.20$ RPO, posterior economy diff $-0.20 \\pm 0.36$), but a 1-SE runs saved bound of $-0.16 \\le 0$ RPO and 95% CI `[-0.90, +0.50]` RPO. He is classified as `POSITIVE_ESTIMATE_UNRESOLVED (HIGH_VOLUME)`. This must NOT be interpreted as evidence of below-baseline performance.",
             "> - **Inconclusive Evidence (`INCONCLUSIVE_EVIDENCE`):** **Sunil Narine (#2: -0.94 RPO)** is classified as `INCONCLUSIVE_EVIDENCE (HIGH_VOLUME)` because his posterior economy diff is $+0.39$ RPO ($S = -0.39$) with $\\text{SE} = 0.55$, giving a 1-SE upper runs saved bound of $+0.16 \\ge 0$.",
@@ -498,7 +496,7 @@ class ExplainabilityEngine:
             "# ROYALS INTELLIGENCE — ROUND 1 METHODOLOGY & LIMITATIONS REPORT",
             f"**Generated:** {now_iso}  ",
             "**Architecture:** ROYALS INTELLIGENCE v4.1  ",
-            "**Task:** R1-06 / R1-06.2.2 Leaderboard, Classification & Uncertainty Disclosure Remediation  ",
+            "**Task:** R1-06 / R1-06.2.3 Final Data-Count Reconciliation & Statistical Wording Correction  ",
             "",
             "---",
             "",
@@ -507,16 +505,16 @@ class ExplainabilityEngine:
             "### Batting: Conservative Lower Credible Bound (Value-at-Risk)",
             "$$\\text{BAT\\_CONSERVATIVE}_i = \\hat{\\theta}_{\\text{SR}, i} - 1.0 \\times \\text{SE}_{\\text{post}, i}$$",
             "- **Units:** Strike-rate points (e.g. +2.2 SR points).",
-            "- **Statistical Credibility & Uncertainty Disclosure:** The primary ranking metric is a **1-SE lower credible bound** ($\\approx 84.1\\%$ one-sided posterior credibility under approximate normality). It is explicitly **NOT a 95% credible interval**, **NOT conventional 95% statistical significance**, and **NOT an empirical guarantee**.",
+            "- **Statistical Credibility & Uncertainty Disclosure:** Under an approximate normal posterior distribution, a positive one-standard-error lower bound implies posterior probability above zero greater than approximately 84.1%. This is a directional uncertainty diagnostic, not a 95% credible interval, conventional 95% statistical significance, or a guarantee of future performance.",
             "- **Rationale:** Balances context-adjusted performance against sample uncertainty. A player with $+15$ SR differential across only 30 balls (SE $\\pm 20$) receives a score of $-5$, whereas a veteran with $+10$ SR differential across 300 balls (SE $\\pm 10$) receives $0.0$. This prevents small-sample noisy flyers from infiltrating top rankings.",
             "",
             "### Bowling: Conservative Runs Saved per Over",
             "$$\\text{BOWL\\_CONSERVATIVE}_i = -\\hat{\\theta}_{\\text{Econ}, i} - 1.0 \\times \\text{SE}_{\\text{post}, i}$$",
             "- **Units:** Runs saved per over (RPO). Higher (less negative) indicates superior run containment.",
-            "- **Statistical Credibility & Uncertainty Disclosure:** Represents a **1-SE lower bound** on runs saved per over relative to baseline ($\\approx 84.1\\%$ one-sided posterior credibility). It is **NOT a 95% credible interval**, **NOT 95% statistical significance**, and **NOT an empirical guarantee**.",
+            "- **Statistical Credibility & Uncertainty Disclosure:** Under an approximate normal posterior distribution, a positive one-standard-error lower bound implies posterior probability above zero greater than approximately 84.1%. This is a directional uncertainty diagnostic, not a 95% credible interval, conventional 95% statistical significance, or a guarantee of future performance.",
             "- **Rationale:** Evaluates bowler run containment under high leverage, resolving the ordinary baseline floor clustering.",
             "",
-            "### Two-Dimensional Candidate Classification System (Remediated Under Tasks R1-06.2 & R1-06.2.2)",
+            "### Two-Dimensional Candidate Classification System (Remediated Under Tasks R1-06.2 & R1-06.2.3)",
             "To prevent the conflation of performance direction, statistical evidence, and exposure volume, R1-06.2 / R1-06.2.2 implements two orthogonal dimensions:",
             "1. **Dimension A: Performance Evidence Status:**",
             "   - `POSITIVE_CONSERVATIVE_EVIDENCE`: Conservative lower bound is strictly $> 0$.",
@@ -608,7 +606,7 @@ class ExplainabilityEngine:
             "# ROYALS INTELLIGENCE — ROUND 1 PLAYER RELIABILITY INTELLIGENCE REPORT",
             f"**Generated:** {now_iso}  ",
             "**Architecture:** ROYALS INTELLIGENCE v4.1  ",
-            "**Task:** R1-06 / R1-06.2.2 Leaderboard, Classification & Uncertainty Disclosure Remediation  ",
+            "**Task:** R1-06 / R1-06.2.3 Final Data-Count Reconciliation & Statistical Wording Correction  ",
             "**Status:** `PLAYER_RELIABILITY_INTELLIGENCE_VALIDATED`  ",
             "",
             "---",
@@ -617,7 +615,7 @@ class ExplainabilityEngine:
             "",
             "This report addresses the official SupeRR Selector Round 1 challenge: **Identify the Most Reliable Players Under Pressure.** "
             "By synthesizing context-stratified expected baselines (R1-04), Empirical Bayes shrinkage (R1-04.1), "
-            "independent statistical audits (R1-05.1 & R1-05.2), and the governance remediations (R1-06.2 & R1-06.2.2), the intelligence engine answers the 7 core analyst questions:",
+            "independent statistical audits (R1-05.1 & R1-05.2), and the governance remediations (R1-06.2, R1-06.2.2 & R1-06.2.3), the intelligence engine answers the 7 core analyst questions:",
             "",
             "### 1. Which batters demonstrate the strongest evidence of pressure reliability?",
             "**Nicholas Pooran** (#1: +2.2 SR conservative lower bound, +16.2 $\\pm$ 14.0 posterior mean, 212 pressure balls across 26 matches & 5 seasons) "
@@ -637,7 +635,7 @@ class ExplainabilityEngine:
             "",
             "### 4. How uncertain is each assessment?",
             "Every player profile discloses posterior standard error $\\text{SE}_{\\text{post}}$ and a 95% credible interval. "
-            "Under Task R1-06.2.2 governance disclosures, the primary ranking metric is explicitly recognized as a **1-SE lower bound** ($\\approx 84.1\\%$ one-sided posterior credibility under normality), and is **NOT a 95% credible interval**, **NOT conventional 95% statistical significance**, and **NOT an empirical guarantee**. "
+            "Under Task R1-06.2.3 governance disclosures: Under an approximate normal posterior distribution, a positive one-standard-error lower bound implies posterior probability above zero greater than approximately 84.1%. This is a directional uncertainty diagnostic, not a 95% credible interval, conventional 95% statistical significance, or a guarantee of future performance. "
             "Pooran's 95% CI is [-11.2, +43.6] SR points; Bumrah's 95% CI is [-0.90, +0.50] RPO. "
             "Smaller sample players (30–59 balls) carry approximately 1.6x wider credible intervals than veterans (150+ balls).",
             "",

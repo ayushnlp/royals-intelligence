@@ -356,7 +356,7 @@ def test_one_se_vs_ninety_five_ci_disclosures(batting_profiles, bowling_profiles
         assert rep.exists()
         text = rep.read_text(encoding="utf-8")
         assert "84.1" in text, f"Missing '84.1' credibility disclosure in {rep}"
-        assert "NOT a 95% credible interval" in text or "NOT a 95% CI" in text or "NOT" in text, (
+        assert "not a 95% credible interval" in text.lower() or "not a 95% ci" in text.lower(), (
             f"Missing 95% CI distinction in {rep}"
         )
 
