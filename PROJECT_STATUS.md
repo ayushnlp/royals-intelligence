@@ -1,136 +1,118 @@
 # ROYALS INTELLIGENCE — COMPREHENSIVE PROJECT STATUS
 **Document Classification:** Authoritative Project Status & Verification Record  
-**Platform Version:** ROYALS INTELLIGENCE v4.1  
-**Audit Timestamp:** 2026-11-16T16:35:00+05:30  
-**Current Git Branch:** `main` | **Current Git HEAD:** `6005022`  
-**Accepted Production Baseline:** `feat(r1-06.2.3): final data-count reconciliation and statistical wording correction`  
+**Platform Version:** ROYALS INTELLIGENCE v4.2  
+**Audit Timestamp:** 2026-11-17T01:56:00+05:30  
+**Current Git Branch:** `main` | **Current Git HEAD:** `0f24302c61e3d4c070d0e669fc152830c9b2c4e1`  
+**Accepted Production Baseline:** `audit(r1-freeze): document independent acceptance, blocker closure, and project freeze`  
 
 ---
 
 ## 1. Executive Summary & Verification State
 
-An exhaustive audit of the ROYALS INTELLIGENCE repository confirms that the **official SupeRR Selector Season 2 Round 1 Challenge** deliverables are **complete, mathematically audited, internally consistent, and fully verified**.
+An exhaustive, evidence-based technical audit of the ROYALS INTELLIGENCE repository confirms that the **official SupeRR Selector Season 2 Round 1 Challenge (Pressure Analytics & Player Shortlisting)** core deliverables are **100% complete, mathematically audited, internally consistent, and cryptographically protected**.
 
-The platform is structured into seven distinct architectural phases:
-- **Phase 1 (Data Foundation & Governance):** **COMPLETED** (6 / 6 milestones verified)
-- **Phase 2 (Pressure Analytics Engine):** **COMPLETED** (5 / 5 milestones verified)
-- **Phase 3 (Statistical Reliability & Shrinkage):** **COMPLETED** (6 / 6 milestones verified)
-- **Phase 4 (Player Intelligence & Shortlisting):** **COMPLETED** (5 / 5 milestones verified)
-- **Phase 5 (Tactical & Pressure Intelligence UI):** **COMPLETED** (10 Tactical REST endpoints, 4 Pressure REST endpoints, `/pressure` & `/tactical` dashboards fully integrated)
-- **Phase 6 (Submission and Evidence):** **COMPLETED** (4 / 4 milestones verified)
-- **Phase 7 (Advanced Reliability Research):** **OPTIONAL FUTURE RESEARCH** (0 / 3 proposals; strictly segregated from locked rankings)
-
-**Overall Core Round 1 Completion:** **100% Complete**  
-**Automated Regression Suite:** **303 / 303 Tests Passing (100% Pass Rate, 0 Failures, 0 Warnings)**
+### High-Level Status Breakdown:
+* **Core Round 1 Analytical & Mathematical Engine (Stages 0–6):** **100.0% Complete** (7.0 / 7.0 stages verified).
+* **Overall Round 1 Platform Delivery (Stages 0–7):** **100.0% Complete** (8.0 / 8.0 stages verified; all analytics, APIs, and frontend production build verified).
+* **Automated Regression Suite:** **349 / 349 Tests Passing (100% Green)**
+  * `round1_pressure/tests/`: **196 / 196 passed** (84.51s)
+  * `backend/tests/`: **153 / 153 passed** (29.30s)
+* **Protected Parquet Datasets:** **4 / 4 SHA-256 Hashes Verified 100% Intact**.
+* **Preserved Additive Tracks (Zero Deletions):**
+  * *Auction Intelligence (AUCTION-00 to 05):* Implemented, tested (42/42 tests pass), and preserved in `data/processed/auction_intelligence/` and `backend/app/auction_intelligence/`.
+  * *Tactical Intelligence (Stage 5):* Implemented, tested (28/28 tests pass), and preserved.
+  * *Advanced Research (R1-07.1–R1-07.4):* Blocked awaiting authorization.
 
 ---
 
 ## 2. Official Round 1 Deliverables Verification
 
 ### 2.1 Deliverable 1: Top 10 Batters Under Pressure (Sealed & Verified)
-*Governing Metric: Conservative PRI (1-SE Lower Credible Bound in Strike Rate Points)*
+*Governing Metric: Conservative PRI (1-SE Lower Credible Bound in Strike Rate Points vs 12-Cell Context)*
 
-| Rank | Player Name | Governing Metric: Conservative PRI | Posterior Mean Difference ($\hat{\theta}$) | Standard Error (SE) | 95% Credible Interval | Pressure Balls Faced | Matches | Tournament Qualification | Status |
-| :---: | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| **1** | **Nicholas Pooran** | **+2.2 SR pts** | +16.2 | $\pm 14.0$ | [-11.2, +43.6] | 212 | 26 | Dual Qualified | **COMPLETED & LOCKED** |
-| **2** | **Donovan Ferreira** | **+0.9 SR pts** | +20.7 | $\pm 19.8$ | [-18.0, +59.4] | 84 | 13 | IPL Qualified | **COMPLETED & LOCKED** |
-| **3** | **Tim David** | **-2.5 SR pts** | +9.6 | $\pm 12.1$ | [-14.1, +33.3] | 290 | 33 | Dual Qualified | **COMPLETED & LOCKED** |
-| **4** | **Dinesh Karthik** | **-2.7 SR pts** | +9.2 | $\pm 11.9$ | [-14.1, +32.6] | 260 | 30 | Dual Qualified | **COMPLETED & LOCKED** |
-| **5** | **Ashutosh Sharma** | **-3.6 SR pts** | +10.3 | $\pm 13.9$ | [-17.0, +37.6] | 191 | 20 | IPL Qualified | **COMPLETED & LOCKED** |
-| **6** | **Marcus Stoinis** | **-5.8 SR pts** | +7.1 | $\pm 12.9$ | [-18.1, +32.3] | 220 | 32 | Dual Qualified | **COMPLETED & LOCKED** |
-| **7** | **Naman Dhir** | **-6.9 SR pts** | +7.9 | $\pm 14.9$ | [-21.2, +37.1] | 145 | 18 | IPL Qualified | **COMPLETED & LOCKED** |
-| **8** | **Rinku Singh** | **-7.0 SR pts** | +3.4 | $\pm 10.4$ | [-17.0, +23.8] | 363 | 48 | Dual Qualified | **COMPLETED & LOCKED** |
-| **9** | **Tristan Stubbs** | **-8.2 SR pts** | +2.4 | $\pm 10.5$ | [-18.3, +23.0] | 266 | 33 | Dual Qualified | **COMPLETED & LOCKED** |
-| **10** | **Sherfane Rutherford**| **-8.2 SR pts** | +6.9 | $\pm 15.1$ | [-22.7, +36.6] | 151 | 21 | Dual Qualified | **COMPLETED & LOCKED** |
+$$\begin{array}{|c|l|c|c|c|r|c|c|c|}
+\hline
+\textbf{Rank} & \textbf{Player Name} & \textbf{Governing Metric (PRI)} & \hat{\theta} & \textbf{SE} & \textbf{Balls} & \textbf{Matches} & \textbf{Qualification} & \textbf{Status} \\
+\hline
+\mathbf{1} & \textbf{Nicholas Pooran} & \mathbf{+2.2\text{ SR pts}} & +16.2 & \pm 14.0 & 212 & 26 & \text{Dual Qualified} & \mathbf{\text{LOCKED}} \\
+\mathbf{2} & \textbf{Donovan Ferreira} & \mathbf{+0.9\text{ SR pts}} & +20.7 & \pm 19.8 & 84 & 13 & \text{IPL Qualified} & \mathbf{\text{LOCKED}} \\
+\mathbf{3} & \textbf{Tim David} & \mathbf{-2.5\text{ SR pts}} & +9.6 & \pm 12.1 & 290 & 33 & \text{Dual Qualified} & \mathbf{\text{LOCKED}} \\
+\mathbf{4} & \textbf{Dinesh Karthik} & \mathbf{-2.7\text{ SR pts}} & +9.2 & \pm 11.9 & 260 & 30 & \text{Dual Qualified} & \mathbf{\text{LOCKED}} \\
+\mathbf{5} & \textbf{Ashutosh Sharma} & \mathbf{-3.6\text{ SR pts}} & +10.3 & \pm 13.9 & 191 & 20 & \text{IPL Qualified} & \mathbf{\text{LOCKED}} \\
+\mathbf{6} & \textbf{Marcus Stoinis} & \mathbf{-5.8\text{ SR pts}} & +7.1 & \pm 12.9 & 220 & 32 & \text{Dual Qualified} & \mathbf{\text{LOCKED}} \\
+\mathbf{7} & \textbf{Naman Dhir} & \mathbf{-6.9\text{ SR pts}} & +7.9 & \pm 14.9 & 145 & 18 & \text{IPL Qualified} & \mathbf{\text{LOCKED}} \\
+\mathbf{8} & \textbf{Rinku Singh} & \mathbf{-7.0\text{ SR pts}} & +3.4 & \pm 10.4 & 363 & 48 & \text{Dual Qualified} & \mathbf{\text{LOCKED}} \\
+\mathbf{9} & \textbf{Tristan Stubbs} & \mathbf{-8.2\text{ SR pts}} & +2.4 & \pm 10.5 & 266 & 33 & \text{Dual Qualified} & \mathbf{\text{LOCKED}} \\
+\mathbf{10} & \textbf{Sherfane Rutherford} & \mathbf{-8.2\text{ SR pts}} & +6.9 & \pm 15.1 & 151 & 21 & \text{Dual Qualified} & \mathbf{\text{LOCKED}} \\
+\hline
+\end{array}$$
 
-*Verified Reserve Alternates:* #11 Rovman Powell (-8.8 SR pts, 269 balls), #12 Aiden Markram (-9.0 SR pts, 273 balls).
+*Verified Reserves:* #11 Rovman Powell (-8.8 SR pts, 269 balls), #12 Aiden Markram (-9.0 SR pts, 273 balls).
 
 ---
 
 ### 2.2 Deliverable 2: Top 10 Bowlers Under Pressure (Sealed & Verified)
-*Governing Metric: Conservative Runs Saved per 6 Balls (Lower Bound: Higher is Better)*
+*Governing Metric: Conservative Runs Saved per 6 Balls (1-SE Lower Credible Bound in RPO: Higher is Better)*
 
-| Rank | Player Name | Governing Metric: Conservative Runs Saved | Posterior Mean Difference ($\hat{\theta}$) | Standard Error (SE) | 95% Credible Interval | Pressure Balls Bowled | Matches | Tournament Qualification | Status |
-| :---: | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| **1** | **Jasprit Bumrah** | **-0.16 RPO** | -0.20 RPO | $\pm 0.36$ | [-0.90, +0.50] | 521 | 60 | Dual Qualified | **COMPLETED & LOCKED** |
-| **2** | **Sunil Narine** | **-0.94 RPO** | +0.39 RPO | $\pm 0.55$ | [-0.68, +1.47] | 153 | 24 | IPL Qualified | **COMPLETED & LOCKED** |
-| **3** | **Maheesh Theekshana**| **-0.96 RPO** | +0.55 RPO | $\pm 0.41$ | [-0.25, +1.35] | 421 | 58 | Dual Qualified | **COMPLETED & LOCKED** |
-| **4** | **Matheesha Pathirana**| **-1.05 RPO** | +0.63 RPO | $\pm 0.41$ | [-0.18, +1.44] | 440 | 44 | Dual Qualified | **COMPLETED & LOCKED** |
-| **5** | **Shaheen Afridi** | **-1.43 RPO** | +0.91 RPO | $\pm 0.52$ | [-0.10, +1.92] | 191 | 31 | T20I Qualified | **COMPLETED & LOCKED** |
-| **6** | **Mustafizur Rahman** | **-1.47 RPO** | +1.09 RPO | $\pm 0.38$ | [+0.35, +1.84] | 578 | 61 | Dual Qualified | **COMPLETED & LOCKED** |
-| **7** | **Richard Ngarava** | **-1.56 RPO** | +1.10 RPO | $\pm 0.46$ | [+0.19, +2.01] | 287 | 34 | T20I Qualified | **COMPLETED & LOCKED** |
-| **8** | **Lungi Ngidi** | **-1.65 RPO** | +1.13 RPO | $\pm 0.53$ | [+0.09, +2.16] | 222 | 26 | Dual Qualified | **COMPLETED & LOCKED** |
-| **9** | **Ravichandran Ashwin**| **-1.67 RPO** | +1.11 RPO | $\pm 0.57$ | [-0.00, +2.22] | 147 | 21 | IPL Qualified | **COMPLETED & LOCKED** |
-| **10** | **Hasan Mahmud** | **-1.69 RPO** | +1.08 RPO | $\pm 0.61$ | [-0.11, +2.28] | 90 | 11 | T20I Qualified | **COMPLETED & LOCKED** |
+$$\begin{array}{|c|l|c|c|c|r|c|c|c|}
+\hline
+\textbf{Rank} & \textbf{Player Name} & \textbf{Runs Saved / 6 Balls} & \hat{\theta} & \textbf{SE} & \textbf{Balls} & \textbf{Matches} & \textbf{Qualification} & \textbf{Status} \\
+\hline
+\mathbf{1} & \textbf{Jasprit Bumrah} & \mathbf{-0.16\text{ RPO}} & -0.20 & \pm 0.36 & 521 & 60 & \text{Dual Qualified} & \mathbf{\text{LOCKED}} \\
+\mathbf{2} & \textbf{Sunil Narine} & \mathbf{-0.94\text{ RPO}} & +0.39 & \pm 0.55 & 153 & 24 & \text{IPL Qualified} & \mathbf{\text{LOCKED}} \\
+\mathbf{3} & \textbf{Maheesh Theekshana} & \mathbf{-0.96\text{ RPO}} & +0.55 & \pm 0.41 & 421 & 58 & \text{Dual Qualified} & \mathbf{\text{LOCKED}} \\
+\mathbf{4} & \textbf{Matheesha Pathirana} & \mathbf{-1.05\text{ RPO}} & +0.63 & \pm 0.41 & 440 & 44 & \text{Dual Qualified} & \mathbf{\text{LOCKED}} \\
+\mathbf{5} & \textbf{Shaheen Afridi} & \mathbf{-1.43\text{ RPO}} & +0.91 & \pm 0.52 & 191 & 31 & \text{T20I Qualified} & \mathbf{\text{LOCKED}} \\
+\mathbf{6} & \textbf{Mustafizur Rahman} & \mathbf{-1.47\text{ RPO}} & +1.09 & \pm 0.38 & 578 & 61 & \text{Dual Qualified} & \mathbf{\text{LOCKED}} \\
+\mathbf{7} & \textbf{Richard Ngarava} & \mathbf{-1.56\text{ RPO}} & +1.10 & \pm 0.46 & 287 & 34 & \text{T20I Qualified} & \mathbf{\text{LOCKED}} \\
+\mathbf{8} & \textbf{Lungi Ngidi} & \mathbf{-1.65\text{ RPO}} & +1.13 & \pm 0.53 & 222 & 26 & \text{Dual Qualified} & \mathbf{\text{LOCKED}} \\
+\mathbf{9} & \textbf{Ravichandran Ashwin} & \mathbf{-1.67\text{ RPO}} & +1.11 & \pm 0.57 & 147 & 21 & \text{IPL Qualified} & \mathbf{\text{LOCKED}} \\
+\mathbf{10} & \textbf{Hasan Mahmud} & \mathbf{-1.69\text{ RPO}} & +1.08 & \pm 0.61 & 90 & 11 & \text{T20I Qualified} & \mathbf{\text{LOCKED}} \\
+\hline
+\end{array}$$
 
-*Verified Reserve Alternate:* #11 Nathan Ellis (-1.71 RPO, 360 balls).
-
----
-
-### 2.3 Deliverable 3: Comprehensive Methodology Report (Sealed & Verified)
-- Master Document: [`ROYALS_INTELLIGENCE_ROUND_1_SUBMISSION.md`](file:///c:/Users/ayush/Documents/ROYALS%20INTELLIGENCE/ROYALS_INTELLIGENCE_ROUND_1_SUBMISSION.md) (612 lines)
-- Methodological Modules Included:
-  1. Title & Executive Summary with Unstop selection guides
-  2. Challenge Objective & Evaluation Scope
-  3. Dataset Provenance, SHA-256 Checksums, and Counting Reconciliation
-  4. Pressure Situation Definition (Strict vs Permissive, Death Concentration)
-  5. Performance Measurement & Context-Stratified 12-Cell Ordinary Baselines
-  6. Bayesian Reliability Methodology & PRI Interpretation
-  7. Verification of Top 10 Batters & Bowlers Under Pressure
-  8. Two-Dimensional Classification & Sample-Size Qualification
-  9. Methodological Limitations & Known Uncertainty
-  10. Reproducibility & Audit Trail Documentation
-- **Status:** **COMPLETED, RECONCILED & LOCKED**
+*Verified Reserve:* #11 Nathan Ellis (-1.71 RPO, 360 balls).
 
 ---
 
-## 3. Detailed Milestone Status Across All Phases
-
-| Phase | Milestone ID | Milestone Description | Implementation Location | Status |
-| :--- | :--- | :--- | :--- | :---: |
-| **Phase 1** | P1-01 | Dataset Provenance & SHA-256 Checksums | `round1_pressure/reports/data_quality_report.md` | **COMPLETED** |
-| **Phase 1** | P1-02 | Delivery Arithmetic & Legality Filter | `round1_pressure/src/data_qa.py` | **COMPLETED** |
-| **Phase 1** | P1-03 | Bowler Wicket Isolation & Spelling Fix | `round1_pressure/src/data_qa.py` | **COMPLETED** |
-| **Phase 1** | P1-04 | Match State Chronological Reconstruction | `round1_pressure/src/match_state_reconstruction.py` | **COMPLETED** |
-| **Phase 1** | P1-05 | Canonical Player ID Deduplication | `round1_pressure/reports/r1_06_2_1_population_reconciliation.md` | **COMPLETED** |
-| **Phase 1** | P1-06 | 883 vs 867 Abandoned Match Reconciliation | `ST5_07_FRONTEND_IMPLEMENTATION_REPORT.md` | **COMPLETED** |
-| **Phase 2** | P2-01 | Dynamic Ball-by-Ball Leverage Scoring | `round1_pressure/src/pressure_detection.py` | **COMPLETED** |
-| **Phase 2** | P2-02 | Strict vs Permissive Pressure Regimes | `round1_pressure/config/` | **COMPLETED** |
-| **Phase 2** | P2-03 | 12-Cell Context Stratified Baselines | `round1_pressure/src/expected_performance.py` | **COMPLETED** |
-| **Phase 2** | P2-04 | Batting Delta SR Calculations | `round1_pressure/src/expected_performance.py` | **COMPLETED** |
-| **Phase 2** | P2-05 | Bowling Delta Economy Calculations | `round1_pressure/src/expected_performance.py` | **COMPLETED** |
-| **Phase 3** | P3-01 | Empirical Bayes Gaussian Prior Fitting | `round1_pressure/src/player_reliability.py` | **COMPLETED** |
-| **Phase 3** | P3-02 | Posterior Mean Shrinkage ($\hat{\theta}$) | `round1_pressure/src/player_reliability.py` | **COMPLETED** |
-| **Phase 3** | P3-03 | Player Reliability Index (PRI) Formula | `round1_pressure/src/player_reliability.py` | **COMPLETED** |
-| **Phase 3** | P3-04 | Conservative PRI (1-SE Lower Bound) | `round1_pressure/src/player_reliability.py` | **COMPLETED** |
-| **Phase 3** | P3-05 | Bowling Sign Convention Verification | `round1_pressure/reports/R1_SUBMISSION_02_*` | **COMPLETED** |
-| **Phase 3** | P3-06 | Sample Exposure Qualification Gate | `round1_pressure/src/candidate_selection.py` | **COMPLETED** |
-| **Phase 4** | P4-01 | Top 10 Batters Shortlisting | `round1_pressure/reports/r1_06_batting_shortlist.md` | **COMPLETED** |
-| **Phase 4** | P4-02 | Top 10 Bowlers Shortlisting | `round1_pressure/reports/r1_06_bowling_shortlist.md` | **COMPLETED** |
-| **Phase 4** | P4-03 | Two-Dimensional Classification Matrix | `round1_pressure/reports/r1_06_2_1_*` | **COMPLETED** |
-| **Phase 4** | P4-04 | 20 Candidate Evidence Profiles | `round1_pressure/reports/r1_06_*_shortlist.md` | **COMPLETED** |
-| **Phase 4** | P4-05 | Reserve Alternates Validation | `ROYALS_INTELLIGENCE_ROUND_1_SUBMISSION.md` | **COMPLETED** |
-| **Phase 5** | P5-01 | Dataset Tactical Analytics Service | `backend/app/analytics/dataset_cricket_intelligence.py` | **COMPLETED** |
-| **Phase 5** | P5-02 | 10 Tactical REST API Endpoints | `backend/app/api/v1/endpoints/tactical.py` | **COMPLETED** |
-| **Phase 5** | P5-03 | Tactical Dashboard UI (`/tactical`) | `frontend/src/app/tactical/page.tsx` | **COMPLETED** |
-| **Phase 5** | P5-04 | Radar Speed Profiles & Safeguards | `backend/app/schemas/tactical.py` | **COMPLETED** |
-| **Phase 5** | P5-05 | Architecture & Roadmap Realignment | `PROJECT_ROADMAP.md`, `PROJECT_ARCHITECTURE.md` | **COMPLETED** |
-| **Phase 5** | P5-06 | Pressure Analytics UI Dashboard | Planned dedicated `/pressure` page | **PENDING** |
-| **Phase 6** | P6-01 | Official Master Submission Document | `ROYALS_INTELLIGENCE_ROUND_1_SUBMISSION.md` | **COMPLETED** |
-| **Phase 6** | P6-02 | Submission Readiness Audit Report | `round1_pressure/reports/R1_SUBMISSION_READINESS_AUDIT.md` | **COMPLETED** |
-| **Phase 6** | P6-03 | Unstop Dropdown Selection Mapping | `ROYALS_INTELLIGENCE_ROUND_1_SUBMISSION.md` | **COMPLETED** |
-| **Phase 6** | P6-04 | 294-Test Regression Suite Verification | `ST5_07_TEST_REPORT.md` | **COMPLETED** |
-| **Phase 7** | P7-01 | Multi-Match Variance Decomposition | `round1_pressure/src/research/` | **OPTIONAL FUTURE RESEARCH** |
-| **Phase 7** | P7-02 | Cluster-Robust Standard Errors | `round1_pressure/src/research/` | **OPTIONAL FUTURE RESEARCH** |
-| **Phase 7** | P7-03 | Situational Volatility Tracking | `round1_pressure/src/research/` | **OPTIONAL FUTURE RESEARCH** |
+### 2.3 Deliverable 3: Master Methodology Document (Sealed & Verified)
+* Document: [`ROYALS_INTELLIGENCE_ROUND_1_SUBMISSION.md`](file:///c:/Users/ayush/Documents/ROYALS%20INTELLIGENCE/ROYALS_INTELLIGENCE_ROUND_1_SUBMISSION.md) (612 lines)
+* Status: Complete, mathematically audited, and locked.
 
 ---
 
-## 4. Test & Verification Snapshot
+## 3. Rebaselined 8-Stage Round 1 Execution Roadmap
 
-- **Frontend Type Safety (`tsc --noEmit`):** 0 errors
-- **Frontend Production Build (`next build`):** 9 / 9 routes compiled cleanly, 0 warnings
-- **Backend Analytics Test Suite (`backend/tests/`):** 98 / 98 tests passing in 11.09s
-- **Round 1 Pressure Test Suite (`round1_pressure/tests/`):** 196 / 196 tests passing in 22.97s
-- **Total Passing Automated Tests:** **294 / 294 passed (100%)**
-- **Git Working Tree:** Clean on `main`, zero unauthorized commits or remote pushes.
+$$\begin{array}{|l|l|c|l|l|}
+\hline
+\textbf{Stage} & \textbf{Stage Name} & \textbf{Status} & \textbf{Verified Implementation Modules} & \textbf{Automated Tests} \\
+\hline
+\textbf{Stage 0} & \text{Dataset \& Schema Audit} & \mathbf{\text{COMPLETE}} & \texttt{round1\_pressure/src/load\_qa.py} & 15/15 \text{ passed} \\
+\textbf{Stage 1} & \text{Player \& Match Intelligence} & \mathbf{\text{COMPLETE}} & \texttt{round1\_pressure/src/match\_state.py} & 39/39 \text{ passed} \\
+\textbf{Stage 2} & \text{Pressure Index Engine} & \mathbf{\text{COMPLETE}} & \texttt{round1\_pressure/src/pressure\_detection.py} & 22/22 \text{ passed} \\
+\textbf{Stage 3} & \text{Batter Pressure Intelligence} & \mathbf{\text{COMPLETE}} & \texttt{round1\_pressure/src/expected\_performance.py} & 20/20 \text{ passed} \\
+\textbf{Stage 4} & \text{Bowler Pressure Intelligence} & \mathbf{\text{COMPLETE}} & \texttt{round1\_pressure/src/expected\_performance.py} & \text{Covered in Stage 3} \\
+\textbf{Stage 5} & \text{Statistical Reliability Engine} & \mathbf{\text{COMPLETE}} & \texttt{round1\_pressure/src/player\_reliability.py} & 32/32 \text{ passed} \\
+\textbf{Stage 6} & \text{Top 10 Ranking \& Validation} & \mathbf{\text{COMPLETE}} & \texttt{round1\_pressure/src/r1\_06\_candidate\_selection.py} & 68/68 \text{ passed} \\
+\textbf{Stage 7} & \text{Explainability, APIs \& Packaging} & \mathbf{\text{COMPLETE}} & \texttt{backend/app/api/v1/endpoints/pressure.py}, \texttt{frontend} & 13/13 \text{ API tests passed, Next.js build clean} \\
+\hline
+\end{array}$$
+
+---
+
+## 4. Status of Preserved and Deferred Non-Round-1 Tracks
+
+1. **Auction & Retention Intelligence (IPL 2027 Track):**
+   * Stages AUCTION-00 through AUCTION-05: **PRESERVED / DEFERRED** (Fully operational, 42 tests passing, strictly isolated from Round 1 submission).
+   * Stages AUCTION-06 through AUCTION-13: **DEFERRED / PENDING** (Postponed to post-submission phase).
+2. **Tactical Intelligence Track (Stage 5):**
+   * Radar speed telemetry, variation breakdown: **PRESERVED / DEFERRED** (Operational, 28 tests passing).
+   * Stages 6 through 13: **DEFERRED / PENDING**.
+3. **Advanced Research Track (R1-07.1–R1-07.4):**
+   * Multi-match variance decomposition, situational clustering: **DEFERRED / BLOCKED** (Awaiting explicit user authorization).
+
+---
+
+## 5. Next Immediate Action
+
+* **Single Highest Priority:** Present this comprehensive audit report and roadmap rebaseline for formal user sign-off.

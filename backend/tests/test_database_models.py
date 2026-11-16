@@ -228,7 +228,9 @@ async def test_ball_by_ball_delivery_persistence(async_test_session: AsyncSessio
 def test_migration_file_structure():
     """Validates Alembic migration file presence and upgrade/downgrade symbols."""
     import importlib.util
-    spec = importlib.util.spec_from_file_location("mig", "backend/alembic/versions/001_uncapped_player_foundation.py")
+    from pathlib import Path
+    mig_path = Path(__file__).resolve().parent.parent / "alembic" / "versions" / "001_uncapped_player_foundation.py"
+    spec = importlib.util.spec_from_file_location("mig", str(mig_path))
     mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mod)
 
