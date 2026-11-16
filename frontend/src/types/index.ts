@@ -707,3 +707,390 @@ export interface UncappedPlayerVenuePerformanceResponse {
   sample_size_warning?: string;
   role_archetype: string;
 }
+
+// ===========================================================================
+// STAGE 5: TACTICAL CRICKET INTELLIGENCE API CONTRACTS
+// ===========================================================================
+
+export interface TacticalDatasetSummaryResponse {
+  total_deliveries: number;
+  legal_deliveries: number;
+  total_matches_with_deliveries: number;
+  total_unique_strikers: number;
+  total_unique_bowlers: number;
+  total_runs_off_bat: number;
+  total_wickets_fallen: number;
+  total_bowler_wickets: number;
+  overall_run_rate_per_6_balls: number;
+  valid_radar_speed_records: number;
+  data_provenance: string;
+  generated_at: string;
+}
+
+export interface TacticalPhaseSplitItem {
+  phase: string;
+  total_balls: number;
+  legal_balls: number;
+  runs: number;
+  wickets: number;
+  strike_rate?: number | null;
+  economy_rate?: number | null;
+  average?: number | null;
+  dot_ball_percentage: number;
+  boundary_percentage: number;
+  balls_per_wicket?: number | null;
+}
+
+export interface TacticalPhaseResponse {
+  striker_id?: number | null;
+  striker_name?: string | null;
+  bowler_id?: number | null;
+  bowler_name?: string | null;
+  phases: Record<string, TacticalPhaseSplitItem>;
+  data_provenance: string;
+}
+
+export interface TacticalStrokeItem {
+  stroke: string;
+  deliveries_faced: number;
+  runs_scored: number;
+  dismissals: number;
+  runs_per_shot: number;
+  dismissal_rate_pct: number;
+  boundary_pct: number;
+}
+
+export interface TacticalStrokesResponse {
+  striker_id?: number | null;
+  striker_name?: string | null;
+  total_strokes_analyzed: number;
+  strokes: TacticalStrokeItem[];
+  data_provenance: string;
+}
+
+export interface HandednessSplitItem {
+  batting_type: string;
+  pace_or_spin: string;
+  balls_faced: number;
+  runs_scored: number;
+  wickets: number;
+  strike_rate: number;
+  economy_rate: number;
+  bowling_average?: number | null;
+  boundary_pct: number;
+  dot_pct: number;
+}
+
+export interface HandednessMatrixResponse {
+  striker_id?: number | null;
+  striker_name?: string | null;
+  bowler_id?: number | null;
+  bowler_name?: string | null;
+  matrix: HandednessSplitItem[];
+  data_provenance: string;
+}
+
+export interface DeliveryStyleItem {
+  delivery_style: string;
+  deliveries_bowled: number;
+  runs_conceded: number;
+  wickets: number;
+  dot_balls: number;
+  economy_rate: number;
+  bowling_average?: number | null;
+  dot_ball_pct: number;
+}
+
+export interface DeliveryStylesResponse {
+  bowler_id?: number | null;
+  bowler_name?: string | null;
+  total_styles_analyzed: number;
+  styles: DeliveryStyleItem[];
+  data_provenance: string;
+}
+
+export interface SpeedBrackets {
+  slow_under_110: number;
+  medium_110_to_125: number;
+  fast_medium_125_to_140: number;
+  express_over_140: number;
+}
+
+export interface FastestBowlerItem {
+  bowler_id: number;
+  bowler_name: string;
+  valid_deliveries: number;
+  mean_speed_kmh: number;
+  max_speed_kmh: number;
+  express_balls_count: number;
+}
+
+export interface SpeedProfileResponse {
+  bowler_id?: number | null;
+  bowler_name?: string | null;
+  total_deliveries?: number | null;
+  overall_valid_speed_deliveries?: number | null;
+  valid_speed_deliveries?: number | null;
+  speed_coverage_pct: number;
+  mean_speed_kmh?: number | null;
+  median_speed_kmh?: number | null;
+  min_speed_kmh?: number | null;
+  max_speed_kmh?: number | null;
+  std_speed_kmh?: number | null;
+  speed_brackets?: SpeedBrackets | null;
+  top_fastest_bowlers?: FastestBowlerItem[] | null;
+  sensor_safeguards_applied: boolean;
+  data_quality_note: string;
+  data_provenance: string;
+}
+
+export interface PlayerTacticalProfileResponse {
+  player_id: number;
+  player_name: string;
+  is_batter: boolean;
+  is_bowler: boolean;
+  batting_profile?: {
+    total_runs: number;
+    balls_faced: number;
+    strike_rate: number;
+    fours: number;
+    sixes: number;
+    boundary_pct: number;
+    dot_ball_pct: number;
+    phase_splits: Record<string, TacticalPhaseSplitItem>;
+    top_strokes: TacticalStrokeItem[];
+    handedness_splits: HandednessSplitItem[];
+  } | null;
+  bowling_profile?: {
+    total_wickets: number;
+    legal_balls: number;
+    runs_conceded: number;
+    economy_rate: number;
+    bowling_average?: number | null;
+    dot_ball_pct: number;
+    phase_splits: Record<string, TacticalPhaseSplitItem>;
+    top_variations: DeliveryStyleItem[];
+    speed_profile: SpeedProfileResponse;
+  } | null;
+  data_provenance: string;
+}
+
+export interface DeathOverPerformerBattingItem {
+  striker_id: number;
+  striker_name: string;
+  runs: number;
+  balls: number;
+  fours: number;
+  sixes: number;
+  strike_rate: number;
+  boundary_pct: number;
+  dot_pct: number;
+}
+
+export interface DeathOverPerformerBowlingItem {
+  bowler_id: number;
+  bowler_name: string;
+  bowling_type: string;
+  legal_balls: number;
+  runs: number;
+  wickets: number;
+  economy: number;
+  average?: number | null;
+  dot_pct: number;
+}
+
+export interface DeathOversRankingResponse {
+  discipline: string;
+  min_balls_threshold: number;
+  batting_finishers?: DeathOverPerformerBattingItem[] | null;
+  bowling_containment?: DeathOverPerformerBowlingItem[] | null;
+  data_provenance: string;
+}
+
+export interface HeadToHeadMatchupResponse {
+  striker_id: number;
+  striker_name: string;
+  bowler_id: number;
+  bowler_name: string;
+  balls_faced: number;
+  legal_balls: number;
+  runs_scored: number;
+  dismissals: number;
+  fours: number;
+  sixes: number;
+  dot_balls: number;
+  strike_rate: number;
+  dot_ball_pct: number;
+  boundary_pct: number;
+  data_provenance: string;
+}
+
+export interface PlayerLookupItem {
+  player_id: number;
+  player_name: string;
+  is_batter: boolean;
+  is_bowler: boolean;
+  total_deliveries: number;
+}
+
+// ===========================================================================
+// STAGE 5 / ROUND 1: PRESSURE ANALYTICS & RELIABILITY API CONTRACTS
+// ===========================================================================
+
+export interface PressureOverviewResponse {
+  challenge_title: string;
+  governing_dataset: string;
+  total_deliveries: number;
+  legal_deliveries: number;
+  matches_with_deliveries: number;
+  reconciled_abandoned_matches: number;
+  total_competitions: number;
+  strict_pressure_bowling_balls: number;
+  strict_pressure_batting_balls: number;
+  permissive_pressure_bowling_balls: number;
+  permissive_pressure_batting_balls: number;
+  death_overs_bowling_pressure_share_pct: number;
+  death_overs_batting_pressure_share_pct: number;
+  total_evaluated_batters: number;
+  total_evaluated_bowlers: number;
+  sample_qualification_threshold: string;
+  governing_ranking_methodology: string;
+  data_provenance: string;
+}
+
+export interface PressureLeaderboardBattingItem {
+  rank: number;
+  player_id: number;
+  player_name: string;
+  discipline: string;
+  is_qualified: boolean;
+  qualification_status: string;
+  conservative_pri: number;
+  posterior_mean: number;
+  posterior_se: number;
+  ci_95_lower: number;
+  ci_95_upper: number;
+  ci_95_width: number;
+  shrinkage_weight: number;
+  prob_exceed_baseline: number;
+  prob_exceed_league_mean: number;
+  observed_strike_rate: number;
+  expected_strike_rate: number;
+  diff_strike_rate: number;
+  observed_boundary_pct: number;
+  diff_boundary_pct: number;
+  observed_dot_pct: number;
+  diff_dot_pct: number;
+  observed_dismissal_pct: number;
+  diff_dismissal_pct: number;
+  pressure_legal_balls: number;
+  pressure_matches: number;
+  pressure_seasons: number;
+  ipl_legal_balls: number;
+  t20i_legal_balls: number;
+  competition_qualification: string;
+  uncertainty_level: string;
+  evidence_volume_tier: string;
+  evidence_classification: string;
+  two_dimensional_classification: string;
+  explainability_summary: string;
+}
+
+export interface PressureLeaderboardBowlingItem {
+  rank: number;
+  player_id: number;
+  player_name: string;
+  discipline: string;
+  is_qualified: boolean;
+  qualification_status: string;
+  conservative_runs_saved: number;
+  posterior_mean: number;
+  posterior_se: number;
+  ci_95_lower: number;
+  ci_95_upper: number;
+  ci_95_width: number;
+  shrinkage_weight: number;
+  prob_exceed_baseline: number;
+  prob_exceed_league_mean: number;
+  observed_economy: number;
+  expected_economy: number;
+  diff_economy: number;
+  observed_wicket_pct: number;
+  diff_wicket_pct: number;
+  observed_dot_pct: number;
+  diff_dot_pct: number;
+  observed_boundary_pct: number;
+  diff_boundary_pct: number;
+  pressure_legal_balls: number;
+  pressure_matches: number;
+  pressure_seasons: number;
+  ipl_legal_balls: number;
+  t20i_legal_balls: number;
+  competition_qualification: string;
+  uncertainty_level: string;
+  evidence_volume_tier: string;
+  evidence_classification: string;
+  two_dimensional_classification: string;
+  explainability_summary: string;
+}
+
+export interface PressureLeaderboardResponse {
+  discipline_filter: string;
+  qualified_only: boolean;
+  batting_count: number;
+  bowling_count: number;
+  batting_leaderboard?: PressureLeaderboardBattingItem[] | null;
+  bowling_leaderboard?: PressureLeaderboardBowlingItem[] | null;
+  data_provenance: string;
+}
+
+export interface CandidateEvidenceQuestions {
+  q1_why_considered: string;
+  q2_pressure_deliveries: string;
+  q3_matches_and_seasons: string;
+  q4_observed_performance: string;
+  q5_expected_performance: string;
+  q6_conservative_diagnostic: string;
+  q7_posterior_uncertainty: string;
+  q8_credible_interval: string;
+  q9_competition_support: string;
+  q10_major_limitations: string;
+  q11_sensitivity_to_assumptions: string;
+}
+
+export interface CandidateEvidenceProfileResponse {
+  player_id: number;
+  player_name: string;
+  discipline: string;
+  rank: number;
+  governing_metric_name: string;
+  governing_metric_value: number;
+  posterior_mean: number;
+  posterior_se: number;
+  ci_95_lower: number;
+  ci_95_upper: number;
+  ci_95_width: number;
+  shrinkage_weight: number;
+  pressure_legal_balls: number;
+  pressure_matches: number;
+  ipl_legal_balls: number;
+  t20i_legal_balls: number;
+  competition_qualification: string;
+  two_dimensional_classification: string;
+  evidence_classification: string;
+  uncertainty_level: string;
+  evidence_questions: CandidateEvidenceQuestions;
+  data_provenance: string;
+}
+
+export interface PressureMethodologyResponse {
+  challenge_objective: string;
+  pressure_definition: Record<string, any>;
+  baseline_strata_12_cell: string[];
+  bayesian_shrinkage_formulation: Record<string, string>;
+  conservative_pri_formula: Record<string, string>;
+  qualification_criteria: Record<string, any>;
+  limitations: string[];
+  data_provenance: string;
+}
+

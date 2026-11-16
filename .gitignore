@@ -71,6 +71,9 @@ data/raw/**/*
 data/processed/**/*
 !data/processed/**/.gitkeep
 !data/processed/**/
+data/validation/**/*
+!data/validation/**/.gitkeep
+!data/validation/**/
 data/external/**/*
 !data/external/**/.gitkeep
 !data/external/**/

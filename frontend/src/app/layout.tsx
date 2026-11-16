@@ -6,7 +6,7 @@ import { Header } from "@/components/layout/Header";
 export const metadata: Metadata = {
   title: "Royals Intelligence | Rajasthan Royals Analytics",
   description:
-    "Rajasthan Royals Cricket Intelligence, Performance Analytics, Talent Scouting and IPL 2027 Auction Decision Support Platform.",
+    "Rajasthan Royals Cricket Intelligence & Dynamic Pressure Analytics Engine — SupeRR Selector Season 2 Round 1.",
 };
 
 export default function RootLayout({

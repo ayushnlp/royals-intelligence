@@ -13,12 +13,17 @@ from app.api.v1.endpoints import (
     domestic,
     venues,
     weather,
+    tactical,
+    pressure,
 )
 
 api_router = APIRouter()
 
 # Health and diagnostic routes
 api_router.include_router(health.router, tags=["Health & Diagnostics"])
+
+# Round 1 Pressure Analytics routes (SupeRR Selector Challenge)
+api_router.include_router(pressure.router, prefix="/analytics/pressure", tags=["Round 1 Pressure Analytics"])
 
 # Data Acquisition Engine routes
 api_router.include_router(acquisition.router, prefix="/acquisition", tags=["Data Acquisition"])
@@ -28,6 +33,9 @@ api_router.include_router(players.router, prefix="/players", tags=["Uncapped Pla
 
 # Analytics Foundation routes (Stage 2)
 api_router.include_router(analytics.router, prefix="/analytics", tags=["Analytics Foundation"])
+
+# Tactical Cricket Intelligence routes (Stage 5)
+api_router.include_router(tactical.router, prefix="/analytics/tactical", tags=["Tactical Cricket Intelligence"])
 
 # RR Proprietary Data Pack & Scouting routes (Stage 2)
 api_router.include_router(proprietary.router, prefix="/proprietary", tags=["RR Proprietary Scouting"])

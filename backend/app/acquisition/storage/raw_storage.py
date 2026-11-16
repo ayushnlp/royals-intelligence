@@ -72,6 +72,21 @@ class RawStorageManager:
             )
             return metadata, False
 
+        # Check existing files in destination directory for identical content
+        for existing_file in dest_dir.iterdir():
+            if existing_file.is_file() and existing_file.name.startswith(source_path.stem):
+                if self.calculate_sha256(existing_file) == checksum:
+                    logger.info(f"Identical file already exists at {existing_file}. Idempotent skip.")
+                    metadata = FileArtifactMetadata(
+                        file_path=str(existing_file),
+                        file_name=existing_file.name,
+                        file_format=suffix,  # type: ignore
+                        file_size_bytes=file_size,
+                        checksum_sha256=checksum,
+                        created_at=datetime.now(timezone.utc),
+                    )
+                    return metadata, False
+
         # Generate immutable filename if not specified
         if not target_filename:
             timestamp_str = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")

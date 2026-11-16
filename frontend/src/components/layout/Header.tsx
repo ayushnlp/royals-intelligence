@@ -34,11 +34,11 @@ export const Header: React.FC = () => {
           </span>
           <span className="text-slate-300">/</span>
           <h2 className="text-sm font-bold text-[#101C37]">
-            Platform Overview & Architecture Initialization
+            Official Round 1 Intelligence Platform
           </h2>
         </div>
         <span className="hidden sm:inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-mono font-semibold bg-pink-50 text-[#E91E8F] border border-pink-200">
-          STAGE 0
+          ROUND 1
         </span>
       </div>
 

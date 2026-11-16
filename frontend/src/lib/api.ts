@@ -16,6 +16,20 @@ import {
   MatchWeatherContextResponse,
   WeatherSourceStatusResponse,
   UncappedPlayerVenuePerformanceResponse,
+  TacticalDatasetSummaryResponse,
+  TacticalPhaseResponse,
+  TacticalStrokesResponse,
+  HandednessMatrixResponse,
+  DeliveryStylesResponse,
+  SpeedProfileResponse,
+  PlayerTacticalProfileResponse,
+  DeathOversRankingResponse,
+  HeadToHeadMatchupResponse,
+  PlayerLookupItem,
+  PressureOverviewResponse,
+  PressureLeaderboardResponse,
+  CandidateEvidenceProfileResponse,
+  PressureMethodologyResponse,
 } from "@/types";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
@@ -477,3 +491,249 @@ export async function fetchWeatherSourceStatus(): Promise<WeatherSourceStatusRes
     return null;
   }
 }
+
+// ============================================================================
+// Stage 5: Dataset-Driven Tactical Cricket Intelligence API
+// ============================================================================
+
+export async function fetchTacticalSummary(): Promise<TacticalDatasetSummaryResponse | null> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/analytics/tactical/summary`, { cache: "no-store" });
+    if (!res.ok) throw new Error("Failed to fetch tactical dataset summary");
+    return await res.json();
+  } catch (e) {
+    return null;
+  }
+}
+
+export async function fetchTacticalPhases(params?: {
+  striker_id?: number;
+  bowler_id?: number;
+  phase?: string;
+}): Promise<TacticalPhaseResponse | null> {
+  try {
+    const query = new URLSearchParams();
+    if (params?.striker_id !== undefined) query.set("striker_id", params.striker_id.toString());
+    if (params?.bowler_id !== undefined) query.set("bowler_id", params.bowler_id.toString());
+    if (params?.phase) query.set("phase", params.phase);
+
+    const queryString = query.toString();
+    const url = `${API_BASE_URL}/analytics/tactical/phases${queryString ? `?${queryString}` : ""}`;
+    const res = await fetch(url, { cache: "no-store" });
+    if (!res.ok) throw new Error("Failed to fetch phase performance");
+    return await res.json();
+  } catch (e) {
+    return null;
+  }
+}
+
+export async function fetchTacticalStrokes(params?: {
+  striker_id?: number;
+  stroke?: string;
+  min_balls?: number;
+}): Promise<TacticalStrokesResponse | null> {
+  try {
+    const query = new URLSearchParams();
+    if (params?.striker_id !== undefined) query.set("striker_id", params.striker_id.toString());
+    if (params?.stroke) query.set("stroke", params.stroke);
+    if (params?.min_balls !== undefined) query.set("min_balls", params.min_balls.toString());
+
+    const queryString = query.toString();
+    const url = `${API_BASE_URL}/analytics/tactical/strokes${queryString ? `?${queryString}` : ""}`;
+    const res = await fetch(url, { cache: "no-store" });
+    if (!res.ok) throw new Error("Failed to fetch stroke efficiency");
+    return await res.json();
+  } catch (e) {
+    return null;
+  }
+}
+
+export async function fetchTacticalHandedness(params?: {
+  batting_type?: string;
+  pace_or_spin?: string;
+  striker_id?: number;
+  bowler_id?: number;
+}): Promise<HandednessMatrixResponse | null> {
+  try {
+    const query = new URLSearchParams();
+    if (params?.batting_type) query.set("batting_type", params.batting_type);
+    if (params?.pace_or_spin) query.set("pace_or_spin", params.pace_or_spin);
+    if (params?.striker_id !== undefined) query.set("striker_id", params.striker_id.toString());
+    if (params?.bowler_id !== undefined) query.set("bowler_id", params.bowler_id.toString());
+
+    const queryString = query.toString();
+    const url = `${API_BASE_URL}/analytics/tactical/handedness${queryString ? `?${queryString}` : ""}`;
+    const res = await fetch(url, { cache: "no-store" });
+    if (!res.ok) throw new Error("Failed to fetch handedness matrix");
+    return await res.json();
+  } catch (e) {
+    return null;
+  }
+}
+
+export async function fetchTacticalVariations(params?: {
+  bowler_id?: number;
+  delivery_style?: string;
+  min_balls?: number;
+}): Promise<DeliveryStylesResponse | null> {
+  try {
+    const query = new URLSearchParams();
+    if (params?.bowler_id !== undefined) query.set("bowler_id", params.bowler_id.toString());
+    if (params?.delivery_style) query.set("delivery_style", params.delivery_style);
+    if (params?.min_balls !== undefined) query.set("min_balls", params.min_balls.toString());
+
+    const queryString = query.toString();
+    const url = `${API_BASE_URL}/analytics/tactical/variations${queryString ? `?${queryString}` : ""}`;
+    const res = await fetch(url, { cache: "no-store" });
+    if (!res.ok) throw new Error("Failed to fetch delivery variations");
+    return await res.json();
+  } catch (e) {
+    return null;
+  }
+}
+
+export async function fetchTacticalSpeedProfiles(params?: {
+  bowler_id?: number;
+  min_balls?: number;
+  top_n?: number;
+}): Promise<SpeedProfileResponse | null> {
+  try {
+    const query = new URLSearchParams();
+    if (params?.bowler_id !== undefined) query.set("bowler_id", params.bowler_id.toString());
+    if (params?.min_balls !== undefined) query.set("min_balls", params.min_balls.toString());
+    if (params?.top_n !== undefined) query.set("top_n", params.top_n.toString());
+
+    const queryString = query.toString();
+    const url = `${API_BASE_URL}/analytics/tactical/speed-profiles${queryString ? `?${queryString}` : ""}`;
+    const res = await fetch(url, { cache: "no-store" });
+    if (!res.ok) throw new Error("Failed to fetch speed profiles");
+    return await res.json();
+  } catch (e) {
+    return null;
+  }
+}
+
+export async function fetchPlayerTacticalProfile(playerId: number): Promise<PlayerTacticalProfileResponse | null> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/analytics/tactical/players/${playerId}`, { cache: "no-store" });
+    if (!res.ok) throw new Error(`Failed to fetch tactical profile for player ${playerId}`);
+    return await res.json();
+  } catch (e) {
+    return null;
+  }
+}
+
+export async function fetchTacticalDeathOvers(params?: {
+  discipline?: string;
+  min_balls?: number;
+  limit?: number;
+}): Promise<DeathOversRankingResponse | null> {
+  try {
+    const query = new URLSearchParams();
+    if (params?.discipline) query.set("discipline", params.discipline);
+    if (params?.min_balls !== undefined) query.set("min_balls", params.min_balls.toString());
+    if (params?.limit !== undefined) query.set("limit", params.limit.toString());
+
+    const queryString = query.toString();
+    const url = `${API_BASE_URL}/analytics/tactical/death-overs${queryString ? `?${queryString}` : ""}`;
+    const res = await fetch(url, { cache: "no-store" });
+    if (!res.ok) throw new Error("Failed to fetch death overs rankings");
+    return await res.json();
+  } catch (e) {
+    return null;
+  }
+}
+
+export async function fetchTacticalMatchup(
+  strikerId: number,
+  bowlerId: number
+): Promise<HeadToHeadMatchupResponse | null> {
+  try {
+    const res = await fetch(
+      `${API_BASE_URL}/analytics/tactical/matchups?striker_id=${strikerId}&bowler_id=${bowlerId}`,
+      { cache: "no-store" }
+    );
+    if (!res.ok) throw new Error("Failed to fetch head-to-head matchup");
+    return await res.json();
+  } catch (e) {
+    return null;
+  }
+}
+
+export async function fetchTacticalPlayers(
+  query: string = "",
+  limit: number = 25
+): Promise<PlayerLookupItem[]> {
+  try {
+    const url = `${API_BASE_URL}/analytics/tactical/players?query=${encodeURIComponent(query)}&limit=${limit}`;
+    const res = await fetch(url, { cache: "no-store" });
+    if (!res.ok) throw new Error("Failed to fetch players");
+    return await res.json();
+  } catch (e) {
+    return [];
+  }
+}
+
+// ============================================================================
+// Round 1 Pressure Analytics & Reliability API (SupeRR Selector Challenge)
+// ============================================================================
+
+export async function fetchPressureOverview(): Promise<PressureOverviewResponse | null> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/analytics/pressure/overview`, { cache: "no-store" });
+    if (!res.ok) throw new Error("Failed to fetch pressure overview");
+    return await res.json();
+  } catch (e) {
+    return null;
+  }
+}
+
+export async function fetchPressureLeaderboards(params?: {
+  discipline?: string;
+  limit?: number;
+  qualified_only?: boolean;
+}): Promise<PressureLeaderboardResponse | null> {
+  try {
+    const query = new URLSearchParams();
+    if (params?.discipline) query.set("discipline", params.discipline);
+    if (params?.limit !== undefined) query.set("limit", params.limit.toString());
+    if (params?.qualified_only !== undefined) query.set("qualified_only", params.qualified_only.toString());
+
+    const queryString = query.toString();
+    const url = `${API_BASE_URL}/analytics/pressure/leaderboards${queryString ? `?${queryString}` : ""}`;
+    const res = await fetch(url, { cache: "no-store" });
+    if (!res.ok) throw new Error("Failed to fetch pressure leaderboards");
+    return await res.json();
+  } catch (e) {
+    return null;
+  }
+}
+
+export async function fetchCandidateProfile(
+  playerId: number,
+  discipline?: string
+): Promise<CandidateEvidenceProfileResponse | null> {
+  try {
+    const query = new URLSearchParams();
+    if (discipline) query.set("discipline", discipline);
+    const queryString = query.toString();
+    const url = `${API_BASE_URL}/analytics/pressure/candidates/${playerId}${queryString ? `?${queryString}` : ""}`;
+    const res = await fetch(url, { cache: "no-store" });
+    if (!res.ok) throw new Error(`Failed to fetch candidate profile for player ${playerId}`);
+    return await res.json();
+  } catch (e) {
+    return null;
+  }
+}
+
+export async function fetchPressureMethodology(): Promise<PressureMethodologyResponse | null> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/analytics/pressure/methodology`, { cache: "no-store" });
+    if (!res.ok) throw new Error("Failed to fetch pressure methodology");
+    return await res.json();
+  } catch (e) {
+    return null;
+  }
+}
+
+
