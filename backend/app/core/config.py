@@ -65,6 +65,23 @@ class Settings(BaseSettings):
         "postgresql+asyncpg://royals_admin:royals_secure_dev_password@localhost:5432/royals_intelligence_db"
     )
 
+    @field_validator("DATABASE_URL", mode="before")
+    @classmethod
+    def assemble_database_url(cls, v: str) -> str:
+        if not v or not isinstance(v, str):
+            return v
+        # Render and standard PostgreSQL URLs often start with postgres:// or postgresql://
+        # Because we use SQLAlchemy async engine, we must ensure the asyncpg driver is specified.
+        if v.startswith("postgres://"):
+            return v.replace("postgres://", "postgresql+asyncpg://", 1)
+        elif v.startswith("postgresql://") and not v.startswith("postgresql+"):
+            return v.replace("postgresql://", "postgresql+asyncpg://", 1)
+        elif v.startswith("postgresql+psycopg2://"):
+            return v.replace("postgresql+psycopg2://", "postgresql+asyncpg://", 1)
+        elif v.startswith("postgresql+psycopg://"):
+            return v.replace("postgresql+psycopg://", "postgresql+asyncpg://", 1)
+        return v
+
     # Database Connection Pool Parameters
     DB_POOL_SIZE: int = 10
     DB_MAX_OVERFLOW: int = 20
