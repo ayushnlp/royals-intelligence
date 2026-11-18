@@ -22,10 +22,59 @@ from app.schemas.domestic_api import (
     PlayerMatchHistoryItem,
     PlayerPhaseSplitDetail,
     AllRoundContributionResponse,
+    DomesticPlayerSummary,
+    PaginatedDomesticPlayersResponse,
 )
 from app.core.logging import logger
 
 router = APIRouter()
+
+
+@router.get("/players", response_model=PaginatedDomesticPlayersResponse, summary="Dynamic Uncapped Player Discovery & Directory")
+async def list_domestic_players(
+    page: int = Query(1, ge=1, description="Page number"),
+    page_size: int = Query(20, ge=1, le=500, description="Items per page"),
+    search: Optional[str] = Query(None, description="Search by player name or key"),
+    eligibility_status: Optional[str] = Query("ALL", description="Filter by eligibility state: VERIFIED_UNCAPPED, PENDING_VERIFICATION, VERIFIED_CAPPED, ALL"),
+    role: Optional[str] = Query(None, description="Filter by role (Batter, Bowler, All-rounder, Wicketkeeper-Batter)"),
+    team: Optional[str] = Query(None, description="Filter by team or franchise"),
+    competition: Optional[str] = Query(None, description="Filter by competition"),
+    season: Optional[str] = Query(None, description="Filter by season"),
+    db: Optional[AsyncSession] = Depends(get_db),
+):
+    """
+    Discovers all eligible uncapped and domestic Indian player candidates with canonical identity,
+    audited eligibility state, match counts, and statistical coverage flags.
+    Strict Scope: Indian domestic prospects with verified uncapped or pending status.
+    """
+    items, total = await DomesticSeasonService.list_domestic_players(
+        session=db,
+        page=page,
+        page_size=page_size,
+        search=search,
+        eligibility_status=eligibility_status,
+        role=role,
+        team=team,
+        competition=competition,
+        season=season,
+    )
+    total_pages = (total + page_size - 1) // page_size if total > 0 else 1
+    return PaginatedDomesticPlayersResponse(
+        items=items,
+        total=total,
+        page=page,
+        page_size=page_size,
+        total_pages=total_pages,
+        filters_applied={
+            "search": search,
+            "eligibility_status": eligibility_status,
+            "role": role,
+            "team": team,
+            "competition": competition,
+            "season": season,
+        }
+    )
+
 
 
 @router.get("/competitions", response_model=List[CompetitionSeasonSummary], summary="Directory of Domestic Competitions & Seasons")
@@ -140,6 +189,8 @@ async def get_player_domestic_season_stats(
             player_id=player_id,
             competition_id=competition_id.lower() if competition_id else None,
         )
+    except KeyError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
     except ValueError as exc:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(exc))
 
@@ -174,6 +225,8 @@ async def get_player_match_history(
             "total_pages": (total + page_size - 1) // page_size if total > 0 else 1,
             "matches": history,
         }
+    except KeyError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
     except ValueError as exc:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(exc))
 
@@ -194,6 +247,8 @@ async def get_player_phase_splits(
             player_id=player_id,
             competition_id=competition_id.lower() if competition_id else None,
         )
+    except KeyError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
     except ValueError as exc:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(exc))
 
@@ -212,6 +267,9 @@ async def get_player_all_round_contribution(
             session=db,
             player_id=player_id,
         )
+    except KeyError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
     except ValueError as exc:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(exc))
+
 

@@ -24,6 +24,7 @@ import {
   fetchCoverage,
   fetchIngestionRuns,
   fetchDatasets,
+  uploadDataset,
 } from "@/lib/api";
 import {
   CricketDataSource,
@@ -78,16 +79,10 @@ export default function AcquisitionPage() {
     formData.append("season", "2024");
 
     try {
-      const res = await fetch("http://localhost:8000/api/v1/acquisition/upload", {
-        method: "POST",
-        body: formData,
-      });
-      const data = await res.json();
+      const data = await uploadDataset(formData);
       setUploadResult(data);
-      if (res.ok) {
-        setUploadFile(null);
-        loadAllData();
-      }
+      setUploadFile(null);
+      loadAllData();
     } catch (err: any) {
       setUploadResult({ message: err.message || "Failed to upload dataset." });
     } finally {

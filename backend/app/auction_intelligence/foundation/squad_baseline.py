@@ -14,6 +14,14 @@ from app.schemas.auction.foundation import (
     RRSquadPlayerEntry,
 )
 from app.auction_intelligence.foundation.data_ingestion import DataIngestionService
+from app.auction_intelligence.foundation.rr_squad_official_data import (
+    RR_IPL_2026_FULL_SQUAD,
+    RR_IPL_2027_RETAINED_PLAYERS,
+    RR_IPL_2027_TRADED_IN_PLAYERS,
+    RR_IPL_2027_TRADED_OUT_PLAYERS,
+    RR_IPL_2027_RELEASED_PLAYERS,
+    get_pre_auction_squad_summary,
+)
 
 # Known trade and contract governance disclaimers in the supplied data pack
 DISCLAIMERS = {
@@ -23,15 +31,21 @@ DISCLAIMERS = {
     ),
     "Ravindra Jadeja": (
         "Listed under Rajasthan Royals (RR) in ipl_players.csv (Row 173). "
-        "Historical CSK franchise stalwart; included as RR benchmark entry in data pack."
+        "Historical CSK franchise stalwart; retained by RR ahead of IPL 2027."
     ),
     "Sam Curran": (
         "Listed under Rajasthan Royals (RR) in ipl_players.csv (Row 174). "
-        "Historical PBKS franchise entry; included as RR benchmark entry in data pack."
+        "Withdrawn mid-season 2026; traded to Lucknow Super Giants for ₹2.4 crore ahead of IPL 2027."
     ),
     "Ravi Bishnoi": (
         "Appears twice in ipl_players.csv: Row 179 (RR) and Row 261 (LSG). "
-        "Single physical individual with dual-franchise historical attribution."
+        "Single physical individual with dual-franchise attribution; retained by RR ahead of IPL 2027."
+    ),
+    "Mohammed Shami": (
+        "Traded in from Lucknow Super Giants (LSG) to Rajasthan Royals for ₹8 crore ahead of IPL 2027."
+    ),
+    "Manimaran Siddharth": (
+        "Traded in from Lucknow Super Giants (LSG) to Rajasthan Royals for ₹75 lakh ahead of IPL 2027."
     ),
 }
 
@@ -89,3 +103,13 @@ class RRSquadBaselineService:
     def get_disclaimer_audit(self) -> Dict[str, str]:
         """Returns all player disclaimers for the squad baseline."""
         return DISCLAIMERS.copy()
+
+    @staticmethod
+    def get_official_2026_full_squad() -> Dict[str, Any]:
+        """Returns the official breakdown of the Rajasthan Royals IPL 2026 Full Squad."""
+        return dict(RR_IPL_2026_FULL_SQUAD)
+
+    @staticmethod
+    def get_official_2027_retention_summary() -> Dict[str, Any]:
+        """Returns the official IPL 2027 Pre-Auction retention, trade & release summary."""
+        return get_pre_auction_squad_summary()

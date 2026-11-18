@@ -36,7 +36,12 @@ import {
   UncappedOverviewResponse,
 } from "@/types";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
+const RAW_API_BASE =
+  process.env.NEXT_PUBLIC_API_URL ||
+  process.env.NEXT_PUBLIC_API_BASE_URL ||
+  "http://localhost:8000/api/v1";
+
+export const API_BASE_URL = RAW_API_BASE.replace(/\/+$/, "");
 
 export async function fetchSystemHealth(): Promise<SystemHealth> {
   try {
@@ -107,6 +112,18 @@ export async function fetchDatasets() {
   } catch (e) {
     return [];
   }
+}
+
+export async function uploadDataset(formData: FormData) {
+  const res = await fetch(`${API_BASE_URL}/acquisition/upload`, {
+    method: "POST",
+    body: formData,
+  });
+  if (!res.ok) {
+    const errorData = await res.json().catch(() => ({}));
+    throw new Error(errorData.detail || `Upload failed with status ${res.status}`);
+  }
+  return await res.json();
 }
 
 // --- Stage 2: Uncapped Players & Analytics API ---

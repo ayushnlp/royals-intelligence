@@ -172,3 +172,24 @@ async def get_player_evaluations(
     }
     masked = RRDataPackService.mask_confidential_data(seed_eval, user_role=user_role)
     return [EvaluationResponse(**masked)]
+
+
+@router.get("/rr-squad-2026", summary="Official Rajasthan Royals IPL 2026 Full Squad")
+async def get_rr_2026_full_squad() -> Dict[str, Any]:
+    """
+    Returns the authoritative breakdown of the Rajasthan Royals IPL 2026 Full Squad
+    (27 players across Batters, Wicket-Keepers, All-Rounders, Bowlers with mid-season replacements).
+    """
+    from app.auction_intelligence.foundation.rr_squad_official_data import RR_IPL_2026_FULL_SQUAD
+    return RR_IPL_2026_FULL_SQUAD
+
+
+@router.get("/rr-retention-2027", summary="Official Rajasthan Royals IPL 2027 Retention, Trade & Release List")
+async def get_rr_2027_retention_list() -> Dict[str, Any]:
+    """
+    Returns the official IPL 2027 Pre-Auction roster decisions announced ahead of the
+    mini-auction on December 16, 2026 (17 Retained, 2 Traded In, 1 Traded Out, 9 Released).
+    """
+    from app.auction_intelligence.foundation.rr_squad_official_data import get_pre_auction_squad_summary
+    return get_pre_auction_squad_summary()
+

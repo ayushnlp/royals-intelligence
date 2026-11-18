@@ -78,7 +78,56 @@ Inspection of `ipl_players.csv` reveals three significant franchise roster dislo
 
 ---
 
-## 4. Contract Governance Disclaimer
+## 4. Mid-Season Squad Replacements During IPL 2026
 
-> [!IMPORTANT]
-> The 27 player records in `ipl_players.csv` serve as an **exploratory research baseline provided by the competition organizers**. They do NOT constitute legally registered BCCI retention declarations or binding player contracts for the IPL 2027 season. All retention models (AUCTION-05) operate on this baseline conditionally, providing full sensitivity disclosures for potential roster dislocations.
+During the IPL 2026 campaign, two squad members were officially withdrawn and replaced:
+- **Sam Curran** (withdrawn mid-season due to national duties/injury) $\rightarrow$ replaced by **Dasun Shanaka** (Overseas pace all-rounder).
+- **Ravi Singh** (withdrawn mid-season) $\rightarrow$ replaced by **Emanjot Singh Chahal** (Domestic spin all-rounder).
+
+---
+
+## 5. Official IPL 2027 Retention & Release Ledger (Announced Ahead of Dec 16, 2026 Mini-Auction)
+
+Ahead of the IPL 2027 mini-auction on December 16, 2026, Rajasthan Royals officially confirmed the retention of 17 players from their existing roster, added 2 players via trades, traded out 1 player, and released 9 players.
+
+### 5.1 Retained Players (17)
+1. **Riyan Parag** (Captain, All-rounder)
+2. **Yashasvi Jaiswal** (Batter)
+3. **Vaibhav Sooryavanshi** (Batter)
+4. **Ravindra Jadeja** (All-rounder)
+5. **Dhruv Jurel** (Wicket-Keeper)
+6. **Jofra Archer** (Overseas - ENG, Bowler)
+7. **Ravi Bishnoi** (Bowler)
+8. **Sandeep Sharma** (Bowler)
+9. **Nandre Burger** (Overseas - SA, Bowler)
+10. **Donovan Ferreira** (Overseas - SA, Wicket-Keeper)
+11. **Lhuan-dre Pretorius** (Overseas - SA, Wicket-Keeper)
+12. **Dasun Shanaka** (Overseas - SL, All-rounder)
+13. **Shubham Dubey** (Batter)
+14. **Aman Rao Perala** (Batter)
+15. **Sushant Mishra** (Bowler)
+16. **Brijesh Sharma** (Bowler)
+17. **Yash Raj Punja** (Bowler)
+
+### 5.2 Traded-In Players (2)
+18. **Mohammed Shami** (Traded in from Lucknow Super Giants for ₹8 crore, Bowler)
+19. **Manimaran Siddharth** (Traded in from Lucknow Super Giants for ₹75 lakh, Bowler)
+
+### 5.3 Traded-Out Player (1)
+- **Sam Curran** (Traded to Lucknow Super Giants for ₹2.4 crore, All-rounder)
+
+### 5.4 Released Players (9)
+1. **Shimron Hetmyer** (Overseas - WI, Batter)
+2. **Tushar Deshpande** (Bowler)
+3. **Adam Milne** (Overseas - NZ, Bowler)
+4. **Kwena Maphaka** (Overseas - SA, Bowler)
+5. **Kuldeep Sen** (Bowler)
+6. **Yudhvir Singh Charak** (All-rounder)
+7. **Vignesh Puthur** (Bowler)
+8. **Ravi Singh** (Wicket-Keeper)
+9. **Emanjot Singh Chahal** (All-rounder)
+
+### 5.5 Pre-Auction Roster Summary
+- **Current Active Squad:** 19 players (14 Indian, 5 Overseas)
+- **Squad Slots Available for Auction:** Exactly 6 slots (maximum squad limit: 25)
+- **Overseas Slots Available for Auction:** Exactly 3 slots (maximum overseas limit: 8)

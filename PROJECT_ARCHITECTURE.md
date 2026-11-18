@@ -204,3 +204,20 @@ $$\text{Conservative PRI}_{\text{Bowling}} = -(\hat{\theta}_i + 1.0 \times \text
 | **Pressure Dashboard UI** | `frontend/src/app/pressure/` | Web UI for official Top 10 leaderboards | **PENDING** |
 | **Multi-Match Variance Research**| `round1_pressure/src/research/` | Mixed-effects consistency research | **OPTIONAL FUTURE RESEARCH** |
 | **Cluster-Robust Error Modeling** | `round1_pressure/src/research/` | Match-clustered variance validation | **OPTIONAL FUTURE RESEARCH** |
+
+---
+
+## 8. Additive Platform Domain: RR Auction & Retention Intelligence
+
+To support long-range IPL 2027 roster construction and squad-retention planning without altering Round 1 competition deliverables, ROYALS INTELLIGENCE incorporates the **RR Auction & Retention Intelligence** domain as an independent, additive bounded context.
+
+### 8.1 Domain Scope & Sovereign Deliverables
+1. **Module A — RR Retention Intelligence:** Exactly three recommended retention choices from the active Rajasthan Royals squad, evaluated across 14 multi-season performance, consistency, replacement difficulty, and wage-cap dimensions (zero artificial role quotas).
+2. **Module B — Combined Uncapped Batters Intelligence:** Exactly one unified Top 10 leaderboard evaluating eligible Indian and overseas uncapped batters against competition-normalized phase baselines.
+3. **Module C — Combined Uncapped Bowlers Intelligence:** Exactly one unified Top 10 leaderboard evaluating eligible Indian and overseas uncapped bowlers across phase containment, dot frequency, radar speed distributions, and variation deception.
+
+### 8.2 Architectural Governance & Isolation
+- **Bounded Context:** Isolated under `backend/app/auction_intelligence/` with independent schemas, API routes (`/api/v1/auction/*`), and test suites.
+- **Strict Cap Verification:** Enforces sovereign international cap certification (0 Test, ODI, or T20I appearances across senior men's cricket). U19 or domestic participation does not constitute a cap.
+- **Reference Specification:** Full system architecture, mathematical formulations, and stage-wise implementation blueprints are authoritatively defined in [docs/RR_AUCTION_RETENTION_INTELLIGENCE_ARCHITECTURE.md](file:///c:/Users/ayush/Documents/ROYALS%20INTELLIGENCE/docs/RR_AUCTION_RETENTION_INTELLIGENCE_ARCHITECTURE.md).
+

@@ -285,7 +285,7 @@ class AllRoundContributionResponse(BaseModel):
     eligibility_status: str
     primary_role: str
     domestic_team: Optional[str] = None
-    sample_size: Dict[str, int] = Field(
+    sample_size: Dict[str, Any] = Field(
         ...,
         description="Sample size transparency: total matches, innings batted, overs bowled"
     )
@@ -297,4 +297,41 @@ class AllRoundContributionResponse(BaseModel):
         description="Qualitative role classification based on evidence (e.g. 'Finishing Batter & Part-Time Off-Spinner')"
     )
     has_sufficient_sample: bool = True
+    statistical_coverage_status: str = Field(
+        default="AVAILABLE",
+        description="Coverage status: 'AVAILABLE' or 'NO_STATISTICAL_COVERAGE'"
+    )
+    data_note: Optional[str] = Field(
+        default=None,
+        description="Provenance and sample limitation disclosures"
+    )
+
+
+class DomesticPlayerSummary(BaseModel):
+    """Canonical summary representation of an Indian domestic / uncapped player candidate."""
+    canonical_id: int
+    player_id: str
+    player_name: str
+    canonical_key: Optional[str] = None
+    eligibility_status: str  # 'VERIFIED_UNCAPPED', 'PENDING_VERIFICATION', 'VERIFIED_CAPPED', 'UNKNOWN'
+    is_uncapped: bool = True
+    role: Optional[str] = None
+    team: Optional[str] = None
+    batting_style: Optional[str] = None
+    bowling_style: Optional[str] = None
+    caps_count: int = 0
+    match_count: int = 0
+    statistical_coverage_status: str = "AVAILABLE"  # 'AVAILABLE' or 'NO_STATISTICAL_COVERAGE'
+    notes: Optional[str] = None
+
+
+class PaginatedDomesticPlayersResponse(BaseModel):
+    """Paginated response for dynamic uncapped player discovery."""
+    items: List[DomesticPlayerSummary]
+    total: int
+    page: int
+    page_size: int
+    total_pages: int
+    filters_applied: Dict[str, Any] = Field(default_factory=dict)
+
 

@@ -176,3 +176,32 @@ Phase 7: Advanced Reliability Research         [....................]   0% (Opti
 
 **Overall Core Round 1 Progress:** **96% Complete**  
 The core analytical pipeline, mathematical models, empirical leaderboards, submission document, and Stage 5 tactical platform are **fully operational and verified**.
+
+---
+
+## 5. Additive Domain Track: RR Auction & Retention Intelligence (IPL 2027)
+
+To expand ROYALS INTELLIGENCE for the IPL 2027 mega-auction without altering any official Round 1 competition deliverables or existing architectures, the **RR Auction & Retention Intelligence** domain is integrated as an additive roadmap track.
+
+All 13 stages below are initialized in **PLANNED** or **NOT STARTED** status, awaiting explicit user authorization.
+
+### 5.1 Stage Breakdown & Verification Gates
+
+| Stage Code | Stage Name & Scope Summary | Primary Deliverables | Target Status | Approval Gate |
+| :--- | :--- | :--- | :--- | :--- |
+| **AUCTION-00** | **Architecture, Data and Source Audit**<br>Comprehensive inspection of `ipl_players.csv`, domestic registry data, and external cap sources. | Data quality audit report, schema discovery, discrepancy register | **PLANNED** | User Architecture Approval |
+| **AUCTION-01** | **Player Identity and Candidate Universe**<br>Canonical entity resolution and deduplication across IPL franchises and overseas leagues. | Candidate universe mapping, unified entity ID registry | **NOT STARTED** | Identity Deduplication Sign-off |
+| **AUCTION-02** | **Senior International Eligibility Verification**<br>Automated debut verification engine across Test, ODI, and T20I matches (ICC + 27 national boards). | Cap verification engine, source provenance ledger, uncapped whitelist | **NOT STARTED** | Cap Invariance Verification |
+| **AUCTION-03** | **Current RR Squad and Retention Intelligence**<br>Forensic profiling of all 27 Rajasthan Royals players across multi-season metrics and contracts. | RR squad telemetry profile, role classification, contract audit | **NOT STARTED** | Squad Coverage Acceptance |
+| **AUCTION-04** | **Historical Performance & Competition Normalization**<br>Calibrating Inter-League Quality Factors (CQF) across IPL, BBL, SA20, SMAT, and regional leagues. | Inter-competition normalization weights, shrunk baseline models | **NOT STARTED** | CQF Calibration Verification |
+| **AUCTION-05** | **Retention Ranking Engine (Module A)**<br>Multi-dimensional 14-feature Retention Composite Index (RCI) producing exactly 3 RR recommendations. | Module A engine, 3 retention dossiers, sensitivity perturbation report | **NOT STARTED** | Top 3 Retention Approval |
+| **AUCTION-06** | **Uncapped Batting Intelligence Engine (Module B)**<br>Phase-stratified valuation model producing ONE unified Top 10 Indian + Overseas uncapped batters list. | Module B engine, Top 10 uncapped batters leaderboard, phase radar splits | **NOT STARTED** | Uncapped Batting Sign-off |
+| **AUCTION-07** | **Uncapped Bowling Intelligence Engine (Module C)**<br>Phase-containment and radar speed telemetry engine producing ONE unified Top 10 uncapped bowlers list. | Module C engine, Top 10 uncapped bowlers leaderboard, deception metrics | **NOT STARTED** | Uncapped Bowling Sign-off |
+| **AUCTION-08** | **Auction Availability & Registration Verification**<br>Independent tracking of auction declarations, home-board NOC clearances, and release statuses. | Availability verification service, NOC clearance matrix | **NOT STARTED** | Availability Data Audit |
+| **AUCTION-09** | **Auction Valuation & Squad Suitability**<br>Skill-scarcity wage modeling, bid ceiling recommendations, and RR tactical vacancy matching. | Valuation engine, bid ceiling guidelines, squad balance matrix | **NOT STARTED** | Economic Ceiling Review |
+| **AUCTION-10** | **Backend APIs & Evidence Provenance**<br>Exposing `/api/v1/auction/*` REST endpoint families with complete cryptographic provenance. | FastAPI router, Pydantic v2 schemas, OpenAPI documentation | **NOT STARTED** | API Contract Verification |
+| **AUCTION-11** | **Frontend Integration & Player Profiles**<br>Responsive Next.js 15 dashboards under `/auction/retention`, `/auction/uncapped-batters`, `/auction/uncapped-bowlers`. | 3 interactive dashboards, evidence drawer components, sidebar integration | **NOT STARTED** | UX & Visual Acceptance |
+| **AUCTION-12** | **Independent Validation, Testing & Acceptance**<br>End-to-end unit, integration, and statistical perturbation suites with zero platform regressions. | Test suite execution, regression report, formal domain acceptance | **NOT STARTED** | Final User Acceptance |
+
+*Authoritative architectural specification:* [docs/RR_AUCTION_RETENTION_INTELLIGENCE_ARCHITECTURE.md](file:///c:/Users/ayush/Documents/ROYALS%20INTELLIGENCE/docs/RR_AUCTION_RETENTION_INTELLIGENCE_ARCHITECTURE.md).
+
