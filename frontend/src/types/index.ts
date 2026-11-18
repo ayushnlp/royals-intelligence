@@ -1148,6 +1148,8 @@ export interface UncappedBattingItem {
   eligibility_reason: string;
   verification_source: string;
   verification_date: string;
+  is_official_r1_qualified?: boolean;
+  meets_active_gate?: boolean;
 }
 
 export interface UncappedBowlingItem {
@@ -1171,6 +1173,8 @@ export interface UncappedBowlingItem {
   eligibility_reason: string;
   verification_source: string;
   verification_date: string;
+  is_official_r1_qualified?: boolean;
+  meets_active_gate?: boolean;
 }
 
 export interface UncappedLeaderboardResponse {
@@ -1183,6 +1187,11 @@ export interface UncappedLeaderboardResponse {
   sample_gate: string;
   governing_statute: string;
   audit_date: string;
+  min_balls_applied?: number;
+  min_matches_applied?: number;
+  is_exploratory_filter?: boolean;
+  excluded_count?: number;
+  total_pool_count?: number;
 }
 
 export interface UncappedOverviewResponse {
@@ -1193,6 +1202,13 @@ export interface UncappedOverviewResponse {
   sample_gate_applied: string;
   governing_statute: string;
   audit_date: string;
+  min_balls_applied?: number;
+  min_matches_applied?: number;
+  is_exploratory_filter?: boolean;
+  total_pool_batters?: number;
+  total_pool_bowlers?: number;
+  excluded_batters_count?: number;
+  excluded_bowlers_count?: number;
 }
 
 

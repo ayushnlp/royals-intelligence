@@ -29,6 +29,8 @@ class UncappedBattingItem(BaseModel):
     eligibility_reason: str
     verification_source: str
     verification_date: str
+    is_official_r1_qualified: Optional[bool] = True
+    meets_active_gate: Optional[bool] = True
 
 
 class UncappedBowlingItem(BaseModel):
@@ -52,6 +54,8 @@ class UncappedBowlingItem(BaseModel):
     eligibility_reason: str
     verification_source: str
     verification_date: str
+    is_official_r1_qualified: Optional[bool] = True
+    meets_active_gate: Optional[bool] = True
 
 
 class UncappedLeaderboardResponse(BaseModel):
@@ -64,6 +68,11 @@ class UncappedLeaderboardResponse(BaseModel):
     sample_gate: str
     governing_statute: str
     audit_date: str
+    min_balls_applied: Optional[int] = 60
+    min_matches_applied: Optional[int] = 0
+    is_exploratory_filter: Optional[bool] = False
+    excluded_count: Optional[int] = 0
+    total_pool_count: Optional[int] = 0
 
 
 class UncappedOverviewResponse(BaseModel):
@@ -74,3 +83,10 @@ class UncappedOverviewResponse(BaseModel):
     sample_gate_applied: str
     governing_statute: str
     audit_date: str
+    min_balls_applied: Optional[int] = 60
+    min_matches_applied: Optional[int] = 0
+    is_exploratory_filter: Optional[bool] = False
+    total_pool_batters: Optional[int] = 30
+    total_pool_bowlers: Optional[int] = 22
+    excluded_batters_count: Optional[int] = 0
+    excluded_bowlers_count: Optional[int] = 0

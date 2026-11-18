@@ -233,11 +233,16 @@ class UncappedPressureIntelligenceService:
         }
 
     def get_uncapped_batting_leaderboard(
-        self, limit: int = 10, qualified_only: bool = True
+        self,
+        limit: int = 10,
+        qualified_only: bool = True,
+        min_balls: int = 60,
+        min_matches: int = 0,
     ) -> List[Dict[str, Any]]:
         """
         Returns ranked Uncapped Batters Under Pressure governed by Conservative PRI.
         Preserves official Round 1 methodology while isolating domestic prospects.
+        Supports configurable sample-size gates (min_balls, min_matches) for exploratory scouting.
         """
         self.load_data()
         assert self._batting_lb is not None
@@ -254,8 +259,15 @@ class UncappedPressureIntelligenceService:
             balls = int(row.get("pressure_legal_balls", 0))
             matches = int(row.get("pressure_matches", 0))
 
-            if qualified_only and (balls < 60 and not (balls >= 50 and matches >= 10)):
-                continue
+            is_official_qualified = bool(balls >= 60 or (balls >= 50 and matches >= 10))
+
+            if qualified_only:
+                if min_balls == 60 and min_matches == 0:
+                    if not is_official_qualified:
+                        continue
+                else:
+                    if balls < min_balls or (min_matches > 0 and matches < min_matches):
+                        continue
 
             # Determine tactical role
             sr = float(row.get("observed_strike_rate", 120.0))
@@ -288,6 +300,8 @@ class UncappedPressureIntelligenceService:
                 "eligibility_reason": elig["reason"],
                 "verification_source": elig["verification_source"],
                 "verification_date": elig["verification_date"],
+                "is_official_r1_qualified": is_official_qualified,
+                "meets_active_gate": True,
             })
 
         # Rank strictly by Conservative PRI descending
@@ -298,10 +312,15 @@ class UncappedPressureIntelligenceService:
         return records[:limit]
 
     def get_uncapped_bowling_leaderboard(
-        self, limit: int = 10, qualified_only: bool = True
+        self,
+        limit: int = 10,
+        qualified_only: bool = True,
+        min_balls: int = 60,
+        min_matches: int = 0,
     ) -> List[Dict[str, Any]]:
         """
         Returns ranked Uncapped Bowlers Under Pressure governed by Conservative Runs Saved.
+        Supports configurable sample-size gates (min_balls, min_matches) for exploratory scouting.
         """
         self.load_data()
         assert self._bowling_lb is not None
@@ -318,8 +337,15 @@ class UncappedPressureIntelligenceService:
             balls = int(row.get("pressure_legal_balls", 0))
             matches = int(row.get("pressure_matches", 0))
 
-            if qualified_only and (balls < 60 and not (balls >= 50 and matches >= 10)):
-                continue
+            is_official_qualified = bool(balls >= 60 or (balls >= 50 and matches >= 10))
+
+            if qualified_only:
+                if min_balls == 60 and min_matches == 0:
+                    if not is_official_qualified:
+                        continue
+                else:
+                    if balls < min_balls or (min_matches > 0 and matches < min_matches):
+                        continue
 
             econ = float(row.get("observed_economy", 9.0))
             wkt_pct = float(row.get("observed_wicket_pct", 0.0))
@@ -353,6 +379,8 @@ class UncappedPressureIntelligenceService:
                 "eligibility_reason": elig["reason"],
                 "verification_source": elig["verification_source"],
                 "verification_date": elig["verification_date"],
+                "is_official_r1_qualified": is_official_qualified,
+                "meets_active_gate": True,
             })
 
         # Rank strictly by Conservative Runs Saved descending (higher/less negative is better)
@@ -362,17 +390,49 @@ class UncappedPressureIntelligenceService:
 
         return records[:limit]
 
-    def get_uncapped_overview(self) -> Dict[str, Any]:
-        """Provides statistical summary of uncapped candidate pool."""
-        bat_qualified = self.get_uncapped_batting_leaderboard(limit=100, qualified_only=True)
-        bowl_qualified = self.get_uncapped_bowling_leaderboard(limit=100, qualified_only=True)
+    def get_uncapped_overview(
+        self, min_balls: int = 60, min_matches: int = 0
+    ) -> Dict[str, Any]:
+        """Provides statistical summary of uncapped candidate pool under configurable sample criteria."""
+        all_bat = self.get_uncapped_batting_leaderboard(limit=500, qualified_only=False)
+        all_bowl = self.get_uncapped_bowling_leaderboard(limit=500, qualified_only=False)
+
+        bat_qualified = self.get_uncapped_batting_leaderboard(
+            limit=500, qualified_only=True, min_balls=min_balls, min_matches=min_matches
+        )
+        bowl_qualified = self.get_uncapped_bowling_leaderboard(
+            limit=500, qualified_only=True, min_balls=min_balls, min_matches=min_matches
+        )
+
+        total_pool_batters = len(all_bat)
+        total_pool_bowlers = len(all_bowl)
+        qualified_batters_count = len(bat_qualified)
+        qualified_bowlers_count = len(bowl_qualified)
+
+        excluded_batters = total_pool_batters - qualified_batters_count
+        excluded_bowlers = total_pool_bowlers - qualified_bowlers_count
+
+        is_exploratory = bool(min_balls != 60 or min_matches > 0)
+
+        if not is_exploratory:
+            gate_desc = ">= 60 pressure legal deliveries (or >= 50 balls & 10 matches) [Official R1 Benchmark]"
+        else:
+            match_str = f" & >= {min_matches} matches" if min_matches > 0 else " & All Matches"
+            gate_desc = f">= {min_balls} pressure legal deliveries{match_str} [Exploratory Scouting Filter]"
 
         return {
-            "total_verified_uncapped_batters": len(bat_qualified),
-            "total_verified_uncapped_bowlers": len(bowl_qualified),
+            "total_verified_uncapped_batters": qualified_batters_count,
+            "total_verified_uncapped_bowlers": qualified_bowlers_count,
             "top_uncapped_batter": bat_qualified[0]["player_name"] if bat_qualified else None,
             "top_uncapped_bowler": bowl_qualified[0]["player_name"] if bowl_qualified else None,
-            "sample_gate_applied": ">= 60 pressure legal deliveries (or >= 50 balls & 10 matches)",
+            "sample_gate_applied": gate_desc,
             "governing_statute": "BCCI IPL Player Regulations 2025/2026",
             "audit_date": "2026-11-16",
+            "min_balls_applied": min_balls,
+            "min_matches_applied": min_matches,
+            "is_exploratory_filter": is_exploratory,
+            "total_pool_batters": total_pool_batters,
+            "total_pool_bowlers": total_pool_bowlers,
+            "excluded_batters_count": excluded_batters,
+            "excluded_bowlers_count": excluded_bowlers,
         }

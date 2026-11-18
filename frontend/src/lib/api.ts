@@ -782,9 +782,18 @@ export async function fetchPressureMethodology(): Promise<PressureMethodologyRes
   }
 }
 
-export async function fetchUncappedOverview(): Promise<UncappedOverviewResponse | null> {
+export async function fetchUncappedOverview(params?: {
+  min_balls?: number;
+  min_matches?: number;
+}): Promise<UncappedOverviewResponse | null> {
   try {
-    const res = await fetch(`${API_BASE_URL}/analytics/uncapped/overview`, { cache: "no-store" });
+    const query = new URLSearchParams();
+    if (params?.min_balls !== undefined) query.set("min_balls", params.min_balls.toString());
+    if (params?.min_matches !== undefined) query.set("min_matches", params.min_matches.toString());
+
+    const queryString = query.toString();
+    const url = `${API_BASE_URL}/analytics/uncapped/overview${queryString ? `?${queryString}` : ""}`;
+    const res = await fetch(url, { cache: "no-store" });
     if (!res.ok) throw new Error("Failed to fetch uncapped overview");
     return await res.json();
   } catch (e) {
@@ -796,12 +805,16 @@ export async function fetchUncappedLeaderboards(params?: {
   discipline?: string;
   limit?: number;
   qualified_only?: boolean;
+  min_balls?: number;
+  min_matches?: number;
 }): Promise<UncappedLeaderboardResponse | null> {
   try {
     const query = new URLSearchParams();
     if (params?.discipline) query.set("discipline", params.discipline);
     if (params?.limit !== undefined) query.set("limit", params.limit.toString());
     if (params?.qualified_only !== undefined) query.set("qualified_only", params.qualified_only.toString());
+    if (params?.min_balls !== undefined) query.set("min_balls", params.min_balls.toString());
+    if (params?.min_matches !== undefined) query.set("min_matches", params.min_matches.toString());
 
     const queryString = query.toString();
     const url = `${API_BASE_URL}/analytics/uncapped/leaderboards${queryString ? `?${queryString}` : ""}`;
