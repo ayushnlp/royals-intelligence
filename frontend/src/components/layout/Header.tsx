@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
-import { Shield, FileText, CheckCircle2, AlertTriangle, RefreshCw } from "lucide-react";
+import { RefreshCw } from "lucide-react";
 import { fetchSystemHealth } from "@/lib/api";
 import { SystemHealth } from "@/types";
 
@@ -38,7 +38,7 @@ export const Header: React.FC = () => {
   const currentPageTitle = pathname ? PAGE_TITLES[pathname] || "Intelligence Platform" : "Executive Overview";
 
   return (
-    <header className="h-16 bg-white/95 backdrop-blur-sm border-b border-slate-200/60 px-6 flex items-center justify-between sticky top-0 z-20">
+    <header className="h-16 bg-white/95 backdrop-blur-sm border-b border-slate-200/80 px-6 flex items-center justify-between sticky top-0 z-20">
       {/* Left: Breadcrumb / Page Title */}
       <div className="flex items-center gap-2.5">
         <span className="text-xs font-medium text-slate-400">
@@ -50,13 +50,13 @@ export const Header: React.FC = () => {
         </h2>
       </div>
 
-      {/* Right: Telemetry & Navigation Actions */}
-      <div className="flex items-center gap-5 text-xs">
-        {/* Understated API Status Indicator */}
+      {/* Right: Telemetry & Live Connection Action */}
+      <div className="flex items-center gap-3 text-xs">
+        {/* Live Engine Status Indicator */}
         <button
           onClick={checkHealth}
           title="Click to re-check API connectivity"
-          className="flex items-center gap-2 text-slate-600 hover:text-slate-900 transition-colors cursor-pointer py-1"
+          className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-slate-200/80 bg-slate-50/70 hover:bg-slate-100 text-slate-700 hover:text-slate-900 transition-colors cursor-pointer shadow-2xs"
         >
           <span className="relative flex h-2 w-2">
             {isHealthy && (
@@ -69,29 +69,16 @@ export const Header: React.FC = () => {
             />
           </span>
           <span className="font-mono text-[11px] text-slate-500">
-            API: <strong className={isHealthy ? "text-emerald-700 font-semibold" : "text-amber-700 font-semibold"}>{isHealthy ? "Online" : "Standby"}</strong>
+            Engine:{" "}
+            <strong className={isHealthy ? "text-emerald-700 font-semibold" : "text-amber-700 font-semibold"}>
+              {isHealthy ? "Online" : "Standby"}
+            </strong>
           </span>
-          {loading && <RefreshCw size={11} className="animate-spin text-slate-400" />}
+          <RefreshCw
+            size={11}
+            className={`text-slate-400 ${loading ? "animate-spin text-[#E91E8F]" : ""}`}
+          />
         </button>
-
-        <span className="h-3.5 w-px bg-slate-200" />
-
-        {/* RR Operations Link */}
-        <div className="hidden sm:flex items-center gap-1.5 text-slate-600 hover:text-slate-900 transition-colors">
-          <Shield size={13} className="text-[#D6B56D]" />
-          <span className="font-medium text-[11px]">RR Operations</span>
-        </div>
-
-        {/* Documentation Link */}
-        <a
-          href="https://github.com/rajasthanroyals/royals-intelligence"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="hidden sm:flex items-center gap-1 text-slate-500 hover:text-[#E91E8F] transition-colors"
-        >
-          <FileText size={13} />
-          <span className="font-medium text-[11px]">Docs</span>
-        </a>
       </div>
     </header>
   );
