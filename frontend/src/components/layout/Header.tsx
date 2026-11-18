@@ -76,7 +76,7 @@ export const Header: React.FC = () => {
           </span>
           <RefreshCw
             size={11}
-            className={`text-slate-400 ${loading ? "animate-spin text-[#E91E8F]" : ""}`}
+            className={`text-slate-400 ${loading ? "animate-spin text-[#E91E8C]" : ""}`}
           />
         </button>
       </div>

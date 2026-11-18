@@ -92,7 +92,7 @@ export default function UncappedIntelligencePage() {
       {/* ------------------------------------------------------------------- */}
       <section className="space-y-3">
         <div className="flex flex-wrap items-center gap-3 text-xs">
-          <span className="font-mono font-bold tracking-widest text-[#E91E8F] uppercase">
+          <span className="font-mono font-bold tracking-widest text-[#E91E8C] uppercase">
             Rajasthan Royals Scouting
           </span>
           <span className="text-slate-300">•</span>
@@ -121,9 +121,9 @@ export default function UncappedIntelligencePage() {
           <div className="flex flex-wrap items-center gap-3 shrink-0">
             <Link
               href="/pressure"
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#101C37] text-white text-xs font-semibold hover:bg-[#1A2B50] transition-colors shadow-sm"
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#111C38] text-white text-xs font-semibold hover:bg-[#1A2B50] transition-colors shadow-sm"
             >
-              <Shield size={14} className="text-[#E91E8F]" />
+              <Shield size={14} className="text-[#E91E8C]" />
               <span>Official Global Top 10</span>
               <ArrowRight size={13} className="text-slate-400" />
             </Link>
@@ -161,14 +161,15 @@ export default function UncappedIntelligencePage() {
       {/* ------------------------------------------------------------------- */}
       {/* 2. Open Editorial Telemetry Strip (No Card Boxes) */}
       {/* ------------------------------------------------------------------- */}
-      <section className="py-5 border-y border-slate-200/70">
+      <section className="py-5 border-y border-slate-200/80">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
           <div>
-            <span className="text-[11px] font-mono uppercase tracking-wider text-slate-400 block mb-1">
+            <span className="text-[10px] font-mono uppercase tracking-wider text-slate-500 font-semibold block mb-1">
               Top Uncapped Batter
             </span>
-            <div className="text-xl md:text-2xl font-extrabold text-slate-900 tracking-tight">
-              {overview?.top_uncapped_batter ?? "Ashutosh Sharma"}
+            <div className="text-xl md:text-2xl font-extrabold text-[#111827] tracking-tight flex items-baseline gap-1.5">
+              <span>{overview?.top_uncapped_batter ?? "Ashutosh Sharma"}</span>
+              <span className="w-1.5 h-1.5 rounded-full bg-[#E91E8C]" />
             </div>
             <p className="text-xs text-slate-500 mt-0.5">
               Punjab Kings • Rank #5 Overall R1
@@ -176,11 +177,12 @@ export default function UncappedIntelligencePage() {
           </div>
 
           <div>
-            <span className="text-[11px] font-mono uppercase tracking-wider text-slate-400 block mb-1">
+            <span className="text-[10px] font-mono uppercase tracking-wider text-slate-500 font-semibold block mb-1">
               Top Uncapped Bowler
             </span>
-            <div className="text-xl md:text-2xl font-extrabold text-slate-900 tracking-tight">
-              {overview?.top_uncapped_bowler ?? "Vaibhav Arora"}
+            <div className="text-xl md:text-2xl font-extrabold text-[#111827] tracking-tight flex items-baseline gap-1.5">
+              <span>{overview?.top_uncapped_bowler ?? "Vaibhav Arora"}</span>
+              <span className="w-1.5 h-1.5 rounded-full bg-[#E91E8C]" />
             </div>
             <p className="text-xs text-slate-500 mt-0.5">
               PBKS / KKR • 193 Pressure Balls
@@ -188,10 +190,10 @@ export default function UncappedIntelligencePage() {
           </div>
 
           <div>
-            <span className="text-[11px] font-mono uppercase tracking-wider text-slate-400 block mb-1">
+            <span className="text-[10px] font-mono uppercase tracking-wider text-slate-500 font-semibold block mb-1">
               Qualified Prospects
             </span>
-            <div className="text-xl md:text-2xl font-extrabold text-slate-900 font-mono tracking-tight">
+            <div className="text-xl md:text-2xl font-extrabold text-[#111827] font-mono tracking-tight">
               {overview
                 ? `${overview.total_verified_uncapped_batters} Bat / ${overview.total_verified_uncapped_bowlers} Bowl`
                 : "15 Bat / 20 Bowl"}
@@ -202,7 +204,7 @@ export default function UncappedIntelligencePage() {
           </div>
 
           <div>
-            <span className="text-[11px] font-mono uppercase tracking-wider text-slate-400 block mb-1">
+            <span className="text-[10px] font-mono uppercase tracking-wider text-slate-500 font-semibold block mb-1">
               Domestic Talent Pool
             </span>
             <div className="text-xl md:text-2xl font-extrabold text-emerald-700 font-mono tracking-tight">
@@ -218,13 +220,13 @@ export default function UncappedIntelligencePage() {
       {/* ------------------------------------------------------------------- */}
       {/* 3. Editorial Segmented Tab Navigation */}
       {/* ------------------------------------------------------------------- */}
-      <div className="flex items-center gap-1 border-b border-slate-200">
+      <div className="flex items-center gap-6 border-b border-slate-200">
         <button
           onClick={() => setActiveTab("batting")}
           className={cn(
-            "flex items-center gap-2 px-4 py-2.5 text-xs font-semibold transition-all border-b-2 -mb-px",
+            "flex items-center gap-2 py-3 text-xs font-semibold transition-all border-b-2 -mb-px whitespace-nowrap",
             activeTab === "batting"
-              ? "border-[#E91E8F] text-[#101C37]"
+              ? "border-[#E91E8C] text-[#E91E8C] font-bold"
               : "border-transparent text-slate-500 hover:text-slate-800"
           )}
         >
@@ -235,9 +237,9 @@ export default function UncappedIntelligencePage() {
         <button
           onClick={() => setActiveTab("bowling")}
           className={cn(
-            "flex items-center gap-2 px-4 py-2.5 text-xs font-semibold transition-all border-b-2 -mb-px",
+            "flex items-center gap-2 py-3 text-xs font-semibold transition-all border-b-2 -mb-px whitespace-nowrap",
             activeTab === "bowling"
-              ? "border-[#E91E8F] text-[#101C37]"
+              ? "border-[#E91E8C] text-[#E91E8C] font-bold"
               : "border-transparent text-slate-500 hover:text-slate-800"
           )}
         >
@@ -248,9 +250,9 @@ export default function UncappedIntelligencePage() {
         <button
           onClick={() => setActiveTab("governance")}
           className={cn(
-            "flex items-center gap-2 px-4 py-2.5 text-xs font-semibold transition-all border-b-2 -mb-px",
+            "flex items-center gap-2 py-3 text-xs font-semibold transition-all border-b-2 -mb-px whitespace-nowrap",
             activeTab === "governance"
-              ? "border-[#E91E8F] text-[#101C37]"
+              ? "border-[#E91E8C] text-[#E91E8C] font-bold"
               : "border-transparent text-slate-500 hover:text-slate-800"
           )}
         >
@@ -317,7 +319,7 @@ export default function UncappedIntelligencePage() {
                                 className={cn(
                                   "w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-mono font-bold shrink-0",
                                   isTop1
-                                    ? "bg-[#D6B56D] text-[#101C37]"
+                                    ? "bg-[#D6B56D] text-[#111C38]"
                                     : isTop3
                                     ? "bg-slate-900 text-white"
                                     : "bg-slate-100 text-slate-600"
@@ -390,7 +392,7 @@ export default function UncappedIntelligencePage() {
                           </span>
                           <button
                             onClick={loadUncappedData}
-                            className="mt-2 px-3 py-1.5 rounded-lg bg-[#101C37] text-white text-xs font-semibold hover:bg-[#1A2B50] transition-colors flex items-center gap-1.5"
+                            className="mt-2 px-3 py-1.5 rounded-lg bg-[#111C38] text-white text-xs font-semibold hover:bg-[#1A2B50] transition-colors flex items-center gap-1.5"
                           >
                             <RefreshCw className="w-3.5 h-3.5" />
                             <span>Retry Request</span>
@@ -464,7 +466,7 @@ export default function UncappedIntelligencePage() {
                                 className={cn(
                                   "w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-mono font-bold shrink-0",
                                   isTop1
-                                    ? "bg-[#D6B56D] text-[#101C37]"
+                                    ? "bg-[#D6B56D] text-[#111C38]"
                                     : isTop3
                                     ? "bg-slate-900 text-white"
                                     : "bg-slate-100 text-slate-600"
@@ -535,7 +537,7 @@ export default function UncappedIntelligencePage() {
                           </span>
                           <button
                             onClick={loadUncappedData}
-                            className="mt-2 px-3 py-1.5 rounded-lg bg-[#101C37] text-white text-xs font-semibold hover:bg-[#1A2B50] transition-colors flex items-center gap-1.5"
+                            className="mt-2 px-3 py-1.5 rounded-lg bg-[#111C38] text-white text-xs font-semibold hover:bg-[#1A2B50] transition-colors flex items-center gap-1.5"
                           >
                             <RefreshCw className="w-3.5 h-3.5" />
                             <span>Retry Request</span>
@@ -680,7 +682,7 @@ export default function UncappedIntelligencePage() {
 
               <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200/70">
                 <div className="text-[10px] text-slate-500 font-mono uppercase">Overall R1 Rank</div>
-                <div className="text-lg font-extrabold font-mono text-[#101C37] mt-1">
+                <div className="text-lg font-extrabold font-mono text-[#111C38] mt-1">
                   #{selectedPlayer.overall_r1_rank}
                 </div>
               </div>
@@ -696,7 +698,7 @@ export default function UncappedIntelligencePage() {
             <div className="flex justify-end pt-2">
               <button
                 onClick={closeDossier}
-                className="px-5 py-2 rounded-lg bg-[#101C37] hover:bg-[#1A2B50] text-xs font-semibold text-white transition-colors"
+                className="px-5 py-2 rounded-lg bg-[#111C38] hover:bg-[#1A2B50] text-xs font-semibold text-white transition-colors"
               >
                 Close Dossier
               </button>

@@ -263,7 +263,7 @@ export default function TacticalIntelligencePage() {
       {/* ------------------------------------------------------------------- */}
       <section className="space-y-3">
         <div className="flex flex-wrap items-center gap-3 text-xs">
-          <span className="font-mono font-bold tracking-widest text-[#E91E8F] uppercase">
+          <span className="font-mono font-bold tracking-widest text-[#E91E8C] uppercase">
             Rajasthan Royals Analytics
           </span>
           <span className="text-slate-300">•</span>
@@ -291,9 +291,9 @@ export default function TacticalIntelligencePage() {
           <div className="flex flex-wrap items-center gap-3 shrink-0">
             <Link
               href="/pressure"
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[#101C37] text-white text-xs font-semibold hover:bg-[#1A2B50] transition-colors shadow-sm"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[#111C38] text-white text-xs font-semibold hover:bg-[#1A2B50] transition-colors shadow-sm"
             >
-              <Shield size={14} className="text-[#E91E8F]" />
+              <Shield size={14} className="text-[#E91E8C]" />
               <span>Pressure Leaderboards</span>
               <ArrowRight size={13} className="text-slate-400" />
             </Link>
@@ -322,161 +322,152 @@ export default function TacticalIntelligencePage() {
       )}
 
       {/* ------------------------------------------------------------------- */}
-      {/* 2. Premium KPI Dashboard (6 Compact Enterprise Cards) */}
+      {/* 2. Open Editorial Telemetry Strip (Inline Metric Groups) */}
       {/* ------------------------------------------------------------------- */}
-      <section className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3.5">
-        {/* KPI 1: Total Deliveries */}
-        <div className="p-4 rounded-xl bg-white border border-slate-200/80 shadow-2xs hover:border-slate-300 transition-colors relative overflow-hidden group">
-          <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-[#E91E8F] to-[#D6B56D]" />
-          <span className="text-[10px] font-mono uppercase tracking-wider text-slate-500 font-semibold block mb-1">
-            Total Deliveries
-          </span>
-          <div className="text-2xl font-extrabold text-slate-900 font-mono tracking-tight">
-            {summary ? summary.total_deliveries.toLocaleString() : "200,999"}
+      <section className="py-5 border-y border-slate-200/80">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6 md:gap-4">
+          <div className="space-y-1">
+            <span className="text-[10px] font-mono uppercase tracking-wider text-slate-500 font-semibold block">
+              Total Deliveries
+            </span>
+            <div className="text-2xl md:text-3xl font-extrabold text-[#111827] font-mono tracking-tight flex items-baseline gap-1.5">
+              <span>{summary ? summary.total_deliveries.toLocaleString() : "200,999"}</span>
+              <span className="w-1.5 h-1.5 rounded-full bg-[#E91E8C]" />
+            </div>
+            <p className="text-[11px] text-slate-500 truncate">
+              {summary ? summary.legal_deliveries.toLocaleString() : "192,709"} legal deliveries
+            </p>
           </div>
-          <p className="text-[11px] text-slate-500 mt-1 truncate">
-            {summary ? summary.legal_deliveries.toLocaleString() : "192,709"} legal deliveries
-          </p>
-        </div>
 
-        {/* KPI 2: Matches Covered */}
-        <div className="p-4 rounded-xl bg-white border border-slate-200/80 shadow-2xs hover:border-slate-300 transition-colors relative overflow-hidden group">
-          <div className="absolute top-0 left-0 right-0 h-0.5 bg-slate-300" />
-          <span className="text-[10px] font-mono uppercase tracking-wider text-slate-500 font-semibold block mb-1">
-            Matches Covered
-          </span>
-          <div className="text-2xl font-extrabold text-slate-900 font-mono tracking-tight">
-            {summary ? summary.total_matches_with_deliveries : "867"}
+          <div className="space-y-1">
+            <span className="text-[10px] font-mono uppercase tracking-wider text-slate-500 font-semibold block">
+              Matches Covered
+            </span>
+            <div className="text-2xl md:text-3xl font-extrabold text-[#111827] font-mono tracking-tight">
+              {summary ? summary.total_matches_with_deliveries : "867"}
+            </div>
+            <p className="text-[11px] text-slate-500 truncate">
+              +16 abandoned without ball
+            </p>
           </div>
-          <p className="text-[11px] text-slate-500 mt-1 truncate">
-            +16 abandoned without ball
-          </p>
-        </div>
 
-        {/* KPI 3: Runs Off Bat */}
-        <div className="p-4 rounded-xl bg-white border border-slate-200/80 shadow-2xs hover:border-slate-300 transition-colors relative overflow-hidden group">
-          <div className="absolute top-0 left-0 right-0 h-0.5 bg-emerald-400" />
-          <span className="text-[10px] font-mono uppercase tracking-wider text-slate-500 font-semibold block mb-1">
-            Runs Off Bat
-          </span>
-          <div className="text-2xl font-extrabold text-slate-900 font-mono tracking-tight">
-            {summary ? summary.total_runs_off_bat.toLocaleString() : "260,209"}
+          <div className="space-y-1">
+            <span className="text-[10px] font-mono uppercase tracking-wider text-slate-500 font-semibold block">
+              Runs Off Bat
+            </span>
+            <div className="text-2xl md:text-3xl font-extrabold text-[#111827] font-mono tracking-tight">
+              {summary ? summary.total_runs_off_bat.toLocaleString() : "260,209"}
+            </div>
+            <p className="text-[11px] text-slate-500 truncate">
+              Run rate: {summary ? summary.overall_run_rate_per_6_balls.toFixed(2) : "8.10"} rpo
+            </p>
           </div>
-          <p className="text-[11px] text-slate-500 mt-1 truncate">
-            Run rate: {summary ? summary.overall_run_rate_per_6_balls.toFixed(2) : "8.10"} rpo
-          </p>
-        </div>
 
-        {/* KPI 4: Total Wickets */}
-        <div className="p-4 rounded-xl bg-white border border-slate-200/80 shadow-2xs hover:border-slate-300 transition-colors relative overflow-hidden group">
-          <div className="absolute top-0 left-0 right-0 h-0.5 bg-rose-400" />
-          <span className="text-[10px] font-mono uppercase tracking-wider text-slate-500 font-semibold block mb-1">
-            Total Wickets
-          </span>
-          <div className="text-2xl font-extrabold text-slate-900 font-mono tracking-tight">
-            {summary ? summary.total_wickets_fallen.toLocaleString() : "11,460"}
+          <div className="space-y-1">
+            <span className="text-[10px] font-mono uppercase tracking-wider text-slate-500 font-semibold block">
+              Total Wickets
+            </span>
+            <div className="text-2xl md:text-3xl font-extrabold text-[#111827] font-mono tracking-tight">
+              {summary ? summary.total_wickets_fallen.toLocaleString() : "11,460"}
+            </div>
+            <p className="text-[11px] text-slate-500 truncate">
+              {summary ? summary.total_bowler_wickets.toLocaleString() : "10,489"} bowler wickets
+            </p>
           </div>
-          <p className="text-[11px] text-slate-500 mt-1 truncate">
-            {summary ? summary.total_bowler_wickets.toLocaleString() : "10,489"} bowler wickets
-          </p>
-        </div>
 
-        {/* KPI 5: Active Players */}
-        <div className="p-4 rounded-xl bg-white border border-slate-200/80 shadow-2xs hover:border-slate-300 transition-colors relative overflow-hidden group">
-          <div className="absolute top-0 left-0 right-0 h-0.5 bg-[#D6B56D]" />
-          <span className="text-[10px] font-mono uppercase tracking-wider text-slate-500 font-semibold block mb-1">
-            Active Players
-          </span>
-          <div className="text-2xl font-extrabold text-slate-900 font-mono tracking-tight">
-            {summary ? `${summary.total_unique_strikers} / ${summary.total_unique_bowlers}` : "618 / 460"}
+          <div className="space-y-1">
+            <span className="text-[10px] font-mono uppercase tracking-wider text-slate-500 font-semibold block">
+              Active Players
+            </span>
+            <div className="text-2xl md:text-3xl font-extrabold text-[#111827] font-mono tracking-tight">
+              {summary ? `${summary.total_unique_strikers} / ${summary.total_unique_bowlers}` : "618 / 460"}
+            </div>
+            <p className="text-[11px] text-slate-500 truncate">
+              Batters / Bowlers mapped
+            </p>
           </div>
-          <p className="text-[11px] text-slate-500 mt-1 truncate">
-            Batters / Bowlers mapped
-          </p>
-        </div>
 
-        {/* KPI 6: Radar Speeds */}
-        <div className="p-4 rounded-xl bg-white border border-slate-200/80 shadow-2xs hover:border-slate-300 transition-colors relative overflow-hidden group">
-          <div className="absolute top-0 left-0 right-0 h-0.5 bg-cyan-500" />
-          <span className="text-[10px] font-mono uppercase tracking-wider text-slate-500 font-semibold block mb-1">
-            Radar Speeds
-          </span>
-          <div className="text-2xl font-extrabold text-slate-900 font-mono tracking-tight">
-            {summary ? summary.valid_radar_speed_records.toLocaleString() : "123,113"}
+          <div className="space-y-1">
+            <span className="text-[10px] font-mono uppercase tracking-wider text-slate-500 font-semibold block">
+              Radar Speeds
+            </span>
+            <div className="text-2xl md:text-3xl font-extrabold text-[#111827] font-mono tracking-tight">
+              {summary ? summary.valid_radar_speed_records.toLocaleString() : "123,113"}
+            </div>
+            <p className="text-[11px] text-emerald-700 font-medium truncate">
+              61.3% sensor coverage
+            </p>
           </div>
-          <p className="text-[11px] text-emerald-700 font-medium mt-1 truncate">
-            61.3% sensor coverage
-          </p>
         </div>
       </section>
 
       {/* ------------------------------------------------------------------- */}
-      {/* 3. Tactical Sub-System Navigation Tabs (Refined Light Theme) */}
+      {/* 3. Tactical Sub-System Navigation Tabs (Refined Pink Underline) */}
       {/* ------------------------------------------------------------------- */}
-      <div className="bg-white rounded-xl border border-slate-200/80 p-1 shadow-2xs">
-        <div className="flex items-center gap-1 overflow-x-auto">
+      <div className="border-b border-slate-200">
+        <div className="flex items-center gap-6 overflow-x-auto">
           <button
             onClick={() => setActiveTab("overview")}
             className={cn(
-              "flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition-all whitespace-nowrap",
+              "flex items-center gap-2 py-3 text-xs font-semibold transition-all border-b-2 -mb-px whitespace-nowrap",
               activeTab === "overview"
-                ? "bg-[#101C37] text-white shadow-2xs"
-                : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
+                ? "border-[#E91E8C] text-[#E91E8C] font-bold"
+                : "border-transparent text-slate-500 hover:text-slate-800"
             )}
           >
-            <BarChart2 className={cn("w-4 h-4", activeTab === "overview" ? "text-[#E91E8F]" : "text-slate-400")} />
+            <BarChart2 className={cn("w-4 h-4", activeTab === "overview" ? "text-[#E91E8C]" : "text-slate-400")} />
             <span>Phase Mastery & Splits</span>
           </button>
 
           <button
             onClick={() => setActiveTab("strokes_handedness")}
             className={cn(
-              "flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition-all whitespace-nowrap",
+              "flex items-center gap-2 py-3 text-xs font-semibold transition-all border-b-2 -mb-px whitespace-nowrap",
               activeTab === "strokes_handedness"
-                ? "bg-[#101C37] text-white shadow-2xs"
-                : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
+                ? "border-[#E91E8C] text-[#E91E8C] font-bold"
+                : "border-transparent text-slate-500 hover:text-slate-800"
             )}
           >
-            <Target className={cn("w-4 h-4", activeTab === "strokes_handedness" ? "text-emerald-400" : "text-slate-400")} />
+            <Target className={cn("w-4 h-4", activeTab === "strokes_handedness" ? "text-[#E91E8C]" : "text-slate-400")} />
             <span>Strokes & Handedness</span>
           </button>
 
           <button
             onClick={() => setActiveTab("bowling_speed")}
             className={cn(
-              "flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition-all whitespace-nowrap",
+              "flex items-center gap-2 py-3 text-xs font-semibold transition-all border-b-2 -mb-px whitespace-nowrap",
               activeTab === "bowling_speed"
-                ? "bg-[#101C37] text-white shadow-2xs"
-                : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
+                ? "border-[#E91E8C] text-[#E91E8C] font-bold"
+                : "border-transparent text-slate-500 hover:text-slate-800"
             )}
           >
-            <Gauge className={cn("w-4 h-4", activeTab === "bowling_speed" ? "text-[#D6B56D]" : "text-slate-400")} />
+            <Gauge className={cn("w-4 h-4", activeTab === "bowling_speed" ? "text-[#E91E8C]" : "text-slate-400")} />
             <span>Variations & Radar Speed</span>
           </button>
 
           <button
             onClick={() => setActiveTab("death_overs")}
             className={cn(
-              "flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition-all whitespace-nowrap",
+              "flex items-center gap-2 py-3 text-xs font-semibold transition-all border-b-2 -mb-px whitespace-nowrap",
               activeTab === "death_overs"
-                ? "bg-[#101C37] text-white shadow-2xs"
-                : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
+                ? "border-[#E91E8C] text-[#E91E8C] font-bold"
+                : "border-transparent text-slate-500 hover:text-slate-800"
             )}
           >
-            <Flame className={cn("w-4 h-4", activeTab === "death_overs" ? "text-rose-400" : "text-slate-400")} />
+            <Flame className={cn("w-4 h-4", activeTab === "death_overs" ? "text-[#E91E8C]" : "text-slate-400")} />
             <span>Death Overs Finishers</span>
           </button>
 
           <button
             onClick={() => setActiveTab("matchups_players")}
             className={cn(
-              "flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition-all whitespace-nowrap",
+              "flex items-center gap-2 py-3 text-xs font-semibold transition-all border-b-2 -mb-px whitespace-nowrap",
               activeTab === "matchups_players"
-                ? "bg-[#101C37] text-white shadow-2xs"
-                : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
+                ? "border-[#E91E8C] text-[#E91E8C] font-bold"
+                : "border-transparent text-slate-500 hover:text-slate-800"
             )}
           >
-            <Swords className={cn("w-4 h-4", activeTab === "matchups_players" ? "text-cyan-400" : "text-slate-400")} />
+            <Swords className={cn("w-4 h-4", activeTab === "matchups_players" ? "text-[#E91E8C]" : "text-slate-400")} />
             <span>Matchup Battles & Dossiers</span>
           </button>
         </div>
@@ -490,7 +481,7 @@ export default function TacticalIntelligencePage() {
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 p-5 rounded-xl bg-white border border-slate-200/80 shadow-2xs">
             <div>
               <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
-                <BarChart2 className="w-5 h-5 text-[#E91E8F]" />
+                <BarChart2 className="w-5 h-5 text-[#E91E8C]" />
                 Tournament Match Phase Architecture
               </h2>
               <p className="text-xs text-slate-500 mt-0.5">
@@ -508,7 +499,7 @@ export default function TacticalIntelligencePage() {
           {/* Phase Cards Grid (Refined Light Theme) */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {/* Powerplay Card */}
-            <div className="p-6 rounded-xl bg-white border border-slate-200/80 shadow-2xs hover:shadow-sm hover:border-[#E91E8F]/40 transition-all flex flex-col justify-between">
+            <div className="p-6 rounded-xl bg-white border border-slate-200/80 shadow-2xs hover:shadow-sm hover:border-[#E91E8C]/40 transition-all flex flex-col justify-between">
               <div>
                 <div className="flex items-center justify-between mb-4">
                   <span className="text-xs font-mono font-bold px-2.5 py-0.5 rounded bg-pink-50 text-pink-700 border border-pink-200">
@@ -664,7 +655,7 @@ export default function TacticalIntelligencePage() {
           {/* Tactical Takeaways Box */}
           <div className="p-5 rounded-xl bg-white border border-slate-200/80 shadow-2xs flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
             <div className="flex items-center gap-3">
-              <div className="p-2.5 rounded-lg bg-pink-50 text-[#E91E8F] border border-pink-100">
+              <div className="p-2.5 rounded-lg bg-pink-50 text-[#E91E8C] border border-pink-100">
                 <Sparkles className="w-5 h-5" />
               </div>
               <div>
@@ -676,7 +667,7 @@ export default function TacticalIntelligencePage() {
             </div>
             <button
               onClick={() => setActiveTab("death_overs")}
-              className="px-4 py-2 rounded-lg bg-[#101C37] hover:bg-[#1A2B50] text-xs font-semibold text-white flex items-center gap-1.5 whitespace-nowrap transition-colors shadow-2xs"
+              className="px-4 py-2 rounded-lg bg-[#111C38] hover:bg-[#1A2B50] text-xs font-semibold text-white flex items-center gap-1.5 whitespace-nowrap transition-colors shadow-2xs"
             >
               <span>Explore Death Specialists</span>
               <ChevronRight className="w-3.5 h-3.5 text-[#D6B56D]" />
@@ -695,7 +686,7 @@ export default function TacticalIntelligencePage() {
             <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 p-5 rounded-xl bg-white border border-slate-200/80 shadow-2xs">
               <div>
                 <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
-                  <Target className="w-5 h-5 text-[#E91E8F]" />
+                  <Target className="w-5 h-5 text-[#E91E8C]" />
                   Batting Stroke Efficiency & Dismissal Threat (30 Strokes)
                 </h2>
                 <p className="text-xs text-slate-500 mt-0.5">
@@ -710,7 +701,7 @@ export default function TacticalIntelligencePage() {
                   <select
                     value={strokeMinBalls}
                     onChange={(e) => setStrokeMinBalls(Number(e.target.value))}
-                    className="bg-slate-50 text-slate-800 text-xs font-mono border border-slate-200 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-[#E91E8F]"
+                    className="bg-slate-50 text-slate-800 text-xs font-mono border border-slate-200 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-[#E91E8C]"
                   >
                     <option value={20}>20+ Balls</option>
                     <option value={50}>50+ Balls</option>
@@ -725,7 +716,7 @@ export default function TacticalIntelligencePage() {
                   <select
                     value={strokeSortKey}
                     onChange={(e) => setStrokeSortKey(e.target.value as any)}
-                    className="bg-slate-50 text-slate-800 text-xs font-mono border border-slate-200 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-[#E91E8F]"
+                    className="bg-slate-50 text-slate-800 text-xs font-mono border border-slate-200 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-[#E91E8C]"
                   >
                     <option value="runs_per_shot">Runs / Shot (Highest)</option>
                     <option value="deliveries_faced">Sample Volume (Balls)</option>
@@ -759,7 +750,7 @@ export default function TacticalIntelligencePage() {
                       return (
                         <tr key={idx} className="hover:bg-slate-50/70 transition-colors">
                           <td className="px-4 py-3 font-semibold text-slate-900 font-sans flex items-center gap-2">
-                            <span className="w-1.5 h-1.5 rounded-full bg-[#E91E8F]" />
+                            <span className="w-1.5 h-1.5 rounded-full bg-[#E91E8C]" />
                             {stroke.stroke}
                           </td>
                           <td className="px-4 py-3 text-right text-slate-600">
@@ -1034,7 +1025,7 @@ export default function TacticalIntelligencePage() {
                           </td>
                           <td className="px-4 py-3 text-center font-sans">
                             {isRR ? (
-                              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-pink-50 text-[#E91E8F] border border-pink-200">
+                              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-pink-50 text-[#E91E8C] border border-pink-200">
                                 Royals Bowler
                               </span>
                             ) : (
@@ -1055,7 +1046,7 @@ export default function TacticalIntelligencePage() {
             <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 p-5 rounded-xl bg-white border border-slate-200/80 shadow-2xs">
               <div>
                 <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
-                  <Layers className="w-5 h-5 text-[#E91E8F]" />
+                  <Layers className="w-5 h-5 text-[#E91E8C]" />
                   Bowling Variations & Delivery Styles (34 Styles)
                 </h2>
                 <p className="text-xs text-slate-500 mt-0.5">
@@ -1070,7 +1061,7 @@ export default function TacticalIntelligencePage() {
                   <select
                     value={variationMinBalls}
                     onChange={(e) => setVariationMinBalls(Number(e.target.value))}
-                    className="bg-slate-50 text-slate-800 text-xs font-mono border border-slate-200 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-[#E91E8F]"
+                    className="bg-slate-50 text-slate-800 text-xs font-mono border border-slate-200 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-[#E91E8C]"
                   >
                     <option value={20}>20+ Balls</option>
                     <option value={50}>50+ Balls</option>
@@ -1084,7 +1075,7 @@ export default function TacticalIntelligencePage() {
                   <select
                     value={variationSortKey}
                     onChange={(e) => setVariationSortKey(e.target.value as any)}
-                    className="bg-slate-50 text-slate-800 text-xs font-mono border border-slate-200 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-[#E91E8F]"
+                    className="bg-slate-50 text-slate-800 text-xs font-mono border border-slate-200 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-[#E91E8C]"
                   >
                     <option value="economy_rate">Economy Rate (Most Economical)</option>
                     <option value="wickets">Wickets (Most Threatening)</option>
@@ -1230,7 +1221,7 @@ export default function TacticalIntelligencePage() {
                 <select
                   value={deathMinBalls}
                   onChange={(e) => setDeathMinBalls(Number(e.target.value))}
-                  className="bg-slate-50 text-slate-800 text-xs font-mono border border-slate-200 rounded-lg px-2.5 py-1 focus:outline-none focus:border-[#E91E8F]"
+                  className="bg-slate-50 text-slate-800 text-xs font-mono border border-slate-200 rounded-lg px-2.5 py-1 focus:outline-none focus:border-[#E91E8C]"
                 >
                   <option value={50}>50+ Balls</option>
                   <option value={100}>100+ Balls (Standard)</option>
@@ -1359,7 +1350,7 @@ export default function TacticalIntelligencePage() {
             <div className="p-5 rounded-xl bg-white border border-slate-200/80 shadow-2xs flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
               <div>
                 <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
-                  <Swords className="w-5 h-5 text-[#E91E8F]" />
+                  <Swords className="w-5 h-5 text-[#E91E8C]" />
                   Direct Head-to-Head Micro-Battle Explorer
                 </h2>
                 <p className="text-xs text-slate-500 mt-0.5">
@@ -1380,7 +1371,7 @@ export default function TacticalIntelligencePage() {
                     className={cn(
                       "px-2.5 py-1 rounded-md text-xs font-semibold border transition-all",
                       h2hStrikerId === preset.strikerId && h2hBowlerId === preset.bowlerId
-                        ? "bg-[#101C37] text-white border-[#101C37] shadow-2xs"
+                        ? "bg-[#111C38] text-white border-[#111C38] shadow-2xs"
                         : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100"
                     )}
                   >
@@ -1394,7 +1385,7 @@ export default function TacticalIntelligencePage() {
             <div className="p-6 rounded-xl bg-white border border-slate-200/80 shadow-2xs">
               {h2hLoading ? (
                 <div className="flex items-center justify-center py-12 text-slate-500 text-xs font-mono">
-                  <RefreshCw className="w-5 h-5 animate-spin text-[#E91E8F] mr-2" />
+                  <RefreshCw className="w-5 h-5 animate-spin text-[#E91E8C] mr-2" />
                   Extracting empirical micro-battle records...
                 </div>
               ) : h2hData ? (
@@ -1403,11 +1394,11 @@ export default function TacticalIntelligencePage() {
                   <div className="flex flex-col md:flex-row items-center justify-between gap-6 pb-6 border-b border-slate-100">
                     {/* Striker side */}
                     <div className="flex items-center gap-4 text-left w-full md:w-auto">
-                      <div className="w-12 h-12 rounded-xl bg-pink-50 border border-pink-200 flex items-center justify-center text-[#E91E8F] font-bold text-sm">
+                      <div className="w-12 h-12 rounded-xl bg-pink-50 border border-pink-200 flex items-center justify-center text-[#E91E8C] font-bold text-sm">
                         BAT
                       </div>
                       <div>
-                        <span className="text-[10px] font-mono text-[#E91E8F] uppercase tracking-wider font-bold">Striker (Batter)</span>
+                        <span className="text-[10px] font-mono text-[#E91E8C] uppercase tracking-wider font-bold">Striker (Batter)</span>
                         <h3 className="text-xl font-bold text-slate-900">{h2hData.striker_name}</h3>
                         <span className="text-xs text-slate-500 font-mono">ID: {h2hData.striker_id}</span>
                       </div>
@@ -1521,7 +1512,7 @@ export default function TacticalIntelligencePage() {
                     placeholder="Search player name..."
                     value={playerSearchQuery}
                     onChange={(e) => handlePlayerSearch(e.target.value)}
-                    className="w-full bg-slate-50 text-slate-900 text-xs pl-9 pr-4 py-2 rounded-lg border border-slate-200 focus:outline-none focus:border-[#E91E8F] focus:bg-white transition-colors"
+                    className="w-full bg-slate-50 text-slate-900 text-xs pl-9 pr-4 py-2 rounded-lg border border-slate-200 focus:outline-none focus:border-[#E91E8C] focus:bg-white transition-colors"
                   />
                 </div>
 
@@ -1540,7 +1531,7 @@ export default function TacticalIntelligencePage() {
                       >
                         <span className="font-semibold text-slate-900">{p.player_name}</span>
                         <div className="flex items-center gap-1.5 text-[10px] font-mono text-slate-500">
-                          {p.is_batter && <span className="text-[#E91E8F] font-bold">BAT</span>}
+                          {p.is_batter && <span className="text-[#E91E8C] font-bold">BAT</span>}
                           {p.is_bowler && <span className="text-cyan-700 font-bold">BWL</span>}
                         </div>
                       </button>
@@ -1560,7 +1551,7 @@ export default function TacticalIntelligencePage() {
                   className={cn(
                     "px-3 py-1 rounded-lg text-xs font-semibold border transition-all flex items-center gap-1.5",
                     selectedPlayerId === player.id
-                      ? "bg-[#101C37] text-white border-[#101C37] shadow-2xs font-bold"
+                      ? "bg-[#111C38] text-white border-[#111C38] shadow-2xs font-bold"
                       : "bg-white text-slate-700 border-slate-200 hover:bg-slate-50"
                   )}
                 >
@@ -1586,7 +1577,7 @@ export default function TacticalIntelligencePage() {
                       </h3>
                       <div className="flex items-center gap-2 mt-0.5">
                         {playerProfile.is_batter && (
-                          <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-pink-50 text-[#E91E8F] border border-pink-200">
+                          <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-pink-50 text-[#E91E8C] border border-pink-200">
                             Batter Profile Active
                           </span>
                         )}
@@ -1604,7 +1595,7 @@ export default function TacticalIntelligencePage() {
                 {playerProfile.batting_profile && (
                   <div className="space-y-4">
                     <h4 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-                      <TrendingUp className="w-4 h-4 text-[#E91E8F]" />
+                      <TrendingUp className="w-4 h-4 text-[#E91E8C]" />
                       Batting Diagnostics & Phase Splits
                     </h4>
 

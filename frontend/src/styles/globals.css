@@ -3,11 +3,13 @@
 @tailwind utilities;
 
 :root {
-  --background: #F4F6FA;
-  --foreground: #101C37;
-  --royals-navy: #101C37;
-  --royals-pink: #E91E8F;
+  --background: #F5F6FA;
+  --foreground: #111827;
+  --royals-navy: #111C38;
+  --royals-pink: #E91E8C;
+  --royals-pink-soft: #FCE7F3;
   --royals-gold: #D6B56D;
+  --border-color: #E5E7EB;
 }
 
 body {
@@ -18,21 +20,21 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Custom scrollbars */
+/* Custom scrollbars - Light & Clean */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #0B1220;
+  background: #F5F6FA;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #1A2B50;
+  background: #CBD5E1;
   border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #E91E8F;
+  background: #E91E8C;
 }

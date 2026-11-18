@@ -22,7 +22,7 @@ export const StatCard: React.FC<StatCardProps> = ({
   return (
     <div
       className={cn(
-        "bg-white rounded-xl border border-slate-200/80 p-5 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden",
+        "bg-white rounded-xl border border-slate-200/80 p-5 shadow-2xs hover:shadow-xs transition-shadow relative overflow-hidden",
         className
       )}
     >
@@ -31,14 +31,14 @@ export const StatCard: React.FC<StatCardProps> = ({
           {title}
         </span>
         {icon && (
-          <div className="p-2 rounded-lg bg-slate-50 text-[#101C37] border border-slate-100">
+          <div className="p-2 rounded-lg bg-slate-50 text-[#111C38] border border-slate-100">
             {icon}
           </div>
         )}
       </div>
 
       <div className="flex items-baseline gap-2 mb-1">
-        <h3 className="text-2xl font-bold tracking-tight text-[#101C37] font-mono">
+        <h3 className="text-2xl font-bold tracking-tight text-[#111827] font-mono">
           {value}
         </h3>
         {badgeText && (
@@ -51,7 +51,7 @@ export const StatCard: React.FC<StatCardProps> = ({
       <p className="text-xs text-slate-500 leading-relaxed">{subtitle}</p>
 
       {/* Royals Pink subtle accent stripe at top */}
-      <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-[#101C37] via-[#E91E8F] to-[#D6B56D]" />
+      <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-[#111C38] via-[#E91E8C] to-[#D6B56D]" />
     </div>
   );
 };

@@ -104,7 +104,7 @@ export default function AcquisitionPage() {
       {/* Header Banner */}
       <section className="space-y-3">
         <div className="flex flex-wrap items-center gap-3 text-xs">
-          <span className="font-mono font-bold tracking-widest text-[#E91E8F] uppercase">
+          <span className="font-mono font-bold tracking-widest text-[#E91E8C] uppercase">
             Rajasthan Royals Infrastructure
           </span>
           <span className="text-slate-300">•</span>
@@ -132,9 +132,9 @@ export default function AcquisitionPage() {
           <button
             onClick={loadAllData}
             disabled={loading}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-[#101C37] text-white text-xs font-semibold hover:bg-[#1A2B50] transition-colors shadow-sm shrink-0 self-start md:self-auto"
+            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-[#111C38] text-white text-xs font-semibold hover:bg-[#1A2B50] transition-colors shadow-sm shrink-0 self-start md:self-auto"
           >
-            <RefreshCw size={14} className={loading ? "animate-spin text-[#E91E8F]" : "text-[#D6B56D]"} />
+            <RefreshCw size={14} className={loading ? "animate-spin text-[#E91E8C]" : "text-[#D6B56D]"} />
             <span>Refresh Feeds</span>
           </button>
         </div>
@@ -209,11 +209,11 @@ export default function AcquisitionPage() {
               onClick={() => setActiveTab(tab.id as any)}
               className={`flex items-center gap-2 px-4 py-2.5 text-xs font-bold transition-all border-b-2 whitespace-nowrap ${
                 isActive
-                  ? "border-[#E91E8F] text-[#101C37] bg-white rounded-t-lg shadow-sm"
-                  : "border-transparent text-slate-500 hover:text-[#101C37] hover:border-slate-300"
+                  ? "border-[#E91E8C] text-[#111C38] bg-white rounded-t-lg shadow-sm"
+                  : "border-transparent text-slate-500 hover:text-[#111C38] hover:border-slate-300"
               }`}
             >
-              <Icon size={15} className={isActive ? "text-[#E91E8F]" : "text-slate-400"} />
+              <Icon size={15} className={isActive ? "text-[#E91E8C]" : "text-slate-400"} />
               <span>{tab.label}</span>
             </button>
           );
@@ -225,7 +225,7 @@ export default function AcquisitionPage() {
         <div className="space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-4 rounded-xl border border-slate-200">
             <div>
-              <h3 className="text-sm font-bold text-[#101C37]">Evaluated Cricket Data Sources</h3>
+              <h3 className="text-sm font-bold text-[#111C38]">Evaluated Cricket Data Sources</h3>
               <p className="text-xs text-slate-500">
                 Sources evaluated against legal licensing, rate limits, coverage, and anti-scraping policies.
               </p>
@@ -237,7 +237,7 @@ export default function AcquisitionPage() {
                   onClick={() => setSelectedTier(tier)}
                   className={`px-2.5 py-1 rounded-md text-[11px] font-mono font-semibold transition-all ${
                     selectedTier === tier
-                      ? "bg-[#101C37] text-white shadow-sm"
+                      ? "bg-[#111C38] text-white shadow-sm"
                       : "bg-slate-100 text-slate-600 hover:bg-slate-200"
                   }`}
                 >
@@ -251,7 +251,7 @@ export default function AcquisitionPage() {
             {filteredSources.map((source) => (
               <div
                 key={source.source_id}
-                className="bg-white rounded-xl border border-slate-200/80 p-5 shadow-sm hover:border-[#E91E8F]/40 transition-all flex flex-col justify-between"
+                className="bg-white rounded-xl border border-slate-200/80 p-5 shadow-sm hover:border-[#E91E8C]/40 transition-all flex flex-col justify-between"
               >
                 <div>
                   <div className="flex items-center justify-between mb-2">
@@ -273,7 +273,7 @@ export default function AcquisitionPage() {
                     </span>
                   </div>
 
-                  <h4 className="text-base font-bold text-[#101C37] mb-1">{source.name}</h4>
+                  <h4 className="text-base font-bold text-[#111C38] mb-1">{source.name}</h4>
                   <p className="text-xs font-mono text-slate-400 mb-3">{source.source_id}</p>
 
                   <div className="space-y-1.5 text-xs text-slate-600 mb-4 bg-slate-50 p-3 rounded-lg border border-slate-100">
@@ -303,7 +303,7 @@ export default function AcquisitionPage() {
                       {source.status === "active" ? "Operational" : "Manual Route Only"}
                     </span>
                   </div>
-                  <span className="text-[11px] text-[#E91E8F] font-semibold">
+                  <span className="text-[11px] text-[#E91E8C] font-semibold">
                     {source.reliability_assessment.split(" ")[0]} Reliability
                   </span>
                 </div>
@@ -318,7 +318,7 @@ export default function AcquisitionPage() {
         <div className="space-y-6">
           <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm space-y-4">
             <div>
-              <h3 className="text-sm font-bold text-[#101C37]">Tournament Coverage Status & Gap Audit</h3>
+              <h3 className="text-sm font-bold text-[#111C38]">Tournament Coverage Status & Gap Audit</h3>
               <p className="text-xs text-slate-500">
                 Audited data availability across targeted competitions. Unacquired elements are transparently documented.
               </p>
@@ -332,7 +332,7 @@ export default function AcquisitionPage() {
                 >
                   <div className="flex items-center justify-between">
                     <div>
-                      <h4 className="text-sm font-bold text-[#101C37]">
+                      <h4 className="text-sm font-bold text-[#111C38]">
                         {comp.competition_name} ({comp.season})
                       </h4>
                       <span className="text-[11px] text-slate-500 font-mono">
@@ -355,15 +355,15 @@ export default function AcquisitionPage() {
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs pt-2 border-t border-slate-200/60">
                     <div>
                       <span className="text-slate-400 block">Matches:</span>
-                      <span className="font-bold font-mono text-[#101C37]">{comp.matches_acquired}</span>
+                      <span className="font-bold font-mono text-[#111C38]">{comp.matches_acquired}</span>
                     </div>
                     <div>
                       <span className="text-slate-400 block">Ball-by-Ball:</span>
-                      <span className="font-bold font-mono text-[#101C37]">{comp.ball_by_ball_available} rows</span>
+                      <span className="font-bold font-mono text-[#111C38]">{comp.ball_by_ball_available} rows</span>
                     </div>
                     <div>
                       <span className="text-slate-400 block">Scorecards:</span>
-                      <span className="font-bold font-mono text-[#101C37]">{comp.scorecards_available}</span>
+                      <span className="font-bold font-mono text-[#111C38]">{comp.scorecards_available}</span>
                     </div>
                     <div>
                       <span className="text-slate-400 block">Squads:</span>
@@ -384,7 +384,7 @@ export default function AcquisitionPage() {
 
           {/* Dataset Manifests Table */}
           <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm space-y-4">
-            <h3 className="text-sm font-bold text-[#101C37]">Parquet Dataset Manifests</h3>
+            <h3 className="text-sm font-bold text-[#111C38]">Parquet Dataset Manifests</h3>
             <div className="overflow-x-auto">
               <table className="w-full text-xs text-left">
                 <thead className="bg-slate-50 text-slate-500 uppercase font-mono border-b border-slate-200">
@@ -400,7 +400,7 @@ export default function AcquisitionPage() {
                 <tbody className="divide-y divide-slate-100">
                   {datasets.map((d) => (
                     <tr key={d.dataset_id} className="hover:bg-slate-50/50 font-mono">
-                      <td className="px-4 py-3 font-bold text-[#101C37]">{d.dataset_id}</td>
+                      <td className="px-4 py-3 font-bold text-[#111C38]">{d.dataset_id}</td>
                       <td className="px-4 py-3 text-slate-600">{d.source_id}</td>
                       <td className="px-4 py-3 text-slate-800 font-bold">{d.total_matches}</td>
                       <td className="px-4 py-3 text-slate-800 font-bold">{d.total_deliveries}</td>
@@ -431,7 +431,7 @@ export default function AcquisitionPage() {
         <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-sm font-bold text-[#101C37]">Ingestion Run History</h3>
+              <h3 className="text-sm font-bold text-[#111C38]">Ingestion Run History</h3>
               <p className="text-xs text-slate-500">
                 Audited execution logs with execution durations, arithmetic validation checks, and SHA-256 hashes.
               </p>
@@ -454,7 +454,7 @@ export default function AcquisitionPage() {
               <tbody className="divide-y divide-slate-100">
                 {runs.map((r) => (
                   <tr key={r.run_id} className="hover:bg-slate-50/50 font-mono">
-                    <td className="px-4 py-3 font-bold text-[#101C37]">{r.run_id}</td>
+                    <td className="px-4 py-3 font-bold text-[#111C38]">{r.run_id}</td>
                     <td className="px-4 py-3 text-slate-600">{r.source_id}</td>
                     <td className="px-4 py-3 text-slate-600">{r.season}</td>
                     <td className="px-4 py-3 text-slate-600">{r.duration_seconds}s</td>
@@ -485,7 +485,7 @@ export default function AcquisitionPage() {
       {activeTab === "upload" && (
         <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm max-w-2xl mx-auto space-y-6">
           <div>
-            <h3 className="text-base font-bold text-[#101C37]">Compliant Manual Dataset Import</h3>
+            <h3 className="text-base font-bold text-[#111C38]">Compliant Manual Dataset Import</h3>
             <p className="text-xs text-slate-500 leading-relaxed mt-1">
               Authorized interface for uploading structured match scorecards, scouting notes, or CSV player registries.
               All uploads are checked for file size (&le; 20MB), assigned cryptographic SHA-256 hashes, and validated
@@ -494,7 +494,7 @@ export default function AcquisitionPage() {
           </div>
 
           <form onSubmit={handleUploadSubmit} className="space-y-4">
-            <div className="border-2 border-dashed border-slate-200 hover:border-[#E91E8F] transition-colors rounded-xl p-8 text-center bg-slate-50/50 flex flex-col items-center justify-center">
+            <div className="border-2 border-dashed border-slate-200 hover:border-[#E91E8C] transition-colors rounded-xl p-8 text-center bg-slate-50/50 flex flex-col items-center justify-center">
               <Upload size={32} className="text-slate-400 mb-2" />
               <input
                 type="file"
@@ -505,7 +505,7 @@ export default function AcquisitionPage() {
               />
               <label
                 htmlFor="fileInput"
-                className="cursor-pointer text-xs font-bold text-[#E91E8F] hover:underline mb-1"
+                className="cursor-pointer text-xs font-bold text-[#E91E8C] hover:underline mb-1"
               >
                 {uploadFile ? uploadFile.name : "Select a .json or .csv match file"}
               </label>
@@ -517,11 +517,11 @@ export default function AcquisitionPage() {
             <button
               type="submit"
               disabled={!uploadFile || uploading}
-              className="w-full py-2.5 px-4 rounded-xl bg-[#101C37] hover:bg-[#1A2B50] text-white text-xs font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="w-full py-2.5 px-4 rounded-xl bg-[#111C38] hover:bg-[#1A2B50] text-white text-xs font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               {uploading ? (
                 <>
-                  <RefreshCw size={14} className="animate-spin text-[#E91E8F]" />
+                  <RefreshCw size={14} className="animate-spin text-[#E91E8C]" />
                   <span>Validating & Hashing...</span>
                 </>
               ) : (
@@ -536,7 +536,7 @@ export default function AcquisitionPage() {
           {uploadResult && (
             <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 text-xs space-y-2 font-mono">
               <div className="flex items-center justify-between">
-                <span className="font-bold text-[#101C37]">Ingestion Audit Result:</span>
+                <span className="font-bold text-[#111C38]">Ingestion Audit Result:</span>
                 <span className="text-emerald-600 font-bold">SHA-256 Verified</span>
               </div>
               <p className="text-slate-600">{uploadResult.message}</p>

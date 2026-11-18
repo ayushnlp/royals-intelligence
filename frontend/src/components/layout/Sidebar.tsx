@@ -80,7 +80,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ className }) => {
         className={cn(
           "flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs transition-colors group relative",
           isActive
-            ? "bg-white/[0.08] text-white font-medium border-l-2 border-[#E91E8F] pl-2.5"
+            ? "bg-white/[0.08] text-white font-medium border-l-2 border-[#E91E8C] pl-2.5"
             : "text-slate-400 hover:text-slate-100 hover:bg-white/[0.04]"
         )}
       >
@@ -88,7 +88,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ className }) => {
           size={17}
           className={cn(
             "shrink-0 transition-colors",
-            isActive ? "text-[#E91E8F]" : "text-slate-400 group-hover:text-slate-200"
+            isActive ? "text-[#E91E8C]" : "text-slate-400 group-hover:text-slate-200"
           )}
         />
 
@@ -109,7 +109,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ className }) => {
   return (
     <aside
       className={cn(
-        "relative flex flex-col bg-[#101C37] text-slate-200 transition-all duration-200 z-30 min-h-screen border-r border-slate-800/80 select-none",
+        "relative flex flex-col bg-[#111C38] text-slate-200 transition-all duration-200 z-30 min-h-screen border-r border-slate-800/80 select-none",
         collapsed ? "w-16" : "w-60",
         className
       )}
@@ -118,9 +118,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ className }) => {
       <div className="flex items-center justify-between px-4 h-16 border-b border-slate-800/60">
         {!collapsed ? (
           <Link href="/" className="flex items-center gap-2.5 group">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-[#E91E8F] to-[#D6B56D] p-px flex items-center justify-center shrink-0">
-              <div className="w-full h-full bg-[#101C37] rounded-[7px] flex items-center justify-center">
-                <span className="font-bold text-xs text-transparent bg-clip-text bg-gradient-to-r from-[#E91E8F] to-[#D6B56D]">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-[#E91E8C] to-[#D6B56D] p-px flex items-center justify-center shrink-0">
+              <div className="w-full h-full bg-[#111C38] rounded-[7px] flex items-center justify-center">
+                <span className="font-bold text-xs text-transparent bg-clip-text bg-gradient-to-r from-[#E91E8C] to-[#D6B56D]">
                   RR
                 </span>
               </div>
@@ -135,9 +135,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ className }) => {
             </div>
           </Link>
         ) : (
-          <Link href="/" className="mx-auto w-8 h-8 rounded-lg bg-gradient-to-tr from-[#E91E8F] to-[#D6B56D] p-px flex items-center justify-center">
-            <div className="w-full h-full bg-[#101C37] rounded-[7px] flex items-center justify-center">
-              <span className="font-bold text-xs text-[#E91E8F]">RR</span>
+          <Link href="/" className="mx-auto w-8 h-8 rounded-lg bg-gradient-to-tr from-[#E91E8C] to-[#D6B56D] p-px flex items-center justify-center">
+            <div className="w-full h-full bg-[#111C38] rounded-[7px] flex items-center justify-center">
+              <span className="font-bold text-xs text-[#E91E8C]">RR</span>
             </div>
           </Link>
         )}

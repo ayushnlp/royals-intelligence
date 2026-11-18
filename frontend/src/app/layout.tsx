@@ -16,7 +16,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className="bg-[#F4F6FA] text-[#101C37] antialiased flex min-h-screen">
+      <body className="bg-[#F5F6FA] text-[#111827] antialiased flex min-h-screen">
         {/* Rajasthan Royals Sidebar */}
         <Sidebar />
 

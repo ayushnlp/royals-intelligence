@@ -9,7 +9,7 @@ export default function NotFound() {
       <p className="text-xs text-slate-500">The requested tactical resource could not be located.</p>
       <Link
         href="/"
-        className="px-4 py-2 rounded-lg bg-[#E91E8F] text-white text-xs font-semibold shadow-md hover:bg-[#E91E8F]/90 transition-all"
+        className="px-4 py-2 rounded-lg bg-[#E91E8C] text-white text-xs font-semibold shadow-md hover:bg-[#E91E8C]/90 transition-all"
       >
         Return to Overview
       </Link>

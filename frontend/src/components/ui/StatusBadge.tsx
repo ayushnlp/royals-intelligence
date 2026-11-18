@@ -31,7 +31,7 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({ status, label, classNa
     },
     stage0: {
       bg: "bg-pink-500/10 border-pink-500/30 text-pink-600 dark:text-pink-400",
-      dot: "bg-[#E91E8F]",
+      dot: "bg-[#E91E8C]",
       defaultLabel: "Stage 0 Baseline",
     },
   };

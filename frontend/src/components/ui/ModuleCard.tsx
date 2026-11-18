@@ -8,10 +8,10 @@ interface ModuleCardProps {
 
 export const ModuleCard: React.FC<ModuleCardProps> = ({ module }) => {
   return (
-    <div className="bg-white rounded-xl border border-slate-200/80 p-5 shadow-sm hover:border-[#E91E8F]/40 transition-all group flex flex-col justify-between">
+    <div className="bg-white rounded-xl border border-slate-200/80 p-5 shadow-2xs hover:border-[#E91E8C]/40 transition-all group flex flex-col justify-between">
       <div>
         <div className="flex items-center justify-between mb-3">
-          <span className="text-[11px] font-mono font-bold text-slate-400 group-hover:text-[#E91E8F] transition-colors">
+          <span className="text-[11px] font-mono font-bold text-slate-400 group-hover:text-[#E91E8C] transition-colors">
             MOD-{String(module.number).padStart(2, "0")}
           </span>
           <span className="text-[11px] font-medium text-slate-500 bg-slate-100 px-2 py-0.5 rounded">
@@ -19,7 +19,7 @@ export const ModuleCard: React.FC<ModuleCardProps> = ({ module }) => {
           </span>
         </div>
 
-        <h4 className="text-base font-semibold text-[#101C37] mb-2 group-hover:text-[#E91E8F] transition-colors">
+        <h4 className="text-base font-semibold text-[#111827] mb-2 group-hover:text-[#E91E8C] transition-colors">
           {module.title}
         </h4>
 

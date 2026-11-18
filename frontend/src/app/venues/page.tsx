@@ -98,7 +98,7 @@ export default function VenuePitchIntelligencePage() {
       {/* Top Header & Context Banner */}
       <section className="space-y-3">
         <div className="flex flex-wrap items-center gap-3 text-xs">
-          <span className="font-mono font-bold tracking-widest text-[#E91E8F] uppercase">
+          <span className="font-mono font-bold tracking-widest text-[#E91E8C] uppercase">
             Rajasthan Royals Operations
           </span>
           <span className="text-slate-300">•</span>
@@ -139,11 +139,11 @@ export default function VenuePitchIntelligencePage() {
               onClick={() => setRrOnly(true)}
               className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-md transition-all ${
                 rrOnly
-                  ? "bg-[#101C37] text-white shadow-sm"
+                  ? "bg-[#111C38] text-white shadow-sm"
                   : "text-slate-500 hover:text-slate-700"
               }`}
             >
-              <Shield size={13} className="text-[#E91E8F]" />
+              <Shield size={13} className="text-[#E91E8C]" />
               <span>RR Grounds (2)</span>
             </button>
           </div>
@@ -158,14 +158,14 @@ export default function VenuePitchIntelligencePage() {
             onClick={() => setSelectedVenueCode(v.venue_code)}
             className={`flex-shrink-0 px-4 py-2.5 rounded-xl border text-left transition-all ${
               selectedVenueCode === v.venue_code
-                ? "bg-[#101C37] text-white border-[#101C37] shadow-md ring-2 ring-[#E91E8F]/20"
+                ? "bg-[#111C38] text-white border-[#111C38] shadow-md ring-2 ring-[#E91E8C]/20"
                 : "bg-white text-slate-700 border-slate-200 hover:border-slate-300"
             }`}
           >
             <div className="flex items-center justify-between gap-3">
               <span className="font-bold text-xs">{v.name}</span>
               {v.is_rr_home && (
-                <span className="px-1.5 py-0.2 rounded text-[9px] font-mono font-bold bg-[#E91E8F] text-white">
+                <span className="px-1.5 py-0.2 rounded text-[9px] font-mono font-bold bg-[#E91E8C] text-white">
                   RR HOME
                 </span>
               )}
@@ -187,7 +187,7 @@ export default function VenuePitchIntelligencePage() {
                 <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-slate-100 text-slate-700">
                   {venueDetail.venue_code}
                 </span>
-                <span className="text-xs font-mono font-bold text-[#E91E8F]">
+                <span className="text-xs font-mono font-bold text-[#E91E8C]">
                   {venueDetail.rr_venue_type}
                 </span>
                 {venueDetail.altitude_m && (
@@ -196,9 +196,9 @@ export default function VenuePitchIntelligencePage() {
                   </span>
                 )}
               </div>
-              <h2 className="text-2xl font-black text-[#101C37]">{venueDetail.name}</h2>
+              <h2 className="text-2xl font-black text-[#111C38]">{venueDetail.name}</h2>
               <p className="text-xs text-slate-500 mt-1 flex items-center gap-1.5">
-                <MapPin size={13} className="text-[#E91E8F]" />
+                <MapPin size={13} className="text-[#E91E8C]" />
                 {venueDetail.city}, {venueDetail.state ? `${venueDetail.state}, ` : ""}{venueDetail.country} • GPS: {venueDetail.latitude}°N, {venueDetail.longitude}°E
               </p>
             </div>
@@ -207,71 +207,71 @@ export default function VenuePitchIntelligencePage() {
             <div className="flex items-center gap-4 text-right">
               <div className="p-3 bg-slate-50 rounded-xl border border-slate-100">
                 <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Total Matches</div>
-                <div className="text-lg font-black text-[#101C37]">{venueDetail.matches_hosted_count}</div>
+                <div className="text-lg font-black text-[#111C38]">{venueDetail.matches_hosted_count}</div>
               </div>
               <div className="p-3 bg-slate-50 rounded-xl border border-slate-100">
                 <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Soil Type</div>
-                <div className="text-sm font-extrabold text-[#E91E8F] mt-0.5">{venueDetail.pitch_soil_type || "Standard Turf"}</div>
+                <div className="text-sm font-extrabold text-[#E91E8C] mt-0.5">{venueDetail.pitch_soil_type || "Standard Turf"}</div>
               </div>
             </div>
           </div>
 
           {/* Navigation Tabs within Venue */}
-          <div className="flex flex-wrap gap-2 border-b border-slate-200 pb-2">
+          <div className="flex items-center gap-6 border-b border-slate-200 overflow-x-auto">
             <button
               onClick={() => setActiveTab("geometry")}
-              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all ${
+              className={`flex items-center gap-2 py-3 text-xs font-semibold transition-all border-b-2 -mb-px whitespace-nowrap ${
                 activeTab === "geometry"
-                  ? "bg-[#101C37] text-white shadow-sm"
-                  : "text-slate-600 hover:bg-slate-100"
+                  ? "border-[#E91E8C] text-[#E91E8C] font-bold"
+                  : "border-transparent text-slate-500 hover:text-slate-800"
               }`}
             >
-              <Compass size={14} />
-              Boundary Geometry
+              <Compass size={14} className="text-[#D6B56D]" />
+              <span>Boundary Geometry</span>
             </button>
             <button
               onClick={() => setActiveTab("scoring")}
-              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all ${
+              className={`flex items-center gap-2 py-3 text-xs font-semibold transition-all border-b-2 -mb-px whitespace-nowrap ${
                 activeTab === "scoring"
-                  ? "bg-[#101C37] text-white shadow-sm"
-                  : "text-slate-600 hover:bg-slate-100"
+                  ? "border-[#E91E8C] text-[#E91E8C] font-bold"
+                  : "border-transparent text-slate-500 hover:text-slate-800"
               }`}
             >
-              <TrendingUp size={14} />
-              Historical Scoring & Phases
+              <TrendingUp size={14} className="text-emerald-600" />
+              <span>Historical Scoring & Phases</span>
             </button>
             <button
               onClick={() => setActiveTab("pitch")}
-              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all ${
+              className={`flex items-center gap-2 py-3 text-xs font-semibold transition-all border-b-2 -mb-px whitespace-nowrap ${
                 activeTab === "pitch"
-                  ? "bg-[#101C37] text-white shadow-sm"
-                  : "text-slate-600 hover:bg-slate-100"
+                  ? "border-[#E91E8C] text-[#E91E8C] font-bold"
+                  : "border-transparent text-slate-500 hover:text-slate-800"
               }`}
             >
-              <Target size={14} />
-              Pitch & Pace-vs-Spin Evidence
+              <Target size={14} className="text-cyan-600" />
+              <span>Pitch & Pace-vs-Spin Evidence</span>
             </button>
             <button
               onClick={() => setActiveTab("weather")}
-              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all ${
+              className={`flex items-center gap-2 py-3 text-xs font-semibold transition-all border-b-2 -mb-px whitespace-nowrap ${
                 activeTab === "weather"
-                  ? "bg-[#101C37] text-white shadow-sm"
-                  : "text-slate-600 hover:bg-slate-100"
+                  ? "border-[#E91E8C] text-[#E91E8C] font-bold"
+                  : "border-transparent text-slate-500 hover:text-slate-800"
               }`}
             >
-              <Droplets size={14} />
-              Weather & Dew Telemetry
+              <Droplets size={14} className="text-blue-500" />
+              <span>Weather & Dew Telemetry</span>
             </button>
             <button
               onClick={() => setActiveTab("uncapped_track")}
-              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all ${
+              className={`flex items-center gap-2 py-3 text-xs font-semibold transition-all border-b-2 -mb-px whitespace-nowrap ${
                 activeTab === "uncapped_track"
-                  ? "bg-[#E91E8F] text-white shadow-sm"
-                  : "text-[#E91E8F] bg-pink-50 hover:bg-pink-100"
+                  ? "border-[#E91E8C] text-[#E91E8C] font-bold"
+                  : "border-transparent text-slate-500 hover:text-slate-800"
               }`}
             >
-              <Award size={14} />
-              Uncapped Prospect Tracking
+              <Award size={14} className="text-[#E91E8C]" />
+              <span>Uncapped Prospect Tracking</span>
             </button>
           </div>
 
@@ -284,7 +284,7 @@ export default function VenuePitchIntelligencePage() {
                   <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
                     Straight Boundary (Down the V)
                   </div>
-                  <div className="text-3xl font-black text-[#101C37] my-1">
+                  <div className="text-3xl font-black text-[#111C38] my-1">
                     {venueDetail.boundary_dimensions.straight_m ? (
                       <span>{venueDetail.boundary_dimensions.straight_m} <span className="text-sm font-normal text-slate-500">meters</span></span>
                     ) : (
@@ -299,7 +299,7 @@ export default function VenuePitchIntelligencePage() {
                   <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
                     Off-Side Square Boundary
                   </div>
-                  <div className="text-3xl font-black text-[#101C37] my-1">
+                  <div className="text-3xl font-black text-[#111C38] my-1">
                     {venueDetail.boundary_dimensions.off_boundary_m ? (
                       <span>{venueDetail.boundary_dimensions.off_boundary_m} <span className="text-sm font-normal text-slate-500">meters</span></span>
                     ) : (
@@ -314,7 +314,7 @@ export default function VenuePitchIntelligencePage() {
                   <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
                     Leg-Side Square Boundary
                   </div>
-                  <div className="text-3xl font-black text-[#101C37] my-1">
+                  <div className="text-3xl font-black text-[#111C38] my-1">
                     {venueDetail.boundary_dimensions.leg_boundary_m ? (
                       <span>{venueDetail.boundary_dimensions.leg_boundary_m} <span className="text-sm font-normal text-slate-500">meters</span></span>
                     ) : (
@@ -327,25 +327,25 @@ export default function VenuePitchIntelligencePage() {
 
               {/* Surface Details & Drainage */}
               <div className="p-5 rounded-xl border border-slate-200 bg-slate-50/60 space-y-3">
-                <h4 className="text-xs font-bold uppercase tracking-wider text-[#101C37] flex items-center gap-1.5">
+                <h4 className="text-xs font-bold uppercase tracking-wider text-[#111C38] flex items-center gap-1.5">
                   <Layers size={14} className="text-[#D6B56D]" />
                   Soil, Turf & Environmental Specification
                 </h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs text-slate-600">
                   <div>
-                    <span className="font-bold text-[#101C37]">Soil Composition:</span>{" "}
+                    <span className="font-bold text-[#111C38]">Soil Composition:</span>{" "}
                     {venueDetail.surface_details.soil_composition || "Standard Clay/Loam Turf"}
                   </div>
                   <div>
-                    <span className="font-bold text-[#101C37]">Grass Specification:</span>{" "}
+                    <span className="font-bold text-[#111C38]">Grass Specification:</span>{" "}
                     {venueDetail.surface_details.grass_type || "Bermuda Turf"}
                   </div>
                   <div>
-                    <span className="font-bold text-[#101C37]">Outfield Speed:</span>{" "}
+                    <span className="font-bold text-[#111C38]">Outfield Speed:</span>{" "}
                     {venueDetail.surface_details.outfield_speed || "Medium-Fast Outfield"}
                   </div>
                   <div>
-                    <span className="font-bold text-[#101C37]">Evening Dew Tendency:</span>{" "}
+                    <span className="font-bold text-[#111C38]">Evening Dew Tendency:</span>{" "}
                     {venueDetail.surface_details.dew_tendency || "Moderate coastal / atmospheric dew"}
                   </div>
                 </div>
@@ -366,12 +366,12 @@ export default function VenuePitchIntelligencePage() {
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 text-center">
                   <div className="text-[10px] font-bold uppercase text-slate-400">1st Innings Average</div>
-                  <div className="text-2xl font-black text-[#101C37] mt-1">{scoringTrends.avg_first_innings_score}</div>
+                  <div className="text-2xl font-black text-[#111C38] mt-1">{scoringTrends.avg_first_innings_score}</div>
                   <div className="text-[10px] text-slate-500 mt-0.5">Par Score Target</div>
                 </div>
                 <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 text-center">
                   <div className="text-[10px] font-bold uppercase text-slate-400">2nd Innings Average</div>
-                  <div className="text-2xl font-black text-[#101C37] mt-1">{scoringTrends.avg_second_innings_score}</div>
+                  <div className="text-2xl font-black text-[#111C38] mt-1">{scoringTrends.avg_second_innings_score}</div>
                   <div className="text-[10px] text-slate-500 mt-0.5">Chasing Par</div>
                 </div>
                 <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 text-center">
@@ -383,32 +383,32 @@ export default function VenuePitchIntelligencePage() {
                 </div>
                 <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 text-center">
                   <div className="text-[10px] font-bold uppercase text-slate-400">Avg Wickets / Match</div>
-                  <div className="text-2xl font-black text-[#E91E8F] mt-1">{scoringTrends.avg_wickets_per_innings}</div>
+                  <div className="text-2xl font-black text-[#E91E8C] mt-1">{scoringTrends.avg_wickets_per_innings}</div>
                   <div className="text-[10px] text-slate-500 mt-0.5">Wickets fallen</div>
                 </div>
               </div>
 
               {/* Phase Run Rates */}
               <div className="p-5 rounded-xl border border-slate-200 bg-slate-50/60 space-y-3">
-                <h4 className="text-xs font-bold uppercase tracking-wider text-[#101C37]">
+                <h4 className="text-xs font-bold uppercase tracking-wider text-[#111C38]">
                   Phase-Specific Run Rates at {scoringTrends.venue_name}
                 </h4>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   <div className="p-3 bg-white rounded-lg border border-slate-200">
                     <div className="text-[10px] font-bold text-slate-400 uppercase">Powerplay (Overs 0-5)</div>
-                    <div className="text-xl font-black text-[#101C37] mt-0.5">
+                    <div className="text-xl font-black text-[#111C38] mt-0.5">
                       {scoringTrends.phase_scoring_rates.powerplay} <span className="text-xs font-normal text-slate-500">rpo</span>
                     </div>
                   </div>
                   <div className="p-3 bg-white rounded-lg border border-slate-200">
                     <div className="text-[10px] font-bold text-slate-400 uppercase">Middle Overs (Overs 6-14)</div>
-                    <div className="text-xl font-black text-[#101C37] mt-0.5">
+                    <div className="text-xl font-black text-[#111C38] mt-0.5">
                       {scoringTrends.phase_scoring_rates.middle} <span className="text-xs font-normal text-slate-500">rpo</span>
                     </div>
                   </div>
                   <div className="p-3 bg-white rounded-lg border border-slate-200">
                     <div className="text-[10px] font-bold text-slate-400 uppercase">Death Overs (Overs 15-19)</div>
-                    <div className="text-xl font-black text-[#E91E8F] mt-0.5">
+                    <div className="text-xl font-black text-[#E91E8C] mt-0.5">
                       {scoringTrends.phase_scoring_rates.death} <span className="text-xs font-normal text-slate-500">rpo</span>
                     </div>
                   </div>
@@ -434,12 +434,12 @@ export default function VenuePitchIntelligencePage() {
                   <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
                     Empirical Conditions Classification
                   </div>
-                  <div className="text-xl font-black text-[#101C37] mt-0.5">
+                  <div className="text-xl font-black text-[#111C38] mt-0.5">
                     {pitchEvidence.conditions_evidence_classification}
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="px-2.5 py-1 rounded text-xs font-mono font-bold bg-[#E91E8F] text-white">
+                  <span className="px-2.5 py-1 rounded text-xs font-mono font-bold bg-[#E91E8C] text-white">
                     Confidence: {pitchEvidence.evidence_confidence}
                   </span>
                   <span className="text-xs font-mono text-slate-500">
@@ -453,7 +453,7 @@ export default function VenuePitchIntelligencePage() {
                 {/* Pace Dimension */}
                 <div className="p-5 rounded-xl border border-slate-200 bg-blue-50/20">
                   <div className="flex items-center justify-between mb-3">
-                    <span className="text-xs font-bold text-[#101C37]">Pace Bowler Impact</span>
+                    <span className="text-xs font-bold text-[#111C38]">Pace Bowler Impact</span>
                     <span className="text-xs font-mono font-extrabold text-blue-600">
                       {pitchEvidence.observed_pace_vs_spin.pace_wickets_share_pct}% wickets
                     </span>
@@ -461,11 +461,11 @@ export default function VenuePitchIntelligencePage() {
                   <div className="grid grid-cols-2 gap-2 text-center text-xs">
                     <div className="p-2 bg-white rounded border border-slate-100">
                       <div className="text-[10px] text-slate-400">Economy</div>
-                      <div className="font-bold text-[#101C37]">{pitchEvidence.observed_pace_vs_spin.pace_economy}</div>
+                      <div className="font-bold text-[#111C38]">{pitchEvidence.observed_pace_vs_spin.pace_economy}</div>
                     </div>
                     <div className="p-2 bg-white rounded border border-slate-100">
                       <div className="text-[10px] text-slate-400">Average</div>
-                      <div className="font-bold text-[#101C37]">{pitchEvidence.observed_pace_vs_spin.pace_average}</div>
+                      <div className="font-bold text-[#111C38]">{pitchEvidence.observed_pace_vs_spin.pace_average}</div>
                     </div>
                   </div>
                 </div>
@@ -473,7 +473,7 @@ export default function VenuePitchIntelligencePage() {
                 {/* Spin Dimension */}
                 <div className="p-5 rounded-xl border border-slate-200 bg-amber-50/20">
                   <div className="flex items-center justify-between mb-3">
-                    <span className="text-xs font-bold text-[#101C37]">Spin Bowler Impact</span>
+                    <span className="text-xs font-bold text-[#111C38]">Spin Bowler Impact</span>
                     <span className="text-xs font-mono font-extrabold text-amber-600">
                       {pitchEvidence.observed_pace_vs_spin.spin_wickets_share_pct}% wickets
                     </span>
@@ -481,11 +481,11 @@ export default function VenuePitchIntelligencePage() {
                   <div className="grid grid-cols-2 gap-2 text-center text-xs">
                     <div className="p-2 bg-white rounded border border-slate-100">
                       <div className="text-[10px] text-slate-400">Economy</div>
-                      <div className="font-bold text-[#101C37]">{pitchEvidence.observed_pace_vs_spin.spin_economy}</div>
+                      <div className="font-bold text-[#111C38]">{pitchEvidence.observed_pace_vs_spin.spin_economy}</div>
                     </div>
                     <div className="p-2 bg-white rounded border border-slate-100">
                       <div className="text-[10px] text-slate-400">Average</div>
-                      <div className="font-bold text-[#101C37]">{pitchEvidence.observed_pace_vs_spin.spin_average}</div>
+                      <div className="font-bold text-[#111C38]">{pitchEvidence.observed_pace_vs_spin.spin_average}</div>
                     </div>
                   </div>
                 </div>
@@ -495,7 +495,7 @@ export default function VenuePitchIntelligencePage() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
                   <div className="text-[10px] font-bold uppercase text-slate-400">Boundary Runs Contribution</div>
-                  <div className="text-xl font-black text-[#101C37] mt-1">
+                  <div className="text-xl font-black text-[#111C38] mt-1">
                     {pitchEvidence.boundary_patterns.boundary_runs_pct}%
                   </div>
                   <div className="text-[11px] text-slate-500 mt-0.5">
@@ -504,7 +504,7 @@ export default function VenuePitchIntelligencePage() {
                 </div>
                 <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
                   <div className="text-[10px] font-bold uppercase text-slate-400">Dot Ball Percentage</div>
-                  <div className="text-xl font-black text-[#101C37] mt-1">
+                  <div className="text-xl font-black text-[#111C38] mt-1">
                     {pitchEvidence.dot_ball_patterns.dot_ball_pct}%
                   </div>
                   <div className="text-[11px] text-slate-500 mt-0.5">
@@ -515,7 +515,7 @@ export default function VenuePitchIntelligencePage() {
 
               {/* Observed Summary & Caveats */}
               <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 text-xs text-slate-600 space-y-2">
-                <p><span className="font-bold text-[#101C37]">Observed Evidence:</span> {pitchEvidence.observed_statistical_summary}</p>
+                <p><span className="font-bold text-[#111C38]">Observed Evidence:</span> {pitchEvidence.observed_statistical_summary}</p>
                 <p className="text-[11px] text-slate-500 italic border-t border-slate-200 pt-2">
                   * {pitchEvidence.limitations_disclaimer}
                 </p>
@@ -530,7 +530,7 @@ export default function VenuePitchIntelligencePage() {
                 <div className="flex items-center gap-2">
                   <Droplets className="text-blue-500" size={18} />
                   <div>
-                    <h4 className="text-xs font-bold text-[#101C37]">Open-Meteo Hourly Telemetry</h4>
+                    <h4 className="text-xs font-bold text-[#111C38]">Open-Meteo Hourly Telemetry</h4>
                     <p className="text-[11px] text-slate-500">Attribution: Weather data by Open-Meteo.com under CC-BY 4.0</p>
                   </div>
                 </div>
@@ -547,7 +547,7 @@ export default function VenuePitchIntelligencePage() {
                     className="p-4 rounded-xl border border-slate-200 bg-white hover:border-slate-300 transition-all space-y-2"
                   >
                     <div className="flex items-center justify-between text-xs">
-                      <span className="font-mono font-bold text-[#101C37]">
+                      <span className="font-mono font-bold text-[#111C38]">
                         {obs.observation_time.split("T")[-1] || obs.observation_time}
                       </span>
                       <span className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold ${
@@ -564,19 +564,19 @@ export default function VenuePitchIntelligencePage() {
                     <div className="grid grid-cols-2 gap-2 text-xs py-2 border-y border-slate-100">
                       <div>
                         <span className="text-slate-400 text-[10px]">Temperature:</span>
-                        <div className="font-black text-sm text-[#101C37]">{obs.temperature_c}°C</div>
+                        <div className="font-black text-sm text-[#111C38]">{obs.temperature_c}°C</div>
                       </div>
                       <div>
                         <span className="text-slate-400 text-[10px]">Humidity:</span>
-                        <div className="font-black text-sm text-[#101C37]">{obs.relative_humidity_pct}%</div>
+                        <div className="font-black text-sm text-[#111C38]">{obs.relative_humidity_pct}%</div>
                       </div>
                       <div>
                         <span className="text-slate-400 text-[10px]">Dew Point:</span>
-                        <div className="font-bold text-[#101C37]">{obs.dew_point_c}°C</div>
+                        <div className="font-bold text-[#111C38]">{obs.dew_point_c}°C</div>
                       </div>
                       <div>
                         <span className="text-slate-400 text-[10px]">Wind:</span>
-                        <div className="font-bold text-[#101C37]">{obs.wind_speed_kph} km/h {obs.wind_direction_compass}</div>
+                        <div className="font-bold text-[#111C38]">{obs.wind_speed_kph} km/h {obs.wind_direction_compass}</div>
                       </div>
                     </div>
 
@@ -602,7 +602,7 @@ export default function VenuePitchIntelligencePage() {
                     onClick={() => setSelectedPlayerId(p.id)}
                     className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
                       selectedPlayerId === p.id
-                        ? "bg-[#E91E8F] text-white shadow-sm"
+                        ? "bg-[#E91E8C] text-white shadow-sm"
                         : "bg-white text-slate-700 border border-slate-200 hover:bg-slate-100"
                     }`}
                   >
@@ -617,14 +617,14 @@ export default function VenuePitchIntelligencePage() {
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-4">
                     <div>
                       <div className="flex items-center gap-2 mb-1">
-                        <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-[#E91E8F]/15 text-[#E91E8F]">
+                        <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-[#E91E8C]/15 text-[#E91E8C]">
                           {playerPerformance.eligibility_status}
                         </span>
                         <span className="text-xs font-mono text-slate-400">
                           {playerPerformance.player_id}
                         </span>
                       </div>
-                      <h3 className="text-xl font-bold text-[#101C37]">
+                      <h3 className="text-xl font-bold text-[#111C38]">
                         {playerPerformance.player_name} at {playerPerformance.venue_name}
                       </h3>
                       <p className="text-xs text-slate-500 mt-0.5">Role Archetype: {playerPerformance.role_archetype}</p>
@@ -632,53 +632,53 @@ export default function VenuePitchIntelligencePage() {
 
                     <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 text-right">
                       <div className="text-[10px] font-bold uppercase text-slate-400">Matches at Venue</div>
-                      <div className="text-base font-extrabold text-[#101C37]">{playerPerformance.matches_at_venue}</div>
+                      <div className="text-base font-extrabold text-[#111C38]">{playerPerformance.matches_at_venue}</div>
                     </div>
                   </div>
 
                   {/* Batting vs Bowling Dual Grid at this venue */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="p-4 rounded-xl border border-slate-200 bg-pink-50/20">
-                      <h4 className="text-xs font-bold text-[#101C37] mb-2 flex items-center gap-1.5">
-                        <TrendingUp size={14} className="text-[#E91E8F]" /> Batting at Venue
+                      <h4 className="text-xs font-bold text-[#111C38] mb-2 flex items-center gap-1.5">
+                        <TrendingUp size={14} className="text-[#E91E8C]" /> Batting at Venue
                       </h4>
                       <div className="grid grid-cols-3 gap-2 text-center text-xs">
                         <div className="p-2 bg-white rounded border border-slate-100">
                           <div className="text-[10px] text-slate-400">Runs</div>
-                          <div className="font-extrabold text-sm text-[#101C37]">{playerPerformance.batting_at_venue.runs}</div>
+                          <div className="font-extrabold text-sm text-[#111C38]">{playerPerformance.batting_at_venue.runs}</div>
                         </div>
                         <div className="p-2 bg-white rounded border border-slate-100">
                           <div className="text-[10px] text-slate-400">Strike Rate</div>
-                          <div className="font-extrabold text-sm text-[#E91E8F]">{playerPerformance.batting_at_venue.strike_rate}</div>
+                          <div className="font-extrabold text-sm text-[#E91E8C]">{playerPerformance.batting_at_venue.strike_rate}</div>
                         </div>
                         <div className="p-2 bg-white rounded border border-slate-100">
                           <div className="text-[10px] text-slate-400">Average</div>
-                          <div className="font-bold text-sm text-[#101C37]">{playerPerformance.batting_at_venue.average ?? "N/A"}</div>
+                          <div className="font-bold text-sm text-[#111C38]">{playerPerformance.batting_at_venue.average ?? "N/A"}</div>
                         </div>
                       </div>
                       {playerPerformance.batting_at_venue.death_sr && (
                         <div className="text-[11px] text-slate-600 mt-2">
-                          Death Overs SR at this ground: <span className="font-bold text-[#E91E8F]">{playerPerformance.batting_at_venue.death_sr}</span>
+                          Death Overs SR at this ground: <span className="font-bold text-[#E91E8C]">{playerPerformance.batting_at_venue.death_sr}</span>
                         </div>
                       )}
                     </div>
 
                     <div className="p-4 rounded-xl border border-slate-200 bg-blue-50/20">
-                      <h4 className="text-xs font-bold text-[#101C37] mb-2 flex items-center gap-1.5">
+                      <h4 className="text-xs font-bold text-[#111C38] mb-2 flex items-center gap-1.5">
                         <Target size={14} className="text-blue-600" /> Bowling at Venue
                       </h4>
                       <div className="grid grid-cols-3 gap-2 text-center text-xs">
                         <div className="p-2 bg-white rounded border border-slate-100">
                           <div className="text-[10px] text-slate-400">Wickets</div>
-                          <div className="font-extrabold text-sm text-[#101C37]">{playerPerformance.bowling_at_venue.wickets}</div>
+                          <div className="font-extrabold text-sm text-[#111C38]">{playerPerformance.bowling_at_venue.wickets}</div>
                         </div>
                         <div className="p-2 bg-white rounded border border-slate-100">
                           <div className="text-[10px] text-slate-400">Economy</div>
-                          <div className="font-extrabold text-sm text-[#101C37]">{playerPerformance.bowling_at_venue.economy}</div>
+                          <div className="font-extrabold text-sm text-[#111C38]">{playerPerformance.bowling_at_venue.economy}</div>
                         </div>
                         <div className="p-2 bg-white rounded border border-slate-100">
                           <div className="text-[10px] text-slate-400">Overs</div>
-                          <div className="font-bold text-sm text-[#101C37]">{playerPerformance.bowling_at_venue.overs}</div>
+                          <div className="font-bold text-sm text-[#111C38]">{playerPerformance.bowling_at_venue.overs}</div>
                         </div>
                       </div>
                     </div>

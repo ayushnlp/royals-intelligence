@@ -29,7 +29,7 @@ export default function OverviewPage() {
       {/* ------------------------------------------------------------------- */}
       <section className="space-y-4">
         <div className="flex flex-wrap items-center gap-3 text-xs">
-          <span className="font-mono font-bold tracking-widest text-[#E91E8F] uppercase">
+          <span className="font-mono font-bold tracking-widest text-[#E91E8C] uppercase">
             Rajasthan Royals SupeRR Selector
           </span>
           <span className="text-slate-300">•</span>
@@ -58,9 +58,9 @@ export default function OverviewPage() {
         <div className="flex flex-wrap items-center gap-4 pt-2">
           <Link
             href="/pressure"
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-[#101C37] text-white text-xs font-semibold hover:bg-[#1A2B50] transition-colors shadow-sm group"
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-[#111C38] text-white text-xs font-semibold hover:bg-[#1A2B50] transition-colors shadow-sm group"
           >
-            <Shield size={14} className="text-[#E91E8F]" />
+            <Shield size={14} className="text-[#E91E8C]" />
             <span>Official Pressure Leaderboards</span>
             <ArrowRight size={13} className="text-slate-400 group-hover:translate-x-0.5 transition-transform" />
           </Link>
@@ -154,7 +154,7 @@ export default function OverviewPage() {
           </div>
           <Link
             href="/pressure"
-            className="text-xs font-semibold text-[#E91E8F] hover:text-[#C2185B] transition-colors inline-flex items-center gap-1"
+            className="text-xs font-semibold text-[#E91E8C] hover:text-[#C2185B] transition-colors inline-flex items-center gap-1"
           >
             <span>View Complete Leaderboards & Dossiers</span>
             <ArrowRight size={13} />
@@ -166,7 +166,7 @@ export default function OverviewPage() {
           <div className="space-y-3">
             <div className="flex items-center justify-between text-xs font-semibold text-slate-700">
               <span className="flex items-center gap-2">
-                <TrendingUp size={15} className="text-[#E91E8F]" />
+                <TrendingUp size={15} className="text-[#E91E8C]" />
                 Top 5 Batters Under Pressure (Conservative PRI)
               </span>
               <span className="font-mono text-[11px] text-slate-400">Balls / Matches</span>
@@ -353,7 +353,7 @@ export default function OverviewPage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 text-xs">
           <div className="space-y-1.5">
             <div className="flex items-center gap-2 font-bold text-slate-900">
-              <Flame size={15} className="text-[#E91E8F]" />
+              <Flame size={15} className="text-[#E91E8C]" />
               <span>1. Dynamic Pressure</span>
             </div>
             <p className="text-slate-600 leading-relaxed">
@@ -416,7 +416,7 @@ export default function OverviewPage() {
             className="p-4 rounded-lg bg-white border border-slate-200/80 hover:border-slate-400 hover:shadow-sm transition-all group block"
           >
             <div className="flex items-center justify-between mb-2">
-              <Shield size={18} className="text-[#E91E8F]" />
+              <Shield size={18} className="text-[#E91E8C]" />
               <ArrowRight size={13} className="text-slate-400 group-hover:translate-x-0.5 group-hover:text-slate-800 transition-all" />
             </div>
             <h3 className="font-bold text-xs text-slate-900">Pressure Intelligence</h3>

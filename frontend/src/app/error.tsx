@@ -20,11 +20,11 @@ export default function ErrorBoundary({
     <div className="min-h-[70vh] flex items-center justify-center p-6">
       <div className="max-w-md w-full bg-white border border-slate-200/80 rounded-xl shadow-sm p-8 text-center space-y-6">
         <div className="w-14 h-14 mx-auto rounded-full bg-rose-50 border border-rose-100 flex items-center justify-center">
-          <AlertTriangle className="w-7 h-7 text-[#E91E8F]" />
+          <AlertTriangle className="w-7 h-7 text-[#E91E8C]" />
         </div>
 
         <div className="space-y-2">
-          <span className="text-[10px] font-mono tracking-widest text-[#E91E8F] uppercase font-bold">
+          <span className="text-[10px] font-mono tracking-widest text-[#E91E8C] uppercase font-bold">
             Analytics System Notification
           </span>
           <h2 className="text-xl font-bold text-slate-900 tracking-tight">
@@ -43,7 +43,7 @@ export default function ErrorBoundary({
         <div className="flex items-center justify-center gap-3 pt-2">
           <button
             onClick={() => reset()}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[#101C37] text-white text-xs font-semibold hover:bg-[#1A2B50] transition-colors shadow-sm"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[#111C38] text-white text-xs font-semibold hover:bg-[#1A2B50] transition-colors shadow-sm"
           >
             <RefreshCw size={13} />
             <span>Try Again</span>

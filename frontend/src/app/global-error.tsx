@@ -17,10 +17,10 @@ export default function GlobalError({
 
   return (
     <html lang="en">
-      <body className="bg-[#F4F6FA] text-[#101C37] antialiased min-h-screen flex items-center justify-center p-6">
+      <body className="bg-[#F5F6FA] text-[#111827] antialiased min-h-screen flex items-center justify-center p-6">
         <div className="max-w-md w-full bg-white border border-slate-200 rounded-xl shadow-sm p-8 text-center space-y-5">
           <div className="w-12 h-12 mx-auto rounded-full bg-rose-50 border border-rose-100 flex items-center justify-center">
-            <span className="text-[#E91E8F] text-xl font-bold">!</span>
+            <span className="text-[#E91E8C] text-xl font-bold">!</span>
           </div>
 
           <div className="space-y-1">
@@ -35,7 +35,7 @@ export default function GlobalError({
           <div className="flex justify-center gap-3 pt-2">
             <button
               onClick={() => reset()}
-              className="px-4 py-2 rounded-lg bg-[#101C37] text-white text-xs font-semibold hover:bg-[#1A2B50] transition-colors"
+              className="px-4 py-2 rounded-lg bg-[#111C38] text-white text-xs font-semibold hover:bg-[#1A2B50] transition-colors"
             >
               Reload
             </button>
