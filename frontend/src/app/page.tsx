@@ -79,7 +79,10 @@ export default function OverviewPage() {
     loadOverviewData();
   }, []);
 
-  const battersToDisplay = leaderboards?.batting_leaderboard && leaderboards.batting_leaderboard.length > 0
+  const isLiveBatters = Boolean(leaderboards?.batting_leaderboard && leaderboards.batting_leaderboard.length > 0);
+  const isLiveBowlers = Boolean(leaderboards?.bowling_leaderboard && leaderboards.bowling_leaderboard.length > 0);
+
+  const battersToDisplay = isLiveBatters && leaderboards?.batting_leaderboard
     ? leaderboards.batting_leaderboard.slice(0, 5).map((b, idx) => ({
         rank: b.rank,
         name: b.player_name,
@@ -91,7 +94,7 @@ export default function OverviewPage() {
       }))
     : DEFAULT_TOP_BATTERS;
 
-  const bowlersToDisplay = leaderboards?.bowling_leaderboard && leaderboards.bowling_leaderboard.length > 0
+  const bowlersToDisplay = isLiveBowlers && leaderboards?.bowling_leaderboard
     ? leaderboards.bowling_leaderboard.slice(0, 5).map((bw, idx) => ({
         rank: bw.rank,
         name: bw.player_name,
@@ -164,6 +167,21 @@ export default function OverviewPage() {
             <span>Tactical Analytics</span>
           </Link>
         </div>
+
+        {/* Degraded Standby Notice (if live analytical engine is offline) */}
+        {(!isLive || !isLiveBatters) && (
+          <div className="p-3.5 rounded-xl bg-amber-50/90 border border-amber-200 text-amber-900 text-xs flex items-center justify-between gap-3 shadow-xs">
+            <div className="flex items-center gap-2.5">
+              <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse shrink-0" />
+              <span>
+                <strong>DEGRADED STANDBY MODE:</strong> Live analytical engine is offline. Platform is operating in safe fallback mode. The top 5 leaderboards below are displaying verified historical reference benchmarks, <strong>NOT live engine calculations</strong>.
+              </span>
+            </div>
+            <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-amber-200/80 text-amber-900 shrink-0">
+              REFERENCE DATA — NOT LIVE
+            </span>
+          </div>
+        )}
       </section>
 
       {/* ------------------------------------------------------------------- */}
@@ -252,7 +270,16 @@ export default function OverviewPage() {
             <div className="flex items-center justify-between text-xs font-semibold text-slate-700">
               <span className="flex items-center gap-2">
                 <TrendingUp size={15} className="text-[#E91E8C]" />
-                Top 5 Batters Under Pressure (Conservative PRI)
+                <span>Top 5 Batters Under Pressure (Conservative PRI)</span>
+                {isLiveBatters ? (
+                  <span className="px-1.5 py-0.5 rounded text-[9px] font-mono font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                    LIVE
+                  </span>
+                ) : (
+                  <span className="px-1.5 py-0.5 rounded text-[9px] font-mono font-bold bg-amber-50 text-amber-700 border border-amber-200">
+                    REFERENCE DATA — NOT LIVE
+                  </span>
+                )}
               </span>
               <span className="font-mono text-[11px] text-slate-400">Balls / Matches</span>
             </div>
@@ -290,7 +317,16 @@ export default function OverviewPage() {
             <div className="flex items-center justify-between text-xs font-semibold text-slate-700">
               <span className="flex items-center gap-2">
                 <Target size={15} className="text-[#D6B56D]" />
-                Top 5 Bowlers Under Pressure (Conservative Runs Saved)
+                <span>Top 5 Bowlers Under Pressure (Conservative Runs Saved)</span>
+                {isLiveBowlers ? (
+                  <span className="px-1.5 py-0.5 rounded text-[9px] font-mono font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                    LIVE
+                  </span>
+                ) : (
+                  <span className="px-1.5 py-0.5 rounded text-[9px] font-mono font-bold bg-amber-50 text-amber-700 border border-amber-200">
+                    REFERENCE DATA — NOT LIVE
+                  </span>
+                )}
               </span>
               <span className="font-mono text-[11px] text-slate-400">Balls / Matches</span>
             </div>

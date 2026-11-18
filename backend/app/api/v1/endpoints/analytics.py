@@ -5,7 +5,7 @@ and recent-form window queries.
 """
 
 from typing import Optional
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.session import get_db
@@ -89,6 +89,7 @@ MOCK_BOWLING_AGGREGATES = {
 @router.get("/players/{player_id}/batting", response_model=BattingAggregates, summary="Player Batting Career & Phase Aggregates")
 async def get_player_batting(
     player_id: str,
+    response: Response,
     competition_id: Optional[str] = Query(None, description="Filter by competition (e.g. smat, ipl)"),
     season_id: Optional[str] = Query(None, description="Filter by season (e.g. 2024, 2025)"),
     db: Optional[AsyncSession] = Depends(get_db),
@@ -107,17 +108,22 @@ async def get_player_batting(
     except Exception as exc:
         logger.warning(f"Database batting aggregate calculation failed: {exc}")
 
-    # Fallback to mock
+    # Explicitly labelled reference seed for degraded / cold DB mode
     if player_id in MOCK_BATTING_AGGREGATES:
-        return MOCK_BATTING_AGGREGATES[player_id]
+        response.headers["X-Data-Governance"] = "REFERENCE DATA - NOT LIVE; DEGRADED MODE"
+        ref = MOCK_BATTING_AGGREGATES[player_id].model_copy()
+        ref.is_degraded_reference = True
+        ref.data_source = "REFERENCE DATA - NOT LIVE"
+        return ref
 
-    # Return clean empty aggregates
-    return BattingAggregates(player_id=player_id)
+    # Return clean empty aggregates without fabricating official stats
+    return BattingAggregates(player_id=player_id, is_degraded_reference=False, data_source="live_database_empty")
 
 
 @router.get("/players/{player_id}/bowling", response_model=BowlingAggregates, summary="Player Bowling Career & Phase Aggregates")
 async def get_player_bowling(
     player_id: str,
+    response: Response,
     competition_id: Optional[str] = Query(None, description="Filter by competition"),
     season_id: Optional[str] = Query(None, description="Filter by season"),
     db: Optional[AsyncSession] = Depends(get_db),
@@ -137,9 +143,13 @@ async def get_player_bowling(
         logger.warning(f"Database bowling aggregate calculation failed: {exc}")
 
     if player_id in MOCK_BOWLING_AGGREGATES:
-        return MOCK_BOWLING_AGGREGATES[player_id]
+        response.headers["X-Data-Governance"] = "REFERENCE DATA - NOT LIVE; DEGRADED MODE"
+        ref = MOCK_BOWLING_AGGREGATES[player_id].model_copy()
+        ref.is_degraded_reference = True
+        ref.data_source = "REFERENCE DATA - NOT LIVE"
+        return ref
 
-    return BowlingAggregates(player_id=player_id)
+    return BowlingAggregates(player_id=player_id, is_degraded_reference=False, data_source="live_database_empty")
 
 
 @router.get("/players/{player_id}/recent-form", response_model=RecentFormWindow, summary="Player Recent Form Window")

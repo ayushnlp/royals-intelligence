@@ -95,6 +95,7 @@ async def get_source_health(source_id: str):
 # --- 2. Ingestion Run Management ---
 
 @router.get("/runs", response_model=List[IngestionRun], summary="List Ingestion Runs")
+@router.get("/ingestion-runs", response_model=List[IngestionRun], summary="List Ingestion Runs (Compatibility Alias)")
 async def list_ingestion_runs(limit: int = Query(50, ge=1, le=100)):
     """Returns recent data acquisition runs with validation metrics and durations."""
     return orchestrator.list_runs(limit=limit)

@@ -259,7 +259,7 @@ class UncappedPressureIntelligenceService:
             balls = int(row.get("pressure_legal_balls", 0))
             matches = int(row.get("pressure_matches", 0))
 
-            is_official_qualified = bool(balls >= 60 or (balls >= 50 and matches >= 10))
+            is_official_qualified = bool(balls >= 60)
 
             if qualified_only:
                 if min_balls == 60 and min_matches == 0:
@@ -337,7 +337,7 @@ class UncappedPressureIntelligenceService:
             balls = int(row.get("pressure_legal_balls", 0))
             matches = int(row.get("pressure_matches", 0))
 
-            is_official_qualified = bool(balls >= 60 or (balls >= 50 and matches >= 10))
+            is_official_qualified = bool(balls >= 60)
 
             if qualified_only:
                 if min_balls == 60 and min_matches == 0:
@@ -415,7 +415,7 @@ class UncappedPressureIntelligenceService:
         is_exploratory = bool(min_balls != 60 or min_matches > 0)
 
         if not is_exploratory:
-            gate_desc = ">= 60 pressure legal deliveries (or >= 50 balls & 10 matches) [Official R1 Benchmark]"
+            gate_desc = ">= 60 pressure legal deliveries [Official R1 Benchmark]"
         else:
             match_str = f" & >= {min_matches} matches" if min_matches > 0 else " & All Matches"
             gate_desc = f">= {min_balls} pressure legal deliveries{match_str} [Exploratory Scouting Filter]"

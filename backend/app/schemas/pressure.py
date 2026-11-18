@@ -24,7 +24,7 @@ class PressureOverviewResponse(BaseModel):
     death_overs_batting_pressure_share_pct: float = 78.95
     total_evaluated_batters: int = 278
     total_evaluated_bowlers: int = 239
-    sample_qualification_threshold: str = ">= 60 pressure balls (or >= 50 balls across >= 10 matches)"
+    sample_qualification_threshold: str = ">= 60 pressure balls"
     governing_ranking_methodology: str = "Empirical Bayes Shrinkage with 1-SE Conservative Lower Credible Bound"
     data_provenance: str = "Official Rajasthan Royals Round 1 Data Pack"
 

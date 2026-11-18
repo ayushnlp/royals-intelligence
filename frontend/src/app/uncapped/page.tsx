@@ -61,6 +61,7 @@ export default function UncappedIntelligencePage() {
   // Core Data
   const [overview, setOverview] = useState<UncappedOverviewResponse | null>(null);
   const [leaderboards, setLeaderboards] = useState<UncappedLeaderboardResponse | null>(null);
+  const [isFallbackActive, setIsFallbackActive] = useState<boolean>(false);
 
   // Selected Player Dossier Modal
   const [selectedPlayer, setSelectedPlayer] = useState<UncappedBattingItem | UncappedBowlingItem | null>(null);
@@ -78,17 +79,14 @@ export default function UncappedIntelligencePage() {
         const pBalls = Number(b.pressure_legal_balls || 0);
         const pMatches = Number(b.pressure_matches || 0);
         if (isOfficial) {
-          return pBalls >= 60 || (pBalls >= 50 && pMatches >= 10);
+          return pBalls >= 60;
         }
         return pBalls >= balls && (matches === 0 || pMatches >= matches);
       })
       .map((b, idx) => ({
         ...b,
         uncapped_rank: idx + 1,
-        is_official_r1_qualified: Boolean(
-          Number(b.pressure_legal_balls || 0) >= 60 ||
-          (Number(b.pressure_legal_balls || 0) >= 50 && Number(b.pressure_matches || 0) >= 10)
-        ),
+        is_official_r1_qualified: Boolean(Number(b.pressure_legal_balls || 0) >= 60),
         meets_active_gate: true,
       }));
 
@@ -97,24 +95,21 @@ export default function UncappedIntelligencePage() {
         const pBalls = Number(bw.pressure_legal_balls || 0);
         const pMatches = Number(bw.pressure_matches || 0);
         if (isOfficial) {
-          return pBalls >= 60 || (pBalls >= 50 && pMatches >= 10);
+          return pBalls >= 60;
         }
         return pBalls >= balls && (matches === 0 || pMatches >= matches);
       })
       .map((bw, idx) => ({
         ...bw,
         uncapped_rank: idx + 1,
-        is_official_r1_qualified: Boolean(
-          Number(bw.pressure_legal_balls || 0) >= 60 ||
-          (Number(bw.pressure_legal_balls || 0) >= 50 && Number(bw.pressure_matches || 0) >= 10)
-        ),
+        is_official_r1_qualified: Boolean(Number(bw.pressure_legal_balls || 0) >= 60),
         meets_active_gate: true,
       }));
 
     const isExploratory = !isOfficial;
     const matchStr = matches > 0 ? ` & >= ${matches} matches` : " & All Matches";
     const gateDesc = isOfficial
-      ? ">= 60 pressure deliveries (or >= 50 balls & 10 matches) [Official R1 Benchmark]"
+      ? ">= 60 pressure deliveries [Official R1 Benchmark]"
       : `>= ${balls} pressure deliveries${matchStr} [Exploratory Scouting Filter]`;
 
     return {
@@ -168,17 +163,24 @@ export default function UncappedIntelligencePage() {
         }),
       ]);
 
-      if (ovRes && lbRes) {
+      if (
+        ovRes &&
+        lbRes &&
+        ((lbRes.batting_leaderboard?.length ?? 0) > 0 || (lbRes.bowling_leaderboard?.length ?? 0) > 0)
+      ) {
         setOverview(ovRes);
         setLeaderboards(lbRes);
+        setIsFallbackActive(false);
       } else {
-        // Graceful client fallback using verified domestic dataset
+        // Explicitly enter degraded reference mode
+        setIsFallbackActive(true);
         const fallback = computeClientFallback(balls, matches);
         setOverview(fallback.overview);
         setLeaderboards(fallback.leaderboards);
       }
     } catch (err: any) {
-      // Graceful fallback on network error
+      // Explicitly enter degraded reference mode on error
+      setIsFallbackActive(true);
       const fallback = computeClientFallback(balls, matches);
       setOverview(fallback.overview);
       setLeaderboards(fallback.leaderboards);
@@ -279,15 +281,20 @@ export default function UncappedIntelligencePage() {
         </div>
       </section>
 
-      {/* Connection Notice (if backend unreachable) */}
-      {errorMsg && (
-        <div className="p-4 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 flex items-center justify-between gap-4">
+      {/* Connection / Degraded Standby Notice */}
+      {(errorMsg || isFallbackActive) && (
+        <div className="p-4 rounded-xl bg-amber-50/90 border border-amber-200 text-amber-900 flex items-center justify-between gap-4 shadow-xs">
           <div className="flex items-center gap-3">
             <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0" />
             <div>
-              <div className="text-xs font-bold">Backend Standby Notice</div>
-              <div className="text-xs text-amber-800 mt-0.5">
-                {errorMsg} Local high-fidelity domestic dataset active.
+              <div className="text-xs font-bold uppercase tracking-wider flex items-center gap-2">
+                <span>DEGRADED MODE — REFERENCE DATA (NOT LIVE)</span>
+                <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-amber-200/80 text-amber-900">
+                  OFFLINE SNAPSHOT
+                </span>
+              </div>
+              <div className="text-xs text-amber-800 mt-1">
+                Backend analytics service is offline or unreachable. The prospect listings and totals below are sourced from the verified local reference audit snapshot for interface continuity. <strong>These must NOT be interpreted as live official engine calculations.</strong>
               </div>
             </div>
           </div>
@@ -296,7 +303,7 @@ export default function UncappedIntelligencePage() {
             className="px-3 py-1.5 rounded-lg bg-amber-600 text-white font-bold text-xs hover:bg-amber-700 transition-colors shrink-0 flex items-center gap-1.5"
           >
             <RefreshCw className="w-3.5 h-3.5" />
-            <span>Retry</span>
+            <span>Retry Connection</span>
           </button>
         </div>
       )}
@@ -576,6 +583,15 @@ export default function UncappedIntelligencePage() {
               </p>
             </div>
             <div className="flex items-center gap-2 self-start sm:self-auto">
+              {isFallbackActive ? (
+                <span className="text-[11px] font-mono font-medium text-amber-800 bg-amber-50 px-2.5 py-1 rounded-full border border-amber-200/80">
+                  REFERENCE DATA — NOT LIVE
+                </span>
+              ) : (
+                <span className="text-[11px] font-mono font-medium text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200/60">
+                  LIVE OFFICIAL
+                </span>
+              )}
               <span className="text-[11px] font-mono font-medium text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200/60">
                 {leaderboards?.batting_count ?? 0} Qualified Batters
               </span>
@@ -613,7 +629,7 @@ export default function UncappedIntelligencePage() {
                     leaderboards.batting_leaderboard.map((batter) => {
                       const isTop1 = batter.uncapped_rank === 1;
                       const isTop3 = batter.uncapped_rank <= 3;
-                      const isOfficial = batter.is_official_r1_qualified ?? (batter.pressure_legal_balls >= 60 || (batter.pressure_legal_balls >= 50 && batter.pressure_matches >= 10));
+                      const isOfficial = batter.is_official_r1_qualified ?? (batter.pressure_legal_balls >= 60);
                       return (
                         <tr key={batter.player_id} className="hover:bg-slate-50/70 transition-colors">
                           <td className="px-4 py-3 font-sans text-slate-900">
@@ -745,6 +761,15 @@ export default function UncappedIntelligencePage() {
               </p>
             </div>
             <div className="flex items-center gap-2 self-start sm:self-auto">
+              {isFallbackActive ? (
+                <span className="text-[11px] font-mono font-medium text-amber-800 bg-amber-50 px-2.5 py-1 rounded-full border border-amber-200/80">
+                  REFERENCE DATA — NOT LIVE
+                </span>
+              ) : (
+                <span className="text-[11px] font-mono font-medium text-cyan-700 bg-cyan-50 px-2.5 py-1 rounded-full border border-cyan-200/60">
+                  LIVE OFFICIAL
+                </span>
+              )}
               <span className="text-[11px] font-mono font-medium text-cyan-700 bg-cyan-50 px-2.5 py-1 rounded-full border border-cyan-200/60">
                 {leaderboards?.bowling_count ?? 0} Qualified Bowlers
               </span>
@@ -782,7 +807,7 @@ export default function UncappedIntelligencePage() {
                     leaderboards.bowling_leaderboard.map((bowler) => {
                       const isTop1 = bowler.uncapped_rank === 1;
                       const isTop3 = bowler.uncapped_rank <= 3;
-                      const isOfficial = bowler.is_official_r1_qualified ?? (bowler.pressure_legal_balls >= 60 || (bowler.pressure_legal_balls >= 50 && bowler.pressure_matches >= 10));
+                      const isOfficial = bowler.is_official_r1_qualified ?? (bowler.pressure_legal_balls >= 60);
                       return (
                         <tr key={bowler.player_id} className="hover:bg-slate-50/70 transition-colors">
                           <td className="px-4 py-3 font-sans text-slate-900">
@@ -940,7 +965,7 @@ export default function UncappedIntelligencePage() {
                   <span>Rule 3: Configurable Sample Gate</span>
                 </div>
                 <p className="text-xs text-slate-600 leading-relaxed">
-                  Default strict benchmark requires &ge; 60 pressure deliveries (or &ge; 50 balls across &ge; 10 matches). Exploratory filters allow adjusting down to 20 balls for early scouting without corrupting official rankings.
+                  Default strict benchmark requires &ge; 60 pressure deliveries. Exploratory filters allow adjusting down to 20 balls for early scouting without corrupting official rankings.
                 </p>
               </div>
             </div>

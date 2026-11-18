@@ -1,5 +1,6 @@
 import {
   SystemHealth,
+  IngestionRunData,
   CompetitionSeasonSummary,
   MatchSummaryItem,
   InningsAnalysisResponse,
@@ -42,6 +43,57 @@ const RAW_API_BASE =
   "http://localhost:8000/api/v1";
 
 export const API_BASE_URL = RAW_API_BASE.replace(/\/+$/, "");
+
+export class ApiError extends Error {
+  public status?: number;
+  public statusText?: string;
+  public isNetworkError: boolean;
+  public endpoint: string;
+
+  constructor(
+    message: string,
+    options?: { status?: number; statusText?: string; isNetworkError?: boolean; endpoint?: string }
+  ) {
+    super(message);
+    this.name = "ApiError";
+    this.status = options?.status;
+    this.statusText = options?.statusText;
+    this.isNetworkError = Boolean(options?.isNetworkError);
+    this.endpoint = options?.endpoint || "";
+  }
+}
+
+export async function safeApiFetch<T>(endpoint: string, options?: RequestInit): Promise<T> {
+  const url = `${API_BASE_URL}${endpoint}`;
+  let res: Response;
+  try {
+    res = await fetch(url, {
+      cache: "no-store",
+      ...options,
+    });
+  } catch (err: any) {
+    throw new ApiError(
+      `Network error connecting to backend service at ${API_BASE_URL}: ${err.message || "Connection refused / unreachable"}`,
+      { isNetworkError: true, endpoint }
+    );
+  }
+
+  if (!res.ok) {
+    let errorDetail = "";
+    try {
+      const errJson = await res.json();
+      errorDetail = errJson.detail || errJson.message || "";
+    } catch {
+      // Ignore JSON parse error on non-JSON response
+    }
+    throw new ApiError(
+      errorDetail ? `API Error [${res.status}]: ${errorDetail}` : `API Error [${res.status}] ${res.statusText}`,
+      { status: res.status, statusText: res.statusText, endpoint }
+    );
+  }
+
+  return await res.json();
+}
 
 export async function fetchSystemHealth(): Promise<SystemHealth> {
   try {
@@ -94,12 +146,17 @@ export async function fetchCoverage() {
   }
 }
 
-export async function fetchIngestionRuns() {
+export async function fetchIngestionRuns(): Promise<IngestionRunData[]> {
   try {
-    const res = await fetch(`${API_BASE_URL}/acquisition/runs`, { cache: "no-store" });
-    if (!res.ok) throw new Error("Failed to fetch runs");
-    return await res.json();
-  } catch (e) {
+    return await safeApiFetch<IngestionRunData[]>("/acquisition/runs");
+  } catch (err: any) {
+    if (err instanceof ApiError && err.status === 404) {
+      try {
+        return await safeApiFetch<IngestionRunData[]>("/acquisition/ingestion-runs");
+      } catch {
+        return [];
+      }
+    }
     return [];
   }
 }
@@ -742,13 +799,7 @@ export async function fetchTacticalPlayers(
 // ============================================================================
 
 export async function fetchPressureOverview(): Promise<PressureOverviewResponse | null> {
-  try {
-    const res = await fetch(`${API_BASE_URL}/analytics/pressure/overview`, { cache: "no-store" });
-    if (!res.ok) throw new Error("Failed to fetch pressure overview");
-    return await res.json();
-  } catch (e) {
-    return null;
-  }
+  return await safeApiFetch<PressureOverviewResponse>("/analytics/pressure/overview");
 }
 
 export async function fetchPressureLeaderboards(params?: {
@@ -756,20 +807,15 @@ export async function fetchPressureLeaderboards(params?: {
   limit?: number;
   qualified_only?: boolean;
 }): Promise<PressureLeaderboardResponse | null> {
-  try {
-    const query = new URLSearchParams();
-    if (params?.discipline) query.set("discipline", params.discipline);
-    if (params?.limit !== undefined) query.set("limit", params.limit.toString());
-    if (params?.qualified_only !== undefined) query.set("qualified_only", params.qualified_only.toString());
+  const query = new URLSearchParams();
+  if (params?.discipline) query.set("discipline", params.discipline);
+  if (params?.limit !== undefined) query.set("limit", params.limit.toString());
+  if (params?.qualified_only !== undefined) query.set("qualified_only", params.qualified_only.toString());
 
-    const queryString = query.toString();
-    const url = `${API_BASE_URL}/analytics/pressure/leaderboards${queryString ? `?${queryString}` : ""}`;
-    const res = await fetch(url, { cache: "no-store" });
-    if (!res.ok) throw new Error("Failed to fetch pressure leaderboards");
-    return await res.json();
-  } catch (e) {
-    return null;
-  }
+  const queryString = query.toString();
+  return await safeApiFetch<PressureLeaderboardResponse>(
+    `/analytics/pressure/leaderboards${queryString ? `?${queryString}` : ""}`
+  );
 }
 
 export async function fetchCandidateProfile(
@@ -803,19 +849,14 @@ export async function fetchUncappedOverview(params?: {
   min_balls?: number;
   min_matches?: number;
 }): Promise<UncappedOverviewResponse | null> {
-  try {
-    const query = new URLSearchParams();
-    if (params?.min_balls !== undefined) query.set("min_balls", params.min_balls.toString());
-    if (params?.min_matches !== undefined) query.set("min_matches", params.min_matches.toString());
+  const query = new URLSearchParams();
+  if (params?.min_balls !== undefined) query.set("min_balls", params.min_balls.toString());
+  if (params?.min_matches !== undefined) query.set("min_matches", params.min_matches.toString());
 
-    const queryString = query.toString();
-    const url = `${API_BASE_URL}/analytics/uncapped/overview${queryString ? `?${queryString}` : ""}`;
-    const res = await fetch(url, { cache: "no-store" });
-    if (!res.ok) throw new Error("Failed to fetch uncapped overview");
-    return await res.json();
-  } catch (e) {
-    return null;
-  }
+  const queryString = query.toString();
+  return await safeApiFetch<UncappedOverviewResponse>(
+    `/analytics/uncapped/overview${queryString ? `?${queryString}` : ""}`
+  );
 }
 
 export async function fetchUncappedLeaderboards(params?: {
@@ -825,22 +866,17 @@ export async function fetchUncappedLeaderboards(params?: {
   min_balls?: number;
   min_matches?: number;
 }): Promise<UncappedLeaderboardResponse | null> {
-  try {
-    const query = new URLSearchParams();
-    if (params?.discipline) query.set("discipline", params.discipline);
-    if (params?.limit !== undefined) query.set("limit", params.limit.toString());
-    if (params?.qualified_only !== undefined) query.set("qualified_only", params.qualified_only.toString());
-    if (params?.min_balls !== undefined) query.set("min_balls", params.min_balls.toString());
-    if (params?.min_matches !== undefined) query.set("min_matches", params.min_matches.toString());
+  const query = new URLSearchParams();
+  if (params?.discipline) query.set("discipline", params.discipline);
+  if (params?.limit !== undefined) query.set("limit", params.limit.toString());
+  if (params?.qualified_only !== undefined) query.set("qualified_only", params.qualified_only.toString());
+  if (params?.min_balls !== undefined) query.set("min_balls", params.min_balls.toString());
+  if (params?.min_matches !== undefined) query.set("min_matches", params.min_matches.toString());
 
-    const queryString = query.toString();
-    const url = `${API_BASE_URL}/analytics/uncapped/leaderboards${queryString ? `?${queryString}` : ""}`;
-    const res = await fetch(url, { cache: "no-store" });
-    if (!res.ok) throw new Error("Failed to fetch uncapped leaderboards");
-    return await res.json();
-  } catch (e) {
-    return null;
-  }
+  const queryString = query.toString();
+  return await safeApiFetch<UncappedLeaderboardResponse>(
+    `/analytics/uncapped/leaderboards${queryString ? `?${queryString}` : ""}`
+  );
 }
 
 export async function fetchPlayerEligibility(playerId: number, playerName?: string) {
