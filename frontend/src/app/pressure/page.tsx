@@ -250,7 +250,7 @@ export default function PressureIntelligencePage() {
               &ge; 60 Balls
             </div>
             <p className="text-xs text-slate-500 mt-0.5">
-              Or &ge; 50 balls &amp; 10 matches
+              Strict official qualification gate
             </p>
           </div>
 
