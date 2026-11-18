@@ -9,6 +9,7 @@ import {
   PlayerDomesticSeasonStats,
   PlayerPhaseSplitDetail,
   AllRoundContributionResponse,
+  DomesticPlayerSummary,
 } from "@/types";
 import {
   fetchDomesticCompetitions,
@@ -18,6 +19,7 @@ import {
   fetchPlayerDomesticStats,
   fetchPlayerPhaseSplits,
   fetchPlayerAllRoundSummary,
+  fetchDomesticPlayers,
 } from "@/lib/api";
 import {
   Swords,
@@ -25,6 +27,7 @@ import {
   Calendar,
   Layers,
   ChevronRight,
+  ChevronLeft,
   TrendingUp,
   Target,
   Shield,
@@ -37,13 +40,15 @@ import {
   Filter,
   BarChart3,
   X,
+  Search,
+  Database,
 } from "lucide-react";
 
 export default function DomesticIntelligencePage() {
   const [activeTab, setActiveTab] = useState<"tournaments" | "matches" | "player_profile">("tournaments");
   const [competitions, setCompetitions] = useState<CompetitionSeasonSummary[]>([]);
-  const [selectedCompId, setSelectedCompId] = useState<string>("SMAT");
-  const [selectedSeason, setSelectedSeason] = useState<string>("2024-25");
+  const [selectedCompId, setSelectedCompId] = useState<string>("ipl");
+  const [selectedSeason, setSelectedSeason] = useState<string>("2024");
   const [loading, setLoading] = useState(true);
 
   // Match List state
@@ -55,19 +60,41 @@ export default function DomesticIntelligencePage() {
   const [activeInningsIdx, setActiveInningsIdx] = useState(0);
   const [loadingScorecard, setLoadingScorecard] = useState(false);
 
-  // Player All-Round Profile State
-  const [uncappedPlayersList] = useState([
-    { id: "uncapped_rr_01", name: "Ashutosh Sharma", team: "Punjab / Railways", role: "Middle-Order Finisher" },
-    { id: "uncapped_rr_02", name: "Priyansh Arya", team: "Delhi", role: "Top-Order Batter" },
-    { id: "uncapped_rr_03", name: "Vipraj Nigam", team: "Uttar Pradesh", role: "Bowling All-Rounder (Leg-Spin)" },
-    { id: "uncapped_rr_04", name: "Abhinandan Singh", team: "Delhi", role: "Right-Arm Medium Fast" },
-    { id: "uncapped_rr_05", name: "Digvesh Rathi", team: "Delhi", role: "Right-Arm Off-Spin" },
-  ]);
-  const [selectedPlayerId, setSelectedPlayerId] = useState("uncapped_rr_01");
+  // Player Discovery & Dossier State
+  const [domesticPlayers, setDomesticPlayers] = useState<DomesticPlayerSummary[]>([]);
+  const [playerTotal, setPlayerTotal] = useState(0);
+  const [playerPage, setPlayerPage] = useState(1);
+  const [playerSearch, setPlayerSearch] = useState("");
+  const [playerEligibilityFilter, setPlayerEligibilityFilter] = useState<string>("ALL");
+  const [playerRoleFilter, setPlayerRoleFilter] = useState<string>("");
+  const [selectedPlayerId, setSelectedPlayerId] = useState<string>("8101");
+  const [eligibilityCounts, setEligibilityCounts] = useState<{
+    ALL: number;
+    VERIFIED_UNCAPPED: number;
+    PENDING_VERIFICATION: number;
+  }>({ ALL: 0, VERIFIED_UNCAPPED: 0, PENDING_VERIFICATION: 0 });
   const [allRoundData, setAllRoundData] = useState<AllRoundContributionResponse | null>(null);
   const [playerSeasonStats, setPlayerSeasonStats] = useState<PlayerDomesticSeasonStats[]>([]);
   const [playerPhaseSplits, setPlayerPhaseSplits] = useState<PlayerPhaseSplitDetail[]>([]);
   const [loadingPlayer, setLoadingPlayer] = useState(false);
+  const [loadingPlayerList, setLoadingPlayerList] = useState(false);
+
+  // Load live eligibility totals on mount
+  useEffect(() => {
+    async function loadCounts() {
+      const [allRes, uncappedRes, pendingRes] = await Promise.all([
+        fetchDomesticPlayers({ page: 1, page_size: 1, eligibility_status: "ALL" }),
+        fetchDomesticPlayers({ page: 1, page_size: 1, eligibility_status: "VERIFIED_UNCAPPED" }),
+        fetchDomesticPlayers({ page: 1, page_size: 1, eligibility_status: "PENDING_VERIFICATION" }),
+      ]);
+      setEligibilityCounts({
+        ALL: allRes.total,
+        VERIFIED_UNCAPPED: uncappedRes.total,
+        PENDING_VERIFICATION: pendingRes.total,
+      });
+    }
+    loadCounts();
+  }, []);
 
   // Load competitions on initial mount
   useEffect(() => {
@@ -75,6 +102,10 @@ export default function DomesticIntelligencePage() {
       setLoading(true);
       const res = await fetchDomesticCompetitions();
       setCompetitions(res);
+      if (res.length > 0 && !res.some((c) => c.competition_id === selectedCompId)) {
+        setSelectedCompId(res[0].competition_id);
+        setSelectedSeason(res[0].season);
+      }
       setLoading(false);
     }
     loadComps();
@@ -110,9 +141,30 @@ export default function DomesticIntelligencePage() {
     loadCard();
   }, [selectedMatchId]);
 
+  // Load dynamic player discovery catalog
+  useEffect(() => {
+    async function loadPlayers() {
+      setLoadingPlayerList(true);
+      const res = await fetchDomesticPlayers({
+        page: playerPage,
+        page_size: 12,
+        search: playerSearch || undefined,
+        eligibility_status: playerEligibilityFilter,
+        role: playerRoleFilter || undefined,
+      });
+      setDomesticPlayers(res.items);
+      setPlayerTotal(res.total);
+      if (res.items.length > 0 && !res.items.some((p) => String(p.canonical_id) === selectedPlayerId)) {
+        setSelectedPlayerId(String(res.items[0].canonical_id));
+      }
+      setLoadingPlayerList(false);
+    }
+    loadPlayers();
+  }, [playerPage, playerSearch, playerEligibilityFilter, playerRoleFilter]);
+
   // Load player all-round data when player tab is viewed or player changed
   useEffect(() => {
-    if (activeTab !== "player_profile") return;
+    if (activeTab !== "player_profile" || !selectedPlayerId) return;
     async function loadProfile() {
       setLoadingPlayer(true);
       const [allRound, stats, splits] = await Promise.all([
@@ -134,97 +186,117 @@ export default function DomesticIntelligencePage() {
       : undefined;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8 pb-12">
       {/* Top Header & Context */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-        <div>
-          <div className="flex items-center gap-2 mb-2">
-            <span className="px-2.5 py-0.5 rounded-full text-[11px] font-mono font-bold bg-[#E91E8F] text-white">
-              STAGE 3
-            </span>
-            <span className="px-2.5 py-0.5 rounded-full text-[11px] font-mono font-semibold bg-[#D6B56D]/20 text-[#8C6D1F] border border-[#D6B56D]/40">
-              UNCAPPED SCOPE ONLY
-            </span>
-            <span className="text-xs text-slate-500 font-mono">SMAT • VHT • Ranji • DPL</span>
-          </div>
-          <h1 className="text-2xl font-extrabold text-[#101C37] tracking-tight">
-            Domestic Season & Match Intelligence
-          </h1>
-          <p className="text-xs text-slate-500 mt-1">
-            Format-aware phase diagnostics, ball-by-ball scorecards, partnerships, progression worms,
-            and uncompromised all-round dual-contribution tracking for IPL 2027 recruitment.
-          </p>
+      <section className="space-y-3">
+        <div className="flex flex-wrap items-center gap-3 text-xs">
+          <span className="font-mono font-bold tracking-widest text-[#E91E8F] uppercase">
+            Rajasthan Royals Recruitment
+          </span>
+          <span className="text-slate-300">•</span>
+          <span className="font-mono text-slate-500">
+            IPL • SMAT • VHT • Ranji • DPL
+          </span>
+          <span className="text-slate-300">•</span>
+          <span className="inline-flex items-center gap-1.5 text-emerald-700 font-medium">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+            Verified Domestic Coverage
+          </span>
         </div>
 
-        {/* Global Selectors */}
-        <div className="flex items-center gap-3">
-          <div className="flex flex-col">
-            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">
-              Competition
-            </label>
-            <select
-              value={selectedCompId}
-              onChange={(e) => setSelectedCompId(e.target.value)}
-              className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 text-xs font-semibold text-[#101C37] focus:outline-none focus:ring-2 focus:ring-[#E91E8F]"
-            >
-              <option value="SMAT">Syed Mushtaq Ali Trophy (T20)</option>
-              <option value="VHT">Vijay Hazare Trophy (List A)</option>
-              <option value="RANJI">Ranji Trophy (Multi-Day)</option>
-              <option value="DPL_T20">Delhi Premier League (T20)</option>
-              <option value="UP_T20">UP T20 League (T20)</option>
-            </select>
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+          <div className="max-w-3xl space-y-2">
+            <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-slate-900 leading-tight">
+              Domestic Season & Match Intelligence
+            </h1>
+            <p className="text-sm md:text-base text-slate-600 leading-relaxed font-normal">
+              Format-aware phase diagnostics, ball-by-ball scorecards, partnerships, progression worms,
+              and uncompromised all-round dual-contribution tracking for IPL 2027 recruitment.
+            </p>
           </div>
 
-          <div className="flex flex-col">
-            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">
-              Season
-            </label>
-            <select
-              value={selectedSeason}
-              onChange={(e) => setSelectedSeason(e.target.value)}
-              className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 text-xs font-semibold text-[#101C37] focus:outline-none focus:ring-2 focus:ring-[#E91E8F]"
-            >
-              <option value="2024-25">2024-25</option>
-              <option value="2025-26">2025-26</option>
-            </select>
+          {/* Global Selectors */}
+          <div className="flex items-center gap-3 shrink-0">
+            <div className="flex flex-col">
+              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1 font-mono">
+                Competition
+              </label>
+              <select
+                value={selectedCompId}
+                onChange={(e) => setSelectedCompId(e.target.value)}
+                className="bg-white border border-slate-200 rounded-lg px-3 py-1.5 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#E91E8F] shadow-sm"
+              >
+                {competitions.length > 0 ? (
+                  competitions.map((c) => (
+                    <option key={`${c.competition_id}_${c.season}`} value={c.competition_id}>
+                      {c.competition_name} ({c.competition_type})
+                    </option>
+                  ))
+                ) : (
+                  <>
+                    <option value="ipl">Indian Premier League (T20)</option>
+                    <option value="smat">Syed Mushtaq Ali Trophy (T20)</option>
+                    <option value="vht">Vijay Hazare Trophy (List A)</option>
+                    <option value="ranji">Ranji Trophy (Multi-Day)</option>
+                    <option value="dpl">Delhi Premier League (T20)</option>
+                  </>
+                )}
+              </select>
+            </div>
+
+            <div className="flex flex-col">
+              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1 font-mono">
+                Season
+              </label>
+              <select
+                value={selectedSeason}
+                onChange={(e) => setSelectedSeason(e.target.value)}
+                className="bg-white border border-slate-200 rounded-lg px-3 py-1.5 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#E91E8F] shadow-sm"
+              >
+                <option value="2024">2024</option>
+                <option value="2025">2025</option>
+                <option value="2026">2026</option>
+                <option value="2024-25">2024-25</option>
+              </select>
+            </div>
           </div>
         </div>
-      </div>
+      </section>
 
       {/* Navigation Tabs */}
-      <div className="flex items-center gap-2 border-b border-slate-200 pb-2">
+      <div className="flex items-center gap-1 border-b border-slate-200">
         <button
           onClick={() => setActiveTab("tournaments")}
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-colors ${
+          className={`flex items-center gap-2 px-4 py-2.5 text-xs font-semibold transition-all border-b-2 -mb-px ${
             activeTab === "tournaments"
-              ? "bg-[#101C37] text-white shadow-sm"
-              : "text-slate-600 hover:bg-slate-100"
+              ? "border-[#E91E8F] text-[#101C37]"
+              : "border-transparent text-slate-500 hover:text-slate-800"
           }`}
         >
-          <Trophy size={15} />
-          Tournament Directory ({competitions.length})
+          <Trophy size={14} className="text-[#D6B56D]" />
+          <span>Tournament Directory ({competitions.length})</span>
         </button>
         <button
           onClick={() => setActiveTab("matches")}
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-colors ${
+          className={`flex items-center gap-2 px-4 py-2.5 text-xs font-semibold transition-all border-b-2 -mb-px ${
             activeTab === "matches"
-              ? "bg-[#101C37] text-white shadow-sm"
-              : "text-slate-600 hover:bg-slate-100"
+              ? "border-[#E91E8F] text-[#101C37]"
+              : "border-transparent text-slate-500 hover:text-slate-800"
           }`}
         >
-          <Swords size={15} />
-          Match Intelligence & Scorecards ({matchTotal})
+          <Swords size={14} className="text-slate-600" />
+          <span>Match Intelligence & Scorecards ({matchTotal})</span>
         </button>
         <button
           onClick={() => setActiveTab("player_profile")}
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-colors ${
+          className={`flex items-center gap-2 px-4 py-2.5 text-xs font-semibold transition-all border-b-2 -mb-px ${
             activeTab === "player_profile"
-              ? "bg-[#101C37] text-white shadow-sm"
-              : "text-slate-600 hover:bg-slate-100"
+              ? "border-[#E91E8F] text-[#101C37]"
+              : "border-transparent text-slate-500 hover:text-slate-800"
           }`}
         >
-          <Target size={15} />
-          All-Round Dual Contribution & Phase Splits
+          <Target size={14} className="text-emerald-600" />
+          <span>Uncapped Player Dossier & Splits ({playerTotal})</span>
         </button>
       </div>
 
@@ -234,14 +306,14 @@ export default function DomesticIntelligencePage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
             {competitions.map((comp) => (
               <div
-                key={comp.competition_id}
+                key={`${comp.competition_id}_${comp.season}`}
                 onClick={() => {
                   setSelectedCompId(comp.competition_id);
                   setSelectedSeason(comp.season);
                   setActiveTab("matches");
                 }}
                 className={`group p-5 rounded-2xl bg-white border cursor-pointer transition-all hover:shadow-md ${
-                  selectedCompId === comp.competition_id
+                  selectedCompId === comp.competition_id && selectedSeason === comp.season
                     ? "border-[#E91E8F] ring-2 ring-[#E91E8F]/20"
                     : "border-slate-200 hover:border-slate-300"
                 }`}
@@ -278,10 +350,10 @@ export default function DomesticIntelligencePage() {
                 <div className="flex items-center justify-between text-xs text-slate-500 pt-2 border-t border-slate-100">
                   <span className="flex items-center gap-1 text-[11px]">
                     <CheckCircle2 size={13} className="text-emerald-500" />
-                    {comp.validation_pass_rate}% validated
+                    Audit Pass: {comp.validation_pass_rate}%
                   </span>
-                  <span className="flex items-center gap-1 font-semibold text-[#101C37] group-hover:translate-x-1 transition-transform">
-                    Explore Matches <ChevronRight size={14} />
+                  <span className="text-[11px] font-mono font-bold text-[#E91E8F] flex items-center">
+                    Explore Fixtures <ChevronRight size={13} />
                   </span>
                 </div>
               </div>
@@ -293,22 +365,21 @@ export default function DomesticIntelligencePage() {
       {/* TAB 2: MATCH INTELLIGENCE & SCORECARDS */}
       {activeTab === "matches" && (
         <div className="space-y-6">
-          {/* Filter Bar */}
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-white p-4 rounded-xl border border-slate-200">
-            <div className="flex items-center gap-2 w-full sm:w-auto">
-              <Filter size={15} className="text-slate-400" />
+          {/* Match Filter & List */}
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4 bg-white p-4 rounded-xl border border-slate-200">
+            <div className="flex items-center gap-3 w-full md:w-auto">
+              <Filter size={16} className="text-slate-400" />
               <input
                 type="text"
-                placeholder="Filter by team (e.g. Punjab, Delhi)..."
+                placeholder="Filter by Team Name / Code..."
                 value={teamFilter}
                 onChange={(e) => setTeamFilter(e.target.value)}
-                className="bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-xs text-[#101C37] placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#E91E8F] w-full sm:w-64"
+                className="bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-xs text-[#101C37] focus:outline-none focus:ring-2 focus:ring-[#E91E8F]"
               />
             </div>
-            <div className="text-xs text-slate-500">
-              Showing <span className="font-bold text-[#101C37]">{matches.length}</span> matches for{" "}
-              <span className="font-bold text-[#E91E8F]">{selectedCompId}</span> ({selectedSeason})
-            </div>
+            <span className="text-xs text-slate-500 font-mono">
+              Displaying {matches.length} of {matchTotal} Recorded Matches
+            </span>
           </div>
 
           {/* Matches Grid */}
@@ -316,51 +387,32 @@ export default function DomesticIntelligencePage() {
             {matches.map((m) => (
               <div
                 key={m.match_id}
-                className="p-5 rounded-2xl bg-white border border-slate-200 hover:border-slate-300 transition-shadow shadow-sm flex flex-col justify-between"
+                onClick={() => setSelectedMatchId(m.match_id)}
+                className="p-4 bg-white rounded-xl border border-slate-200 hover:border-[#E91E8F] cursor-pointer transition-all hover:shadow-sm"
               >
-                <div>
-                  <div className="flex items-center justify-between mb-3 text-xs text-slate-500">
-                    <span className="flex items-center gap-1 font-mono text-[11px]">
-                      <Calendar size={13} className="text-[#D6B56D]" />
-                      {m.match_date}
-                    </span>
-                    <span className="px-2 py-0.5 rounded text-[10px] font-mono font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                      Ball-by-ball Verified
-                    </span>
-                  </div>
-
-                  <div className="flex items-center justify-between py-2 border-y border-slate-100 my-2">
-                    <div className="flex items-center gap-2">
-                      <div className="w-8 h-8 rounded-lg bg-[#101C37] text-white flex items-center justify-center font-bold text-xs">
-                        {m.home_team_code.slice(0, 3)}
-                      </div>
-                      <span className="font-bold text-sm text-[#101C37]">{m.home_team_name}</span>
-                    </div>
-                    <span className="text-xs font-mono font-bold text-slate-400">vs</span>
-                    <div className="flex items-center gap-2">
-                      <span className="font-bold text-sm text-[#101C37]">{m.away_team_name}</span>
-                      <div className="w-8 h-8 rounded-lg bg-[#E91E8F] text-white flex items-center justify-center font-bold text-xs">
-                        {m.away_team_code.slice(0, 3)}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="text-xs text-slate-600 mt-2">
-                    <span className="font-bold text-[#101C37]">Outcome:</span> {m.result_outcome}
-                  </div>
-                  <div className="text-[11px] text-slate-400 mt-1">
-                    Venue: {m.venue_name}, {m.venue_city}
-                  </div>
+                <div className="flex items-center justify-between text-[11px] text-slate-400 font-mono mb-2">
+                  <span>Match #{m.match_number || "—"}</span>
+                  <span>{m.match_date}</span>
                 </div>
 
-                <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
-                  <span className="text-[11px] font-mono text-slate-400">ID: {m.external_match_id}</span>
-                  <button
-                    onClick={() => setSelectedMatchId(m.match_id)}
-                    className="flex items-center gap-1 text-xs font-bold text-[#E91E8F] hover:text-[#c2185b] px-3 py-1.5 rounded-lg bg-pink-50 hover:bg-pink-100 transition-colors"
-                  >
-                    Inspect Scorecard & Phases <ChevronRight size={14} />
-                  </button>
+                <div className="flex items-center justify-between my-2">
+                  <div className="flex items-center gap-2">
+                    <span className="font-extrabold text-sm text-[#101C37]">{m.home_team_name}</span>
+                    <span className="text-xs text-slate-400 font-mono">vs</span>
+                    <span className="font-extrabold text-sm text-[#101C37]">{m.away_team_name}</span>
+                  </div>
+                  {m.winner_team_code && (
+                    <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-emerald-100 text-emerald-800">
+                      Won: {m.winner_team_code}
+                    </span>
+                  )}
+                </div>
+
+                <div className="flex items-center justify-between text-xs text-slate-500 pt-2 border-t border-slate-100 mt-2">
+                  <span>{m.venue_name}, {m.venue_city}</span>
+                  <span className="text-[#E91E8F] font-bold flex items-center text-[11px]">
+                    Full Scorecard <ChevronRight size={12} />
+                  </span>
                 </div>
               </div>
             ))}
@@ -368,85 +420,64 @@ export default function DomesticIntelligencePage() {
         </div>
       )}
 
-      {/* MATCH SCORECARD MODAL / OVERLAY */}
+      {/* Match Scorecard Modal */}
       {selectedMatchId && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm overflow-y-auto">
-          <div className="bg-white rounded-2xl max-w-5xl w-full max-h-[92vh] flex flex-col shadow-2xl overflow-hidden border border-slate-200">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 overflow-y-auto">
+          <div className="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-slate-200">
             {/* Modal Header */}
-            <div className="flex items-center justify-between p-5 bg-[#101C37] text-white">
+            <div className="p-5 border-b border-slate-200 flex items-center justify-between bg-slate-50 sticky top-0 z-10">
               <div>
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-[#E91E8F] text-white font-bold">
-                    {matchScorecard?.competition_type || "MATCH"}
-                  </span>
-                  <span className="text-xs text-slate-300 font-mono">
-                    {matchScorecard?.competition_name} ({matchScorecard?.season})
-                  </span>
-                </div>
-                <h2 className="text-lg font-bold text-white">
-                  {matchScorecard?.home_team?.name} vs {matchScorecard?.away_team?.name}
-                </h2>
-                <p className="text-xs text-slate-300">
-                  {matchScorecard?.venue_name}, {matchScorecard?.venue_city} • {matchScorecard?.match_date}
-                </p>
+                <span className="text-[10px] font-mono font-bold text-[#E91E8F] uppercase tracking-wider">
+                  Verified Match Telemetry
+                </span>
+                <h3 className="text-lg font-extrabold text-[#101C37]">
+                  {matchScorecard ? `${matchScorecard.home_team.name} vs ${matchScorecard.away_team.name}` : "Loading Scorecard..."}
+                </h3>
+                {matchScorecard && (
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    {matchScorecard.venue_name}, {matchScorecard.venue_city} • {matchScorecard.match_date} • {matchScorecard.win_margin}
+                  </p>
+                )}
               </div>
               <button
                 onClick={() => setSelectedMatchId(null)}
-                className="p-2 text-slate-300 hover:text-white rounded-lg hover:bg-white/10 transition-colors"
+                className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-200 transition-colors"
               >
-                <X size={20} />
+                <X size={18} />
               </button>
             </div>
 
             {loadingScorecard ? (
               <div className="p-12 text-center text-xs text-slate-500 font-mono">
-                Loading format-aware ball-by-ball analysis...
+                Extracting ball-by-ball match diagnostics...
               </div>
             ) : matchScorecard && activeInnings ? (
-              <div className="flex-1 overflow-y-auto p-6 space-y-6">
-                {/* Toss & Outcome summary bar */}
-                <div className="flex flex-wrap items-center justify-between gap-3 p-4 bg-slate-50 rounded-xl border border-slate-200 text-xs">
-                  <div>
-                    <span className="font-bold text-[#101C37]">Toss:</span> {matchScorecard.toss_winner_code} won and elected to {matchScorecard.toss_decision}
-                  </div>
-                  <div>
-                    <span className="font-bold text-[#101C37]">Winner:</span> {matchScorecard.winner_team_code} ({matchScorecard.win_margin})
-                  </div>
-                  {matchScorecard.player_of_match && (
-                    <div className="flex items-center gap-1 font-bold text-[#E91E8F]">
-                      <Award size={14} /> POTM: {matchScorecard.player_of_match}
-                    </div>
-                  )}
-                </div>
-
-                {/* Innings Switcher */}
-                <div className="flex items-center gap-2 border-b border-slate-200 pb-2">
+              <div className="p-6 space-y-6">
+                {/* Innings Selector */}
+                <div className="flex items-center gap-2 border-b border-slate-200 pb-3">
                   {matchScorecard.innings.map((inn, idx) => (
                     <button
                       key={inn.innings_number}
                       onClick={() => setActiveInningsIdx(idx)}
-                      className={`px-4 py-2 rounded-xl text-xs font-bold transition-colors ${
+                      className={`px-4 py-1.5 rounded-xl text-xs font-bold transition-all ${
                         activeInningsIdx === idx
-                          ? "bg-[#101C37] text-white"
+                          ? "bg-[#101C37] text-white shadow-sm"
                           : "bg-slate-100 text-slate-600 hover:bg-slate-200"
                       }`}
                     >
-                      Innings {inn.innings_number}: {inn.batting_team_name} ({inn.total_runs}/{inn.wickets} in {inn.overs_completed} ov)
+                      Innings {inn.innings_number}: {inn.batting_team_name} ({inn.total_runs}/{inn.wickets})
                     </button>
                   ))}
                 </div>
 
-                {/* Format-Aware Phase Diagnostics Cards */}
+                {/* Phase Summaries Cards */}
                 <div>
                   <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">
-                    Format-Aware Phase Leverage Diagnostics
+                    Phase-by-Phase Scoring Trajectory
                   </h4>
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                     {activeInnings.phase_summaries.map((phase) => (
-                      <div
-                        key={phase.phase_name}
-                        className="p-4 rounded-xl bg-gradient-to-br from-slate-50 to-slate-100 border border-slate-200"
-                      >
+                      <div key={phase.phase_name} className="p-3 bg-slate-50 rounded-xl border border-slate-200">
                         <div className="flex items-center justify-between mb-1">
                           <span className="text-xs font-bold text-[#101C37]">{phase.phase_name}</span>
                           <span className="text-[10px] font-mono text-slate-500">{phase.overs_range}</span>
@@ -525,9 +556,6 @@ export default function DomesticIntelligencePage() {
                       </tbody>
                     </table>
                   </div>
-                  <div className="text-[11px] text-slate-500 mt-2 px-1">
-                    Extras: <span className="font-semibold text-[#101C37]">{activeInnings.extras_total}</span> (w: {activeInnings.extras_breakdown.wides || 0}, nb: {activeInnings.extras_breakdown.noballs || 0}, b: {activeInnings.extras_breakdown.byes || 0}, lb: {activeInnings.extras_breakdown.legbyes || 0})
-                  </div>
                 </div>
 
                 {/* Bowling Scorecard */}
@@ -560,96 +588,19 @@ export default function DomesticIntelligencePage() {
                                 </span>
                               )}
                             </td>
-                            <td className="py-2.5 px-3 text-right text-slate-600">{bw.overs}</td>
+                            <td className="py-2.5 px-3 text-right font-mono text-slate-700">{bw.overs}</td>
                             <td className="py-2.5 px-3 text-right text-slate-600">{bw.maidens}</td>
-                            <td className="py-2.5 px-3 text-right text-slate-600">{bw.runs_conceded}</td>
-                            <td className="py-2.5 px-3 text-right font-extrabold text-[#E91E8F]">{bw.bowler_wickets}</td>
+                            <td className="py-2.5 px-3 text-right font-extrabold text-[#101C37]">{bw.runs_conceded}</td>
+                            <td className="py-2.5 px-3 text-right font-extrabold text-blue-600">{bw.bowler_wickets}</td>
                             <td className="py-2.5 px-3 text-right font-mono font-bold text-[#101C37]">{bw.economy_rate}</td>
-                            <td className="py-2.5 px-3 text-right text-slate-600">{bw.dot_balls ?? "-"}</td>
+                            <td className="py-2.5 px-3 text-right text-slate-600">{bw.dot_balls ?? 0}</td>
                             <td className="py-2.5 px-3 text-right text-slate-500 font-mono text-[11px]">
-                              w: {bw.wides}, nb: {bw.noballs}
+                              w:{bw.wides} nb:{bw.noballs}
                             </td>
                           </tr>
                         ))}
                       </tbody>
                     </table>
-                  </div>
-                  <div className="text-[10px] text-slate-400 mt-1 italic">
-                    * Wickets credited strictly exclude run-outs per platform integrity rules.
-                  </div>
-                </div>
-
-                {/* Fall of Wickets & Partnerships Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {/* Fall of Wickets */}
-                  <div className="p-4 rounded-xl border border-slate-200 bg-slate-50/60">
-                    <h5 className="text-xs font-bold text-[#101C37] mb-2">Fall of Wickets (FoW)</h5>
-                    <div className="space-y-1.5 max-h-48 overflow-y-auto pr-1">
-                      {activeInnings.fall_of_wickets.map((fow) => (
-                        <div
-                          key={fow.wicket_number}
-                          className="flex items-center justify-between text-xs py-1 px-2 rounded bg-white border border-slate-200/80"
-                        >
-                          <span className="font-bold text-[#101C37]">
-                            {fow.runs}/{fow.wicket_number}
-                          </span>
-                          <span className="text-slate-600">{fow.batter_out_name}</span>
-                          <span className="font-mono text-slate-400 text-[11px]">{fow.over_display} ov</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Partnerships */}
-                  <div className="p-4 rounded-xl border border-slate-200 bg-slate-50/60">
-                    <h5 className="text-xs font-bold text-[#101C37] mb-2">Partnerships</h5>
-                    <div className="space-y-1.5 max-h-48 overflow-y-auto pr-1">
-                      {activeInnings.partnerships.map((p) => (
-                        <div
-                          key={p.wicket_number}
-                          className="text-xs p-2 rounded bg-white border border-slate-200/80"
-                        >
-                          <div className="flex items-center justify-between font-bold text-[#101C37] mb-1">
-                            <span>
-                              {p.wicket_number === 1 ? "1st" : p.wicket_number === 2 ? "2nd" : p.wicket_number === 3 ? "3rd" : `${p.wicket_number}th`} Wicket: {p.runs} runs ({p.balls}b)
-                            </span>
-                            {p.is_unbroken && (
-                              <span className="text-[10px] text-emerald-600 font-mono">Unbroken</span>
-                            )}
-                          </div>
-                          <div className="text-[11px] text-slate-500 flex justify-between">
-                            <span>{p.batter_1_name}: {p.batter_1_runs} ({p.batter_1_balls}b)</span>
-                            <span>{p.batter_2_name}: {p.batter_2_runs} ({p.batter_2_balls}b)</span>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Over progression worm data */}
-                <div>
-                  <h5 className="text-xs font-bold text-[#101C37] mb-2">
-                    Over-by-Over Progression (Scoring Trajectory)
-                  </h5>
-                  <div className="flex items-center gap-1.5 overflow-x-auto pb-2">
-                    {activeInnings.scoring_progression.map((ov) => (
-                      <div
-                        key={ov.over_number}
-                        className="flex-shrink-0 w-12 text-center p-2 rounded-lg bg-slate-50 border border-slate-200"
-                      >
-                        <div className="text-[10px] text-slate-400 font-mono">Ov {ov.over_number}</div>
-                        <div className="text-xs font-extrabold text-[#101C37]">+{ov.runs_in_over}</div>
-                        <div className="text-[10px] font-mono text-slate-600 mt-0.5">
-                          {ov.cumulative_runs}/{ov.cumulative_wickets}
-                        </div>
-                        {ov.wickets_in_over > 0 && (
-                          <div className="text-[9px] font-bold text-[#E91E8F] mt-0.5">
-                            {ov.wickets_in_over}w
-                          </div>
-                        )}
-                      </div>
-                    ))}
                   </div>
                 </div>
               </div>
@@ -672,24 +623,166 @@ export default function DomesticIntelligencePage() {
       {/* TAB 3: ALL-ROUND DUAL CONTRIBUTION & PHASE SPLITS */}
       {activeTab === "player_profile" && (
         <div className="space-y-6">
-          {/* Player Selector Bar */}
-          <div className="flex flex-wrap items-center gap-2 p-4 bg-white rounded-xl border border-slate-200">
-            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider mr-2">
-              Select Uncapped Talent:
-            </span>
-            {uncappedPlayersList.map((p) => (
-              <button
-                key={p.id}
-                onClick={() => setSelectedPlayerId(p.id)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                  selectedPlayerId === p.id
-                    ? "bg-[#E91E8F] text-white shadow-sm"
-                    : "bg-slate-100 text-slate-700 hover:bg-slate-200"
-                }`}
+          {/* Dynamic Player Discovery & Search Bar */}
+          <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm space-y-4">
+            <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
+              {/* Search Input */}
+              <div className="relative flex-1">
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={15} />
+                <input
+                  type="text"
+                  placeholder="Search domestic player by name, ID, or role..."
+                  value={playerSearch}
+                  onChange={(e) => {
+                    setPlayerSearch(e.target.value);
+                    setPlayerPage(1);
+                  }}
+                  className="w-full pl-9 pr-4 py-2 bg-slate-50/80 border border-slate-200/80 rounded-lg text-xs font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#E91E8F]"
+                />
+                {playerSearch && (
+                  <button
+                    onClick={() => {
+                      setPlayerSearch("");
+                      setPlayerPage(1);
+                    }}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                  >
+                    <X size={14} />
+                  </button>
+                )}
+              </div>
+
+              {/* Eligibility Filter Tabs */}
+              <div className="flex items-center gap-1 p-1 bg-slate-100 rounded-lg">
+                <button
+                  onClick={() => {
+                    setPlayerEligibilityFilter("ALL");
+                    setPlayerPage(1);
+                  }}
+                  className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${
+                    playerEligibilityFilter === "ALL"
+                      ? "bg-white text-slate-900 shadow-sm"
+                      : "text-slate-500 hover:text-slate-700"
+                  }`}
+                >
+                  All ({eligibilityCounts.ALL || playerTotal})
+                </button>
+                <button
+                  onClick={() => {
+                    setPlayerEligibilityFilter("VERIFIED_UNCAPPED");
+                    setPlayerPage(1);
+                  }}
+                  className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${
+                    playerEligibilityFilter === "VERIFIED_UNCAPPED"
+                      ? "bg-[#101C37] text-white shadow-sm"
+                      : "text-slate-500 hover:text-slate-700"
+                  }`}
+                >
+                  Uncapped ({eligibilityCounts.VERIFIED_UNCAPPED || (playerEligibilityFilter === "VERIFIED_UNCAPPED" ? playerTotal : 0)})
+                </button>
+                <button
+                  onClick={() => {
+                    setPlayerEligibilityFilter("PENDING_VERIFICATION");
+                    setPlayerPage(1);
+                  }}
+                  className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${
+                    playerEligibilityFilter === "PENDING_VERIFICATION"
+                      ? "bg-[#D6B56D] text-[#101C37] shadow-sm"
+                      : "text-slate-500 hover:text-slate-700"
+                  }`}
+                >
+                  Pending ({eligibilityCounts.PENDING_VERIFICATION || (playerEligibilityFilter === "PENDING_VERIFICATION" ? playerTotal : 0)})
+                </button>
+              </div>
+
+              {/* Role Dropdown */}
+              <select
+                value={playerRoleFilter}
+                onChange={(e) => {
+                  setPlayerRoleFilter(e.target.value);
+                  setPlayerPage(1);
+                }}
+                className="bg-slate-50/80 border border-slate-200/80 rounded-lg px-3 py-2 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#E91E8F]"
               >
-                {p.name}
-              </button>
-            ))}
+                <option value="">All Roles</option>
+                <option value="Batter">Batter</option>
+                <option value="Bowler">Bowler</option>
+                <option value="All-rounder">All-Rounder</option>
+                <option value="Wicketkeeper">Wicketkeeper-Batter</option>
+              </select>
+            </div>
+
+            {/* Player Grid / Selector Strip */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
+              {domesticPlayers.map((p) => {
+                const isSelected = String(p.canonical_id) === selectedPlayerId;
+                return (
+                  <button
+                    key={p.canonical_id}
+                    onClick={() => setSelectedPlayerId(String(p.canonical_id))}
+                    className={`p-3 rounded-xl text-left border transition-all ${
+                      isSelected
+                        ? "bg-[#101C37] text-white border-[#101C37] shadow-sm"
+                        : "bg-white hover:bg-slate-50 text-slate-800 border-slate-200/80"
+                    }`}
+                  >
+                    <div className="flex items-center justify-between gap-1 mb-1">
+                      <span
+                        className={`text-[9px] font-mono px-1.5 py-0.2 rounded font-bold ${
+                          p.eligibility_status === "VERIFIED_UNCAPPED"
+                            ? isSelected
+                              ? "bg-[#E91E8F] text-white"
+                              : "bg-emerald-50 text-emerald-700 border border-emerald-200/60"
+                            : isSelected
+                            ? "bg-slate-700 text-slate-200"
+                            : "bg-slate-100 text-slate-600"
+                        }`}
+                      >
+                        {p.eligibility_status === "VERIFIED_UNCAPPED" ? "UNCAPPED" : "PENDING"}
+                      </span>
+                      <span
+                        className={`w-1.5 h-1.5 rounded-full ${
+                          p.statistical_coverage_status === "AVAILABLE" ? "bg-emerald-500" : "bg-slate-300"
+                        }`}
+                        title={p.statistical_coverage_status === "AVAILABLE" ? "Telemetry Available" : "No Match Data"}
+                      />
+                    </div>
+                    <div className="font-bold text-xs truncate">{p.player_name}</div>
+                    <div className={`text-[10px] truncate mt-0.5 ${isSelected ? "text-slate-300" : "text-slate-500"}`}>
+                      {p.team || "Domestic"} • {p.role || "Prospect"}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Pagination Bar */}
+            {playerTotal > 12 && (
+              <div className="flex items-center justify-between pt-3 border-t border-slate-100 text-xs">
+                <span className="text-slate-500 font-mono text-[11px]">
+                  {(playerPage - 1) * 12 + 1}–{Math.min(playerPage * 12, playerTotal)} of {playerTotal} candidates
+                </span>
+                <div className="flex items-center gap-1.5">
+                  <button
+                    disabled={playerPage <= 1}
+                    onClick={() => setPlayerPage((p) => Math.max(1, p - 1))}
+                    className="p-1.5 rounded-lg border border-slate-200 text-slate-600 disabled:opacity-40 hover:bg-slate-50"
+                  >
+                    <ChevronLeft size={14} />
+                  </button>
+                  <span className="font-mono text-xs font-bold text-slate-800 px-2">
+                    Page {playerPage} of {Math.ceil(playerTotal / 12)}
+                  </span>
+                  <button
+                    disabled={playerPage >= Math.ceil(playerTotal / 12)}
+                    onClick={() => setPlayerPage((p) => p + 1)}
+                    className="p-1.5 rounded-lg border border-slate-200 text-slate-600 disabled:opacity-40 hover:bg-slate-50"
+                  >
+                    <ChevronRight size={14} />
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
 
           {loadingPlayer ? (
@@ -700,112 +793,142 @@ export default function DomesticIntelligencePage() {
             <>
               {/* Dual-Discipline Summary Card */}
               {allRoundData && (
-                <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-6">
+                <div className="bg-white p-6 md:p-8 rounded-2xl border border-slate-200/80 shadow-sm space-y-6">
                   <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 pb-5">
                     <div>
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-[#D6B56D]/20 text-[#8C6D1F]">
+                      <div className="flex items-center gap-2 mb-1.5">
+                        <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-emerald-50 text-emerald-700 border border-emerald-200/60">
                           {allRoundData.eligibility_status}
                         </span>
                         <span className="text-xs font-mono text-slate-400">
-                          {allRoundData.canonical_id}
+                          Canonical ID: #{allRoundData.canonical_id}
+                        </span>
+                        <span
+                          className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold ${
+                            allRoundData.statistical_coverage_status === "AVAILABLE"
+                              ? "bg-slate-100 text-slate-700"
+                              : "bg-amber-50 text-amber-800 border border-amber-200/60"
+                          }`}
+                        >
+                          {allRoundData.statistical_coverage_status === "AVAILABLE" ? "TELEMETRY ACTIVE" : "PENDING MATCH COVERAGE"}
                         </span>
                       </div>
-                      <h2 className="text-2xl font-black text-[#101C37]">{allRoundData.full_name}</h2>
+                      <h2 className="text-2xl font-black text-slate-900">{allRoundData.full_name}</h2>
                       <p className="text-xs text-slate-500 mt-1">
-                        Primary Role: <span className="font-semibold text-[#101C37]">{allRoundData.primary_role}</span> • Team: {allRoundData.domestic_team}
+                        Primary Role: <span className="font-semibold text-slate-800">{allRoundData.primary_role}</span> • Team: {allRoundData.domestic_team}
                       </p>
                     </div>
 
                     {/* Transparent Archetype & Sample Size */}
-                    <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 text-right">
-                      <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                    <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200/70 text-right">
+                      <div className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400">
                         Evidence-Based Archetype
                       </div>
-                      <div className="text-sm font-extrabold text-[#E91E8F] mt-0.5">
+                      <div className="text-sm font-bold text-[#E91E8F] mt-0.5">
                         {allRoundData.role_archetype_context}
                       </div>
-                      <div className="text-[11px] font-mono text-slate-500 mt-1">
-                        Sample: {allRoundData.sample_size.matches} matches | {allRoundData.sample_size.innings_batted} inn | {allRoundData.sample_size.overs_bowled} ov
+                      <div className="text-[11px] font-mono text-slate-500 mt-0.5">
+                        Sample: {allRoundData.sample_size?.matches ?? 0} matches • {allRoundData.sample_size?.innings_batted ?? 0} inn • {allRoundData.sample_size?.overs_bowled ?? 0} ov
                       </div>
                     </div>
                   </div>
 
-                  {/* Independent Batting vs Bowling Dual Grid */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Informational Banner when No Statistical Coverage */}
+                  {allRoundData.statistical_coverage_status === "NO_STATISTICAL_COVERAGE" && (
+                    <div className="p-4 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 flex items-start gap-3">
+                      <AlertCircle className="text-amber-600 mt-0.5 flex-shrink-0" size={16} />
+                      <div>
+                        <div className="text-xs font-bold">
+                          No Domestic Match Telemetry Recorded in Current Dataset
+                        </div>
+                        <div className="text-xs text-amber-800 mt-0.5">
+                          Candidate is confirmed in official BCCI registries. Ball-by-ball match delivery records are pending ingestion for this cricketer. Zero statistics are presented to avoid speculative fabrication.
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Independent Batting vs Bowling Dual Columns (Open Layout) */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-2">
                     {/* Batting Dimension */}
-                    <div className="p-5 rounded-xl border border-slate-200 bg-pink-50/20">
-                      <div className="flex items-center justify-between mb-4">
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between pb-2 border-b border-slate-100">
                         <div className="flex items-center gap-2">
                           <TrendingUp size={16} className="text-[#E91E8F]" />
-                          <h4 className="text-sm font-bold text-[#101C37]">Batting Profile</h4>
+                          <h4 className="text-sm font-bold text-slate-900">Batting Profile</h4>
                         </div>
-                        <span className="text-xs font-mono text-slate-500">
-                          {allRoundData.batting_summary.innings} innings
+                        <span className="text-xs font-mono text-slate-400">
+                          {allRoundData.batting_summary?.innings ?? 0} innings
                         </span>
                       </div>
-                      <div className="grid grid-cols-3 gap-3 text-center">
-                        <div className="p-3 bg-white rounded-lg border border-slate-100">
-                          <div className="text-[10px] uppercase font-bold text-slate-400">Runs</div>
-                          <div className="text-base font-black text-[#101C37]">{allRoundData.batting_summary.runs}</div>
+                      <div className="grid grid-cols-3 gap-4">
+                        <div>
+                          <div className="text-[10px] font-mono uppercase text-slate-400">Runs</div>
+                          <div className="text-xl font-bold font-mono text-slate-900 mt-0.5">
+                            {allRoundData.batting_summary?.runs ?? 0}
+                          </div>
                         </div>
-                        <div className="p-3 bg-white rounded-lg border border-slate-100">
-                          <div className="text-[10px] uppercase font-bold text-slate-400">Strike Rate</div>
-                          <div className="text-base font-black text-[#101C37]">{allRoundData.batting_summary.strike_rate}</div>
+                        <div>
+                          <div className="text-[10px] font-mono uppercase text-slate-400">Strike Rate</div>
+                          <div className="text-xl font-bold font-mono text-slate-900 mt-0.5">
+                            {allRoundData.batting_summary?.strike_rate ?? 0.0}
+                          </div>
                         </div>
-                        <div className="p-3 bg-white rounded-lg border border-slate-100">
-                          <div className="text-[10px] uppercase font-bold text-slate-400">Average</div>
-                          <div className="text-base font-black text-[#101C37]">
-                            {allRoundData.batting_summary.average ?? "N/A (0 outs)"}
+                        <div>
+                          <div className="text-[10px] font-mono uppercase text-slate-400">Average</div>
+                          <div className="text-xl font-bold font-mono text-slate-900 mt-0.5">
+                            {allRoundData.batting_summary?.batting_average ?? allRoundData.batting_summary?.average ?? "N/A"}
                           </div>
                         </div>
                       </div>
-                      <div className="flex items-center justify-between text-xs text-slate-500 mt-4 px-1">
-                        <span>Boundaries: {allRoundData.batting_summary.boundary_percentage}%</span>
-                        <span>High Score: {allRoundData.batting_summary.high_score}</span>
+                      <div className="flex items-center justify-between text-xs text-slate-500 pt-2 border-t border-slate-100">
+                        <span>Boundaries: {allRoundData.batting_summary?.boundary_percentage ?? 0.0}%</span>
+                        <span>High Score: {allRoundData.batting_summary?.high_score ?? 0}</span>
                       </div>
                     </div>
 
                     {/* Bowling Dimension */}
-                    <div className="p-5 rounded-xl border border-slate-200 bg-blue-50/20">
-                      <div className="flex items-center justify-between mb-4">
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between pb-2 border-b border-slate-100">
                         <div className="flex items-center gap-2">
-                          <Target size={16} className="text-blue-600" />
-                          <h4 className="text-sm font-bold text-[#101C37]">Bowling Profile</h4>
+                          <Target size={16} className="text-cyan-600" />
+                          <h4 className="text-sm font-bold text-slate-900">Bowling Profile</h4>
                         </div>
-                        <span className="text-xs font-mono text-slate-500">
-                          {allRoundData.bowling_summary.overs_bowled} overs
+                        <span className="text-xs font-mono text-slate-400">
+                          {allRoundData.bowling_summary?.overs ?? allRoundData.bowling_summary?.overs_bowled ?? 0} overs
                         </span>
                       </div>
-                      <div className="grid grid-cols-3 gap-3 text-center">
-                        <div className="p-3 bg-white rounded-lg border border-slate-100">
-                          <div className="text-[10px] uppercase font-bold text-slate-400">Wickets</div>
-                          <div className="text-base font-black text-[#101C37]">
-                            {allRoundData.bowling_summary.wickets ?? 0}
+                      <div className="grid grid-cols-3 gap-4">
+                        <div>
+                          <div className="text-[10px] font-mono uppercase text-slate-400">Wickets</div>
+                          <div className="text-xl font-bold font-mono text-slate-900 mt-0.5">
+                            {allRoundData.bowling_summary?.bowler_wickets ?? allRoundData.bowling_summary?.wickets ?? 0}
                           </div>
                         </div>
-                        <div className="p-3 bg-white rounded-lg border border-slate-100">
-                          <div className="text-[10px] uppercase font-bold text-slate-400">Economy</div>
-                          <div className="text-base font-black text-[#101C37]">{allRoundData.bowling_summary.economy}</div>
+                        <div>
+                          <div className="text-[10px] font-mono uppercase text-slate-400">Economy</div>
+                          <div className="text-xl font-bold font-mono text-slate-900 mt-0.5">
+                            {allRoundData.bowling_summary?.economy_rate ?? allRoundData.bowling_summary?.economy ?? 0.0}
+                          </div>
                         </div>
-                        <div className="p-3 bg-white rounded-lg border border-slate-100">
-                          <div className="text-[10px] uppercase font-bold text-slate-400">Average</div>
-                          <div className="text-base font-black text-[#101C37]">
-                            {allRoundData.bowling_summary.average ?? "N/A (0 wkts)"}
+                        <div>
+                          <div className="text-[10px] font-mono uppercase text-slate-400">Average</div>
+                          <div className="text-xl font-bold font-mono text-slate-900 mt-0.5">
+                            {allRoundData.bowling_summary?.bowling_average ?? allRoundData.bowling_summary?.average ?? "N/A"}
                           </div>
                         </div>
                       </div>
-                      <div className="flex items-center justify-between text-xs text-slate-500 mt-4 px-1">
-                        <span>Maidens: {allRoundData.bowling_summary.maidens ?? 0}</span>
+                      <div className="flex items-center justify-between text-xs text-slate-500 pt-2 border-t border-slate-100">
+                        <span>Dots: {allRoundData.bowling_summary?.dot_balls_bowled ?? 0}</span>
                         <span>Catches: {allRoundData.fielding_summary?.catches ?? 0}</span>
                       </div>
                     </div>
                   </div>
 
-                  <div className="p-3 bg-slate-50 rounded-xl border border-slate-200/80 text-[11px] text-slate-500 flex items-center gap-2">
-                    <Shield size={14} className="text-[#D6B56D]" />
+                  <div className="pt-4 border-t border-slate-100 text-[11px] text-slate-500 flex items-center gap-2">
+                    <Shield size={13} className="text-[#D6B56D]" />
                     <span>
-                      Integrity Policy: royals-intelligence avoids composite ratings or weighted formulas to represent dual contributors. Independent metrics are preserved with transparent sample sizes.
+                      Integrity Policy: Independent metrics are preserved without composite ratings or speculative weights.
                     </span>
                   </div>
                 </div>
@@ -865,4 +988,3 @@ export default function DomesticIntelligencePage() {
     </div>
   );
 }
-

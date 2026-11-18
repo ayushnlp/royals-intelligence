@@ -8,6 +8,8 @@ import {
   PlayerMatchHistoryItem,
   PlayerPhaseSplitDetail,
   AllRoundContributionResponse,
+  DomesticPlayerSummary,
+  PaginatedDomesticPlayersResponse,
   VenueSummaryItem,
   VenueDetailResponse,
   VenueScoringTrendsResponse,
@@ -30,6 +32,8 @@ import {
   PressureLeaderboardResponse,
   CandidateEvidenceProfileResponse,
   PressureMethodologyResponse,
+  UncappedLeaderboardResponse,
+  UncappedOverviewResponse,
 } from "@/types";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
@@ -268,7 +272,13 @@ export async function fetchSeasonMatches(
     const url = `${API_BASE_URL}/domestic/seasons/${competitionId}/${season}/matches${qs ? `?${qs}` : ""}`;
     const res = await fetch(url, { cache: "no-store" });
     if (!res.ok) throw new Error("Failed to fetch season matches");
-    return await res.json();
+    const data = await res.json();
+    return {
+      total: data.total ?? data.total_matches ?? 0,
+      page: data.page ?? 1,
+      page_size: data.page_size ?? 20,
+      matches: data.matches ?? [],
+    };
   } catch (e) {
     return { total: 0, page: 1, page_size: 20, matches: [] };
   }
@@ -380,6 +390,42 @@ export async function fetchPlayerAllRoundSummary(
     return null;
   }
 }
+
+export interface DomesticPlayersQueryParams {
+  page?: number;
+  page_size?: number;
+  search?: string;
+  eligibility_status?: string;
+  role?: string;
+  team?: string;
+  competition?: string;
+  season?: string;
+}
+
+export async function fetchDomesticPlayers(
+  params?: DomesticPlayersQueryParams
+): Promise<PaginatedDomesticPlayersResponse> {
+  try {
+    const searchParams = new URLSearchParams();
+    if (params?.page) searchParams.append("page", String(params.page));
+    if (params?.page_size) searchParams.append("page_size", String(params.page_size));
+    if (params?.search) searchParams.append("search", params.search);
+    if (params?.eligibility_status) searchParams.append("eligibility_status", params.eligibility_status);
+    if (params?.role) searchParams.append("role", params.role);
+    if (params?.team) searchParams.append("team", params.team);
+    if (params?.competition) searchParams.append("competition", params.competition);
+    if (params?.season) searchParams.append("season", params.season);
+
+    const qs = searchParams.toString();
+    const url = `${API_BASE_URL}/domestic/players${qs ? `?${qs}` : ""}`;
+    const res = await fetch(url, { cache: "no-store" });
+    if (!res.ok) throw new Error("Failed to fetch domestic players");
+    return await res.json();
+  } catch (e) {
+    return { items: [], total: 0, page: 1, page_size: 20, total_pages: 1 };
+  }
+}
+
 
 // --- Stage 4: Venue, Pitch & Weather Intelligence API ---
 
@@ -735,5 +781,51 @@ export async function fetchPressureMethodology(): Promise<PressureMethodologyRes
     return null;
   }
 }
+
+export async function fetchUncappedOverview(): Promise<UncappedOverviewResponse | null> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/analytics/uncapped/overview`, { cache: "no-store" });
+    if (!res.ok) throw new Error("Failed to fetch uncapped overview");
+    return await res.json();
+  } catch (e) {
+    return null;
+  }
+}
+
+export async function fetchUncappedLeaderboards(params?: {
+  discipline?: string;
+  limit?: number;
+  qualified_only?: boolean;
+}): Promise<UncappedLeaderboardResponse | null> {
+  try {
+    const query = new URLSearchParams();
+    if (params?.discipline) query.set("discipline", params.discipline);
+    if (params?.limit !== undefined) query.set("limit", params.limit.toString());
+    if (params?.qualified_only !== undefined) query.set("qualified_only", params.qualified_only.toString());
+
+    const queryString = query.toString();
+    const url = `${API_BASE_URL}/analytics/uncapped/leaderboards${queryString ? `?${queryString}` : ""}`;
+    const res = await fetch(url, { cache: "no-store" });
+    if (!res.ok) throw new Error("Failed to fetch uncapped leaderboards");
+    return await res.json();
+  } catch (e) {
+    return null;
+  }
+}
+
+export async function fetchPlayerEligibility(playerId: number, playerName?: string) {
+  try {
+    const query = new URLSearchParams();
+    if (playerName) query.set("player_name", playerName);
+    const queryString = query.toString();
+    const url = `${API_BASE_URL}/analytics/uncapped/eligibility/${playerId}${queryString ? `?${queryString}` : ""}`;
+    const res = await fetch(url, { cache: "no-store" });
+    if (!res.ok) throw new Error("Failed to fetch player eligibility");
+    return await res.json();
+  } catch (e) {
+    return null;
+  }
+}
+
 
 

@@ -1,13 +1,25 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Server, Shield, FileText, CheckCircle2, AlertTriangle, RefreshCw } from "lucide-react";
+import { usePathname } from "next/navigation";
+import { Shield, FileText, CheckCircle2, AlertTriangle, RefreshCw } from "lucide-react";
 import { fetchSystemHealth } from "@/lib/api";
 import { SystemHealth } from "@/types";
+
+const PAGE_TITLES: Record<string, string> = {
+  "/": "Executive Overview",
+  "/pressure": "Pressure Intelligence",
+  "/tactical": "Tactical Intelligence",
+  "/uncapped": "Uncapped Intelligence",
+  "/domestic": "Domestic & Matches",
+  "/venues": "Venue & Pitch",
+  "/acquisition": "Data Acquisition",
+};
 
 export const Header: React.FC = () => {
   const [health, setHealth] = useState<SystemHealth | null>(null);
   const [loading, setLoading] = useState(false);
+  const pathname = usePathname();
 
   const checkHealth = async () => {
     setLoading(true);
@@ -23,64 +35,62 @@ export const Header: React.FC = () => {
   }, []);
 
   const isHealthy = health?.status === "healthy";
+  const currentPageTitle = pathname ? PAGE_TITLES[pathname] || "Intelligence Platform" : "Executive Overview";
 
   return (
-    <header className="h-16 bg-white border-b border-slate-200/80 px-6 flex items-center justify-between sticky top-0 z-20">
-      {/* Left: Breadcrumb / Section Header */}
-      <div className="flex items-center gap-3">
-        <div className="flex items-center gap-2">
-          <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
-            Royals Intelligence
-          </span>
-          <span className="text-slate-300">/</span>
-          <h2 className="text-sm font-bold text-[#101C37]">
-            Official Round 1 Intelligence Platform
-          </h2>
-        </div>
-        <span className="hidden sm:inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-mono font-semibold bg-pink-50 text-[#E91E8F] border border-pink-200">
-          ROUND 1
+    <header className="h-16 bg-white/95 backdrop-blur-sm border-b border-slate-200/60 px-6 flex items-center justify-between sticky top-0 z-20">
+      {/* Left: Breadcrumb / Page Title */}
+      <div className="flex items-center gap-2.5">
+        <span className="text-xs font-medium text-slate-400">
+          Royals Intelligence
         </span>
+        <span className="text-slate-300 font-light">/</span>
+        <h2 className="text-sm font-semibold tracking-tight text-slate-900">
+          {currentPageTitle}
+        </h2>
       </div>
 
-      {/* Right: Telemetry & Actions */}
-      <div className="flex items-center gap-4">
-        {/* Backend Connectivity Indicator */}
+      {/* Right: Telemetry & Navigation Actions */}
+      <div className="flex items-center gap-5 text-xs">
+        {/* Understated API Status Indicator */}
         <button
           onClick={checkHealth}
           title="Click to re-check API connectivity"
-          className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-xs text-slate-700 hover:bg-slate-100 transition-colors"
+          className="flex items-center gap-2 text-slate-600 hover:text-slate-900 transition-colors cursor-pointer py-1"
         >
-          <Server size={14} className="text-[#101C37]" />
-          <span className="hidden md:inline font-mono text-[11px]">API:</span>
-          {isHealthy ? (
-            <span className="flex items-center gap-1 font-mono text-[11px] font-semibold text-emerald-600">
-              <CheckCircle2 size={13} />
-              ONLINE
-            </span>
-          ) : (
-            <span className="flex items-center gap-1 font-mono text-[11px] font-semibold text-amber-600">
-              <AlertTriangle size={13} />
-              STANDBY
-            </span>
-          )}
-          {loading && <RefreshCw size={12} className="animate-spin text-slate-400" />}
+          <span className="relative flex h-2 w-2">
+            {isHealthy && (
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+            )}
+            <span
+              className={`relative inline-flex rounded-full h-2 w-2 ${
+                isHealthy ? "bg-emerald-500" : "bg-amber-500"
+              }`}
+            />
+          </span>
+          <span className="font-mono text-[11px] text-slate-500">
+            API: <strong className={isHealthy ? "text-emerald-700 font-semibold" : "text-amber-700 font-semibold"}>{isHealthy ? "Online" : "Standby"}</strong>
+          </span>
+          {loading && <RefreshCw size={11} className="animate-spin text-slate-400" />}
         </button>
 
-        {/* Confidentiality Pill */}
-        <div className="hidden lg:flex items-center gap-1.5 text-xs text-slate-500 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-lg">
-          <Shield size={14} className="text-[#D6B56D]" />
-          <span className="font-semibold text-slate-700">RR Operations</span>
+        <span className="h-3.5 w-px bg-slate-200" />
+
+        {/* RR Operations Link */}
+        <div className="hidden sm:flex items-center gap-1.5 text-slate-600 hover:text-slate-900 transition-colors">
+          <Shield size={13} className="text-[#D6B56D]" />
+          <span className="font-medium text-[11px]">RR Operations</span>
         </div>
 
-        {/* Documentation Link Pill */}
+        {/* Documentation Link */}
         <a
           href="https://github.com/rajasthanroyals/royals-intelligence"
           target="_blank"
           rel="noopener noreferrer"
-          className="hidden sm:flex items-center gap-1 text-xs text-slate-600 hover:text-[#E91E8F] transition-colors"
+          className="hidden sm:flex items-center gap-1 text-slate-500 hover:text-[#E91E8F] transition-colors"
         >
-          <FileText size={14} />
-          <span>Docs</span>
+          <FileText size={13} />
+          <span className="font-medium text-[11px]">Docs</span>
         </a>
       </div>
     </header>

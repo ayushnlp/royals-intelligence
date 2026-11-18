@@ -535,7 +535,36 @@ export interface AllRoundContributionResponse {
   fielding_summary: Record<string, any>;
   role_archetype_context: string;
   has_sufficient_sample: boolean;
+  statistical_coverage_status?: string;
+  data_note?: string;
 }
+
+export interface DomesticPlayerSummary {
+  canonical_id: number;
+  player_id: string;
+  player_name: string;
+  canonical_key?: string;
+  eligibility_status: string;
+  is_uncapped: boolean;
+  role?: string;
+  team?: string;
+  batting_style?: string;
+  bowling_style?: string;
+  caps_count: number;
+  match_count: number;
+  statistical_coverage_status: string;
+  notes?: string;
+}
+
+export interface PaginatedDomesticPlayersResponse {
+  items: DomesticPlayerSummary[];
+  total: number;
+  page: number;
+  page_size: number;
+  total_pages: number;
+  filters_applied?: Record<string, any>;
+}
+
 
 // --- Stage 4: Venue, Pitch & Weather Intelligence Interfaces ---
 
@@ -1093,4 +1122,77 @@ export interface PressureMethodologyResponse {
   limitations: string[];
   data_provenance: string;
 }
+
+// ---------------------------------------------------------------------------
+// Uncapped Player Intelligence Types
+// ---------------------------------------------------------------------------
+
+export interface UncappedBattingItem {
+  uncapped_rank: number;
+  overall_r1_rank: number;
+  player_id: number;
+  player_name: string;
+  franchise: string;
+  tactical_role: string;
+  conservative_pri: number;
+  posterior_mean: number;
+  posterior_se: number;
+  ci_95_lower: number;
+  ci_95_upper: number;
+  pressure_legal_balls: number;
+  pressure_matches: number;
+  observed_strike_rate: number;
+  observed_boundary_pct: number;
+  observed_dot_pct: number;
+  eligibility_status: string;
+  eligibility_reason: string;
+  verification_source: string;
+  verification_date: string;
+}
+
+export interface UncappedBowlingItem {
+  uncapped_rank: number;
+  overall_r1_rank: number;
+  player_id: number;
+  player_name: string;
+  franchise: string;
+  tactical_role: string;
+  conservative_runs_saved: number;
+  posterior_mean: number;
+  posterior_se: number;
+  ci_95_lower: number;
+  ci_95_upper: number;
+  pressure_legal_balls: number;
+  pressure_matches: number;
+  observed_economy: number;
+  observed_wicket_pct: number;
+  observed_dot_pct: number;
+  eligibility_status: string;
+  eligibility_reason: string;
+  verification_source: string;
+  verification_date: string;
+}
+
+export interface UncappedLeaderboardResponse {
+  discipline_filter: string;
+  qualified_only: boolean;
+  batting_count: number;
+  bowling_count: number;
+  batting_leaderboard: UncappedBattingItem[] | null;
+  bowling_leaderboard: UncappedBowlingItem[] | null;
+  sample_gate: string;
+  governing_statute: string;
+  audit_date: string;
+}
+
+export interface UncappedOverviewResponse {
+  total_verified_uncapped_batters: number;
+  total_verified_uncapped_bowlers: number;
+  top_uncapped_batter: string | null;
+  top_uncapped_bowler: string | null;
+  sample_gate_applied: string;
+  governing_statute: string;
+  audit_date: string;
+}
+
 

@@ -1,721 +1,705 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
+import Link from "next/link";
 import {
-  UncappedPlayerSummary,
-  UncappedPlayerDetail,
-  BattingAggregates,
-  BowlingAggregates,
-  RecentFormWindow,
-  SchemaDiscoveryResult,
-  RRDataPackIngestionSummary,
+  UncappedOverviewResponse,
+  UncappedLeaderboardResponse,
+  UncappedBattingItem,
+  UncappedBowlingItem,
 } from "@/types";
 import {
-  fetchUncappedPlayers,
-  fetchUncappedPlayerDetail,
-  verifyPlayerEligibility,
-  fetchPlayerBatting,
-  fetchPlayerBowling,
-  fetchPlayerRecentForm,
-  discoverProprietarySchema,
-  ingestProprietaryPack,
-  fetchPlayerEvaluations,
+  fetchUncappedOverview,
+  fetchUncappedLeaderboards,
 } from "@/lib/api";
+import {
+  Shield,
+  Award,
+  TrendingUp,
+  Target,
+  Sparkles,
+  ChevronRight,
+  X,
+  FileText,
+  RefreshCw,
+  Crosshair,
+  ArrowRight,
+  CheckCircle2,
+  AlertTriangle,
+} from "lucide-react";
+import { cn } from "@/lib/utils";
 
-export default function UncappedScoutingPage() {
-  const [activeTab, setActiveTab] = useState<"roster" | "analytics" | "form" | "datapack">("roster");
-  const [players, setPlayers] = useState<UncappedPlayerSummary[]>([]);
-  const [selectedPlayerId, setSelectedPlayerId] = useState<string>("uncapped_rr_01");
-  const [selectedPlayer, setSelectedPlayer] = useState<UncappedPlayerDetail | null>(null);
-  const [loading, setLoading] = useState(true);
+export default function UncappedIntelligencePage() {
+  const [activeTab, setActiveTab] = useState<"batting" | "bowling" | "governance">("batting");
+  const [loading, setLoading] = useState<boolean>(true);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  // Filters
-  const [searchName, setSearchName] = useState("");
-  const [filterEligibility, setFilterEligibility] = useState<string>("");
-  const [filterTier, setFilterTier] = useState<string>("");
-  const [trialistOnly, setTrialistOnly] = useState<boolean>(false);
+  // Core Data
+  const [overview, setOverview] = useState<UncappedOverviewResponse | null>(null);
+  const [leaderboards, setLeaderboards] = useState<UncappedLeaderboardResponse | null>(null);
 
-  // Analytics states
-  const [battingStats, setBattingStats] = useState<BattingAggregates | null>(null);
-  const [bowlingStats, setBowlingStats] = useState<BowlingAggregates | null>(null);
-  const [recentForm, setRecentForm] = useState<RecentFormWindow | null>(null);
+  // Selected Player Dossier Modal
+  const [selectedPlayer, setSelectedPlayer] = useState<UncappedBattingItem | UncappedBowlingItem | null>(null);
+  const [selectedDiscipline, setSelectedDiscipline] = useState<"batting" | "bowling">("batting");
 
-  // Eligibility modal / audit state
-  const [auditNotes, setAuditNotes] = useState("");
-  const [auditStatus, setAuditStatus] = useState("CONFIRMED_UNCAPPED");
-  const [auditSubmitting, setAuditSubmitting] = useState(false);
-  const [auditSuccessMsg, setAuditSuccessMsg] = useState("");
+  const loadUncappedData = async () => {
+    setLoading(true);
+    setErrorMsg(null);
+    try {
+      const [ovRes, lbRes] = await Promise.all([
+        fetchUncappedOverview(),
+        fetchUncappedLeaderboards({ discipline: "all", limit: 20, qualified_only: true }),
+      ]);
 
-  // RR 8 Nov Data Pack state
-  const [schemaResult, setSchemaResult] = useState<SchemaDiscoveryResult | null>(null);
-  const [ingestionSummary, setIngestionSummary] = useState<RRDataPackIngestionSummary | null>(null);
-  const [dataPackJson, setDataPackJson] = useState(
-    JSON.stringify(
-      [
-        {
-          player_name: "Ashutosh Sharma",
-          dob: "1998-09-15",
-          state_association: "Madhya Pradesh",
-          primary_role: "Finisher",
-          batting_hand: "Right",
-          technical_rating: 8.5,
-          confidential_notes: "Target for auction finisher role. Max bid INR 7.5 Cr.",
-          is_rr_trialist: "true",
-        },
-        {
-          player_name: "Priyansh Arya",
-          dob: "2001-01-18",
-          state_association: "Delhi",
-          primary_role: "Top Order Batter",
-          batting_hand: "Left",
-          technical_rating: 9.0,
-          confidential_notes: "Dominant powerplay striker. 6 sixes in DPL over.",
-          is_rr_trialist: "true",
-        },
-        {
-          player_name: "Unverified State Prospect",
-          dob: "", // Missing DOB to test validation & PENDING_VERIFICATION
-          state_association: "Himachal Pradesh",
-          primary_role: "Pace Bowler",
-          batting_hand: "Right",
-          technical_rating: 7.0,
-          confidential_notes: "Physical testing pending at Nagpur academy.",
-          is_rr_trialist: "false",
-        },
-      ],
-      null,
-      2
-    )
-  );
-  const [userRole, setUserRole] = useState<"public" | "rr_scout_admin">("public");
-  const [evaluations, setEvaluations] = useState<any[]>([]);
-
-  // Load roster
-  useEffect(() => {
-    async function loadData() {
-      setLoading(true);
-      const res = await fetchUncappedPlayers({
-        eligibility: filterEligibility || undefined,
-        tier: filterTier || undefined,
-        trialist_only: trialistOnly,
-      });
-      setPlayers(res);
+      if (ovRes) setOverview(ovRes);
+      if (lbRes) {
+        setLeaderboards(lbRes);
+      } else {
+        setErrorMsg("Uncapped Intelligence API is offline or in standby. Ensure backend is running on port 8000.");
+      }
+    } catch (err: any) {
+      setErrorMsg("Failed to communicate with Uncapped Intelligence backend service.");
+    } finally {
       setLoading(false);
     }
-    loadData();
-  }, [filterEligibility, filterTier, trialistOnly]);
+  };
 
-  // Load selected player detail & analytics
   useEffect(() => {
-    if (!selectedPlayerId) return;
+    loadUncappedData();
 
-    async function loadPlayerTelemetry() {
-      const detail = await fetchUncappedPlayerDetail(selectedPlayerId);
-      setSelectedPlayer(detail);
-
-      const bat = await fetchPlayerBatting(selectedPlayerId);
-      setBattingStats(bat);
-
-      const bowl = await fetchPlayerBowling(selectedPlayerId);
-      setBowlingStats(bowl);
-
-      const form = await fetchPlayerRecentForm(selectedPlayerId, 5, "batting");
-      setRecentForm(form);
-
-      const evals = await fetchPlayerEvaluations(selectedPlayerId, userRole);
-      setEvaluations(evals);
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const tab = params.get("tab") || params.get("discipline");
+      if (tab === "bowling") setActiveTab("bowling");
+      if (tab === "batting") setActiveTab("batting");
+      if (tab === "governance") setActiveTab("governance");
     }
+  }, []);
 
-    loadPlayerTelemetry();
-  }, [selectedPlayerId, userRole]);
-
-  const handleAuditSubmit = async () => {
-    if (!selectedPlayerId) return;
-    setAuditSubmitting(true);
-    setAuditSuccessMsg("");
-    try {
-      await verifyPlayerEligibility(selectedPlayerId, {
-        new_status: auditStatus,
-        verification_notes: auditNotes || "Eligibility confirmed via domestic BCCI scorecard audit.",
-        verified_by: "LEAD_SCOUT_PANEL",
-      });
-      setAuditSuccessMsg(`Successfully updated status to ${auditStatus}`);
-      // Refresh detail
-      const updated = await fetchUncappedPlayerDetail(selectedPlayerId);
-      setSelectedPlayer(updated);
-    } catch (err: any) {
-      setAuditSuccessMsg("Failed to update: " + err.message);
-    } finally {
-      setAuditSubmitting(false);
-    }
+  const openDossier = (player: UncappedBattingItem | UncappedBowlingItem, discipline: "batting" | "bowling") => {
+    setSelectedPlayer(player);
+    setSelectedDiscipline(discipline);
   };
 
-  const handleDiscoverSchema = async () => {
-    try {
-      const parsed = JSON.parse(dataPackJson);
-      const res = await discoverProprietarySchema(parsed);
-      setSchemaResult(res);
-    } catch (err: any) {
-      alert("Invalid JSON format: " + err.message);
-    }
+  const closeDossier = () => {
+    setSelectedPlayer(null);
   };
-
-  const handleIngestPack = async () => {
-    try {
-      const parsed = JSON.parse(dataPackJson);
-      const res = await ingestProprietaryPack({
-        records: parsed,
-        column_mapping: schemaResult?.recommended_mapping,
-        dataset_key: "rr_uncapped_pack_2026_test",
-      });
-      setIngestionSummary(res);
-    } catch (err: any) {
-      alert("Ingestion error: " + err.message);
-    }
-  };
-
-  const filteredPlayers = players.filter((p) =>
-    p.full_name.toLowerCase().includes(searchName.toLowerCase()) ||
-    (p.home_state_association || "").toLowerCase().includes(searchName.toLowerCase())
-  );
 
   return (
-    <div className="space-y-6">
-      {/* Top Banner */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-navy-800 pb-5">
-        <div>
-          <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-bold tracking-tight text-white">
-              Uncapped Talent Scouting Hub
+    <div className="space-y-8 pb-12">
+      {/* ------------------------------------------------------------------- */}
+      {/* 1. Editorial Header & Context */}
+      {/* ------------------------------------------------------------------- */}
+      <section className="space-y-3">
+        <div className="flex flex-wrap items-center gap-3 text-xs">
+          <span className="font-mono font-bold tracking-widest text-[#E91E8F] uppercase">
+            Rajasthan Royals Scouting
+          </span>
+          <span className="text-slate-300">•</span>
+          <span className="font-mono text-slate-500">
+            AUCTION-02 Eligibility Ledger
+          </span>
+          <span className="text-slate-300">•</span>
+          <span className="inline-flex items-center gap-1.5 text-emerald-700 font-medium">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+            Strict Domestic Uncapped Scope
+          </span>
+        </div>
+
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+          <div className="max-w-3xl space-y-2">
+            <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-slate-900 leading-tight">
+              Uncapped Player Intelligence
             </h1>
-            <span className="rounded-full bg-pink-500/10 px-3 py-1 text-xs font-semibold text-pink-400 border border-pink-500/30">
-              STAGE 2 SEALED
-            </span>
-            <span className="rounded-full bg-gold-500/10 px-3 py-1 text-xs font-semibold text-gold-400 border border-gold-500/30">
-              UNCAPPED ONLY
-            </span>
-          </div>
-          <p className="mt-1 text-sm text-navy-400">
-            Relational intelligence database for domestic T20 prospects, age-group eligibility, and RR 8 Nov Data Pack integration.
-          </p>
-        </div>
-
-        {/* Global Reference Cutoff Date Pill */}
-        <div className="flex items-center gap-2 rounded-lg bg-navy-900 border border-navy-700 px-3 py-2 text-xs">
-          <span className="text-navy-400">Eligibility Cutoff Reference:</span>
-          <span className="font-semibold text-amber-400 font-mono">Unresolved (Awaiting Official BCCI Cutoff)</span>
-        </div>
-      </div>
-
-      {/* Navigation Tabs */}
-      <div className="flex flex-wrap gap-2 border-b border-navy-800 pb-2">
-        <button
-          onClick={() => setActiveTab("roster")}
-          className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
-            activeTab === "roster"
-              ? "bg-pink-600 text-white shadow-lg shadow-pink-600/30"
-              : "text-navy-400 hover:text-white hover:bg-navy-800"
-          }`}
-        >
-          Uncapped Roster & Eligibility ({filteredPlayers.length})
-        </button>
-        <button
-          onClick={() => setActiveTab("analytics")}
-          className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
-            activeTab === "analytics"
-              ? "bg-pink-600 text-white shadow-lg shadow-pink-600/30"
-              : "text-navy-400 hover:text-white hover:bg-navy-800"
-          }`}
-        >
-          Analytics & Phase Breakdown
-        </button>
-        <button
-          onClick={() => setActiveTab("form")}
-          className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
-            activeTab === "form"
-              ? "bg-pink-600 text-white shadow-lg shadow-pink-600/30"
-              : "text-navy-400 hover:text-white hover:bg-navy-800"
-          }`}
-        >
-          Recent Form Window (Last 5)
-        </button>
-        <button
-          onClick={() => setActiveTab("datapack")}
-          className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
-            activeTab === "datapack"
-              ? "bg-pink-600 text-white shadow-lg shadow-pink-600/30"
-              : "text-navy-400 hover:text-white hover:bg-navy-800"
-          }`}
-        >
-          RR 8 Nov Data Pack Readiness
-        </button>
-        <a
-          href="/domestic"
-          className="px-4 py-2 text-sm font-medium rounded-lg transition-colors text-pink-400 hover:text-white hover:bg-navy-800 flex items-center gap-1.5 ml-auto border border-pink-500/30"
-        >
-          <span>Domestic Matches & Phase Breakdown (Stage 3)</span>
-          <span className="text-xs">→</span>
-        </a>
-      </div>
-
-      {/* TAB 1: Roster & Eligibility */}
-      {activeTab === "roster" && (
-        <div className="space-y-4">
-          {/* Filter Bar */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 bg-navy-900/60 p-4 rounded-xl border border-navy-800">
-            <div>
-              <label className="text-xs text-navy-400 block mb-1">Search Player or State</label>
-              <input
-                type="text"
-                placeholder="e.g. Shashank, Delhi..."
-                value={searchName}
-                onChange={(e) => setSearchName(e.target.value)}
-                className="w-full bg-navy-950 border border-navy-700 rounded-lg px-3 py-1.5 text-sm text-white placeholder-navy-500 focus:outline-none focus:border-pink-500"
-              />
-            </div>
-            <div>
-              <label className="text-xs text-navy-400 block mb-1">Eligibility Status</label>
-              <select
-                value={filterEligibility}
-                onChange={(e) => setFilterEligibility(e.target.value)}
-                className="w-full bg-navy-950 border border-navy-700 rounded-lg px-3 py-1.5 text-sm text-white focus:outline-none focus:border-pink-500"
-              >
-                <option value="">All Verification States</option>
-                <option value="CONFIRMED_UNCAPPED">Confirmed Uncapped</option>
-                <option value="SUSPECTED_CAPPED">Suspected Capped</option>
-                <option value="PENDING_VERIFICATION">Pending Verification</option>
-                <option value="FLAGGED_CONFLICT">Flagged Conflict</option>
-              </select>
-            </div>
-            <div>
-              <label className="text-xs text-navy-400 block mb-1">Scouting Priority Tier</label>
-              <select
-                value={filterTier}
-                onChange={(e) => setFilterTier(e.target.value)}
-                className="w-full bg-navy-950 border border-navy-700 rounded-lg px-3 py-1.5 text-sm text-white focus:outline-none focus:border-pink-500"
-              >
-                <option value="">All Tiers</option>
-                <option value="TARGET_A_LIST">Target A-List</option>
-                <option value="WATCHLIST_HIGH">Watchlist High</option>
-                <option value="MONITOR">Monitor</option>
-              </select>
-            </div>
-            <div className="flex items-center pt-5">
-              <label className="flex items-center gap-2 cursor-pointer text-sm text-navy-300">
-                <input
-                  type="checkbox"
-                  checked={trialistOnly}
-                  onChange={(e) => setTrialistOnly(e.target.checked)}
-                  className="rounded border-navy-700 bg-navy-950 text-pink-500 focus:ring-0"
-                />
-                <span>RR Trialists Only</span>
-              </label>
-            </div>
-          </div>
-
-          {/* Roster Grid */}
-          {loading ? (
-            <div className="p-8 text-center text-navy-400">Loading uncapped player profiles...</div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {filteredPlayers.map((player) => (
-                <div
-                  key={player.id}
-                  onClick={() => setSelectedPlayerId(player.id)}
-                  className={`p-4 rounded-xl border cursor-pointer transition-all ${
-                    selectedPlayerId === player.id
-                      ? "bg-navy-900 border-pink-500 shadow-md shadow-pink-500/20"
-                      : "bg-navy-900/50 border-navy-800 hover:border-navy-700 hover:bg-navy-900"
-                  }`}
-                >
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <h3 className="font-semibold text-white text-base">{player.full_name}</h3>
-                      <p className="text-xs text-navy-400 mt-0.5">
-                        {player.primary_role || "All-Rounder"} • {player.home_state_association || "Domestic"}
-                      </p>
-                    </div>
-                    {/* Status Badge */}
-                    <span
-                      className={`text-xs px-2.5 py-0.5 rounded-full font-medium ${
-                        player.eligibility_status === "CONFIRMED_UNCAPPED"
-                          ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
-                          : player.eligibility_status === "SUSPECTED_CAPPED"
-                          ? "bg-amber-500/20 text-amber-400 border border-amber-500/30"
-                          : "bg-purple-500/20 text-purple-400 border border-purple-500/30"
-                      }`}
-                    >
-                      {player.eligibility_status.replace("_", " ")}
-                    </span>
-                  </div>
-
-                  <div className="mt-3 grid grid-cols-2 gap-2 text-xs pt-3 border-t border-navy-800">
-                    <div>
-                      <span className="text-navy-500">Calculated Age:</span>{" "}
-                      <span className="font-semibold text-navy-200">
-                        {player.calculated_age !== null && player.calculated_age !== undefined
-                          ? `${player.calculated_age} yrs`
-                          : (player.dob ? "Unresolved Cutoff" : "Missing DOB")}
-                      </span>
-                    </div>
-                    <div>
-                      <span className="text-navy-500">Tier:</span>{" "}
-                      <span className="font-semibold text-gold-400">
-                        {player.scouting_tier.replace("_", " ")}
-                      </span>
-                    </div>
-                    <div>
-                      <span className="text-navy-500">Batting:</span>{" "}
-                      <span className="text-navy-300">{player.batting_hand || "Right"}</span>
-                    </div>
-                    <div>
-                      <span className="text-navy-500">Trialist:</span>{" "}
-                      <span className={player.is_rr_trialist ? "text-pink-400 font-semibold" : "text-navy-400"}>
-                        {player.is_rr_trialist ? "Yes (RR Academy)" : "No"}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {/* Detailed Verification Drawer */}
-          {selectedPlayer && (
-            <div className="mt-6 p-5 rounded-xl bg-navy-900 border border-navy-700 space-y-4">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-navy-800 pb-3">
-                <div>
-                  <h2 className="text-lg font-bold text-white flex items-center gap-2">
-                    {selectedPlayer.full_name}
-                    <span className="text-xs px-2 py-0.5 rounded bg-navy-800 text-navy-300 font-mono">
-                      {selectedPlayer.canonical_id}
-                    </span>
-                  </h2>
-                  <p className="text-xs text-navy-400">
-                    DOB: {selectedPlayer.dob || "Missing"} ({selectedPlayer.dob_source || "Unverified"}) • Age at Cutoff: {selectedPlayer.calculated_age ?? "N/A"}
-                  </p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-xs text-navy-400">Cap Status:</span>
-                  <span className="text-xs font-semibold text-emerald-400 bg-emerald-500/10 px-2 py-1 rounded">
-                    Uncapped (0 Senior Caps)
-                  </span>
-                </div>
-              </div>
-
-              {/* External Source Identifiers */}
-              <div>
-                <h4 className="text-xs font-semibold text-navy-400 uppercase tracking-wider mb-2">
-                  External Source Identifiers
-                </h4>
-                <div className="flex flex-wrap gap-2">
-                  {selectedPlayer.identities.map((id, i) => (
-                    <span
-                      key={i}
-                      className="text-xs px-2.5 py-1 bg-navy-950 border border-navy-800 rounded font-mono text-navy-300"
-                    >
-                      <strong className="text-pink-400 uppercase">{id.source_name}:</strong> {id.external_player_id} (conf: {id.confidence_score})
-                    </span>
-                  ))}
-                </div>
-              </div>
-
-              {/* Audit Verification Form */}
-              <div className="pt-2 border-t border-navy-800">
-                <h4 className="text-xs font-semibold text-navy-300 mb-2">Audit & Update Verification State</h4>
-                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-                  <select
-                    value={auditStatus}
-                    onChange={(e) => setAuditStatus(e.target.value)}
-                    className="bg-navy-950 border border-navy-700 rounded-lg px-3 py-1.5 text-xs text-white"
-                  >
-                    <option value="CONFIRMED_UNCAPPED">CONFIRMED_UNCAPPED</option>
-                    <option value="SUSPECTED_CAPPED">SUSPECTED_CAPPED</option>
-                    <option value="PENDING_VERIFICATION">PENDING_VERIFICATION</option>
-                    <option value="FLAGGED_CONFLICT">FLAGGED_CONFLICT</option>
-                  </select>
-                  <input
-                    type="text"
-                    placeholder="Enter audit justification or verification reference..."
-                    value={auditNotes}
-                    onChange={(e) => setAuditNotes(e.target.value)}
-                    className="flex-1 bg-navy-950 border border-navy-700 rounded-lg px-3 py-1.5 text-xs text-white placeholder-navy-500"
-                  />
-                  <button
-                    onClick={handleAuditSubmit}
-                    disabled={auditSubmitting}
-                    className="px-4 py-1.5 bg-pink-600 hover:bg-pink-700 text-white rounded-lg text-xs font-semibold transition-colors disabled:opacity-50"
-                  >
-                    {auditSubmitting ? "Updating..." : "Confirm State"}
-                  </button>
-                </div>
-                {auditSuccessMsg && (
-                  <p className="text-xs text-emerald-400 mt-2 font-medium">{auditSuccessMsg}</p>
-                )}
-              </div>
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* TAB 2: Analytics & Phase Breakdown */}
-      {activeTab === "analytics" && (
-        <div className="space-y-5">
-          <div className="flex items-center justify-between bg-navy-900/60 p-4 rounded-xl border border-navy-800">
-            <div>
-              <span className="text-xs text-navy-400">Selected Player:</span>
-              <h2 className="text-lg font-bold text-white">{selectedPlayer?.full_name || "Select Player"}</h2>
-            </div>
-            <span className="text-xs font-mono bg-pink-500/10 text-pink-400 border border-pink-500/20 px-3 py-1 rounded-full">
-              Phase Analytics Active
-            </span>
-          </div>
-
-          {/* Batting Metrics Cards */}
-          {battingStats && battingStats.innings_count > 0 ? (
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
-                <div className="p-3 bg-navy-900 rounded-xl border border-navy-800">
-                  <div className="text-navy-400 text-xs">Total Runs</div>
-                  <div className="text-xl font-bold text-white mt-1">{battingStats.runs}</div>
-                  <div className="text-navy-500 text-xs mt-0.5">{battingStats.innings_count} innings</div>
-                </div>
-                <div className="p-3 bg-navy-900 rounded-xl border border-navy-800">
-                  <div className="text-navy-400 text-xs">Strike Rate</div>
-                  <div className="text-xl font-bold text-pink-400 mt-1">{battingStats.strike_rate}</div>
-                  <div className="text-navy-500 text-xs mt-0.5">{battingStats.balls_faced} balls</div>
-                </div>
-                <div className="p-3 bg-navy-900 rounded-xl border border-navy-800">
-                  <div className="text-navy-400 text-xs">Batting Average</div>
-                  <div className="text-xl font-bold text-white mt-1">{battingStats.batting_average ?? "N/A"}</div>
-                  <div className="text-navy-500 text-xs mt-0.5">{battingStats.dismissals} outs</div>
-                </div>
-                <div className="p-3 bg-navy-900 rounded-xl border border-navy-800">
-                  <div className="text-navy-400 text-xs">Boundary %</div>
-                  <div className="text-xl font-bold text-gold-400 mt-1">{battingStats.boundary_percentage}%</div>
-                  <div className="text-navy-500 text-xs mt-0.5">{battingStats.fours} 4s, {battingStats.sixes} 6s</div>
-                </div>
-                <div className="p-3 bg-navy-900 rounded-xl border border-navy-800">
-                  <div className="text-navy-400 text-xs">Dot Ball %</div>
-                  <div className="text-xl font-bold text-white mt-1">{battingStats.dot_ball_percentage}%</div>
-                  <div className="text-navy-500 text-xs mt-0.5">{battingStats.dot_balls} dots</div>
-                </div>
-                <div className="p-3 bg-navy-900 rounded-xl border border-navy-800">
-                  <div className="text-navy-400 text-xs">High Score</div>
-                  <div className="text-xl font-bold text-white mt-1">{battingStats.high_score}</div>
-                  <div className="text-navy-500 text-xs mt-0.5">Career best</div>
-                </div>
-              </div>
-
-              {/* Phase Breakdown Grid */}
-              <div className="p-5 bg-navy-900/60 rounded-xl border border-navy-800">
-                <h3 className="text-sm font-semibold text-white mb-4">Phase-Specific Batting Acceleration</h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {Object.entries(battingStats.phase_splits).map(([phase, stats]) => (
-                    <div key={phase} className="p-4 rounded-xl bg-navy-950 border border-navy-800">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="font-semibold text-sm text-pink-400">{phase}</span>
-                        <span className="text-xs font-mono text-navy-400">{stats.balls} balls</span>
-                      </div>
-                      <div className="text-2xl font-bold text-white">{stats.runs} <span className="text-xs text-navy-400 font-normal">runs</span></div>
-                      <div className="mt-2 flex items-center justify-between text-xs text-navy-300">
-                        <span>Phase Strike Rate:</span>
-                        <span className="font-semibold text-gold-400">{stats.strike_rate}</span>
-                      </div>
-                      {/* Bar indicator */}
-                      <div className="w-full bg-navy-800 h-1.5 rounded-full mt-3 overflow-hidden">
-                        <div
-                          className="bg-pink-500 h-full rounded-full"
-                          style={{ width: `${Math.min(stats.strike_rate / 2.5, 100)}%` }}
-                        />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          ) : (
-            <div className="p-8 text-center text-navy-400 bg-navy-900/40 rounded-xl border border-navy-800">
-              No domestic batting innings recorded for this player yet.
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* TAB 3: Recent Form Window */}
-      {activeTab === "form" && (
-        <div className="space-y-4">
-          <div className="flex items-center justify-between bg-navy-900/60 p-4 rounded-xl border border-navy-800">
-            <div>
-              <span className="text-xs text-navy-400">Recent Form Diagnostic:</span>
-              <h2 className="text-lg font-bold text-white">{selectedPlayer?.full_name}</h2>
-            </div>
-            <span className="text-xs font-mono text-gold-400 bg-gold-500/10 border border-gold-500/20 px-3 py-1 rounded-full">
-              Window: Last 5 Match Innings
-            </span>
-          </div>
-
-          {recentForm && recentForm.recent_matches.length > 0 ? (
-            <div className="space-y-3">
-              <p className="text-xs text-navy-400 italic">{recentForm.aggregate_metric_summary}</p>
-              <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse text-xs">
-                  <thead>
-                    <tr className="border-b border-navy-800 text-navy-400">
-                      <th className="py-2.5 px-3">Date</th>
-                      <th className="py-2.5 px-3">Opposition</th>
-                      <th className="py-2.5 px-3">Venue</th>
-                      <th className="py-2.5 px-3">Performance</th>
-                      <th className="py-2.5 px-3">SR / Economy</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {recentForm.recent_matches.map((m, idx) => (
-                      <tr key={idx} className="border-b border-navy-800/50 hover:bg-navy-900">
-                        <td className="py-2.5 px-3 font-mono text-navy-300">{m.match_date}</td>
-                        <td className="py-2.5 px-3 font-semibold text-white">{m.opposition_team}</td>
-                        <td className="py-2.5 px-3 text-navy-300">{m.venue_name}</td>
-                        <td className="py-2.5 px-3 font-bold text-pink-400">{m.runs_or_wickets_display}</td>
-                        <td className="py-2.5 px-3 font-mono text-gold-400">{m.strike_rate_or_economy}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          ) : (
-            <div className="p-8 text-center text-navy-400 bg-navy-900/40 rounded-xl border border-navy-800">
-              No recent match scorecards logged in this window. Ingest domestic match scorecards in Data Acquisition Hub.
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* TAB 4: RR 8 Nov Data Pack Readiness */}
-      {activeTab === "datapack" && (
-        <div className="space-y-6">
-          <div className="p-4 bg-navy-900 rounded-xl border border-navy-800 space-y-2">
-            <h2 className="text-base font-bold text-white flex items-center gap-2">
-              <span>Rajasthan Royals 8 November Proprietary Data Pack Ingestion Harness</span>
-              <span className="text-xs bg-gold-500/20 text-gold-300 border border-gold-500/30 px-2 py-0.5 rounded">
-                Pre-Flight Ready
-              </span>
-            </h2>
-            <p className="text-xs text-navy-400">
-              Paste or inspect incoming scout records. Test dynamic schema discovery, column mapping, missing DOB detection, and role-based security masking boundaries.
+            <p className="text-sm md:text-base text-slate-600 leading-relaxed font-normal">
+              Targeted talent discovery for Indian domestic prospects with zero senior international caps.
+              Ranked under empirical high-pressure scenarios (&gt;1.50 Required Run Rate, middle/death overs, run-chases)
+              with Empirical Bayes shrinkage and 1-SE conservative credible bounds.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Input JSON */}
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <label className="text-xs font-semibold text-navy-300">Incoming Records Payload (JSON)</label>
-                <button
-                  onClick={handleDiscoverSchema}
-                  className="px-3 py-1 bg-navy-800 hover:bg-navy-700 text-white rounded text-xs transition-colors"
-                >
-                  1. Discover Schema
-                </button>
+          <div className="flex flex-wrap items-center gap-3 shrink-0">
+            <Link
+              href="/pressure"
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#101C37] text-white text-xs font-semibold hover:bg-[#1A2B50] transition-colors shadow-sm"
+            >
+              <Shield size={14} className="text-[#E91E8F]" />
+              <span>Official Global Top 10</span>
+              <ArrowRight size={13} className="text-slate-400" />
+            </Link>
+            <Link
+              href="/domestic"
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-white border border-slate-200 text-slate-800 text-xs font-semibold hover:bg-slate-50 transition-colors shadow-sm"
+            >
+              <Sparkles size={14} className="text-[#D6B56D]" />
+              <span>Domestic Match Dossiers</span>
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Connection Notice (if backend unreachable) */}
+      {errorMsg && (
+        <div className="p-4 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0" />
+            <div>
+              <div className="text-xs font-bold">Backend Connection Notice</div>
+              <div className="text-xs text-amber-800 mt-0.5">{errorMsg}</div>
+            </div>
+          </div>
+          <button
+            onClick={loadUncappedData}
+            className="px-3 py-1.5 rounded-lg bg-amber-600 text-white font-bold text-xs hover:bg-amber-700 transition-colors shrink-0 flex items-center gap-1.5"
+          >
+            <RefreshCw className="w-3.5 h-3.5" />
+            <span>Retry</span>
+          </button>
+        </div>
+      )}
+
+      {/* ------------------------------------------------------------------- */}
+      {/* 2. Open Editorial Telemetry Strip (No Card Boxes) */}
+      {/* ------------------------------------------------------------------- */}
+      <section className="py-5 border-y border-slate-200/70">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
+          <div>
+            <span className="text-[11px] font-mono uppercase tracking-wider text-slate-400 block mb-1">
+              Top Uncapped Batter
+            </span>
+            <div className="text-xl md:text-2xl font-extrabold text-slate-900 tracking-tight">
+              {overview?.top_uncapped_batter ?? "Ashutosh Sharma"}
+            </div>
+            <p className="text-xs text-slate-500 mt-0.5">
+              Punjab Kings • Rank #5 Overall R1
+            </p>
+          </div>
+
+          <div>
+            <span className="text-[11px] font-mono uppercase tracking-wider text-slate-400 block mb-1">
+              Top Uncapped Bowler
+            </span>
+            <div className="text-xl md:text-2xl font-extrabold text-slate-900 tracking-tight">
+              {overview?.top_uncapped_bowler ?? "Vaibhav Arora"}
+            </div>
+            <p className="text-xs text-slate-500 mt-0.5">
+              PBKS / KKR • 193 Pressure Balls
+            </p>
+          </div>
+
+          <div>
+            <span className="text-[11px] font-mono uppercase tracking-wider text-slate-400 block mb-1">
+              Qualified Prospects
+            </span>
+            <div className="text-xl md:text-2xl font-extrabold text-slate-900 font-mono tracking-tight">
+              {overview
+                ? `${overview.total_verified_uncapped_batters} Bat / ${overview.total_verified_uncapped_bowlers} Bowl`
+                : "15 Bat / 20 Bowl"}
+            </div>
+            <p className="text-xs text-slate-500 mt-0.5">
+              Strict gate &ge; 60 pressure deliveries
+            </p>
+          </div>
+
+          <div>
+            <span className="text-[11px] font-mono uppercase tracking-wider text-slate-400 block mb-1">
+              Domestic Talent Pool
+            </span>
+            <div className="text-xl md:text-2xl font-extrabold text-emerald-700 font-mono tracking-tight">
+              287 Verified Uncapped
+            </div>
+            <p className="text-xs text-slate-500 mt-0.5">
+              100% Indian domestic zero-cap audited
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* ------------------------------------------------------------------- */}
+      {/* 3. Editorial Segmented Tab Navigation */}
+      {/* ------------------------------------------------------------------- */}
+      <div className="flex items-center gap-1 border-b border-slate-200">
+        <button
+          onClick={() => setActiveTab("batting")}
+          className={cn(
+            "flex items-center gap-2 px-4 py-2.5 text-xs font-semibold transition-all border-b-2 -mb-px",
+            activeTab === "batting"
+              ? "border-[#E91E8F] text-[#101C37]"
+              : "border-transparent text-slate-500 hover:text-slate-800"
+          )}
+        >
+          <TrendingUp className="w-4 h-4 text-emerald-600" />
+          <span>Top Uncapped Batters Under Pressure</span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab("bowling")}
+          className={cn(
+            "flex items-center gap-2 px-4 py-2.5 text-xs font-semibold transition-all border-b-2 -mb-px",
+            activeTab === "bowling"
+              ? "border-[#E91E8F] text-[#101C37]"
+              : "border-transparent text-slate-500 hover:text-slate-800"
+          )}
+        >
+          <Target className="w-4 h-4 text-cyan-600" />
+          <span>Top Uncapped Bowlers Under Pressure</span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab("governance")}
+          className={cn(
+            "flex items-center gap-2 px-4 py-2.5 text-xs font-semibold transition-all border-b-2 -mb-px",
+            activeTab === "governance"
+              ? "border-[#E91E8F] text-[#101C37]"
+              : "border-transparent text-slate-500 hover:text-slate-800"
+          )}
+        >
+          <FileText className="w-4 h-4 text-[#D6B56D]" />
+          <span>Eligibility Governance & Safeguards</span>
+        </button>
+      </div>
+
+      {/* ------------------------------------------------------------------- */}
+      {/* TAB 1: TOP UNCAPPED BATTERS */}
+      {/* ------------------------------------------------------------------- */}
+      {activeTab === "batting" && (
+        <div className="space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <div>
+              <h2 className="text-base font-bold text-slate-900">
+                Verified Indian Uncapped Batters Under Pressure
+              </h2>
+              <p className="text-xs text-slate-500">
+                Ranked strictly by Conservative PRI (1-SE Lower Credible Bound in Strike Rate points). Domestic Indian players with 0 senior international caps.
+              </p>
+            </div>
+            <span className="text-[11px] font-mono font-medium text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200/60 self-start sm:self-auto">
+              Independent Scouting Dimension
+            </span>
+          </div>
+
+          <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead className="bg-slate-50/80 text-slate-500 uppercase text-[10px] tracking-wider border-b border-slate-200/80 font-mono">
+                  <tr>
+                    <th className="px-4 py-3 font-sans font-semibold">Rank & Batter</th>
+                    <th className="px-4 py-3 font-sans font-semibold">Franchise & Role</th>
+                    <th className="px-4 py-3 text-right font-semibold">Conservative PRI</th>
+                    <th className="px-4 py-3 text-right font-semibold">Posterior Mean (&theta;)</th>
+                    <th className="px-4 py-3 text-right font-semibold">Uncertainty (SE)</th>
+                    <th className="px-4 py-3 text-right font-semibold">95% Credible Region</th>
+                    <th className="px-4 py-3 text-right font-semibold">Pressure Balls</th>
+                    <th className="px-4 py-3 text-right font-semibold">Observed SR</th>
+                    <th className="px-4 py-3 text-center font-sans font-semibold">Eligibility</th>
+                    <th className="px-4 py-3 text-center font-sans font-semibold">Dossier</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 font-mono">
+                  {loading ? (
+                    <tr>
+                      <td colSpan={10} className="px-6 py-12 text-center text-slate-400">
+                        <div className="flex flex-col items-center justify-center gap-2">
+                          <RefreshCw className="w-5 h-5 animate-spin text-emerald-600" />
+                          <span className="text-xs">Loading uncapped batting intelligence...</span>
+                        </div>
+                      </td>
+                    </tr>
+                  ) : leaderboards?.batting_leaderboard && leaderboards.batting_leaderboard.length > 0 ? (
+                    leaderboards.batting_leaderboard.map((batter) => {
+                      const isTop1 = batter.uncapped_rank === 1;
+                      const isTop3 = batter.uncapped_rank <= 3;
+                      return (
+                        <tr key={batter.player_id} className="hover:bg-slate-50/70 transition-colors">
+                          <td className="px-4 py-3 font-sans text-slate-900">
+                            <div className="flex items-center gap-2.5">
+                              <span
+                                className={cn(
+                                  "w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-mono font-bold shrink-0",
+                                  isTop1
+                                    ? "bg-[#D6B56D] text-[#101C37]"
+                                    : isTop3
+                                    ? "bg-slate-900 text-white"
+                                    : "bg-slate-100 text-slate-600"
+                                )}
+                              >
+                                {batter.uncapped_rank}
+                              </span>
+                              <div>
+                                <div className="font-bold text-slate-900">{batter.player_name}</div>
+                                <div className="text-[10px] font-mono text-slate-400">
+                                  Overall R1 #{batter.overall_r1_rank} • ID: {batter.player_id}
+                                </div>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="px-4 py-3 font-sans text-slate-700">
+                            <div className="font-semibold text-slate-900">{batter.franchise}</div>
+                            <div className="text-[10px] text-slate-500 font-mono">{batter.tactical_role}</div>
+                          </td>
+                          <td className="px-4 py-3 text-right">
+                            <span className="font-bold text-sm text-emerald-700 font-mono">
+                              {batter.conservative_pri > 0
+                                ? `+${batter.conservative_pri.toFixed(2)}`
+                                : batter.conservative_pri.toFixed(2)}{" "}
+                              <span className="text-[10px] font-normal text-slate-400">SR</span>
+                            </span>
+                          </td>
+                          <td className="px-4 py-3 text-right text-slate-800 font-bold">
+                            {batter.posterior_mean > 0
+                              ? `+${batter.posterior_mean.toFixed(2)}`
+                              : batter.posterior_mean.toFixed(2)}
+                          </td>
+                          <td className="px-4 py-3 text-right text-slate-500">
+                            &plusmn;{batter.posterior_se.toFixed(2)}
+                          </td>
+                          <td className="px-4 py-3 text-right text-slate-500 text-[11px]">
+                            [{batter.ci_95_lower.toFixed(1)}, +{batter.ci_95_upper.toFixed(1)}]
+                          </td>
+                          <td className="px-4 py-3 text-right text-slate-900 font-bold">
+                            {batter.pressure_legal_balls}
+                          </td>
+                          <td className="px-4 py-3 text-right text-slate-900 font-bold">
+                            {batter.observed_strike_rate.toFixed(1)}
+                          </td>
+                          <td className="px-4 py-3 text-center font-sans">
+                            <span className="text-[10px] font-mono font-medium px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200/60">
+                              {batter.eligibility_status}
+                            </span>
+                          </td>
+                          <td className="px-4 py-3 text-center font-sans">
+                            <button
+                              onClick={() => openDossier(batter, "batting")}
+                              className="px-2.5 py-1 rounded-md bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] font-semibold transition-all inline-flex items-center gap-1"
+                            >
+                              <span>Dossier</span>
+                              <ChevronRight className="w-3 h-3 text-slate-400" />
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })
+                  ) : (
+                    <tr>
+                      <td colSpan={10} className="px-6 py-12 text-center text-slate-500">
+                        <div className="flex flex-col items-center justify-center gap-2">
+                          <AlertTriangle className="w-7 h-7 text-amber-500" />
+                          <span className="font-semibold text-slate-800">No Uncapped Batting Data Available</span>
+                          <span className="text-xs text-slate-400 max-w-md">
+                            {errorMsg || "Ensure backend service is running on http://localhost:8000"}
+                          </span>
+                          <button
+                            onClick={loadUncappedData}
+                            className="mt-2 px-3 py-1.5 rounded-lg bg-[#101C37] text-white text-xs font-semibold hover:bg-[#1A2B50] transition-colors flex items-center gap-1.5"
+                          >
+                            <RefreshCw className="w-3.5 h-3.5" />
+                            <span>Retry Request</span>
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ------------------------------------------------------------------- */}
+      {/* TAB 2: TOP UNCAPPED BOWLERS */}
+      {/* ------------------------------------------------------------------- */}
+      {activeTab === "bowling" && (
+        <div className="space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <div>
+              <h2 className="text-base font-bold text-slate-900">
+                Verified Indian Uncapped Bowlers Under Pressure
+              </h2>
+              <p className="text-xs text-slate-500">
+                Ranked strictly by Conservative Runs Saved per 6 balls (1-SE Lower Credible Bound in Economy). Crucial scouting insight since all official Top 10 bowlers are capped internationals.
+              </p>
+            </div>
+            <span className="text-[11px] font-mono font-medium text-cyan-700 bg-cyan-50 px-2.5 py-1 rounded-full border border-cyan-200/60 self-start sm:self-auto">
+              Independent Scouting Dimension
+            </span>
+          </div>
+
+          <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead className="bg-slate-50/80 text-slate-500 uppercase text-[10px] tracking-wider border-b border-slate-200/80 font-mono">
+                  <tr>
+                    <th className="px-4 py-3 font-sans font-semibold">Rank & Bowler</th>
+                    <th className="px-4 py-3 font-sans font-semibold">Franchise & Role</th>
+                    <th className="px-4 py-3 text-right font-semibold">Runs Saved (1-SE)</th>
+                    <th className="px-4 py-3 text-right font-semibold">Posterior Mean (&theta;)</th>
+                    <th className="px-4 py-3 text-right font-semibold">Uncertainty (SE)</th>
+                    <th className="px-4 py-3 text-right font-semibold">95% Credible Region</th>
+                    <th className="px-4 py-3 text-right font-semibold">Pressure Balls</th>
+                    <th className="px-4 py-3 text-right font-semibold">Observed Econ</th>
+                    <th className="px-4 py-3 text-center font-sans font-semibold">Eligibility</th>
+                    <th className="px-4 py-3 text-center font-sans font-semibold">Dossier</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 font-mono">
+                  {loading ? (
+                    <tr>
+                      <td colSpan={10} className="px-6 py-12 text-center text-slate-400">
+                        <div className="flex flex-col items-center justify-center gap-2">
+                          <RefreshCw className="w-5 h-5 animate-spin text-cyan-600" />
+                          <span className="text-xs">Loading uncapped bowling intelligence...</span>
+                        </div>
+                      </td>
+                    </tr>
+                  ) : leaderboards?.bowling_leaderboard && leaderboards.bowling_leaderboard.length > 0 ? (
+                    leaderboards.bowling_leaderboard.map((bowler) => {
+                      const isTop1 = bowler.uncapped_rank === 1;
+                      const isTop3 = bowler.uncapped_rank <= 3;
+                      return (
+                        <tr key={bowler.player_id} className="hover:bg-slate-50/70 transition-colors">
+                          <td className="px-4 py-3 font-sans text-slate-900">
+                            <div className="flex items-center gap-2.5">
+                              <span
+                                className={cn(
+                                  "w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-mono font-bold shrink-0",
+                                  isTop1
+                                    ? "bg-[#D6B56D] text-[#101C37]"
+                                    : isTop3
+                                    ? "bg-slate-900 text-white"
+                                    : "bg-slate-100 text-slate-600"
+                                )}
+                              >
+                                {bowler.uncapped_rank}
+                              </span>
+                              <div>
+                                <div className="font-bold text-slate-900">{bowler.player_name}</div>
+                                <div className="text-[10px] font-mono text-slate-400">
+                                  Overall R1 #{bowler.overall_r1_rank} • ID: {bowler.player_id}
+                                </div>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="px-4 py-3 font-sans text-slate-700">
+                            <div className="font-semibold text-slate-900">{bowler.franchise}</div>
+                            <div className="text-[10px] text-slate-500 font-mono">{bowler.tactical_role}</div>
+                          </td>
+                          <td className="px-4 py-3 text-right">
+                            <span className="font-bold text-sm text-cyan-700 font-mono">
+                              {bowler.conservative_runs_saved.toFixed(2)}{" "}
+                              <span className="text-[10px] font-normal text-slate-400">RPO</span>
+                            </span>
+                          </td>
+                          <td className="px-4 py-3 text-right text-slate-800 font-bold">
+                            {bowler.posterior_mean > 0
+                              ? `+${bowler.posterior_mean.toFixed(2)}`
+                              : bowler.posterior_mean.toFixed(2)}
+                          </td>
+                          <td className="px-4 py-3 text-right text-slate-500">
+                            &plusmn;{bowler.posterior_se.toFixed(2)}
+                          </td>
+                          <td className="px-4 py-3 text-right text-slate-500 text-[11px]">
+                            [{bowler.ci_95_lower.toFixed(2)}, +{bowler.ci_95_upper.toFixed(2)}]
+                          </td>
+                          <td className="px-4 py-3 text-right text-slate-900 font-bold">
+                            {bowler.pressure_legal_balls}
+                          </td>
+                          <td className="px-4 py-3 text-right text-slate-900 font-bold">
+                            {bowler.observed_economy.toFixed(2)}
+                          </td>
+                          <td className="px-4 py-3 text-center font-sans">
+                            <span className="text-[10px] font-mono font-medium px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200/60">
+                              {bowler.eligibility_status}
+                            </span>
+                          </td>
+                          <td className="px-4 py-3 text-center font-sans">
+                            <button
+                              onClick={() => openDossier(bowler, "bowling")}
+                              className="px-2.5 py-1 rounded-md bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] font-semibold transition-all inline-flex items-center gap-1"
+                            >
+                              <span>Dossier</span>
+                              <ChevronRight className="w-3 h-3 text-slate-400" />
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })
+                  ) : (
+                    <tr>
+                      <td colSpan={10} className="px-6 py-12 text-center text-slate-500">
+                        <div className="flex flex-col items-center justify-center gap-2">
+                          <AlertTriangle className="w-7 h-7 text-amber-500" />
+                          <span className="font-semibold text-slate-800">No Uncapped Bowling Data Available</span>
+                          <span className="text-xs text-slate-400 max-w-md">
+                            {errorMsg || "Ensure backend service is running on http://localhost:8000"}
+                          </span>
+                          <button
+                            onClick={loadUncappedData}
+                            className="mt-2 px-3 py-1.5 rounded-lg bg-[#101C37] text-white text-xs font-semibold hover:bg-[#1A2B50] transition-colors flex items-center gap-1.5"
+                          >
+                            <RefreshCw className="w-3.5 h-3.5" />
+                            <span>Retry Request</span>
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ------------------------------------------------------------------- */}
+      {/* TAB 3: ELIGIBILITY AUDIT & SAFEGUARDS */}
+      {/* ------------------------------------------------------------------- */}
+      {activeTab === "governance" && (
+        <div className="space-y-6">
+          <div className="bg-white rounded-2xl border border-slate-200/80 p-6 md:p-8 shadow-sm space-y-6">
+            <div>
+              <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2 mb-2">
+                <Shield className="w-5 h-5 text-purple-600" />
+                Uncapped Player Eligibility Governance & Data Integrity Standards
+              </h2>
+              <p className="text-sm text-slate-600 leading-relaxed max-w-3xl">
+                The Rajasthan Royals Uncapped Talent Intelligence framework strictly enforces Indian domestic uncapped eligibility.
+                To avoid false classifications, players are verified against BCCI records and ICC historical match registries.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4 border-t border-slate-100">
+              <div className="space-y-2">
+                <div className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                  <span>The &quot;Absence Trap&quot; Safeguard</span>
+                </div>
+                <p className="text-xs text-slate-600 leading-relaxed">
+                  Never classify a player as uncapped simply because they are missing from one dataset table.
+                  Legends like MS Dhoni and Ishant Sharma played IPL 2022–2026 without Senior T20Is in this period;
+                  our registry explicitly protects against false classifications.
+                </p>
               </div>
-              <textarea
-                value={dataPackJson}
-                onChange={(e) => setDataPackJson(e.target.value)}
-                rows={14}
-                className="w-full bg-navy-950 border border-navy-800 rounded-xl p-3 font-mono text-xs text-navy-200 focus:outline-none focus:border-pink-500"
-              />
-              <div className="flex justify-end gap-2">
-                <button
-                  onClick={handleIngestPack}
-                  className="px-4 py-2 bg-pink-600 hover:bg-pink-700 text-white rounded-lg text-xs font-semibold shadow-lg shadow-pink-600/30 transition-colors"
-                >
-                  2. Simulate Ingestion & Conflict Audit
-                </button>
+
+              <div className="space-y-2">
+                <div className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                  <Award className="w-4 h-4 text-[#D6B56D]" />
+                  <span>Separation from Round 1</span>
+                </div>
+                <p className="text-xs text-slate-600 leading-relaxed">
+                  The official SupeRR Selector Round 1 challenge statement evaluates all qualified players in the data pack.
+                  This Uncapped Intelligence dimension is maintained independently to provide actionable domestic scouting
+                  without modifying the sealed Top 10 leaderboards.
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <div className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                  <Crosshair className="w-4 h-4 text-cyan-600" />
+                  <span>Sample Gate Enforcement</span>
+                </div>
+                <p className="text-xs text-slate-600 leading-relaxed">
+                  Only domestic prospects with &ge; 60 pressure deliveries (or &ge; 50 balls across &ge; 10 matches)
+                  qualify for verified ranking. Small-sample domestic performers shrink toward baseline via Empirical Bayes.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ------------------------------------------------------------------- */}
+      {/* Player Eligibility Dossier Modal */}
+      {/* ------------------------------------------------------------------- */}
+      {selectedPlayer && (
+        <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto p-6 md:p-8 space-y-6">
+            <div className="flex items-center justify-between pb-4 border-b border-slate-100">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-slate-900 text-white flex items-center justify-center font-bold font-mono text-sm">
+                  #{selectedPlayer.uncapped_rank}
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-slate-900">{selectedPlayer.player_name}</h3>
+                  <p className="text-xs text-slate-500 font-mono">
+                    {selectedPlayer.franchise} • {selectedPlayer.tactical_role} • ID: {selectedPlayer.player_id}
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={closeDossier}
+                className="w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center transition-colors"
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            {/* Audit Status Section */}
+            <div className="p-4 rounded-xl bg-emerald-50/70 border border-emerald-200/80 space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-mono font-bold text-emerald-800 uppercase tracking-wider">
+                  BCCI Eligibility Status
+                </span>
+                <span className="px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-emerald-600 text-white">
+                  {selectedPlayer.eligibility_status}
+                </span>
+              </div>
+              <p className="text-xs text-slate-700 leading-relaxed">{selectedPlayer.eligibility_reason}</p>
+              <div className="pt-2 border-t border-emerald-200/60 flex flex-wrap items-center justify-between text-[11px] font-mono text-slate-600">
+                <span>Source: {selectedPlayer.verification_source}</span>
+                <span>Verified: {selectedPlayer.verification_date}</span>
               </div>
             </div>
 
-            {/* Results / Audit View */}
-            <div className="space-y-4">
-              {schemaResult && (
-                <div className="p-4 bg-navy-900 rounded-xl border border-navy-800 space-y-3">
-                  <h3 className="text-xs font-semibold text-pink-400 uppercase tracking-wider">
-                    Discovered Schema ({schemaResult.detected_columns.length} columns)
-                  </h3>
-                  <div className="flex flex-wrap gap-1.5">
-                    {schemaResult.detected_columns.map((col) => (
-                      <span key={col} className="px-2 py-1 bg-navy-950 border border-navy-700 rounded text-xs font-mono text-navy-300">
-                        {col} ({schemaResult.column_type_hints[col] || "str"})
-                      </span>
-                    ))}
-                  </div>
-                  <div className="text-xs text-navy-400 pt-2 border-t border-navy-800">
-                    <strong>Auto-Mapped Name:</strong> {schemaResult.recommended_mapping.name_col} •{" "}
-                    <strong>DOB Col:</strong> {schemaResult.recommended_mapping.dob_col || "None"}
-                  </div>
+            {/* Performance Metrics Strip */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200/70">
+                <div className="text-[10px] text-slate-500 font-mono uppercase">Pressure Balls</div>
+                <div className="text-lg font-extrabold font-mono text-slate-900 mt-1">
+                  {selectedPlayer.pressure_legal_balls}
                 </div>
-              )}
-
-              {ingestionSummary && (
-                <div className="p-4 bg-navy-900 rounded-xl border border-navy-800 space-y-3">
-                  <h3 className="text-xs font-semibold text-emerald-400 uppercase tracking-wider">
-                    Ingestion Execution Telemetry
-                  </h3>
-                  <div className="grid grid-cols-2 gap-2 text-xs">
-                    <div>Rows Processed: <span className="font-bold text-white">{ingestionSummary.total_rows_parsed}</span></div>
-                    <div>Players Created: <span className="font-bold text-white">{ingestionSummary.players_created}</span></div>
-                    <div>Missing DOBs: <span className="font-bold text-amber-400">{ingestionSummary.missing_dob_count}</span></div>
-                    <div>Evaluations Logged: <span className="font-bold text-white">{ingestionSummary.evaluations_recorded}</span></div>
-                  </div>
-                  {ingestionSummary.missing_field_reports.length > 0 && (
-                    <div className="pt-2 border-t border-navy-800">
-                      <span className="text-xs text-amber-400 font-semibold">Missing DOB Audit:</span>
-                      {ingestionSummary.missing_field_reports.map((r, i) => (
-                        <p key={i} className="text-xs text-navy-400 mt-1">
-                          • {r.player_name}: {r.action_taken}
-                        </p>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* Security Boundary Demo */}
-              <div className="p-4 bg-navy-900/60 rounded-xl border border-navy-800 space-y-3">
-                <div className="flex items-center justify-between">
-                  <h4 className="text-xs font-semibold text-white">Security Isolation & Data Masking Preview</h4>
-                  <div className="flex items-center gap-1 bg-navy-950 p-1 rounded-lg border border-navy-800 text-xs">
-                    <button
-                      onClick={() => setUserRole("public")}
-                      className={`px-2 py-0.5 rounded ${userRole === "public" ? "bg-navy-800 text-white font-medium" : "text-navy-400"}`}
-                    >
-                      Public Role
-                    </button>
-                    <button
-                      onClick={() => setUserRole("rr_scout_admin")}
-                      className={`px-2 py-0.5 rounded ${userRole === "rr_scout_admin" ? "bg-pink-600 text-white font-medium" : "text-navy-400"}`}
-                    >
-                      RR Scout Admin
-                    </button>
-                  </div>
-                </div>
-
-                {evaluations.length > 0 ? (
-                  <div className="p-3 bg-navy-950 rounded-lg border border-navy-800 text-xs space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="text-navy-400">Scout ID:</span>
-                      <span className="font-mono text-pink-400">{evaluations[0].scout_identifier}</span>
-                    </div>
-                    <div>
-                      <span className="text-navy-400 block mb-0.5">Scout Strategic Evaluation:</span>
-                      <p className="text-navy-200 font-mono bg-navy-900 p-2 rounded border border-navy-800">
-                        {evaluations[0].proprietary_notes || "No notes"}
-                      </p>
-                    </div>
-                  </div>
-                ) : (
-                  <p className="text-xs text-navy-500">Select a player to view confidential evaluations.</p>
-                )}
               </div>
+
+              <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200/70">
+                <div className="text-[10px] text-slate-500 font-mono uppercase">Pressure Matches</div>
+                <div className="text-lg font-extrabold font-mono text-slate-900 mt-1">
+                  {selectedPlayer.pressure_matches}
+                </div>
+              </div>
+
+              <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200/70">
+                <div className="text-[10px] text-slate-500 font-mono uppercase">
+                  {selectedDiscipline === "batting" ? "Conservative PRI" : "Runs Saved"}
+                </div>
+                <div className="text-lg font-extrabold font-mono text-emerald-700 mt-1">
+                  {selectedDiscipline === "batting"
+                    ? `${(selectedPlayer as UncappedBattingItem).conservative_pri.toFixed(2)} SR`
+                    : `${(selectedPlayer as UncappedBowlingItem).conservative_runs_saved.toFixed(2)} RPO`}
+                </div>
+              </div>
+
+              <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200/70">
+                <div className="text-[10px] text-slate-500 font-mono uppercase">Overall R1 Rank</div>
+                <div className="text-lg font-extrabold font-mono text-[#101C37] mt-1">
+                  #{selectedPlayer.overall_r1_rank}
+                </div>
+              </div>
+            </div>
+
+            <div className="p-4 rounded-xl bg-slate-50 border border-slate-200/70">
+              <div className="text-xs font-bold text-slate-900 mb-1">Bayesian Reliability Summary</div>
+              <p className="text-xs text-slate-600 leading-relaxed">
+                Posterior Mean (&theta;) is {selectedPlayer.posterior_mean > 0 ? `+${selectedPlayer.posterior_mean.toFixed(2)}` : selectedPlayer.posterior_mean.toFixed(2)} with standard error &plusmn;{selectedPlayer.posterior_se.toFixed(2)}. The 95% Bayesian credible interval spans [{selectedPlayer.ci_95_lower.toFixed(1)}, +{selectedPlayer.ci_95_upper.toFixed(1)}], confirming statistically significant pressure reliability under the 1-SE conservative rule.
+              </p>
+            </div>
+
+            <div className="flex justify-end pt-2">
+              <button
+                onClick={closeDossier}
+                className="px-5 py-2 rounded-lg bg-[#101C37] hover:bg-[#1A2B50] text-xs font-semibold text-white transition-colors"
+              >
+                Close Dossier
+              </button>
             </div>
           </div>
         </div>

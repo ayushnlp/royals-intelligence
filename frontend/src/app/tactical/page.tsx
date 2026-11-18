@@ -137,35 +137,39 @@ export default function TacticalIntelligencePage() {
   const [h2hLoading, setH2hLoading] = useState<boolean>(false);
 
   // 1. Initial Load of Core Tactical Datasets
-  useEffect(() => {
-    async function loadTacticalBase() {
-      setLoading(true);
-      setErrorMsg(null);
-      try {
-        const [sumRes, phaseRes, strokeRes, handRes, varRes, spdRes, deathRes] = await Promise.all([
-          fetchTacticalSummary(),
-          fetchTacticalPhases(),
-          fetchTacticalStrokes({ min_balls: strokeMinBalls }),
-          fetchTacticalHandedness(),
-          fetchTacticalVariations({ min_balls: variationMinBalls }),
-          fetchTacticalSpeedProfiles({ min_balls: 30, top_n: 10 }),
-          fetchTacticalDeathOvers({ discipline: deathDiscipline, min_balls: deathMinBalls, limit: 10 }),
-        ]);
+  const loadTacticalBase = async () => {
+    setLoading(true);
+    setErrorMsg(null);
+    try {
+      const [sumRes, phaseRes, strokeRes, handRes, varRes, spdRes, deathRes] = await Promise.all([
+        fetchTacticalSummary(),
+        fetchTacticalPhases(),
+        fetchTacticalStrokes({ min_balls: strokeMinBalls }),
+        fetchTacticalHandedness(),
+        fetchTacticalVariations({ min_balls: variationMinBalls }),
+        fetchTacticalSpeedProfiles({ min_balls: 30, top_n: 10 }),
+        fetchTacticalDeathOvers({ discipline: deathDiscipline, min_balls: deathMinBalls, limit: 10 }),
+      ]);
 
-        if (sumRes) setSummary(sumRes);
-        if (phaseRes) setPhasesData(phaseRes);
-        if (strokeRes) setStrokesData(strokeRes);
-        if (handRes) setHandednessData(handRes);
-        if (varRes) setVariationsData(varRes);
-        if (spdRes) setSpeedData(spdRes);
-        if (deathRes) setDeathOversData(deathRes);
-      } catch (err: any) {
-        setErrorMsg("Failed to communicate with Tactical Intelligence backend services.");
-      } finally {
-        setLoading(false);
+      if (sumRes) setSummary(sumRes);
+      if (phaseRes) setPhasesData(phaseRes);
+      if (strokeRes) setStrokesData(strokeRes);
+      if (handRes) setHandednessData(handRes);
+      if (varRes) setVariationsData(varRes);
+      if (spdRes) setSpeedData(spdRes);
+      if (deathRes) setDeathOversData(deathRes);
+
+      if (!sumRes && !phaseRes) {
+        setErrorMsg("Tactical Intelligence backend service offline or in standby. Ensure backend is running on port 8000.");
       }
+    } catch (err: any) {
+      setErrorMsg("Failed to communicate with Tactical Intelligence backend services.");
+    } finally {
+      setLoading(false);
     }
+  };
 
+  useEffect(() => {
     loadTacticalBase();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -265,207 +269,216 @@ export default function TacticalIntelligencePage() {
   }, [variationsData, variationSortKey]);
 
   return (
-    <div className="min-h-screen bg-[#0B132B] text-slate-100 p-6 md:p-8 space-y-8">
+    <div className="space-y-8 pb-12">
       {/* ------------------------------------------------------------------- */}
-      {/* Header Banner & Tactical Command Context */}
+      {/* 1. Editorial Header & Tactical Command Context */}
       {/* ------------------------------------------------------------------- */}
-      <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 pb-6 border-b border-[#1A2B50]">
-        <div>
+      <section className="space-y-3">
+        <div className="flex flex-wrap items-center gap-3 text-xs">
+          <span className="font-mono font-bold tracking-widest text-[#E91E8F] uppercase">
+            Rajasthan Royals Analytics
+          </span>
+          <span className="text-slate-300">•</span>
+          <span className="font-mono text-slate-500">
+            Official Data Pack • 200,999 Balls
+          </span>
+          <span className="text-slate-300">•</span>
+          <span className="inline-flex items-center gap-1.5 text-emerald-700 font-medium">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+            Phase & Telemetry Engine
+          </span>
+        </div>
+
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+          <div className="max-w-3xl space-y-2">
+            <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-slate-900 leading-tight">
+              Tactical Cricket Intelligence
+            </h1>
+            <p className="text-sm md:text-base text-slate-600 leading-relaxed font-normal">
+              Official Rajasthan Royals Data Pack • Phase Splits • Micro-Battles • Speed Telemetry.
+              867 active matches analyzed with 16 zero-delivery matches reconciled.
+            </p>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-3 shrink-0">
+            <Link
+              href="/pressure"
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#101C37] text-white text-xs font-semibold hover:bg-[#1A2B50] transition-colors shadow-sm"
+            >
+              <Shield size={14} className="text-[#E91E8F]" />
+              <span>Pressure Leaderboards</span>
+              <ArrowRight size={13} className="text-slate-400" />
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Connection Alert Banner (if backend unreachable) */}
+      {errorMsg && (
+        <div className="p-4 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-[#E91E8F] to-[#D6B56D] p-0.5 shadow-lg flex items-center justify-center">
-              <div className="w-full h-full bg-[#101C37] rounded-[10px] flex items-center justify-center">
-                <Crosshair className="w-5 h-5 text-[#E91E8F]" />
-              </div>
-            </div>
+            <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0" />
             <div>
-              <h1 className="text-2xl font-bold tracking-tight text-white flex items-center gap-3">
-                Tactical Cricket Intelligence
-                <span className="text-xs font-mono font-bold px-2 py-0.5 rounded-full bg-[#E91E8F]/20 text-[#E91E8F] border border-[#E91E8F]/30">
-                  Stage 5 Live
-                </span>
-              </h1>
-              <p className="text-xs text-slate-400 mt-0.5">
-                Official Rajasthan Royals Data Pack • Phase Splits • Micro-Battles • Speed Telemetry
-              </p>
+              <div className="text-xs font-bold">Backend Connection Notice</div>
+              <div className="text-xs text-amber-800 mt-0.5">{errorMsg}</div>
             </div>
           </div>
-        </div>
-
-        {/* Global Metadata Badges & Cross-Navigation */}
-        <div className="flex flex-wrap items-center gap-2">
-          <Link
-            href="/pressure"
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#E91E8F] text-white hover:bg-[#E91E8F]/90 transition-all text-xs font-semibold shadow-sm"
+          <button
+            onClick={loadTacticalBase}
+            className="px-3 py-1.5 rounded-lg bg-amber-600 text-white font-bold text-xs hover:bg-amber-700 transition-colors shrink-0 flex items-center gap-1.5"
           >
-            <Shield className="w-3.5 h-3.5" />
-            <span>Pressure Leaderboards</span>
-            <ArrowRight size={13} />
-          </Link>
-          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#101C37] border border-[#1A2B50] text-xs font-mono text-slate-300">
-            <Shield className="w-3.5 h-3.5 text-[#D6B56D]" />
-            <span>200,999 Balls Analyzed</span>
-          </div>
-          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#101C37] border border-[#1A2B50] text-xs font-mono text-slate-300">
-            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-            <span>867 Deliveries Matches (16 Abandoned Reconciled)</span>
-          </div>
-          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#E91E8F]/10 border border-[#E91E8F]/30 text-xs font-mono text-[#E91E8F] font-semibold">
-            <Sparkles className="w-3.5 h-3.5" />
-            <span>Official RR Round 1 Pack</span>
-          </div>
+            <RefreshCw className="w-3.5 h-3.5" />
+            <span>Retry</span>
+          </button>
         </div>
-      </div>
+      )}
 
       {/* ------------------------------------------------------------------- */}
-      {/* Module A: Aggregate Tactical Telemetry Dashboard (Always Top) */}
+      {/* 2. Open Editorial Telemetry Strip (No Card Boxes) */}
       {/* ------------------------------------------------------------------- */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3.5">
-        <div className="p-4 rounded-xl bg-[#101C37]/80 border border-[#1A2B50] hover:border-[#E91E8F]/40 transition-all">
-          <div className="flex items-center justify-between text-slate-400 mb-1">
-            <span className="text-[11px] font-medium uppercase tracking-wider">Total Balls</span>
-            <Activity className="w-3.5 h-3.5 text-[#E91E8F]" />
+      <section className="py-5 border-y border-slate-200/70">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
+          <div>
+            <span className="text-[11px] font-mono uppercase tracking-wider text-slate-400 block mb-1">
+              Total Deliveries
+            </span>
+            <div className="text-xl font-extrabold text-slate-900 font-mono tracking-tight">
+              {summary ? summary.total_deliveries.toLocaleString() : "200,999"}
+            </div>
+            <p className="text-xs text-slate-500 mt-0.5">
+              {summary ? summary.legal_deliveries.toLocaleString() : "192,709"} legal deliveries
+            </p>
           </div>
-          <div className="text-xl font-bold font-mono text-white">
-            {summary ? summary.total_deliveries.toLocaleString() : "200,999"}
-          </div>
-          <div className="text-[10px] text-slate-400 mt-1">
-            {summary ? summary.legal_deliveries.toLocaleString() : "192,709"} legal deliveries
-          </div>
-        </div>
 
-        <div className="p-4 rounded-xl bg-[#101C37]/80 border border-[#1A2B50] hover:border-[#E91E8F]/40 transition-all">
-          <div className="flex items-center justify-between text-slate-400 mb-1">
-            <span className="text-[11px] font-medium uppercase tracking-wider">Matches Covered</span>
-            <Layers className="w-3.5 h-3.5 text-[#D6B56D]" />
+          <div>
+            <span className="text-[11px] font-mono uppercase tracking-wider text-slate-400 block mb-1">
+              Matches Covered
+            </span>
+            <div className="text-xl font-extrabold text-slate-900 font-mono tracking-tight">
+              {summary ? summary.total_matches_with_deliveries : "867"}
+            </div>
+            <p className="text-xs text-slate-500 mt-0.5">
+              +16 abandoned without ball
+            </p>
           </div>
-          <div className="text-xl font-bold font-mono text-white">
-            {summary ? summary.total_matches_with_deliveries : "867"}
-          </div>
-          <div className="text-[10px] text-slate-400 mt-1">
-            +16 abandoned without ball
-          </div>
-        </div>
 
-        <div className="p-4 rounded-xl bg-[#101C37]/80 border border-[#1A2B50] hover:border-[#E91E8F]/40 transition-all">
-          <div className="flex items-center justify-between text-slate-400 mb-1">
-            <span className="text-[11px] font-medium uppercase tracking-wider">Runs Off Bat</span>
-            <TrendingUp className="w-3.5 h-3.5 text-emerald-400" />
+          <div>
+            <span className="text-[11px] font-mono uppercase tracking-wider text-slate-400 block mb-1">
+              Runs Off Bat
+            </span>
+            <div className="text-xl font-extrabold text-slate-900 font-mono tracking-tight">
+              {summary ? summary.total_runs_off_bat.toLocaleString() : "260,209"}
+            </div>
+            <p className="text-xs text-slate-500 mt-0.5">
+              Run rate: {summary ? summary.overall_run_rate_per_6_balls.toFixed(2) : "8.10"} rpo
+            </p>
           </div>
-          <div className="text-xl font-bold font-mono text-white">
-            {summary ? summary.total_runs_off_bat.toLocaleString() : "260,209"}
-          </div>
-          <div className="text-[10px] text-slate-400 mt-1">
-            Run rate: {summary ? summary.overall_run_rate_per_6_balls.toFixed(2) : "8.10"} rpo
-          </div>
-        </div>
 
-        <div className="p-4 rounded-xl bg-[#101C37]/80 border border-[#1A2B50] hover:border-[#E91E8F]/40 transition-all">
-          <div className="flex items-center justify-between text-slate-400 mb-1">
-            <span className="text-[11px] font-medium uppercase tracking-wider">Total Wickets</span>
-            <Target className="w-3.5 h-3.5 text-rose-400" />
+          <div>
+            <span className="text-[11px] font-mono uppercase tracking-wider text-slate-400 block mb-1">
+              Total Wickets
+            </span>
+            <div className="text-xl font-extrabold text-slate-900 font-mono tracking-tight">
+              {summary ? summary.total_wickets_fallen.toLocaleString() : "11,460"}
+            </div>
+            <p className="text-xs text-slate-500 mt-0.5">
+              {summary ? summary.total_bowler_wickets.toLocaleString() : "10,489"} bowler wickets
+            </p>
           </div>
-          <div className="text-xl font-bold font-mono text-white">
-            {summary ? summary.total_wickets_fallen.toLocaleString() : "11,460"}
-          </div>
-          <div className="text-[10px] text-slate-400 mt-1">
-            {summary ? summary.total_bowler_wickets.toLocaleString() : "10,489"} bowler wickets
-          </div>
-        </div>
 
-        <div className="p-4 rounded-xl bg-[#101C37]/80 border border-[#1A2B50] hover:border-[#E91E8F]/40 transition-all">
-          <div className="flex items-center justify-between text-slate-400 mb-1">
-            <span className="text-[11px] font-medium uppercase tracking-wider">Active Players</span>
-            <Users className="w-3.5 h-3.5 text-cyan-400" />
+          <div>
+            <span className="text-[11px] font-mono uppercase tracking-wider text-slate-400 block mb-1">
+              Active Players
+            </span>
+            <div className="text-xl font-extrabold text-slate-900 font-mono tracking-tight">
+              {summary ? `${summary.total_unique_strikers} / ${summary.total_unique_bowlers}` : "618 / 460"}
+            </div>
+            <p className="text-xs text-slate-500 mt-0.5">
+              Batters / Bowlers mapped
+            </p>
           </div>
-          <div className="text-xl font-bold font-mono text-white">
-            {summary ? `${summary.total_unique_strikers} / ${summary.total_unique_bowlers}` : "618 / 460"}
-          </div>
-          <div className="text-[10px] text-slate-400 mt-1">
-            Batters / Bowlers mapped
-          </div>
-        </div>
 
-        <div className="p-4 rounded-xl bg-[#101C37]/80 border border-[#1A2B50] hover:border-[#E91E8F]/40 transition-all">
-          <div className="flex items-center justify-between text-slate-400 mb-1">
-            <span className="text-[11px] font-medium uppercase tracking-wider">Radar Speeds</span>
-            <Gauge className="w-3.5 h-3.5 text-amber-400" />
-          </div>
-          <div className="text-xl font-bold font-mono text-white">
-            {summary ? summary.valid_radar_speed_records.toLocaleString() : "123,113"}
-          </div>
-          <div className="text-[10px] text-emerald-400 font-semibold mt-1">
-            61.3% sensor coverage
+          <div>
+            <span className="text-[11px] font-mono uppercase tracking-wider text-slate-400 block mb-1">
+              Radar Speeds
+            </span>
+            <div className="text-xl font-extrabold text-slate-900 font-mono tracking-tight">
+              {summary ? summary.valid_radar_speed_records.toLocaleString() : "123,113"}
+            </div>
+            <p className="text-xs text-emerald-700 font-medium mt-0.5">
+              61.3% sensor coverage
+            </p>
           </div>
         </div>
-      </div>
+      </section>
 
       {/* ------------------------------------------------------------------- */}
-      {/* Tactical Sub-System Navigation Tabs */}
+      {/* 3. Tactical Sub-System Navigation Tabs */}
       {/* ------------------------------------------------------------------- */}
-      <div className="flex items-center gap-2 border-b border-[#1A2B50] pb-2 overflow-x-auto">
+      <div className="flex items-center gap-1 border-b border-slate-200 overflow-x-auto">
         <button
           onClick={() => setActiveTab("overview")}
           className={cn(
-            "flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition-all whitespace-nowrap",
+            "flex items-center gap-2 px-4 py-2.5 text-xs font-semibold transition-all border-b-2 -mb-px whitespace-nowrap",
             activeTab === "overview"
-              ? "bg-[#E91E8F] text-white shadow-md shadow-[#E91E8F]/20"
-              : "text-slate-400 hover:text-white hover:bg-[#101C37]"
+              ? "border-[#E91E8F] text-[#101C37]"
+              : "border-transparent text-slate-500 hover:text-slate-800"
           )}
         >
-          <BarChart2 className="w-4 h-4" />
-          <span>Phase Mastery & Splits (Mod B)</span>
+          <BarChart2 className="w-4 h-4 text-slate-600" />
+          <span>Phase Mastery & Splits</span>
         </button>
 
         <button
           onClick={() => setActiveTab("strokes_handedness")}
           className={cn(
-            "flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition-all whitespace-nowrap",
+            "flex items-center gap-2 px-4 py-2.5 text-xs font-semibold transition-all border-b-2 -mb-px whitespace-nowrap",
             activeTab === "strokes_handedness"
-              ? "bg-[#E91E8F] text-white shadow-md shadow-[#E91E8F]/20"
-              : "text-slate-400 hover:text-white hover:bg-[#101C37]"
+              ? "border-[#E91E8F] text-[#101C37]"
+              : "border-transparent text-slate-500 hover:text-slate-800"
           )}
         >
-          <Target className="w-4 h-4" />
-          <span>Strokes & Handedness (Mods C & D)</span>
+          <Target className="w-4 h-4 text-emerald-600" />
+          <span>Strokes & Handedness</span>
         </button>
 
         <button
           onClick={() => setActiveTab("bowling_speed")}
           className={cn(
-            "flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition-all whitespace-nowrap",
+            "flex items-center gap-2 px-4 py-2.5 text-xs font-semibold transition-all border-b-2 -mb-px whitespace-nowrap",
             activeTab === "bowling_speed"
-              ? "bg-[#E91E8F] text-white shadow-md shadow-[#E91E8F]/20"
-              : "text-slate-400 hover:text-white hover:bg-[#101C37]"
+              ? "border-[#E91E8F] text-[#101C37]"
+              : "border-transparent text-slate-500 hover:text-slate-800"
           )}
         >
-          <Gauge className="w-4 h-4" />
-          <span>Variations & Radar Speed (Mods E & F)</span>
+          <Gauge className="w-4 h-4 text-[#D6B56D]" />
+          <span>Variations & Radar Speed</span>
         </button>
 
         <button
           onClick={() => setActiveTab("death_overs")}
           className={cn(
-            "flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition-all whitespace-nowrap",
+            "flex items-center gap-2 px-4 py-2.5 text-xs font-semibold transition-all border-b-2 -mb-px whitespace-nowrap",
             activeTab === "death_overs"
-              ? "bg-[#E91E8F] text-white shadow-md shadow-[#E91E8F]/20"
-              : "text-slate-400 hover:text-white hover:bg-[#101C37]"
+              ? "border-[#E91E8F] text-[#101C37]"
+              : "border-transparent text-slate-500 hover:text-slate-800"
           )}
         >
-          <Flame className="w-4 h-4 text-amber-400" />
-          <span>Death Overs Finishers & Containment (Mod H)</span>
+          <Flame className="w-4 h-4 text-rose-500" />
+          <span>Death Overs Finishers</span>
         </button>
 
         <button
           onClick={() => setActiveTab("matchups_players")}
           className={cn(
-            "flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition-all whitespace-nowrap",
+            "flex items-center gap-2 px-4 py-2.5 text-xs font-semibold transition-all border-b-2 -mb-px whitespace-nowrap",
             activeTab === "matchups_players"
-              ? "bg-[#E91E8F] text-white shadow-md shadow-[#E91E8F]/20"
-              : "text-slate-400 hover:text-white hover:bg-[#101C37]"
+              ? "border-[#E91E8F] text-[#101C37]"
+              : "border-transparent text-slate-500 hover:text-slate-800"
           )}
         >
-          <Swords className="w-4 h-4" />
-          <span>Matchup Battles & Player Dossiers (Mods G & I)</span>
+          <Swords className="w-4 h-4 text-cyan-600" />
+          <span>Matchup Battles & Dossiers</span>
         </button>
       </div>
 

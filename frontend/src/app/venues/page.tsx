@@ -94,53 +94,61 @@ export default function VenuePitchIntelligencePage() {
   }, [selectedVenueCode, selectedPlayerId]);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8 pb-12">
       {/* Top Header & Context Banner */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-        <div>
-          <div className="flex items-center gap-2 mb-2">
-            <span className="px-2.5 py-0.5 rounded-full text-[11px] font-mono font-bold bg-[#E91E8F] text-white">
-              STAGE 4
-            </span>
-            <span className="px-2.5 py-0.5 rounded-full text-[11px] font-mono font-semibold bg-[#D6B56D]/20 text-[#8C6D1F] border border-[#D6B56D]/40">
-              VENUE & ENVIRONMENTAL INTELLIGENCE
-            </span>
-            <span className="text-xs text-slate-500 font-mono">Open-Meteo CC-BY 4.0 • Verified BCCI Geometry</span>
-          </div>
-          <h1 className="text-2xl font-extrabold text-[#101C37] tracking-tight">
-            Stadium Geometry, Pitch Evidence & Weather Telemetry
-          </h1>
-          <p className="text-xs text-slate-500 mt-1">
-            Measured boundary dimensions, empirical pace-vs-spin wicket shares, evening dew point progression,
-            and venue-specific performance dossiers for uncapped prospects.
-          </p>
+      <section className="space-y-3">
+        <div className="flex flex-wrap items-center gap-3 text-xs">
+          <span className="font-mono font-bold tracking-widest text-[#E91E8F] uppercase">
+            Rajasthan Royals Operations
+          </span>
+          <span className="text-slate-300">•</span>
+          <span className="font-mono text-slate-500">
+            Open-Meteo CC-BY 4.0 • BCCI Geometry
+          </span>
+          <span className="text-slate-300">•</span>
+          <span className="inline-flex items-center gap-1.5 text-emerald-700 font-medium">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+            Environmental Analytics
+          </span>
         </div>
 
-        {/* Home Grounds vs All Filter */}
-        <div className="flex items-center gap-2 self-start md:self-auto">
-          <button
-            onClick={() => setRrOnly(false)}
-            className={`px-3 py-1.5 text-xs font-bold rounded-xl transition-all ${
-              !rrOnly
-                ? "bg-[#101C37] text-white shadow-sm"
-                : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-            }`}
-          >
-            All Venues ({venues.length})
-          </button>
-          <button
-            onClick={() => setRrOnly(true)}
-            className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-xl transition-all ${
-              rrOnly
-                ? "bg-[#E91E8F] text-white shadow-sm"
-                : "bg-pink-50 text-[#E91E8F] hover:bg-pink-100"
-            }`}
-          >
-            <Shield size={13} />
-            RR Home Grounds (2)
-          </button>
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+          <div className="max-w-3xl space-y-2">
+            <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-slate-900 leading-tight">
+              Stadium Geometry, Pitch Evidence & Weather Telemetry
+            </h1>
+            <p className="text-sm md:text-base text-slate-600 leading-relaxed font-normal">
+              Measured boundary dimensions, empirical pace-vs-spin wicket shares, evening dew point progression,
+              and venue-specific performance dossiers for uncapped prospects.
+            </p>
+          </div>
+
+          {/* Home Grounds vs All Filter */}
+          <div className="flex items-center gap-1.5 p-1 bg-slate-100 rounded-lg shrink-0">
+            <button
+              onClick={() => setRrOnly(false)}
+              className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-all ${
+                !rrOnly
+                  ? "bg-white text-slate-900 shadow-sm"
+                  : "text-slate-500 hover:text-slate-700"
+              }`}
+            >
+              All Venues ({venues.length})
+            </button>
+            <button
+              onClick={() => setRrOnly(true)}
+              className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-md transition-all ${
+                rrOnly
+                  ? "bg-[#101C37] text-white shadow-sm"
+                  : "text-slate-500 hover:text-slate-700"
+              }`}
+            >
+              <Shield size={13} className="text-[#E91E8F]" />
+              <span>RR Grounds (2)</span>
+            </button>
+          </div>
         </div>
-      </div>
+      </section>
 
       {/* Stadium Directory Horizontal Carousel / Selector */}
       <div className="flex items-center gap-2 overflow-x-auto pb-2">

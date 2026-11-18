@@ -15,6 +15,7 @@ from app.api.v1.endpoints import (
     weather,
     tactical,
     pressure,
+    uncapped,
 )
 
 api_router = APIRouter()
@@ -24,6 +25,9 @@ api_router.include_router(health.router, tags=["Health & Diagnostics"])
 
 # Round 1 Pressure Analytics routes (SupeRR Selector Challenge)
 api_router.include_router(pressure.router, prefix="/analytics/pressure", tags=["Round 1 Pressure Analytics"])
+
+# Uncapped Player Intelligence routes
+api_router.include_router(uncapped.router, prefix="/analytics/uncapped", tags=["Uncapped Player Intelligence"])
 
 # Data Acquisition Engine routes
 api_router.include_router(acquisition.router, prefix="/acquisition", tags=["Data Acquisition"])
