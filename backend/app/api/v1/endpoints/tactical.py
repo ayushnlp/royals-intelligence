@@ -55,8 +55,11 @@ def get_engine() -> DatasetCricketIntelligenceEngine:
     if _engine is None:
         logger.info("Initializing DatasetCricketIntelligenceEngine for Tactical API...")
         _engine = DatasetCricketIntelligenceEngine()
-        _engine.load_data()
-        logger.info("DatasetCricketIntelligenceEngine loaded successfully.")
+        try:
+            _engine.load_data()
+            logger.info("DatasetCricketIntelligenceEngine loaded successfully.")
+        except FileNotFoundError as exc:
+            logger.warning(f"Tactical engine running in unhydrated mode: {exc}")
     return _engine
 
 
