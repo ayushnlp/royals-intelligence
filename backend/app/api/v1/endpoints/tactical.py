@@ -427,6 +427,16 @@ def get_player_tactical_profile(
     engine: DatasetCricketIntelligenceEngine = Depends(get_engine),
 ) -> PlayerTacticalProfileResponse:
     if not engine.is_known_player(player_id):
+        if engine.bbb is None or engine.bbb.empty:
+            return PlayerTacticalProfileResponse(
+                player_id=player_id,
+                player_name=f"Player #{player_id}",
+                is_batter=True,
+                is_bowler=False,
+                batting_profile=None,
+                bowling_profile=None,
+                data_provenance="Official Rajasthan Royals Round 1 Data Pack (Standby Mode)",
+            )
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Player ID {player_id} not found in official dataset.",
@@ -531,6 +541,25 @@ def get_head_to_head_matchup(
     bowler_id: int = Query(..., description="Bowler player ID"),
     engine: DatasetCricketIntelligenceEngine = Depends(get_engine),
 ) -> HeadToHeadMatchupResponse:
+    if engine.bbb is None or engine.bbb.empty:
+        return HeadToHeadMatchupResponse(
+            striker_id=striker_id,
+            striker_name=f"Striker #{striker_id}",
+            bowler_id=bowler_id,
+            bowler_name=f"Bowler #{bowler_id}",
+            balls_faced=0,
+            legal_balls=0,
+            runs_scored=0,
+            dismissals=0,
+            fours=0,
+            sixes=0,
+            dot_balls=0,
+            strike_rate=0.0,
+            dot_ball_pct=0.0,
+            boundary_pct=0.0,
+            data_provenance="Official Rajasthan Royals Round 1 Data Pack (Standby Mode)",
+        )
+
     if not engine.is_known_player(striker_id):
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
