@@ -15,6 +15,7 @@ from app.analytics.pressure_intelligence import PressureIntelligenceEngine
 from app.analytics.uncapped_pressure_intelligence import UncappedPressureIntelligenceService
 
 
+@pytest.mark.unit
 def test_pressure_overview_threshold_string():
     """Verifies that sample_qualification_threshold is strictly '>= 60 pressure balls'."""
     engine = PressureIntelligenceEngine()
@@ -23,6 +24,7 @@ def test_pressure_overview_threshold_string():
     assert "or >= 50" not in overview["sample_qualification_threshold"]
 
 
+@pytest.mark.unit
 def test_pressure_methodology_threshold_string():
     """Verifies that methodology qualification criteria is strictly '>= 60 pressure balls'."""
     engine = PressureIntelligenceEngine()
@@ -31,6 +33,7 @@ def test_pressure_methodology_threshold_string():
     assert "50 balls" not in methodology["qualification_criteria"]["primary_threshold"]
 
 
+@pytest.mark.unit
 def test_uncapped_strict_60_qualification_logic():
     """
     Directly tests the strict qualification boundary:
@@ -40,7 +43,7 @@ def test_uncapped_strict_60_qualification_logic():
     50 balls + 20 matches -> False
     """
     engine = UncappedPressureIntelligenceService()
-    
+
     # Test candidate record simulation
     test_cases = [
         {"balls": 59, "matches": 15, "expected_official": False, "desc": "59 balls (below threshold)"},
@@ -50,23 +53,25 @@ def test_uncapped_strict_60_qualification_logic():
         {"balls": 50, "matches": 20, "expected_official": False, "desc": "50 balls & 20 matches (must not qualify)"},
         {"balls": 0, "matches": 0, "expected_official": False, "desc": "0 balls"},
     ]
-    
+
     for tc in test_cases:
         # Check rule directly: balls >= 60
         is_official = bool(tc["balls"] >= 60)
         assert is_official == tc["expected_official"], f"Failed for case: {tc['desc']}"
 
 
+@pytest.mark.data_dependent
 def test_uncapped_overview_official_gate_label():
     """Verifies that the default gate label is strictly '>= 60 pressure legal deliveries [Official R1 Benchmark]'."""
     engine = UncappedPressureIntelligenceService()
-    
+
     # Default parameters: min_balls=60, min_matches=0
     ov = engine.get_uncapped_overview(min_balls=60, min_matches=0)
     assert ov["sample_gate_applied"] == ">= 60 pressure legal deliveries [Official R1 Benchmark]"
     assert "50" not in ov["sample_gate_applied"]
 
 
+@pytest.mark.data_dependent
 def test_exploratory_filter_does_not_modify_official_qualification_flag():
     """
     Verifies that when exploratory filters are used (e.g. min_balls=30):
@@ -74,12 +79,12 @@ def test_exploratory_filter_does_not_modify_official_qualification_flag():
     2. But player records with < 60 balls remain is_official_r1_qualified == False.
     """
     engine = UncappedPressureIntelligenceService()
-    
+
     # Overview with exploratory 30 balls
     ov = engine.get_uncapped_overview(min_balls=30, min_matches=0)
     assert "Exploratory Scouting Filter" in ov["sample_gate_applied"]
     assert ov["min_balls_applied"] == 30
-    
+
     # Leaderboard with exploratory 30 balls
     batters = engine.get_uncapped_batting_leaderboard(limit=50, qualified_only=True, min_balls=30, min_matches=0)
     for b in batters:

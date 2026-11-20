@@ -27,12 +27,13 @@ def eligibility_ledger():
     return ledger, summary
 
 
+@pytest.mark.data_dependent
 def test_eligibility_ledger_exact_reconciliation(eligibility_ledger):
     """Verifies that the candidate universe reconciles exactly to 1,217 canonical players."""
     ledger, summary = eligibility_ledger
     assert len(ledger) == 1217
     assert summary.total_canonical_players == 1217
-    
+
     total = (
         summary.verified_capped_count
         + summary.verified_uncapped_count
@@ -46,6 +47,7 @@ def test_eligibility_ledger_exact_reconciliation(eligibility_ledger):
     assert summary.conflicting_evidence_count == 0
 
 
+@pytest.mark.data_dependent
 def test_three_format_independence_for_all_uncapped(eligibility_ledger):
     """Verifies that all 26 verified uncapped players have independent zero appearances in Test, ODI, and T20I."""
     ledger, _ = eligibility_ledger
@@ -60,6 +62,7 @@ def test_three_format_independence_for_all_uncapped(eligibility_ledger):
         assert record.t20i_evidence.caps_count == 0
 
 
+@pytest.mark.data_dependent
 def test_sai_kishore_t20i_cap_evidence(eligibility_ledger):
     """Verifies that R. Sai Kishore is certified as VERIFIED_CAPPED with Asian Games 2023 T20I cap evidence."""
     ledger, _ = eligibility_ledger
@@ -72,6 +75,7 @@ def test_sai_kishore_t20i_cap_evidence(eligibility_ledger):
     assert "T20I Cap #108" in sk.t20i_evidence.evidence_notes
 
 
+@pytest.mark.data_dependent
 def test_vyshak_kumar_squad_only_bench_callup(eligibility_ledger):
     """Verifies that Vijaykumar Vyshak is classified as VERIFIED_UNCAPPED with squad call-up evidence preserved."""
     ledger, _ = eligibility_ledger
@@ -83,6 +87,7 @@ def test_vyshak_kumar_squad_only_bench_callup(eligibility_ledger):
     assert "0 actual playing XI appearances" in vk.t20i_evidence.evidence_notes
 
 
+@pytest.mark.data_dependent
 def test_downgraded_domestic_candidates(eligibility_ledger):
     """Verifies that confirmed domestic candidates are classified as VERIFIED_UNCAPPED."""
     ledger, _ = eligibility_ledger
@@ -92,6 +97,7 @@ def test_downgraded_domestic_candidates(eligibility_ledger):
         assert r.final_eligibility_state == "VERIFIED_UNCAPPED"
 
 
+@pytest.mark.data_dependent
 def test_multi_name_collision_disambiguation(eligibility_ledger):
     """Verifies independent format and eligibility resolution for distinct cricketers sharing names."""
     ledger, _ = eligibility_ledger
@@ -118,6 +124,7 @@ def test_multi_name_collision_disambiguation(eligibility_ledger):
     assert haider_uae.final_eligibility_state == "VERIFIED_CAPPED"
 
 
+@pytest.mark.data_dependent
 def test_ravi_bishnoi_multi_format_caps(eligibility_ledger):
     """Verifies Ravi Bishnoi senior international eligibility across formats."""
     ledger, _ = eligibility_ledger
@@ -128,6 +135,7 @@ def test_ravi_bishnoi_multi_format_caps(eligibility_ledger):
     assert rb.odi_evidence.appearance_status == "PLAYED_APPEARANCE"
 
 
+@pytest.mark.data_dependent
 def test_bench_only_squad_callups_exclusion(eligibility_ledger):
     """Verifies bench-only squad reserves classification."""
     ledger, summary = eligibility_ledger
@@ -144,6 +152,7 @@ def test_bench_only_squad_callups_exclusion(eligibility_ledger):
             assert r.final_eligibility_state in ["PENDING_VERIFICATION", "VERIFIED_UNCAPPED"]
 
 
+@pytest.mark.data_integrity
 def test_exported_ledger_artifacts_exist():
     """Verifies that Parquet, JSON, and summary files exist on disk."""
     out_dir = REPO_ROOT / "data" / "processed" / "auction_intelligence"
@@ -152,6 +161,7 @@ def test_exported_ledger_artifacts_exist():
     assert (out_dir / "eligibility_ledger_summary.json").exists()
 
 
+@pytest.mark.data_integrity
 def test_protected_parquet_hashes_unmodified():
     """Verifies that all 4 Round 1 Parquet artifacts remain byte-for-byte untouched."""
     expected_hashes = {

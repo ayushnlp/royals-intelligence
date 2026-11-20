@@ -16,6 +16,7 @@ ADMIN_HEADERS = {"Authorization": f"Bearer {settings.SCOUT_ADMIN_API_KEY}"}
 ANALYST_HEADERS = {"Authorization": f"Bearer {settings.LEAD_ANALYST_API_KEY}"}
 
 
+@pytest.mark.unit
 def test_list_uncapped_players():
     """Tests GET /api/v1/players with and without filters, and with dynamic reference date."""
     # 1. Base query without confirmed reference date -> Age is unresolved (None)
@@ -55,6 +56,7 @@ def test_list_uncapped_players():
         assert p["is_rr_trialist"] is True
 
 
+@pytest.mark.unit
 def test_get_uncapped_player_detail():
     """Tests GET /api/v1/players/{id} with and without reference date."""
     # Without reference date
@@ -78,6 +80,7 @@ def test_get_uncapped_player_detail():
     assert res_404.status_code == 404
 
 
+@pytest.mark.unit
 def test_verify_player_eligibility_authorization():
     """Verifies that eligibility modification requires server-side admin credentials."""
     payload = {
@@ -110,6 +113,7 @@ def test_verify_player_eligibility_authorization():
     assert "Audited domestic" in data["verification_notes"]
 
 
+@pytest.mark.unit
 def test_analytics_batting_and_bowling_endpoints():
     """Tests GET /api/v1/analytics/players/{id}/batting and bowling."""
     # Batting
@@ -132,6 +136,7 @@ def test_analytics_batting_and_bowling_endpoints():
     assert res_form.status_code == 200
 
 
+@pytest.mark.unit
 def test_proprietary_endpoints_security_and_masking():
     """Tests authentication enforcement and confidential data masking across proprietary endpoints."""
     sample_payload = {

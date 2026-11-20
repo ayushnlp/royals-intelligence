@@ -23,6 +23,7 @@ def intelligence_engine():
     return engine
 
 
+@pytest.mark.data_dependent
 def test_engine_initialization_and_summary(intelligence_engine):
     """Verifies that the engine loads the official data pack and reports exact aggregations."""
     summary = intelligence_engine.get_dataset_summary()
@@ -38,6 +39,7 @@ def test_engine_initialization_and_summary(intelligence_engine):
     assert summary["valid_radar_speed_records"] > 120000
 
 
+@pytest.mark.data_dependent
 def test_phase_splits_overall(intelligence_engine):
     """Verifies tournament-wide phase splits (Powerplay, Middle, Death)."""
     splits = intelligence_engine.get_phase_splits()
@@ -57,6 +59,7 @@ def test_phase_splits_overall(intelligence_engine):
     assert death.economy_rate > pp.economy_rate
 
 
+@pytest.mark.data_dependent
 def test_player_phase_splits(intelligence_engine):
     """Verifies phase splits for specific players (Jos Buttler batting, Yuzvendra Chahal bowling)."""
     # Jos Buttler (player_id 813)
@@ -72,6 +75,7 @@ def test_player_phase_splits(intelligence_engine):
     assert chahal_splits["Middle"].economy_rate < 9.5
 
 
+@pytest.mark.data_dependent
 def test_handedness_matrix(intelligence_engine):
     """Verifies 4-way stance/bowling cross-split."""
     matrix = intelligence_engine.get_handedness_matrix()
@@ -90,6 +94,7 @@ def test_handedness_matrix(intelligence_engine):
         assert 0.0 <= split.dot_pct <= 100.0
 
 
+@pytest.mark.data_dependent
 def test_tactical_strokes(intelligence_engine):
     """Verifies shot stroke classification and risk profiling."""
     strokes = intelligence_engine.get_top_strokes(min_balls=1000)
@@ -107,6 +112,7 @@ def test_tactical_strokes(intelligence_engine):
     assert worked.dismissal_rate_pct < 4.0
 
 
+@pytest.mark.data_dependent
 def test_delivery_styles(intelligence_engine):
     """Verifies bowling variation styles."""
     styles = intelligence_engine.get_top_delivery_styles(min_balls=500)
@@ -117,6 +123,7 @@ def test_delivery_styles(intelligence_engine):
     assert "Leg Break" in style_names
 
 
+@pytest.mark.data_dependent
 def test_top_death_performers(intelligence_engine):
     """Verifies death overs ranking algorithms."""
     death_batters = intelligence_engine.get_top_death_batters(min_balls=100, top_n=5)
@@ -132,6 +139,7 @@ def test_top_death_performers(intelligence_engine):
     assert "Sunil Narine" in bowler_names or "Jasprit Bumrah" in bowler_names
 
 
+@pytest.mark.data_dependent
 def test_head_to_head_micro_battles(intelligence_engine):
     """Verifies direct head-to-head matchup calculations."""
     # Virat Kohli (47) vs Rashid Khan (4722)
@@ -148,6 +156,7 @@ def test_head_to_head_micro_battles(intelligence_engine):
     assert empty_h2h is None
 
 
+@pytest.mark.data_dependent
 def test_rajasthan_royals_squad_intelligence(intelligence_engine):
     """Verifies Rajasthan Royals squad intelligence dossier generation."""
     rr_dossiers = intelligence_engine.get_rajasthan_royals_squad_intelligence()

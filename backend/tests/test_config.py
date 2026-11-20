@@ -1,10 +1,12 @@
 """
 Royals Intelligence - Configuration & Environment Tests
 """
+import pytest
 
 from app.core.config import settings
 
 
+@pytest.mark.environment
 def test_settings_loaded():
     assert settings.PROJECT_NAME == "Royals Intelligence"
     assert settings.API_V1_PREFIX == "/api/v1"
@@ -14,10 +16,12 @@ def test_settings_loaded():
     assert len(settings.BACKEND_CORS_ORIGINS) > 0
 
 
+@pytest.mark.environment
 def test_cors_settings():
     assert any("localhost" in origin for origin in settings.BACKEND_CORS_ORIGINS)
 
 
+@pytest.mark.environment
 def test_database_url_normalization():
     from app.core.config import Settings
     from app.db.session import get_async_database_url

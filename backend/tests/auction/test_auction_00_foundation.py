@@ -53,6 +53,7 @@ def squad_svc(ingestion_svc):
     return RRSquadBaselineService(ingestion_svc)
 
 
+@pytest.mark.data_integrity
 def test_data_pack_files_exist_and_checksummed(ingestion_svc):
     """Verifies that all 7 required raw data pack CSV files exist and can be inspected."""
     datasets = ingestion_svc.inspect_datasets()
@@ -66,6 +67,7 @@ def test_data_pack_files_exist_and_checksummed(ingestion_svc):
         assert meta.column_count == EXPECTED_FILES[filename]
 
 
+@pytest.mark.data_dependent
 def test_delivery_semantics_exact_counts(ingestion_svc):
     """Verifies the exact delivery semantics:
     - 200,999 total deliveries
@@ -82,6 +84,7 @@ def test_delivery_semantics_exact_counts(ingestion_svc):
     assert summary.total_wickets > 0
 
 
+@pytest.mark.data_dependent
 def test_match_coverage_exact_counts(ingestion_svc):
     """Verifies match coverage:
     - 883 total matches in matches.csv
@@ -94,6 +97,7 @@ def test_match_coverage_exact_counts(ingestion_svc):
     assert coverage.abandoned_or_no_result == ABANDONED_MATCH_COUNT
 
 
+@pytest.mark.data_dependent
 def test_ipl_players_null_bowling_styles(quality_svc):
     """Verifies that exactly 32 players have null Bowling_Style and that all are non-bowling Batters or Keepers."""
     issues = quality_svc.audit_null_values()
@@ -113,6 +117,7 @@ def test_ipl_players_null_bowling_styles(quality_svc):
     assert roles.get("All-rounder", 0) == 0
 
 
+@pytest.mark.data_dependent
 def test_duplicate_player_detection(quality_svc):
     """Verifies that exactly one player name is duplicated in ipl_players.csv: Ravi Bishnoi."""
     issues = quality_svc.audit_duplicate_records()
@@ -130,6 +135,7 @@ def test_duplicate_player_detection(quality_svc):
     assert teams == {"Rajasthan Royals", "Lucknow Super Giants"}
 
 
+@pytest.mark.data_dependent
 def test_rr_2026_squad_baseline_reconciliation(squad_svc):
     """Verifies that the RR squad baseline contains exactly 27 entries:
     - 12 Bowlers
@@ -145,6 +151,7 @@ def test_rr_2026_squad_baseline_reconciliation(squad_svc):
     assert breakdown.wicketkeeper_batters == 4
 
 
+@pytest.mark.data_dependent
 def test_rr_squad_governance_disclaimers(squad_svc):
     """Verifies that critical franchise dislocations and trade disclaimers are documented."""
     disclaimers = squad_svc.get_disclaimer_audit()
@@ -169,6 +176,7 @@ def test_rr_squad_governance_disclaimers(squad_svc):
     assert curran.iloc[0]["Team"] == "Rajasthan Royals"
 
 
+@pytest.mark.data_dependent
 def test_referential_integrity(quality_svc):
     """Verifies that 100% of deliveries and playing eleven match_ids exist in matches.csv."""
     issues = quality_svc.audit_referential_integrity()
@@ -185,6 +193,7 @@ def test_referential_integrity(quality_svc):
     assert abandoned_issue.affected_rows == 16
 
 
+@pytest.mark.data_dependent
 def test_competition_mapping_universe_breadth(ingestion_svc):
     """Verifies that competition_team_player_mapping.csv covers 1,217 unique players across 6,413 rows."""
     mapping_df = ingestion_svc.load_dataset("competition_team_player_mapping.csv")
@@ -192,6 +201,7 @@ def test_competition_mapping_universe_breadth(ingestion_svc):
     assert mapping_df["player_id"].nunique() == 1217
 
 
+@pytest.mark.data_integrity
 def test_protected_parquet_hashes_unmodified():
     """Verifies that all 4 Round 1 Parquet artifacts remain byte-for-byte untouched."""
     expected_hashes = {

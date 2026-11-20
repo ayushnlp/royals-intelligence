@@ -25,6 +25,7 @@ from app.services.domestic.domestic_season_service import DomesticSeasonService
 client = TestClient(app)
 
 
+@pytest.mark.data_dependent
 def test_dynamic_player_discovery_endpoint():
     """Verifies that GET /api/v1/domestic/players returns paginated candidate records."""
     res = client.get("/api/v1/domestic/players?page=1&page_size=20")
@@ -46,6 +47,7 @@ def test_dynamic_player_discovery_endpoint():
     assert first["statistical_coverage_status"] in ["AVAILABLE", "NO_STATISTICAL_COVERAGE"]
 
 
+@pytest.mark.data_dependent
 def test_verified_uncapped_player_filter():
     """Verifies that filtering by VERIFIED_UNCAPPED returns all verified uncapped Indian domestic players."""
     res = client.get("/api/v1/domestic/players?eligibility_status=VERIFIED_UNCAPPED&page_size=100")
@@ -65,6 +67,7 @@ def test_verified_uncapped_player_filter():
     assert "Nehal Wadhera" in names
 
 
+@pytest.mark.data_dependent
 def test_pending_verification_domestic_filter():
     """Verifies that filtering by PENDING_VERIFICATION returns 0 candidates following complete domestic verification."""
     res = client.get("/api/v1/domestic/players?eligibility_status=PENDING_VERIFICATION&page_size=20")
@@ -75,6 +78,7 @@ def test_pending_verification_domestic_filter():
         assert item["eligibility_status"] == "PENDING_VERIFICATION"
 
 
+@pytest.mark.data_dependent
 def test_overseas_exclusion_from_domestic_discovery():
     """Verifies that overseas players (e.g. Australian, English, West Indian) are excluded from domestic discovery."""
     res = client.get("/api/v1/domestic/players?eligibility_status=ALL&page_size=500")
@@ -89,6 +93,7 @@ def test_overseas_exclusion_from_domestic_discovery():
     assert "Heinrich Klaasen" not in names
 
 
+@pytest.mark.data_dependent
 def test_player_search_by_name():
     """Verifies that search finds players by full or partial name."""
     res = client.get("/api/v1/domestic/players?search=Ashutosh")
@@ -100,6 +105,7 @@ def test_player_search_by_name():
     assert "Ashutosh" in p["player_name"]
 
 
+@pytest.mark.data_dependent
 def test_nonexistent_player_returns_404():
     """Verifies that nonexistent player IDs return HTTP 404 Not Found (no silent fallback)."""
     # 1. Nonexistent integer ID
@@ -114,6 +120,7 @@ def test_nonexistent_player_returns_404():
     assert res3.status_code == 404
 
 
+@pytest.mark.data_dependent
 def test_senior_capped_player_returns_403_forbidden():
     """Verifies that senior international capped players are rejected with HTTP 403 Forbidden under uncapped scope."""
     # Jasprit Bumrah (canonical_id 2933) is senior capped
@@ -126,6 +133,7 @@ def test_senior_capped_player_returns_403_forbidden():
     assert res2.status_code == 403
 
 
+@pytest.mark.data_dependent
 def test_real_statistical_aggregation_ashutosh_sharma():
     """Verifies dynamic aggregation of real statistics from delivery_states_strict.parquet for Ashutosh Sharma (8101)."""
     # 1. Season stats
@@ -162,6 +170,7 @@ def test_real_statistical_aggregation_ashutosh_sharma():
     assert ar["batting_summary"]["runs"] == total_runs
 
 
+@pytest.mark.data_dependent
 def test_real_bowling_aggregation_vaibhav_arora():
     """Verifies real bowling aggregation for Vaibhav Arora (8746)."""
     res_ar = client.get("/api/v1/domestic/players/8746/all-round-summary")
@@ -173,6 +182,7 @@ def test_real_bowling_aggregation_vaibhav_arora():
     assert ar["bowling_summary"]["overs"] > 100.0
 
 
+@pytest.mark.data_dependent
 def test_no_statistical_coverage_yarra_prithviraj():
     """Verifies that an uncapped player with 0 deliveries returns NO_STATISTICAL_COVERAGE and zero stats."""
     # Yarra Prithviraj (6351) is a verified uncapped bowler with 0 match deliveries in current pack
@@ -191,6 +201,7 @@ def test_no_statistical_coverage_yarra_prithviraj():
     assert res_stats.json() == []
 
 
+@pytest.mark.data_dependent
 def test_competitions_catalog_excludes_up_t20():
     """Verifies that GET /api/v1/domestic/competitions completely excludes non-existent UP T20 League."""
     res = client.get("/api/v1/domestic/competitions")
@@ -211,6 +222,7 @@ def test_competitions_catalog_excludes_up_t20():
     assert "dpl" in comp_ids
 
 
+@pytest.mark.data_dependent
 def test_season_identifier_normalization():
     """Verifies that season parameter formats ('2024-25' and '2024') resolve consistently."""
     res1 = client.get("/api/v1/domestic/seasons/ipl/2024/matches?page=1&page_size=10")
@@ -222,6 +234,7 @@ def test_season_identifier_normalization():
     assert res2.json()["total_matches"] == 74
 
 
+@pytest.mark.unit
 def test_legacy_test_alias_preservation():
     """Verifies that legacy test ID 'uncapped_rr_01' continues to function for backward test compatibility."""
     res_stats = client.get("/api/v1/domestic/players/uncapped_rr_01/season-stats")

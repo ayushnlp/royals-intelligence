@@ -211,7 +211,7 @@ export default function PressureIntelligencePage() {
               Strict Pressure Balls
             </span>
             <div className="text-xl font-extrabold text-slate-900 font-mono tracking-tight">
-              {overview ? overview.strict_pressure_bowling_balls.toLocaleString() : "37,014"}
+              {overview ? overview.strict_pressure_bowling_balls.toLocaleString() : "—"}
             </div>
             <p className="text-xs text-slate-500 mt-0.5">
               31,163 Batting Pressure
@@ -223,7 +223,7 @@ export default function PressureIntelligencePage() {
               Death Concentration
             </span>
             <div className="text-xl font-extrabold text-slate-900 font-mono tracking-tight">
-              {overview ? `${overview.death_overs_bowling_pressure_share_pct}%` : "87.3%"}
+              {overview ? `${overview.death_overs_bowling_pressure_share_pct}%` : "—"}
             </div>
             <p className="text-xs text-slate-500 mt-0.5">
               Overs 16–20 Pressure Share
@@ -235,7 +235,7 @@ export default function PressureIntelligencePage() {
               Candidate Scope
             </span>
             <div className="text-xl font-extrabold text-slate-900 font-mono tracking-tight">
-              {overview ? `${overview.total_evaluated_batters} / ${overview.total_evaluated_bowlers}` : "278 / 239"}
+              {overview ? `${overview.total_evaluated_batters} / ${overview.total_evaluated_bowlers}` : "—"}
             </div>
             <p className="text-xs text-slate-500 mt-0.5">
               Batters / Bowlers Evaluated

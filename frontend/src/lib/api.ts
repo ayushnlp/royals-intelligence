@@ -35,14 +35,40 @@ import {
   PressureMethodologyResponse,
   UncappedLeaderboardResponse,
   UncappedOverviewResponse,
+  CricketDataSource,
+  CoverageReportData,
+  DatasetManifestData,
+  UploadDatasetResponse,
+  UncappedPlayerSummary,
+  UncappedPlayerDetail,
 } from "@/types";
 
-const RAW_API_BASE =
-  process.env.NEXT_PUBLIC_API_URL ||
-  process.env.NEXT_PUBLIC_API_BASE_URL ||
-  "http://localhost:8000/api/v1";
+/**
+ * Dynamically resolves the API base URL based on environment.
+ * In development: defaults to http://localhost:8000/api/v1
+ * In production: strictly uses NEXT_PUBLIC_API_URL / NEXT_PUBLIC_API_BASE_URL,
+ * or falls back to relative window.location.origin /api/v1 (never hardcoded localhost).
+ */
+export const getApiBaseUrl = (): string => {
+  const envUrl = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL;
+  if (envUrl) {
+    return envUrl.replace(/\/+$/, "");
+  }
+  if (typeof window !== "undefined") {
+    // When running locally in browser (both dev server and local production preview)
+    if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") {
+      return `http://${window.location.hostname}:8000/api/v1`;
+    }
+    // Remote production deployment without explicit env var
+    return `${window.location.origin}/api/v1`;
+  }
+  if (process.env.NODE_ENV === "production") {
+    return "/api/v1";
+  }
+  return "http://localhost:8000/api/v1";
+};
 
-export const API_BASE_URL = RAW_API_BASE.replace(/\/+$/, "");
+export const API_BASE_URL = getApiBaseUrl();
 
 export class ApiError extends Error {
   public status?: number;
@@ -63,127 +89,122 @@ export class ApiError extends Error {
   }
 }
 
-export async function safeApiFetch<T>(endpoint: string, options?: RequestInit): Promise<T> {
-  const url = `${API_BASE_URL}${endpoint}`;
+/**
+ * Centralized, type-safe API fetch wrapper with timeout and explicit error handling.
+ * Never silently swallows network or HTTP errors into pseudo-empty records.
+ */
+export async function safeApiFetch<T>(
+  endpoint: string,
+  options?: RequestInit & { timeoutMs?: number }
+): Promise<T> {
+  const baseUrl = getApiBaseUrl();
+  const cleanEndpoint = endpoint.startsWith("/") ? endpoint : `/${endpoint}`;
+  const url = `${baseUrl}${cleanEndpoint}`;
+  const timeoutMs = options?.timeoutMs ?? 15000;
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+
   let res: Response;
   try {
     res = await fetch(url, {
       cache: "no-store",
       ...options,
+      signal: options?.signal || controller.signal,
     });
   } catch (err: any) {
+    clearTimeout(timer);
+    if (err.name === "AbortError") {
+      throw new ApiError(
+        `Request timed out after ${timeoutMs / 1000}s connecting to ${cleanEndpoint}`,
+        { isNetworkError: true, endpoint: cleanEndpoint }
+      );
+    }
     throw new ApiError(
-      `Network error connecting to backend service at ${API_BASE_URL}: ${err.message || "Connection refused / unreachable"}`,
-      { isNetworkError: true, endpoint }
+      `Network error connecting to backend service at ${baseUrl}: ${err.message || "Connection refused / unreachable"}`,
+      { isNetworkError: true, endpoint: cleanEndpoint }
     );
+  } finally {
+    clearTimeout(timer);
   }
 
   if (!res.ok) {
     let errorDetail = "";
     try {
       const errJson = await res.json();
-      errorDetail = errJson.detail || errJson.message || "";
+      errorDetail =
+        typeof errJson.detail === "string"
+          ? errJson.detail
+          : JSON.stringify(errJson.detail || errJson.message || "");
     } catch {
-      // Ignore JSON parse error on non-JSON response
+      // non-JSON error body
     }
     throw new ApiError(
       errorDetail ? `API Error [${res.status}]: ${errorDetail}` : `API Error [${res.status}] ${res.statusText}`,
-      { status: res.status, statusText: res.statusText, endpoint }
+      { status: res.status, statusText: res.statusText, endpoint: cleanEndpoint }
     );
   }
 
-  return await res.json();
+  try {
+    return await res.json();
+  } catch (err: any) {
+    throw new ApiError(
+      `Invalid JSON response from ${cleanEndpoint}: ${err.message}`,
+      { status: res.status, statusText: res.statusText, endpoint: cleanEndpoint }
+    );
+  }
 }
+
+// ============================================================================
+// Core Health & Diagnostics
+// ============================================================================
 
 export async function fetchSystemHealth(): Promise<SystemHealth> {
-  try {
-    const res = await fetch(`${API_BASE_URL}/health`, {
-      cache: "no-store",
-    });
-    if (!res.ok) {
-      throw new Error(`HTTP error! status: ${res.status}`);
-    }
-    return await res.json();
-  } catch (error) {
-    return {
-      status: "degraded_standby",
-      project: "Royals Intelligence",
-      version: "0.1.0-stage0",
-      environment: process.env.NEXT_PUBLIC_ENVIRONMENT || "development",
-      timestamp: new Date().toISOString(),
-      components: {
-        database: {
-          status: "standby_offline",
-          engine: "postgresql+asyncpg",
-          note: "Backend API offline or database initialization pending.",
-        },
-        redis: {
-          status: "standby",
-          note: "Task queue broker standby.",
-        },
-      },
-    };
-  }
+  return await safeApiFetch<SystemHealth>("/health");
 }
 
-export async function fetchSources() {
-  try {
-    const res = await fetch(`${API_BASE_URL}/acquisition/sources`, { cache: "no-store" });
-    if (!res.ok) throw new Error("Failed to fetch sources");
-    return await res.json();
-  } catch (e) {
-    return [];
-  }
+// ============================================================================
+// Stage 1: Data Acquisition & Provenance Hub
+// ============================================================================
+
+export async function fetchSources(tier?: string, category?: string): Promise<CricketDataSource[]> {
+  const query = new URLSearchParams();
+  if (tier) query.set("tier", tier);
+  if (category) query.set("category", category);
+  const qs = query.toString();
+  return await safeApiFetch<CricketDataSource[]>(`/acquisition/sources${qs ? `?${qs}` : ""}`);
 }
 
-export async function fetchCoverage() {
-  try {
-    const res = await fetch(`${API_BASE_URL}/acquisition/coverage`, { cache: "no-store" });
-    if (!res.ok) throw new Error("Failed to fetch coverage");
-    return await res.json();
-  } catch (e) {
-    return null;
-  }
+export async function fetchCoverage(): Promise<CoverageReportData> {
+  return await safeApiFetch<CoverageReportData>("/acquisition/coverage");
 }
 
-export async function fetchIngestionRuns(): Promise<IngestionRunData[]> {
+export async function fetchIngestionRuns(limit: number = 50): Promise<IngestionRunData[]> {
   try {
-    return await safeApiFetch<IngestionRunData[]>("/acquisition/runs");
+    return await safeApiFetch<IngestionRunData[]>(`/acquisition/runs?limit=${limit}`);
   } catch (err: any) {
     if (err instanceof ApiError && err.status === 404) {
-      try {
-        return await safeApiFetch<IngestionRunData[]>("/acquisition/ingestion-runs");
-      } catch {
-        return [];
-      }
+      return await safeApiFetch<IngestionRunData[]>(`/acquisition/ingestion-runs?limit=${limit}`);
     }
-    return [];
+    throw err;
   }
 }
 
-export async function fetchDatasets() {
-  try {
-    const res = await fetch(`${API_BASE_URL}/acquisition/datasets`, { cache: "no-store" });
-    if (!res.ok) throw new Error("Failed to fetch datasets");
-    return await res.json();
-  } catch (e) {
-    return [];
-  }
+export async function fetchDatasets(): Promise<DatasetManifestData[]> {
+  return await safeApiFetch<DatasetManifestData[]>("/acquisition/datasets");
 }
 
-export async function uploadDataset(formData: FormData) {
-  const res = await fetch(`${API_BASE_URL}/acquisition/upload`, {
+export async function uploadDataset(formData: FormData): Promise<UploadDatasetResponse> {
+  return await safeApiFetch<UploadDatasetResponse>("/acquisition/upload", {
     method: "POST",
     body: formData,
   });
-  if (!res.ok) {
-    const errorData = await res.json().catch(() => ({}));
-    throw new Error(errorData.detail || `Upload failed with status ${res.status}`);
-  }
-  return await res.json();
 }
 
-// --- Stage 2: Uncapped Players & Analytics API ---
+// ============================================================================
+// Stage 2: Uncapped Players, Eligibility & Scouting
+// ============================================================================
+
+const SCOUT_ADMIN_TOKEN = process.env.NEXT_PUBLIC_SCOUT_ADMIN_TOKEN || "rr_scout_admin_secret_token_2026";
 
 export async function fetchUncappedPlayers(params?: {
   eligibility?: string;
@@ -191,144 +212,94 @@ export async function fetchUncappedPlayers(params?: {
   role?: string;
   state?: string;
   trialist_only?: boolean;
-}) {
-  try {
-    const searchParams = new URLSearchParams();
-    if (params?.eligibility) searchParams.append("eligibility", params.eligibility);
-    if (params?.tier) searchParams.append("tier", params.tier);
-    if (params?.role) searchParams.append("role", params.role);
-    if (params?.state) searchParams.append("state", params.state);
-    if (params?.trialist_only) searchParams.append("trialist_only", "true");
+}): Promise<UncappedPlayerSummary[]> {
+  const query = new URLSearchParams();
+  if (params?.eligibility) query.append("eligibility", params.eligibility);
+  if (params?.tier) query.append("tier", params.tier);
+  if (params?.role) query.append("role", params.role);
+  if (params?.state) query.append("state", params.state);
+  if (params?.trialist_only) query.append("trialist_only", "true");
 
-    const qs = searchParams.toString();
-    const url = `${API_BASE_URL}/players${qs ? `?${qs}` : ""}`;
-    const res = await fetch(url, { cache: "no-store" });
-    if (!res.ok) throw new Error("Failed to fetch uncapped players");
-    return await res.json();
-  } catch (e) {
-    return [];
-  }
+  const qs = query.toString();
+  return await safeApiFetch<UncappedPlayerSummary[]>(`/players${qs ? `?${qs}` : ""}`);
 }
 
-export async function fetchUncappedPlayerDetail(playerId: string) {
-  try {
-    const res = await fetch(`${API_BASE_URL}/players/${playerId}`, { cache: "no-store" });
-    if (!res.ok) throw new Error("Failed to fetch player detail");
-    return await res.json();
-  } catch (e) {
-    return null;
-  }
+export async function fetchUncappedPlayerDetail(playerId: string): Promise<UncappedPlayerDetail> {
+  return await safeApiFetch<UncappedPlayerDetail>(`/players/${playerId}`);
 }
-
-// Client-side authentication token for Rajasthan Royals scout administrator operations
-const SCOUT_ADMIN_TOKEN = process.env.NEXT_PUBLIC_SCOUT_ADMIN_TOKEN || "rr_scout_admin_secret_token_2026";
 
 export async function verifyPlayerEligibility(
   playerId: string,
   payload: { new_status: string; verification_notes: string; verified_by?: string }
-) {
-  const res = await fetch(`${API_BASE_URL}/players/${playerId}/verify-eligibility`, {
+): Promise<any> {
+  return await safeApiFetch(`/players/${playerId}/verify-eligibility`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "Authorization": `Bearer ${SCOUT_ADMIN_TOKEN}`,
+      Authorization: `Bearer ${SCOUT_ADMIN_TOKEN}`,
     },
     body: JSON.stringify(payload),
   });
-  if (!res.ok) throw new Error("Failed to verify eligibility");
-  return await res.json();
 }
 
-export async function fetchPlayerBatting(playerId: string) {
-  try {
-    const res = await fetch(`${API_BASE_URL}/analytics/players/${playerId}/batting`, { cache: "no-store" });
-    if (!res.ok) throw new Error("Failed to fetch batting analytics");
-    return await res.json();
-  } catch (e) {
-    return null;
-  }
+export async function fetchPlayerBatting(playerId: string): Promise<any> {
+  return await safeApiFetch(`/analytics/players/${playerId}/batting`);
 }
 
-export async function fetchPlayerBowling(playerId: string) {
-  try {
-    const res = await fetch(`${API_BASE_URL}/analytics/players/${playerId}/bowling`, { cache: "no-store" });
-    if (!res.ok) throw new Error("Failed to fetch bowling analytics");
-    return await res.json();
-  } catch (e) {
-    return null;
-  }
+export async function fetchPlayerBowling(playerId: string): Promise<any> {
+  return await safeApiFetch(`/analytics/players/${playerId}/bowling`);
 }
 
-export async function fetchPlayerRecentForm(playerId: string, lastN: number = 5, discipline: string = "batting") {
-  try {
-    const res = await fetch(
-      `${API_BASE_URL}/analytics/players/${playerId}/recent-form?last_n=${lastN}&discipline=${discipline}`,
-      { cache: "no-store" }
-    );
-    if (!res.ok) throw new Error("Failed to fetch recent form");
-    return await res.json();
-  } catch (e) {
-    return null;
-  }
+export async function fetchPlayerRecentForm(
+  playerId: string,
+  lastN: number = 5,
+  discipline: string = "batting"
+): Promise<any> {
+  return await safeApiFetch(
+    `/analytics/players/${playerId}/recent-form?last_n=${lastN}&discipline=${discipline}`
+  );
 }
 
-export async function discoverProprietarySchema(sampleRows: any[]) {
-  const res = await fetch(`${API_BASE_URL}/proprietary/discover-schema`, {
+export async function discoverProprietarySchema(sampleRows: any[]): Promise<any> {
+  return await safeApiFetch("/proprietary/discover-schema", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "Authorization": `Bearer ${SCOUT_ADMIN_TOKEN}`,
+      Authorization: `Bearer ${SCOUT_ADMIN_TOKEN}`,
     },
     body: JSON.stringify({ sample_rows: sampleRows }),
   });
-  if (!res.ok) throw new Error("Failed to discover schema");
-  return await res.json();
 }
 
 export async function ingestProprietaryPack(payload: {
   records: any[];
   column_mapping?: any;
   dataset_key?: string;
-}) {
-  const res = await fetch(`${API_BASE_URL}/proprietary/ingest-pack`, {
+}): Promise<any> {
+  return await safeApiFetch("/proprietary/ingest-pack", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "Authorization": `Bearer ${SCOUT_ADMIN_TOKEN}`,
+      Authorization: `Bearer ${SCOUT_ADMIN_TOKEN}`,
     },
     body: JSON.stringify(payload),
   });
-  if (!res.ok) throw new Error("Failed to ingest proprietary pack");
-  return await res.json();
 }
 
-export async function fetchPlayerEvaluations(playerId: string, userRole: string = "public") {
-  try {
-    const headers: Record<string, string> = {};
-    if (userRole === "rr_scout_admin") {
-      headers["Authorization"] = `Bearer ${SCOUT_ADMIN_TOKEN}`;
-    }
-    const res = await fetch(`${API_BASE_URL}/proprietary/evaluations/${playerId}`, {
-      headers,
-      cache: "no-store",
-    });
-    if (!res.ok) throw new Error("Failed to fetch evaluations");
-    return await res.json();
-  } catch (e) {
-    return [];
+export async function fetchPlayerEvaluations(playerId: string, userRole: string = "public"): Promise<any[]> {
+  const headers: Record<string, string> = {};
+  if (userRole === "rr_scout_admin") {
+    headers["Authorization"] = `Bearer ${SCOUT_ADMIN_TOKEN}`;
   }
+  return await safeApiFetch<any[]>(`/proprietary/evaluations/${playerId}`, { headers });
 }
 
-// --- Stage 3: Domestic Season and Match Intelligence API ---
+// ============================================================================
+// Stage 3: Domestic Season and Match Intelligence API
+// ============================================================================
 
 export async function fetchDomesticCompetitions(): Promise<CompetitionSeasonSummary[]> {
-  try {
-    const res = await fetch(`${API_BASE_URL}/domestic/competitions`, { cache: "no-store" });
-    if (!res.ok) throw new Error("Failed to fetch domestic competitions");
-    return await res.json();
-  } catch (e) {
-    return [];
-  }
+  return await safeApiFetch<CompetitionSeasonSummary[]>("/domestic/competitions");
 }
 
 export async function fetchSeasonMatches(
@@ -336,133 +307,93 @@ export async function fetchSeasonMatches(
   season: string,
   params?: { team?: string; page?: number; page_size?: number }
 ): Promise<{ total: number; page: number; page_size: number; matches: MatchSummaryItem[] }> {
-  try {
-    const searchParams = new URLSearchParams();
-    if (params?.team) searchParams.append("team", params.team);
-    if (params?.page) searchParams.append("page", String(params.page));
-    if (params?.page_size) searchParams.append("page_size", String(params.page_size));
+  const query = new URLSearchParams();
+  if (params?.team) query.append("team", params.team);
+  if (params?.page) query.append("page", String(params.page));
+  if (params?.page_size) query.append("page_size", String(params.page_size));
 
-    const qs = searchParams.toString();
-    const url = `${API_BASE_URL}/domestic/seasons/${competitionId}/${season}/matches${qs ? `?${qs}` : ""}`;
-    const res = await fetch(url, { cache: "no-store" });
-    if (!res.ok) throw new Error("Failed to fetch season matches");
-    const data = await res.json();
-    return {
-      total: data.total ?? data.total_matches ?? 0,
-      page: data.page ?? 1,
-      page_size: data.page_size ?? 20,
-      matches: data.matches ?? [],
-    };
-  } catch (e) {
-    return { total: 0, page: 1, page_size: 20, matches: [] };
-  }
+  const qs = query.toString();
+  const data = await safeApiFetch<any>(
+    `/domestic/seasons/${competitionId}/${season}/matches${qs ? `?${qs}` : ""}`
+  );
+  return {
+    total: data.total ?? data.total_matches ?? 0,
+    page: data.page ?? 1,
+    page_size: data.page_size ?? 20,
+    matches: data.matches ?? [],
+  };
 }
 
 export async function fetchSeasonSummary(
   competitionId: string,
   season: string
-): Promise<CompetitionSeasonSummary | null> {
-  try {
-    const res = await fetch(`${API_BASE_URL}/domestic/seasons/${competitionId}/${season}/summary`, {
-      cache: "no-store",
-    });
-    if (!res.ok) throw new Error("Failed to fetch season summary");
-    return await res.json();
-  } catch (e) {
-    return null;
-  }
+): Promise<CompetitionSeasonSummary> {
+  return await safeApiFetch<CompetitionSeasonSummary>(
+    `/domestic/seasons/${competitionId}/${season}/summary`
+  );
 }
 
-export async function fetchMatchScorecard(matchId: string): Promise<MatchScorecardResponse | null> {
-  try {
-    const res = await fetch(`${API_BASE_URL}/domestic/matches/${matchId}`, { cache: "no-store" });
-    if (!res.ok) throw new Error("Failed to fetch match scorecard");
-    return await res.json();
-  } catch (e) {
-    return null;
-  }
+export async function fetchMatchScorecard(matchId: string): Promise<MatchScorecardResponse> {
+  return await safeApiFetch<MatchScorecardResponse>(`/domestic/matches/${matchId}`);
 }
 
 export async function fetchInningsAnalysis(
   matchId: string,
   inningsNumber: number
-): Promise<InningsAnalysisResponse | null> {
-  try {
-    const res = await fetch(`${API_BASE_URL}/domestic/matches/${matchId}/innings/${inningsNumber}`, {
-      cache: "no-store",
-    });
-    if (!res.ok) throw new Error("Failed to fetch innings analysis");
-    return await res.json();
-  } catch (e) {
-    return null;
-  }
+): Promise<InningsAnalysisResponse> {
+  return await safeApiFetch<InningsAnalysisResponse>(
+    `/domestic/matches/${matchId}/innings/${inningsNumber}`
+  );
 }
 
 export async function fetchPlayerDomesticStats(
   playerId: string,
   competitionId?: string
 ): Promise<PlayerDomesticSeasonStats[]> {
-  try {
-    const qs = competitionId ? `?competition_id=${encodeURIComponent(competitionId)}` : "";
-    const res = await fetch(`${API_BASE_URL}/domestic/players/${playerId}/season-stats${qs}`, {
-      cache: "no-store",
-    });
-    if (!res.ok) throw new Error("Failed to fetch player domestic season stats");
-    return await res.json();
-  } catch (e) {
-    return [];
-  }
+  const qs = competitionId ? `?competition_id=${encodeURIComponent(competitionId)}` : "";
+  return await safeApiFetch<PlayerDomesticSeasonStats[]>(
+    `/domestic/players/${playerId}/season-stats${qs}`
+  );
 }
 
 export async function fetchPlayerMatchHistory(
   playerId: string,
   params?: { competition_id?: string; season?: string; page?: number; page_size?: number }
 ): Promise<{ total: number; page: number; page_size: number; history: PlayerMatchHistoryItem[] }> {
-  try {
-    const searchParams = new URLSearchParams();
-    if (params?.competition_id) searchParams.append("competition_id", params.competition_id);
-    if (params?.season) searchParams.append("season", params.season);
-    if (params?.page) searchParams.append("page", String(params.page));
-    if (params?.page_size) searchParams.append("page_size", String(params.page_size));
+  const query = new URLSearchParams();
+  if (params?.competition_id) query.append("competition_id", params.competition_id);
+  if (params?.season) query.append("season", params.season);
+  if (params?.page) query.append("page", String(params.page));
+  if (params?.page_size) query.append("page_size", String(params.page_size));
 
-    const qs = searchParams.toString();
-    const url = `${API_BASE_URL}/domestic/players/${playerId}/match-history${qs ? `?${qs}` : ""}`;
-    const res = await fetch(url, { cache: "no-store" });
-    if (!res.ok) throw new Error("Failed to fetch player match history");
-    return await res.json();
-  } catch (e) {
-    return { total: 0, page: 1, page_size: 20, history: [] };
-  }
+  const qs = query.toString();
+  const data = await safeApiFetch<any>(
+    `/domestic/players/${playerId}/match-history${qs ? `?${qs}` : ""}`
+  );
+  return {
+    total: data.total ?? data.total_matches ?? 0,
+    page: data.page ?? 1,
+    page_size: data.page_size ?? 20,
+    history: data.history ?? data.matches ?? [],
+  };
 }
 
 export async function fetchPlayerPhaseSplits(
   playerId: string,
   competitionId?: string
 ): Promise<PlayerPhaseSplitDetail[]> {
-  try {
-    const qs = competitionId ? `?competition_id=${encodeURIComponent(competitionId)}` : "";
-    const res = await fetch(`${API_BASE_URL}/domestic/players/${playerId}/phase-splits${qs}`, {
-      cache: "no-store",
-    });
-    if (!res.ok) throw new Error("Failed to fetch player phase splits");
-    return await res.json();
-  } catch (e) {
-    return [];
-  }
+  const qs = competitionId ? `?competition_id=${encodeURIComponent(competitionId)}` : "";
+  return await safeApiFetch<PlayerPhaseSplitDetail[]>(
+    `/domestic/players/${playerId}/phase-splits${qs}`
+  );
 }
 
 export async function fetchPlayerAllRoundSummary(
   playerId: string
-): Promise<AllRoundContributionResponse | null> {
-  try {
-    const res = await fetch(`${API_BASE_URL}/domestic/players/${playerId}/all-round-summary`, {
-      cache: "no-store",
-    });
-    if (!res.ok) throw new Error("Failed to fetch player all-round summary");
-    return await res.json();
-  } catch (e) {
-    return null;
-  }
+): Promise<AllRoundContributionResponse> {
+  return await safeApiFetch<AllRoundContributionResponse>(
+    `/domestic/players/${playerId}/all-round-summary`
+  );
 }
 
 export interface DomesticPlayersQueryParams {
@@ -479,193 +410,110 @@ export interface DomesticPlayersQueryParams {
 export async function fetchDomesticPlayers(
   params?: DomesticPlayersQueryParams
 ): Promise<PaginatedDomesticPlayersResponse> {
-  try {
-    const searchParams = new URLSearchParams();
-    if (params?.page) searchParams.append("page", String(params.page));
-    if (params?.page_size) searchParams.append("page_size", String(params.page_size));
-    if (params?.search) searchParams.append("search", params.search);
-    if (params?.eligibility_status) searchParams.append("eligibility_status", params.eligibility_status);
-    if (params?.role) searchParams.append("role", params.role);
-    if (params?.team) searchParams.append("team", params.team);
-    if (params?.competition) searchParams.append("competition", params.competition);
-    if (params?.season) searchParams.append("season", params.season);
+  const query = new URLSearchParams();
+  if (params?.page) query.append("page", String(params.page));
+  if (params?.page_size) query.append("page_size", String(params.page_size));
+  if (params?.search) query.append("search", params.search);
+  if (params?.eligibility_status) query.append("eligibility_status", params.eligibility_status);
+  if (params?.role) query.append("role", params.role);
+  if (params?.team) query.append("team", params.team);
+  if (params?.competition) query.append("competition", params.competition);
+  if (params?.season) query.append("season", params.season);
 
-    const qs = searchParams.toString();
-    const url = `${API_BASE_URL}/domestic/players${qs ? `?${qs}` : ""}`;
-    const res = await fetch(url, { cache: "no-store" });
-    if (!res.ok) throw new Error("Failed to fetch domestic players");
-    return await res.json();
-  } catch (e) {
-    return { items: [], total: 0, page: 1, page_size: 20, total_pages: 1 };
-  }
+  const qs = query.toString();
+  return await safeApiFetch<PaginatedDomesticPlayersResponse>(`/domestic/players${qs ? `?${qs}` : ""}`);
 }
 
-
-// --- Stage 4: Venue, Pitch & Weather Intelligence API ---
+// ============================================================================
+// Stage 4: Venue, Pitch & Weather Intelligence API
+// ============================================================================
 
 export async function fetchVenues(rrOnly: boolean = false): Promise<VenueSummaryItem[]> {
-  try {
-    const qs = rrOnly ? "?rr_only=true" : "";
-    const res = await fetch(`${API_BASE_URL}/venues${qs}`, { cache: "no-store" });
-    if (!res.ok) throw new Error("Failed to fetch venues");
-    return await res.json();
-  } catch (e) {
-    return [];
-  }
+  const qs = rrOnly ? "?rr_only=true" : "";
+  return await safeApiFetch<VenueSummaryItem[]>(`/venues${qs}`);
 }
 
-export async function fetchVenueDetail(venueId: string): Promise<VenueDetailResponse | null> {
-  try {
-    const res = await fetch(`${API_BASE_URL}/venues/${venueId}`, { cache: "no-store" });
-    if (!res.ok) throw new Error("Failed to fetch venue detail");
-    return await res.json();
-  } catch (e) {
-    return null;
-  }
+export async function fetchVenueDetail(venueId: string): Promise<VenueDetailResponse> {
+  return await safeApiFetch<VenueDetailResponse>(`/venues/${venueId}`);
 }
 
-export async function fetchVenueScoringTrends(venueId: string): Promise<VenueScoringTrendsResponse | null> {
-  try {
-    const res = await fetch(`${API_BASE_URL}/venues/${venueId}/scoring-trends`, { cache: "no-store" });
-    if (!res.ok) throw new Error("Failed to fetch scoring trends");
-    return await res.json();
-  } catch (e) {
-    return null;
-  }
+export async function fetchVenueScoringTrends(venueId: string): Promise<VenueScoringTrendsResponse> {
+  return await safeApiFetch<VenueScoringTrendsResponse>(`/venues/${venueId}/scoring-trends`);
 }
 
-export async function fetchVenuePitchAnalysis(venueId: string): Promise<PitchEvidenceAnalysisResponse | null> {
-  try {
-    const res = await fetch(`${API_BASE_URL}/venues/${venueId}/pitch-analysis`, { cache: "no-store" });
-    if (!res.ok) throw new Error("Failed to fetch pitch analysis");
-    return await res.json();
-  } catch (e) {
-    return null;
-  }
+export async function fetchVenuePitchAnalysis(venueId: string): Promise<PitchEvidenceAnalysisResponse> {
+  return await safeApiFetch<PitchEvidenceAnalysisResponse>(`/venues/${venueId}/pitch-analysis`);
 }
 
 export async function fetchPlayerVenuePerformance(
   venueId: string,
   playerId: string
-): Promise<UncappedPlayerVenuePerformanceResponse | null> {
-  try {
-    const res = await fetch(
-      `${API_BASE_URL}/venues/${venueId}/player-performance?player_id=${encodeURIComponent(playerId)}`,
-      { cache: "no-store" }
-    );
-    if (!res.ok) throw new Error("Failed to fetch player venue performance");
-    return await res.json();
-  } catch (e) {
-    return null;
-  }
+): Promise<UncappedPlayerVenuePerformanceResponse> {
+  return await safeApiFetch<UncappedPlayerVenuePerformanceResponse>(
+    `/venues/${venueId}/player-performance?player_id=${encodeURIComponent(playerId)}`
+  );
 }
 
-export async function fetchMatchWeatherContext(matchId: string): Promise<MatchWeatherContextResponse | null> {
-  try {
-    const res = await fetch(`${API_BASE_URL}/weather/match/${matchId}`, { cache: "no-store" });
-    if (!res.ok) throw new Error("Failed to fetch match weather context");
-    return await res.json();
-  } catch (e) {
-    return null;
-  }
+export async function fetchMatchWeatherContext(matchId: string): Promise<MatchWeatherContextResponse> {
+  return await safeApiFetch<MatchWeatherContextResponse>(`/weather/match/${matchId}`);
 }
 
 export async function fetchHistoricalWeather(
   venueCode: string,
   matchDate: string
 ): Promise<WeatherObservationItem[]> {
-  try {
-    const res = await fetch(
-      `${API_BASE_URL}/weather/historical?venue_code=${encodeURIComponent(venueCode)}&match_date=${encodeURIComponent(matchDate)}`,
-      { cache: "no-store" }
-    );
-    if (!res.ok) throw new Error("Failed to fetch historical weather");
-    return await res.json();
-  } catch (e) {
-    return [];
-  }
+  return await safeApiFetch<WeatherObservationItem[]>(
+    `/weather/historical?venue_code=${encodeURIComponent(venueCode)}&match_date=${encodeURIComponent(matchDate)}`
+  );
 }
 
 export async function fetchWeatherForecast(
   venueCode: string,
   daysAhead: number = 7
 ): Promise<WeatherObservationItem[]> {
-  try {
-    const res = await fetch(
-      `${API_BASE_URL}/weather/forecast?venue_code=${encodeURIComponent(venueCode)}&days_ahead=${daysAhead}`,
-      { cache: "no-store" }
-    );
-    if (!res.ok) throw new Error("Failed to fetch weather forecast");
-    return await res.json();
-  } catch (e) {
-    return [];
-  }
+  return await safeApiFetch<WeatherObservationItem[]>(
+    `/weather/forecast?venue_code=${encodeURIComponent(venueCode)}&days_ahead=${daysAhead}`
+  );
 }
 
-export async function fetchWeatherSourceStatus(): Promise<WeatherSourceStatusResponse | null> {
-  try {
-    const res = await fetch(`${API_BASE_URL}/weather/source-status`, { cache: "no-store" });
-    if (!res.ok) throw new Error("Failed to fetch weather source status");
-    return await res.json();
-  } catch (e) {
-    return null;
-  }
+export async function fetchWeatherSourceStatus(): Promise<WeatherSourceStatusResponse> {
+  return await safeApiFetch<WeatherSourceStatusResponse>("/weather/source-status");
 }
 
 // ============================================================================
 // Stage 5: Dataset-Driven Tactical Cricket Intelligence API
 // ============================================================================
 
-export async function fetchTacticalSummary(): Promise<TacticalDatasetSummaryResponse | null> {
-  try {
-    const res = await fetch(`${API_BASE_URL}/analytics/tactical/summary`, { cache: "no-store" });
-    if (!res.ok) throw new Error("Failed to fetch tactical dataset summary");
-    return await res.json();
-  } catch (e) {
-    return null;
-  }
+export async function fetchTacticalSummary(): Promise<TacticalDatasetSummaryResponse> {
+  return await safeApiFetch<TacticalDatasetSummaryResponse>("/analytics/tactical/summary");
 }
 
 export async function fetchTacticalPhases(params?: {
   striker_id?: number;
   bowler_id?: number;
   phase?: string;
-}): Promise<TacticalPhaseResponse | null> {
-  try {
-    const query = new URLSearchParams();
-    if (params?.striker_id !== undefined) query.set("striker_id", params.striker_id.toString());
-    if (params?.bowler_id !== undefined) query.set("bowler_id", params.bowler_id.toString());
-    if (params?.phase) query.set("phase", params.phase);
+}): Promise<TacticalPhaseResponse> {
+  const query = new URLSearchParams();
+  if (params?.striker_id !== undefined) query.set("striker_id", params.striker_id.toString());
+  if (params?.bowler_id !== undefined) query.set("bowler_id", params.bowler_id.toString());
+  if (params?.phase) query.set("phase", params.phase);
 
-    const queryString = query.toString();
-    const url = `${API_BASE_URL}/analytics/tactical/phases${queryString ? `?${queryString}` : ""}`;
-    const res = await fetch(url, { cache: "no-store" });
-    if (!res.ok) throw new Error("Failed to fetch phase performance");
-    return await res.json();
-  } catch (e) {
-    return null;
-  }
+  const qs = query.toString();
+  return await safeApiFetch<TacticalPhaseResponse>(`/analytics/tactical/phases${qs ? `?${qs}` : ""}`);
 }
 
 export async function fetchTacticalStrokes(params?: {
   striker_id?: number;
   stroke?: string;
   min_balls?: number;
-}): Promise<TacticalStrokesResponse | null> {
-  try {
-    const query = new URLSearchParams();
-    if (params?.striker_id !== undefined) query.set("striker_id", params.striker_id.toString());
-    if (params?.stroke) query.set("stroke", params.stroke);
-    if (params?.min_balls !== undefined) query.set("min_balls", params.min_balls.toString());
+}): Promise<TacticalStrokesResponse> {
+  const query = new URLSearchParams();
+  if (params?.striker_id !== undefined) query.set("striker_id", params.striker_id.toString());
+  if (params?.stroke) query.set("stroke", params.stroke);
+  if (params?.min_balls !== undefined) query.set("min_balls", params.min_balls.toString());
 
-    const queryString = query.toString();
-    const url = `${API_BASE_URL}/analytics/tactical/strokes${queryString ? `?${queryString}` : ""}`;
-    const res = await fetch(url, { cache: "no-store" });
-    if (!res.ok) throw new Error("Failed to fetch stroke efficiency");
-    return await res.json();
-  } catch (e) {
-    return null;
-  }
+  const qs = query.toString();
+  return await safeApiFetch<TacticalStrokesResponse>(`/analytics/tactical/strokes${qs ? `?${qs}` : ""}`);
 }
 
 export async function fetchTacticalHandedness(params?: {
@@ -673,132 +521,85 @@ export async function fetchTacticalHandedness(params?: {
   pace_or_spin?: string;
   striker_id?: number;
   bowler_id?: number;
-}): Promise<HandednessMatrixResponse | null> {
-  try {
-    const query = new URLSearchParams();
-    if (params?.batting_type) query.set("batting_type", params.batting_type);
-    if (params?.pace_or_spin) query.set("pace_or_spin", params.pace_or_spin);
-    if (params?.striker_id !== undefined) query.set("striker_id", params.striker_id.toString());
-    if (params?.bowler_id !== undefined) query.set("bowler_id", params.bowler_id.toString());
+}): Promise<HandednessMatrixResponse> {
+  const query = new URLSearchParams();
+  if (params?.batting_type) query.set("batting_type", params.batting_type);
+  if (params?.pace_or_spin) query.set("pace_or_spin", params.pace_or_spin);
+  if (params?.striker_id !== undefined) query.set("striker_id", params.striker_id.toString());
+  if (params?.bowler_id !== undefined) query.set("bowler_id", params.bowler_id.toString());
 
-    const queryString = query.toString();
-    const url = `${API_BASE_URL}/analytics/tactical/handedness${queryString ? `?${queryString}` : ""}`;
-    const res = await fetch(url, { cache: "no-store" });
-    if (!res.ok) throw new Error("Failed to fetch handedness matrix");
-    return await res.json();
-  } catch (e) {
-    return null;
-  }
+  const qs = query.toString();
+  return await safeApiFetch<HandednessMatrixResponse>(`/analytics/tactical/handedness${qs ? `?${qs}` : ""}`);
 }
 
 export async function fetchTacticalVariations(params?: {
   bowler_id?: number;
   delivery_style?: string;
   min_balls?: number;
-}): Promise<DeliveryStylesResponse | null> {
-  try {
-    const query = new URLSearchParams();
-    if (params?.bowler_id !== undefined) query.set("bowler_id", params.bowler_id.toString());
-    if (params?.delivery_style) query.set("delivery_style", params.delivery_style);
-    if (params?.min_balls !== undefined) query.set("min_balls", params.min_balls.toString());
+}): Promise<DeliveryStylesResponse> {
+  const query = new URLSearchParams();
+  if (params?.bowler_id !== undefined) query.set("bowler_id", params.bowler_id.toString());
+  if (params?.delivery_style) query.set("delivery_style", params.delivery_style);
+  if (params?.min_balls !== undefined) query.set("min_balls", params.min_balls.toString());
 
-    const queryString = query.toString();
-    const url = `${API_BASE_URL}/analytics/tactical/variations${queryString ? `?${queryString}` : ""}`;
-    const res = await fetch(url, { cache: "no-store" });
-    if (!res.ok) throw new Error("Failed to fetch delivery variations");
-    return await res.json();
-  } catch (e) {
-    return null;
-  }
+  const qs = query.toString();
+  return await safeApiFetch<DeliveryStylesResponse>(`/analytics/tactical/variations${qs ? `?${qs}` : ""}`);
 }
 
 export async function fetchTacticalSpeedProfiles(params?: {
   bowler_id?: number;
   min_balls?: number;
   top_n?: number;
-}): Promise<SpeedProfileResponse | null> {
-  try {
-    const query = new URLSearchParams();
-    if (params?.bowler_id !== undefined) query.set("bowler_id", params.bowler_id.toString());
-    if (params?.min_balls !== undefined) query.set("min_balls", params.min_balls.toString());
-    if (params?.top_n !== undefined) query.set("top_n", params.top_n.toString());
+}): Promise<SpeedProfileResponse> {
+  const query = new URLSearchParams();
+  if (params?.bowler_id !== undefined) query.set("bowler_id", params.bowler_id.toString());
+  if (params?.min_balls !== undefined) query.set("min_balls", params.min_balls.toString());
+  if (params?.top_n !== undefined) query.set("top_n", params.top_n.toString());
 
-    const queryString = query.toString();
-    const url = `${API_BASE_URL}/analytics/tactical/speed-profiles${queryString ? `?${queryString}` : ""}`;
-    const res = await fetch(url, { cache: "no-store" });
-    if (!res.ok) throw new Error("Failed to fetch speed profiles");
-    return await res.json();
-  } catch (e) {
-    return null;
-  }
+  const qs = query.toString();
+  return await safeApiFetch<SpeedProfileResponse>(`/analytics/tactical/speed-profiles${qs ? `?${qs}` : ""}`);
 }
 
-export async function fetchPlayerTacticalProfile(playerId: number): Promise<PlayerTacticalProfileResponse | null> {
-  try {
-    const res = await fetch(`${API_BASE_URL}/analytics/tactical/players/${playerId}`, { cache: "no-store" });
-    if (!res.ok) throw new Error(`Failed to fetch tactical profile for player ${playerId}`);
-    return await res.json();
-  } catch (e) {
-    return null;
-  }
+export async function fetchPlayerTacticalProfile(playerId: number): Promise<PlayerTacticalProfileResponse> {
+  return await safeApiFetch<PlayerTacticalProfileResponse>(`/analytics/tactical/players/${playerId}`);
 }
 
 export async function fetchTacticalDeathOvers(params?: {
   discipline?: string;
   min_balls?: number;
   limit?: number;
-}): Promise<DeathOversRankingResponse | null> {
-  try {
-    const query = new URLSearchParams();
-    if (params?.discipline) query.set("discipline", params.discipline);
-    if (params?.min_balls !== undefined) query.set("min_balls", params.min_balls.toString());
-    if (params?.limit !== undefined) query.set("limit", params.limit.toString());
+}): Promise<DeathOversRankingResponse> {
+  const query = new URLSearchParams();
+  if (params?.discipline) query.set("discipline", params.discipline);
+  if (params?.min_balls !== undefined) query.set("min_balls", params.min_balls.toString());
+  if (params?.limit !== undefined) query.set("limit", params.limit.toString());
 
-    const queryString = query.toString();
-    const url = `${API_BASE_URL}/analytics/tactical/death-overs${queryString ? `?${queryString}` : ""}`;
-    const res = await fetch(url, { cache: "no-store" });
-    if (!res.ok) throw new Error("Failed to fetch death overs rankings");
-    return await res.json();
-  } catch (e) {
-    return null;
-  }
+  const qs = query.toString();
+  return await safeApiFetch<DeathOversRankingResponse>(`/analytics/tactical/death-overs${qs ? `?${qs}` : ""}`);
 }
 
 export async function fetchTacticalMatchup(
   strikerId: number,
   bowlerId: number
-): Promise<HeadToHeadMatchupResponse | null> {
-  try {
-    const res = await fetch(
-      `${API_BASE_URL}/analytics/tactical/matchups?striker_id=${strikerId}&bowler_id=${bowlerId}`,
-      { cache: "no-store" }
-    );
-    if (!res.ok) throw new Error("Failed to fetch head-to-head matchup");
-    return await res.json();
-  } catch (e) {
-    return null;
-  }
+): Promise<HeadToHeadMatchupResponse> {
+  return await safeApiFetch<HeadToHeadMatchupResponse>(
+    `/analytics/tactical/matchups?striker_id=${strikerId}&bowler_id=${bowlerId}`
+  );
 }
 
 export async function fetchTacticalPlayers(
   query: string = "",
   limit: number = 25
 ): Promise<PlayerLookupItem[]> {
-  try {
-    const url = `${API_BASE_URL}/analytics/tactical/players?query=${encodeURIComponent(query)}&limit=${limit}`;
-    const res = await fetch(url, { cache: "no-store" });
-    if (!res.ok) throw new Error("Failed to fetch players");
-    return await res.json();
-  } catch (e) {
-    return [];
-  }
+  const url = `/analytics/tactical/players?query=${encodeURIComponent(query)}&limit=${limit}`;
+  return await safeApiFetch<PlayerLookupItem[]>(url);
 }
 
 // ============================================================================
 // Round 1 Pressure Analytics & Reliability API (SupeRR Selector Challenge)
 // ============================================================================
 
-export async function fetchPressureOverview(): Promise<PressureOverviewResponse | null> {
+export async function fetchPressureOverview(): Promise<PressureOverviewResponse> {
   return await safeApiFetch<PressureOverviewResponse>("/analytics/pressure/overview");
 }
 
@@ -806,56 +607,45 @@ export async function fetchPressureLeaderboards(params?: {
   discipline?: string;
   limit?: number;
   qualified_only?: boolean;
-}): Promise<PressureLeaderboardResponse | null> {
+}): Promise<PressureLeaderboardResponse> {
   const query = new URLSearchParams();
   if (params?.discipline) query.set("discipline", params.discipline);
   if (params?.limit !== undefined) query.set("limit", params.limit.toString());
   if (params?.qualified_only !== undefined) query.set("qualified_only", params.qualified_only.toString());
 
-  const queryString = query.toString();
+  const qs = query.toString();
   return await safeApiFetch<PressureLeaderboardResponse>(
-    `/analytics/pressure/leaderboards${queryString ? `?${queryString}` : ""}`
+    `/analytics/pressure/leaderboards${qs ? `?${qs}` : ""}`
   );
 }
 
 export async function fetchCandidateProfile(
   playerId: number,
   discipline?: string
-): Promise<CandidateEvidenceProfileResponse | null> {
-  try {
-    const query = new URLSearchParams();
-    if (discipline) query.set("discipline", discipline);
-    const queryString = query.toString();
-    const url = `${API_BASE_URL}/analytics/pressure/candidates/${playerId}${queryString ? `?${queryString}` : ""}`;
-    const res = await fetch(url, { cache: "no-store" });
-    if (!res.ok) throw new Error(`Failed to fetch candidate profile for player ${playerId}`);
-    return await res.json();
-  } catch (e) {
-    return null;
-  }
+): Promise<CandidateEvidenceProfileResponse> {
+  const query = new URLSearchParams();
+  if (discipline) query.set("discipline", discipline);
+  const qs = query.toString();
+  return await safeApiFetch<CandidateEvidenceProfileResponse>(
+    `/analytics/pressure/candidates/${playerId}${qs ? `?${qs}` : ""}`
+  );
 }
 
-export async function fetchPressureMethodology(): Promise<PressureMethodologyResponse | null> {
-  try {
-    const res = await fetch(`${API_BASE_URL}/analytics/pressure/methodology`, { cache: "no-store" });
-    if (!res.ok) throw new Error("Failed to fetch pressure methodology");
-    return await res.json();
-  } catch (e) {
-    return null;
-  }
+export async function fetchPressureMethodology(): Promise<PressureMethodologyResponse> {
+  return await safeApiFetch<PressureMethodologyResponse>("/analytics/pressure/methodology");
 }
 
 export async function fetchUncappedOverview(params?: {
   min_balls?: number;
   min_matches?: number;
-}): Promise<UncappedOverviewResponse | null> {
+}): Promise<UncappedOverviewResponse> {
   const query = new URLSearchParams();
   if (params?.min_balls !== undefined) query.set("min_balls", params.min_balls.toString());
   if (params?.min_matches !== undefined) query.set("min_matches", params.min_matches.toString());
 
-  const queryString = query.toString();
+  const qs = query.toString();
   return await safeApiFetch<UncappedOverviewResponse>(
-    `/analytics/uncapped/overview${queryString ? `?${queryString}` : ""}`
+    `/analytics/uncapped/overview${qs ? `?${qs}` : ""}`
   );
 }
 
@@ -865,7 +655,7 @@ export async function fetchUncappedLeaderboards(params?: {
   qualified_only?: boolean;
   min_balls?: number;
   min_matches?: number;
-}): Promise<UncappedLeaderboardResponse | null> {
+}): Promise<UncappedLeaderboardResponse> {
   const query = new URLSearchParams();
   if (params?.discipline) query.set("discipline", params.discipline);
   if (params?.limit !== undefined) query.set("limit", params.limit.toString());
@@ -873,25 +663,15 @@ export async function fetchUncappedLeaderboards(params?: {
   if (params?.min_balls !== undefined) query.set("min_balls", params.min_balls.toString());
   if (params?.min_matches !== undefined) query.set("min_matches", params.min_matches.toString());
 
-  const queryString = query.toString();
+  const qs = query.toString();
   return await safeApiFetch<UncappedLeaderboardResponse>(
-    `/analytics/uncapped/leaderboards${queryString ? `?${queryString}` : ""}`
+    `/analytics/uncapped/leaderboards${qs ? `?${qs}` : ""}`
   );
 }
 
-export async function fetchPlayerEligibility(playerId: number, playerName?: string) {
-  try {
-    const query = new URLSearchParams();
-    if (playerName) query.set("player_name", playerName);
-    const queryString = query.toString();
-    const url = `${API_BASE_URL}/analytics/uncapped/eligibility/${playerId}${queryString ? `?${queryString}` : ""}`;
-    const res = await fetch(url, { cache: "no-store" });
-    if (!res.ok) throw new Error("Failed to fetch player eligibility");
-    return await res.json();
-  } catch (e) {
-    return null;
-  }
+export async function fetchPlayerEligibility(playerId: number, playerName?: string): Promise<any> {
+  const query = new URLSearchParams();
+  if (playerName) query.set("player_name", playerName);
+  const qs = query.toString();
+  return await safeApiFetch(`/analytics/uncapped/eligibility/${playerId}${qs ? `?${qs}` : ""}`);
 }
-
-
-

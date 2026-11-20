@@ -28,10 +28,36 @@ jobs:
       - name: Run Environment Verification
         run: python scripts/verify_environment.py
 
-      - name: Run Pytest
+      - name: Validate Test Marker Classification
+        run: python scripts/validate_test_markers.py
+
+      - name: Run Group A (Unit & Environment Tests)
         run: |
           cd backend
-          pytest -v
+          pytest -m "unit or environment" -v
+
+      - name: Verify Dataset Availability for Groups B & C
+        id: dataset-check
+        run: python scripts/verify_dataset_availability.py
+
+      - name: Run Group B (Data-Dependent Integration Tests)
+        if: steps.dataset-check.outputs.hydrated == 'true'
+        run: |
+          cd backend
+          pytest -m "data_dependent" -v
+
+      - name: Run Group C (Protected Dataset Integrity Tests)
+        if: steps.dataset-check.outputs.hydrated == 'true'
+        run: |
+          cd backend
+          pytest -m "data_integrity" -v
+
+      - name: Gated Integration Status (Hydration Required)
+        if: steps.dataset-check.outputs.hydrated != 'true'
+        run: |
+          echo "::error title=Integration Tests Blocked::Groups B (103 tests) and C (10 tests) cannot execute because proprietary datasets (~68.2 MB) are not hydrated."
+          echo "Group A passed 83/83 tests. Proprietary dataset hydration is required to execute the remaining 113 integration tests."
+          exit 1
 
   frontend-check:
     name: Frontend Lint & Build

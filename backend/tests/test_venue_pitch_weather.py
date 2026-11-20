@@ -15,6 +15,7 @@ from app.services.venue.venue_match_context_engine import VenueMatchContextEngin
 from app.acquisition.normalization.normalizer import CricketDataNormalizer
 
 
+@pytest.mark.unit
 def test_venue_identity_and_alias_resolution():
     """Validates that stadium names and colloquial aliases map to canonical codes."""
     assert CricketDataNormalizer.normalize_venue("Sawai Mansingh Stadium") == "SMS_JAIPUR"
@@ -27,6 +28,7 @@ def test_venue_identity_and_alias_resolution():
     assert CricketDataNormalizer.normalize_venue("ma chidambaram stadium, chepauk") == "CHIDAMBARAM_CHENNAI"
 
 
+@pytest.mark.unit
 def test_coordinate_validation_and_missing_attributes():
     """Validates that coordinates are authentic and unknown dimensions are represented as None."""
     sms = VERIFIED_VENUE_CATALOG["SMS_JAIPUR"]
@@ -42,6 +44,7 @@ def test_coordinate_validation_and_missing_attributes():
     assert unknown == "Village Ground X"
 
 
+@pytest.mark.unit
 @pytest.mark.asyncio
 async def test_venue_scoring_aggregation_and_small_sample():
     """Tests venue scoring trends computation and small-sample limitation warnings."""
@@ -64,6 +67,7 @@ async def test_venue_scoring_aggregation_and_small_sample():
     assert "IPL 2024" in mul_trends.sample_size_warning or "sample size" in mul_trends.sample_size_warning.lower()
 
 
+@pytest.mark.unit
 @pytest.mark.asyncio
 async def test_pitch_evidence_provenance_and_classification():
     """Tests pace vs spin calculations, empirical classifications, and limitations disclaimer."""
@@ -84,6 +88,7 @@ async def test_pitch_evidence_provenance_and_classification():
     assert chinnaswamy.boundary_patterns["boundary_runs_pct"] > 60.0
 
 
+@pytest.mark.unit
 @pytest.mark.asyncio
 async def test_historical_weather_vs_forecast_distinction():
     """Verifies that historical observations and future forecasts are strictly segregated."""
@@ -104,6 +109,7 @@ async def test_historical_weather_vs_forecast_distinction():
         assert fc.reliability == "FORECAST_PROJECTION"
 
 
+@pytest.mark.unit
 @pytest.mark.asyncio
 async def test_weather_dew_risk_calculation():
     """Verifies empirical calculation of evening dew risk."""
@@ -120,6 +126,7 @@ async def test_weather_dew_risk_calculation():
     assert low_dew == "LOW"
 
 
+@pytest.mark.unit
 @pytest.mark.asyncio
 async def test_match_to_venue_context_engine():
     """Tests unifying match records with venue geometry, pitch evidence, and in-match weather."""
@@ -133,6 +140,7 @@ async def test_match_to_venue_context_engine():
     assert "first_innings_variance_from_par" in ctx.historical_scoring_context
 
 
+@pytest.mark.unit
 @pytest.mark.asyncio
 async def test_uncapped_player_venue_filtering_and_scope_guard():
     """Validates uncapped prospect venue performance and ensures capped player queries are forbidden."""
@@ -151,6 +159,7 @@ async def test_uncapped_player_venue_filtering_and_scope_guard():
     assert "UNCAPPED PLAYERS ONLY" in str(exc_info.value)
 
 
+@pytest.mark.unit
 def test_venue_and_weather_endpoints_integration():
     """Integration test verifying all FastAPI REST endpoints under /api/v1/venues and /api/v1/weather."""
     client = TestClient(fastapi_app)

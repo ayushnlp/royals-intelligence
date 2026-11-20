@@ -7,6 +7,7 @@ import pytest
 from app.core.config import Settings
 
 
+@pytest.mark.environment
 def test_development_configuration_allows_defaults():
     """Development environment must permit default local convenience credentials."""
     s = Settings(ENVIRONMENT="development")
@@ -16,6 +17,7 @@ def test_development_configuration_allows_defaults():
     assert s.LEAD_ANALYST_API_KEY == "rr_lead_analyst_secret_token_2026"
 
 
+@pytest.mark.environment
 def test_production_rejects_default_secret_key():
     """Production environment must reject default or short development SECRET_KEY."""
     with pytest.raises(ValueError) as excinfo:
@@ -29,6 +31,7 @@ def test_production_rejects_default_secret_key():
     assert "SECRET_KEY" in str(excinfo.value)
 
 
+@pytest.mark.environment
 def test_production_rejects_short_secret_key():
     """Production environment must reject SECRET_KEY with length < 32."""
     with pytest.raises(ValueError) as excinfo:
@@ -41,6 +44,7 @@ def test_production_rejects_short_secret_key():
     assert "SECRET_KEY (must be unique and >= 32 characters)" in str(excinfo.value)
 
 
+@pytest.mark.environment
 def test_production_rejects_default_privileged_api_keys():
     """Production environment must reject default scout and analyst API keys."""
     with pytest.raises(ValueError) as excinfo:
@@ -54,6 +58,7 @@ def test_production_rejects_default_privileged_api_keys():
     assert "LEAD_ANALYST_API_KEY" in str(excinfo.value)
 
 
+@pytest.mark.environment
 def test_production_accepts_valid_secure_configuration():
     """Production environment must accept fully configured secure credentials."""
     s = Settings(

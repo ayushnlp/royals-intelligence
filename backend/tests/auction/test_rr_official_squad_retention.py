@@ -21,12 +21,13 @@ from app.auction_intelligence.retention.engine import RajasthanRoyalsRetentionEn
 REPO_ROOT = Path(__file__).resolve().parent.parent.parent.parent
 
 
+@pytest.mark.unit
 def test_official_2026_full_squad_breakdown():
     """Verifies the exact 27-player composition and leadership of the IPL 2026 RR squad."""
     squad = RR_IPL_2026_FULL_SQUAD
     assert squad["captain"] == "Riyan Parag"
     assert squad["total_squad_size"] == 27
-    
+
     disciplines = squad["disciplines"]
     batters = disciplines["batters"]
     keepers = disciplines["wicket_keepers"]
@@ -72,11 +73,12 @@ def test_official_2026_full_squad_breakdown():
     assert {p["name"] for p in replacements} == {"Dasun Shanaka", "Emanjot Singh Chahal"}
 
 
+@pytest.mark.unit
 def test_official_2027_retention_list():
     """Verifies that exactly 17 players are retained ahead of the IPL 2027 auction."""
     retained = RR_IPL_2027_RETAINED_PLAYERS
     assert len(retained) == 17
-    
+
     # Captain must be Riyan Parag
     assert retained[0]["name"] == "Riyan Parag"
     assert retained[0]["is_captain"] is True
@@ -92,6 +94,7 @@ def test_official_2027_retention_list():
     assert actual_retained_names == expected_retained_names
 
 
+@pytest.mark.unit
 def test_official_2027_trades_and_releases():
     """Verifies traded-in (2), traded-out (1), and released (9) players."""
     traded_in = RR_IPL_2027_TRADED_IN_PLAYERS
@@ -123,6 +126,7 @@ def test_official_2027_trades_and_releases():
     assert actual_released_names == expected_released_names
 
 
+@pytest.mark.unit
 def test_squad_reconciliation_total_balance():
     """Verifies that 17 Retained + 9 Released + 1 Traded Out == 27 original roster."""
     retained_count = len(RR_IPL_2027_RETAINED_PLAYERS)
@@ -131,6 +135,7 @@ def test_squad_reconciliation_total_balance():
     assert retained_count + released_count + traded_out_count == 27
 
 
+@pytest.mark.unit
 def test_pre_auction_squad_summary_metrics():
     """Verifies current squad size (19), available slots (6), and overseas slots (3)."""
     summary = get_pre_auction_squad_summary()
@@ -145,6 +150,7 @@ def test_pre_auction_squad_summary_metrics():
     assert summary["available_overseas_slots"] == 3
 
 
+@pytest.mark.data_integrity
 def test_processed_json_artifact_integrity():
     """Verifies that data/processed/auction_intelligence/rr_official_squad_retention_2027.json matches."""
     json_path = REPO_ROOT / "data" / "processed" / "auction_intelligence" / "rr_official_squad_retention_2027.json"

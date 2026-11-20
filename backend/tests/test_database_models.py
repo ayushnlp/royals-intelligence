@@ -43,7 +43,7 @@ async def async_test_session():
     engine = create_async_engine("sqlite+aiosqlite:///:memory:", echo=False)
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
-    
+
     async_session = async_sessionmaker(bind=engine, class_=AsyncSession, expire_on_commit=False)
     async with async_session() as session:
         yield session
@@ -53,6 +53,7 @@ async def async_test_session():
     await engine.dispose()
 
 
+@pytest.mark.environment
 @pytest.mark.asyncio
 async def test_all_models_table_registration():
     """Verifies all 29 target tables are properly registered with Base.metadata."""
@@ -72,6 +73,7 @@ async def test_all_models_table_registration():
     assert len(table_names) >= 29
 
 
+@pytest.mark.environment
 @pytest.mark.asyncio
 async def test_core_entities_lifecycle(async_test_session: AsyncSession):
     """Tests creating, querying, and relationship traversal of core competition entities."""
@@ -149,6 +151,7 @@ async def test_core_entities_lifecycle(async_test_session: AsyncSession):
     assert retrieved.uncapped_profile.eligibility_status == "CONFIRMED_UNCAPPED"
 
 
+@pytest.mark.environment
 @pytest.mark.asyncio
 async def test_ball_by_ball_delivery_persistence(async_test_session: AsyncSession):
     """Verifies ball-by-ball delivery integrity and run balance checks."""
@@ -225,6 +228,7 @@ async def test_ball_by_ball_delivery_persistence(async_test_session: AsyncSessio
     assert saved.release_speed_kph is None  # Never fabricated
 
 
+@pytest.mark.environment
 def test_migration_file_structure():
     """Validates Alembic migration file presence and upgrade/downgrade symbols."""
     import importlib.util

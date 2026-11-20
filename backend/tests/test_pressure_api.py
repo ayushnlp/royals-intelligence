@@ -18,6 +18,7 @@ def client():
 # 1. Overview Endpoint Tests
 # ---------------------------------------------------------------------------
 
+@pytest.mark.unit
 def test_get_pressure_overview(client):
     """Verifies Round 1 overview metadata and volume counts."""
     response = client.get("/api/v1/analytics/pressure/overview")
@@ -37,6 +38,7 @@ def test_get_pressure_overview(client):
 # 2. Leaderboards Endpoint Tests
 # ---------------------------------------------------------------------------
 
+@pytest.mark.data_dependent
 def test_get_pressure_leaderboards_all(client):
     """Verifies combined leaderboards response returns both batting and bowling."""
     response = client.get("/api/v1/analytics/pressure/leaderboards?discipline=all&limit=10")
@@ -49,6 +51,7 @@ def test_get_pressure_leaderboards_all(client):
     assert len(data["bowling_leaderboard"]) == 10
 
 
+@pytest.mark.data_dependent
 def test_get_pressure_leaderboard_batting_ranks(client):
     """Verifies Top 10 Batters Under Pressure match the sealed competition rankings."""
     response = client.get("/api/v1/analytics/pressure/leaderboards?discipline=batting&limit=10")
@@ -80,6 +83,7 @@ def test_get_pressure_leaderboard_batting_ranks(client):
     assert batting[3]["player_name"] == "Dinesh Karthik"
 
 
+@pytest.mark.data_dependent
 def test_get_pressure_leaderboard_bowling_ranks(client):
     """Verifies Top 10 Bowlers Under Pressure match the sealed competition rankings."""
     response = client.get("/api/v1/analytics/pressure/leaderboards?discipline=bowling&limit=10")
@@ -110,6 +114,7 @@ def test_get_pressure_leaderboard_bowling_ranks(client):
     assert bowling[3]["player_name"] == "Matheesha Pathirana"
 
 
+@pytest.mark.unit
 def test_get_pressure_leaderboard_invalid_discipline(client):
     """Verifies 400 Bad Request for unrecognized discipline."""
     response = client.get("/api/v1/analytics/pressure/leaderboards?discipline=fielding")
@@ -120,6 +125,7 @@ def test_get_pressure_leaderboard_invalid_discipline(client):
 # 3. Candidate Profile Tests
 # ---------------------------------------------------------------------------
 
+@pytest.mark.data_dependent
 def test_get_candidate_profile_pooran(client):
     """Verifies complete candidate evidence profile for Nicholas Pooran (3125)."""
     response = client.get("/api/v1/analytics/pressure/candidates/3125?discipline=batting")
@@ -135,6 +141,7 @@ def test_get_candidate_profile_pooran(client):
     assert data["evidence_questions"]["q6_conservative_diagnostic"] != ""
 
 
+@pytest.mark.data_dependent
 def test_get_candidate_profile_bumrah(client):
     """Verifies complete candidate evidence profile for Jasprit Bumrah (2933)."""
     response = client.get("/api/v1/analytics/pressure/candidates/2933?discipline=bowling")
@@ -149,6 +156,7 @@ def test_get_candidate_profile_bumrah(client):
     assert "q1_why_considered" in data["evidence_questions"]
 
 
+@pytest.mark.unit
 def test_get_candidate_profile_unknown_player(client):
     """Verifies 404 response for unknown candidate ID."""
     response = client.get("/api/v1/analytics/pressure/candidates/9999999")
@@ -159,6 +167,7 @@ def test_get_candidate_profile_unknown_player(client):
 # 4. Methodology Endpoint Tests
 # ---------------------------------------------------------------------------
 
+@pytest.mark.unit
 def test_get_pressure_methodology(client):
     """Verifies methodology endpoint returns 12-cell matrix and formulas."""
     response = client.get("/api/v1/analytics/pressure/methodology")

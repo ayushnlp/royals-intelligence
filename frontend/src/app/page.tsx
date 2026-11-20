@@ -34,48 +34,40 @@ import {
   RefreshCw,
 } from "lucide-react";
 
-const DEFAULT_TOP_BATTERS = [
-  { rank: 1, name: "Nicholas Pooran", team: "LSG / WI", balls: 212, matches: 26, val: "+2.25", ci: "[-11.2, +43.6]" },
-  { rank: 2, name: "Donovan Ferreira", team: "RR / SA", balls: 84, matches: 13, val: "+0.93", ci: "[-18.0, +59.4]" },
-  { rank: 3, name: "Tim David", team: "MI / AUS", balls: 290, matches: 33, val: "-2.53", ci: "[-14.1, +33.3]" },
-  { rank: 4, name: "Dinesh Karthik", team: "RCB / IND", balls: 260, matches: 30, val: "-2.67", ci: "[-14.1, +32.6]" },
-  { rank: 5, name: "Ashutosh Sharma", team: "PBKS / IND", balls: 191, matches: 20, val: "-3.63", ci: "[-17.0, +37.6]" },
-];
-
-const DEFAULT_TOP_BOWLERS = [
-  { rank: 1, name: "Jasprit Bumrah", team: "MI / IND", balls: 338, matches: 32, val: "-0.16", ci: "[-0.91, +0.51]" },
-  { rank: 2, name: "Sunil Narine", team: "KKR / WI", balls: 215, matches: 28, val: "-0.94", ci: "[-0.68, +1.47]" },
-  { rank: 3, name: "Anrich Nortje", team: "DC / SA", balls: 196, matches: 16, val: "-1.39", ci: "[-0.33, +1.95]" },
-  { rank: 4, name: "Pat Cummins", team: "SRH / AUS", balls: 203, matches: 25, val: "-1.46", ci: "[-0.27, +2.02]" },
-  { rank: 5, name: "Shaheen Afridi", team: "PAK", balls: 163, matches: 24, val: "-1.63", ci: "[-0.41, +2.30]" },
-];
-
 export default function OverviewPage() {
   const [health, setHealth] = useState<SystemHealth | null>(null);
   const [pressureOverview, setPressureOverview] = useState<PressureOverviewResponse | null>(null);
   const [leaderboards, setLeaderboards] = useState<PressureLeaderboardResponse | null>(null);
   const [uncappedOverview, setUncappedOverview] = useState<UncappedOverviewResponse | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  const loadOverviewData = async () => {
+    setLoading(true);
+    setErrorMsg(null);
+    try {
+      const [hRes, pOvRes, lbRes, uncRes] = await Promise.all([
+        fetchSystemHealth(),
+        fetchPressureOverview(),
+        fetchPressureLeaderboards({ discipline: "all", limit: 10, qualified_only: true }),
+        fetchUncappedOverview(),
+      ]);
+      if (hRes) setHealth(hRes);
+      if (pOvRes) setPressureOverview(pOvRes);
+      if (lbRes) setLeaderboards(lbRes);
+      if (uncRes) setUncappedOverview(uncRes);
+
+      if (!hRes && !pOvRes && !lbRes) {
+        setErrorMsg("Failed to connect to backend API service. Ensure backend server is operational.");
+      }
+    } catch {
+      setErrorMsg("Error communicating with backend service.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    async function loadOverviewData() {
-      try {
-        const [hRes, pOvRes, lbRes, uncRes] = await Promise.all([
-          fetchSystemHealth(),
-          fetchPressureOverview(),
-          fetchPressureLeaderboards({ discipline: "all", limit: 5, qualified_only: true }),
-          fetchUncappedOverview(),
-        ]);
-        if (hRes) setHealth(hRes);
-        if (pOvRes) setPressureOverview(pOvRes);
-        if (lbRes) setLeaderboards(lbRes);
-        if (uncRes) setUncappedOverview(uncRes);
-      } catch (err) {
-        // Fallback defaults handle any standby states cleanly
-      } finally {
-        setLoading(false);
-      }
-    }
     loadOverviewData();
   }, []);
 
@@ -83,28 +75,36 @@ export default function OverviewPage() {
   const isLiveBowlers = Boolean(leaderboards?.bowling_leaderboard && leaderboards.bowling_leaderboard.length > 0);
 
   const battersToDisplay = isLiveBatters && leaderboards?.batting_leaderboard
-    ? leaderboards.batting_leaderboard.slice(0, 5).map((b, idx) => ({
+    ? leaderboards.batting_leaderboard.slice(0, 5).map((b) => ({
         rank: b.rank,
         name: b.player_name,
-        team: DEFAULT_TOP_BATTERS[idx]?.team || "Verified Domestic / Franchise",
+        team: b.competition_qualification || "Qualified Candidate",
         balls: b.pressure_legal_balls,
         matches: b.pressure_matches,
         val: b.conservative_pri > 0 ? `+${b.conservative_pri.toFixed(2)}` : b.conservative_pri.toFixed(2),
         ci: `[${b.ci_95_lower.toFixed(1)}, +${b.ci_95_upper.toFixed(1)}]`,
       }))
-    : DEFAULT_TOP_BATTERS;
+    : [];
 
   const bowlersToDisplay = isLiveBowlers && leaderboards?.bowling_leaderboard
-    ? leaderboards.bowling_leaderboard.slice(0, 5).map((bw, idx) => ({
+    ? leaderboards.bowling_leaderboard.slice(0, 5).map((bw) => ({
         rank: bw.rank,
         name: bw.player_name,
-        team: DEFAULT_TOP_BOWLERS[idx]?.team || "Verified Domestic / Franchise",
+        team: bw.competition_qualification || "Qualified Candidate",
         balls: bw.pressure_legal_balls,
         matches: bw.pressure_matches,
         val: bw.conservative_runs_saved.toFixed(2),
         ci: `[${bw.ci_95_lower.toFixed(2)}, +${bw.ci_95_upper.toFixed(2)}]`,
       }))
-    : DEFAULT_TOP_BOWLERS;
+    : [];
+
+  const ranks6to10Batters = leaderboards?.batting_leaderboard && leaderboards.batting_leaderboard.length > 5
+    ? leaderboards.batting_leaderboard.slice(5, 10).map((b) => b.player_name).join(", ")
+    : null;
+
+  const ranks6to10Bowlers = leaderboards?.bowling_leaderboard && leaderboards.bowling_leaderboard.length > 5
+    ? leaderboards.bowling_leaderboard.slice(5, 10).map((bw) => bw.player_name).join(", ")
+    : null;
 
   const isLive = health?.status === "healthy";
   return (
@@ -168,18 +168,22 @@ export default function OverviewPage() {
           </Link>
         </div>
 
-        {/* Degraded Standby Notice (if live analytical engine is offline) */}
-        {(!isLive || !isLiveBatters) && (
+        {/* Connection Notice (if live analytical engine is offline or errored) */}
+        {(!isLive || errorMsg) && (
           <div className="p-3.5 rounded-xl bg-amber-50/90 border border-amber-200 text-amber-900 text-xs flex items-center justify-between gap-3 shadow-xs">
             <div className="flex items-center gap-2.5">
               <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse shrink-0" />
               <span>
-                <strong>DEGRADED STANDBY MODE:</strong> Live analytical engine is offline. Platform is operating in safe fallback mode. The top 5 leaderboards below are displaying verified historical reference benchmarks, <strong>NOT live engine calculations</strong>.
+                <strong>BACKEND STANDBY NOTICE:</strong> Backend analytics service is offline or unreachable. Ensure the FastAPI backend is running on port 8000.
               </span>
             </div>
-            <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-amber-200/80 text-amber-900 shrink-0">
-              REFERENCE DATA — NOT LIVE
-            </span>
+            <button
+              onClick={loadOverviewData}
+              className="px-2.5 py-1 rounded bg-amber-200/80 hover:bg-amber-300 text-amber-900 font-bold text-[11px] shrink-0 flex items-center gap-1 transition-colors"
+            >
+              <RefreshCw size={12} className={loading ? "animate-spin" : ""} />
+              <span>Retry</span>
+            </button>
           </div>
         )}
       </section>
@@ -194,10 +198,12 @@ export default function OverviewPage() {
               Controlling Data Pack
             </span>
             <div className="text-2xl md:text-3xl font-extrabold text-slate-900 font-mono tracking-tight">
-              {pressureOverview?.total_deliveries ? pressureOverview.total_deliveries.toLocaleString() : "200,999"}
+              {pressureOverview?.total_deliveries ? pressureOverview.total_deliveries.toLocaleString() : "—"}
             </div>
             <p className="text-xs text-slate-500 mt-1">
-              Deliveries across {pressureOverview ? (pressureOverview.matches_with_deliveries + pressureOverview.reconciled_abandoned_matches) : 883} matches ({pressureOverview?.total_competitions ?? 141} tournaments)
+              {pressureOverview
+                ? `Deliveries across ${pressureOverview.matches_with_deliveries + pressureOverview.reconciled_abandoned_matches} matches (${pressureOverview.total_competitions} tournaments)`
+                : "Awaiting backend telemetry"}
             </p>
           </div>
 
@@ -220,7 +226,7 @@ export default function OverviewPage() {
             <div className="text-2xl md:text-3xl font-extrabold text-slate-900 font-mono tracking-tight">
               {uncappedOverview
                 ? `${uncappedOverview.total_verified_uncapped_batters + uncappedOverview.total_verified_uncapped_bowlers} Verified`
-                : "29 Verified"}
+                : "—"}
             </div>
             <p className="text-xs text-slate-500 mt-1">
               Certified 0 senior caps in AUCTION-02 ledger
@@ -232,11 +238,11 @@ export default function OverviewPage() {
               Verification Health
             </span>
             <div className="text-2xl md:text-3xl font-extrabold text-emerald-700 font-mono tracking-tight flex items-baseline gap-2">
-              <span>{isLive ? "Engine Online" : "100% Sealed"}</span>
-              <span className={`w-2 h-2 rounded-full ${isLive ? "bg-emerald-500 animate-pulse" : "bg-emerald-600"}`} />
+              <span>{isLive ? "Engine Online" : "Service Standby"}</span>
+              <span className={`w-2 h-2 rounded-full ${isLive ? "bg-emerald-500 animate-pulse" : "bg-amber-500"}`} />
             </div>
             <p className="text-xs text-slate-500 mt-1">
-              {isLive ? `FastAPI v${health?.version || "0.1.0"} active on Render` : "4 Parquet artifacts SHA-256 bitwise verified"}
+              {isLive ? `FastAPI v${health?.version || "0.1.0"} active` : "Backend service awaiting initialization"}
             </p>
           </div>
         </div>
@@ -273,41 +279,54 @@ export default function OverviewPage() {
                 <span>Top 5 Batters Under Pressure (Conservative PRI)</span>
                 {isLiveBatters ? (
                   <span className="px-1.5 py-0.5 rounded text-[9px] font-mono font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                    LIVE
+                    LIVE ENGINE
                   </span>
                 ) : (
-                  <span className="px-1.5 py-0.5 rounded text-[9px] font-mono font-bold bg-amber-50 text-amber-700 border border-amber-200">
-                    REFERENCE DATA — NOT LIVE
+                  <span className="px-1.5 py-0.5 rounded text-[9px] font-mono font-bold bg-slate-100 text-slate-600 border border-slate-200">
+                    STANDBY
                   </span>
                 )}
               </span>
               <span className="font-mono text-[11px] text-slate-400">Balls / Matches</span>
             </div>
 
-            <div className="divide-y divide-slate-100 border-t border-slate-200/60 text-xs">
-              {battersToDisplay.map((p) => (
-                <div key={p.rank} className="py-2.5 flex items-center justify-between hover:bg-slate-50/70 px-2 rounded-md transition-colors">
-                  <div className="flex items-center gap-3">
-                    <span className="font-mono font-bold text-slate-400 w-4 text-center">{p.rank}</span>
-                    <div>
-                      <span className="font-bold text-slate-900 block">{p.name}</span>
-                      <span className="text-[11px] text-slate-400 font-mono">{p.team}</span>
+            {isLiveBatters ? (
+              <div className="divide-y divide-slate-100 border-t border-slate-200/60 text-xs">
+                {battersToDisplay.map((p) => (
+                  <div key={p.rank} className="py-2.5 flex items-center justify-between hover:bg-slate-50/70 px-2 rounded-md transition-colors">
+                    <div className="flex items-center gap-3">
+                      <span className="font-mono font-bold text-slate-400 w-4 text-center">{p.rank}</span>
+                      <div>
+                        <span className="font-bold text-slate-900 block">{p.name}</span>
+                        <span className="text-[11px] text-slate-400 font-mono">{p.team}</span>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <span className={`font-mono font-bold ${p.val.startsWith("+") ? "text-emerald-600" : "text-slate-800"}`}>
+                        {p.val} pts
+                      </span>
+                      <span className="text-[11px] font-mono text-slate-400 block">{p.balls}b • {p.matches}m</span>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <span className={`font-mono font-bold ${p.val.startsWith("+") ? "text-emerald-600" : "text-slate-800"}`}>
-                      {p.val} pts
-                    </span>
-                    <span className="text-[11px] font-mono text-slate-400 block">{p.balls}b • {p.matches}m</span>
-                  </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            ) : (
+              <div className="py-8 px-4 text-center rounded-lg border border-dashed border-slate-200 bg-slate-50/50">
+                <div className="text-xs text-slate-500 font-medium">Official pressure batting leaderboards currently unavailable.</div>
+                <button
+                  onClick={loadOverviewData}
+                  className="mt-2 inline-flex items-center gap-1.5 px-3 py-1 bg-white border border-slate-200 rounded text-xs font-semibold text-slate-700 hover:bg-slate-50 shadow-xs"
+                >
+                  <RefreshCw size={12} className={loading ? "animate-spin" : ""} />
+                  <span>Retry Connection</span>
+                </button>
+              </div>
+            )}
 
             <div className="pt-2 text-[11px] text-slate-400 font-mono flex justify-between">
-              <span>Ranks 6–10: Stoinis, Dhir, Rinku Singh, Stubbs, Rutherford</span>
+              <span>{ranks6to10Batters ? `Ranks 6–10: ${ranks6to10Batters}` : "Ranks 6–10 viewable on full leaderboard"}</span>
               <Link href="/pressure?tab=batting" className="text-slate-600 hover:text-slate-900 font-sans font-medium">
-                Full 824 Batters &rarr;
+                Full Batters &rarr;
               </Link>
             </div>
           </div>
@@ -320,41 +339,54 @@ export default function OverviewPage() {
                 <span>Top 5 Bowlers Under Pressure (Conservative Runs Saved)</span>
                 {isLiveBowlers ? (
                   <span className="px-1.5 py-0.5 rounded text-[9px] font-mono font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                    LIVE
+                    LIVE ENGINE
                   </span>
                 ) : (
-                  <span className="px-1.5 py-0.5 rounded text-[9px] font-mono font-bold bg-amber-50 text-amber-700 border border-amber-200">
-                    REFERENCE DATA — NOT LIVE
+                  <span className="px-1.5 py-0.5 rounded text-[9px] font-mono font-bold bg-slate-100 text-slate-600 border border-slate-200">
+                    STANDBY
                   </span>
                 )}
               </span>
               <span className="font-mono text-[11px] text-slate-400">Balls / Matches</span>
             </div>
 
-            <div className="divide-y divide-slate-100 border-t border-slate-200/60 text-xs">
-              {bowlersToDisplay.map((p) => (
-                <div key={p.rank} className="py-2.5 flex items-center justify-between hover:bg-slate-50/70 px-2 rounded-md transition-colors">
-                  <div className="flex items-center gap-3">
-                    <span className="font-mono font-bold text-slate-400 w-4 text-center">{p.rank}</span>
-                    <div>
-                      <span className="font-bold text-slate-900 block">{p.name}</span>
-                      <span className="text-[11px] text-slate-400 font-mono">{p.team}</span>
+            {isLiveBowlers ? (
+              <div className="divide-y divide-slate-100 border-t border-slate-200/60 text-xs">
+                {bowlersToDisplay.map((p) => (
+                  <div key={p.rank} className="py-2.5 flex items-center justify-between hover:bg-slate-50/70 px-2 rounded-md transition-colors">
+                    <div className="flex items-center gap-3">
+                      <span className="font-mono font-bold text-slate-400 w-4 text-center">{p.rank}</span>
+                      <div>
+                        <span className="font-bold text-slate-900 block">{p.name}</span>
+                        <span className="text-[11px] text-slate-400 font-mono">{p.team}</span>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <span className="font-mono font-bold text-slate-800">
+                        {p.val} RPO
+                      </span>
+                      <span className="text-[11px] font-mono text-slate-400 block">{p.balls}b • {p.matches}m</span>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <span className="font-mono font-bold text-slate-800">
-                      {p.val} RPO
-                    </span>
-                    <span className="text-[11px] font-mono text-slate-400 block">{p.balls}b • {p.matches}m</span>
-                  </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            ) : (
+              <div className="py-8 px-4 text-center rounded-lg border border-dashed border-slate-200 bg-slate-50/50">
+                <div className="text-xs text-slate-500 font-medium">Official pressure bowling leaderboards currently unavailable.</div>
+                <button
+                  onClick={loadOverviewData}
+                  className="mt-2 inline-flex items-center gap-1.5 px-3 py-1 bg-white border border-slate-200 rounded text-xs font-semibold text-slate-700 hover:bg-slate-50 shadow-xs"
+                >
+                  <RefreshCw size={12} className={loading ? "animate-spin" : ""} />
+                  <span>Retry Connection</span>
+                </button>
+              </div>
+            )}
 
             <div className="pt-2 text-[11px] text-slate-400 font-mono flex justify-between">
-              <span>Ranks 6–10: Mustafizur, Ngarava, Ngidi, Starc, Hasan Mahmud</span>
+              <span>{ranks6to10Bowlers ? `Ranks 6–10: ${ranks6to10Bowlers}` : "Ranks 6–10 viewable on full leaderboard"}</span>
               <Link href="/pressure?tab=bowling" className="text-slate-600 hover:text-slate-900 font-sans font-medium">
-                Full 596 Bowlers &rarr;
+                Full Bowlers &rarr;
               </Link>
             </div>
           </div>

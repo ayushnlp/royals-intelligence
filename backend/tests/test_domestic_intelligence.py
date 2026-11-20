@@ -35,6 +35,7 @@ async def async_test_session():
     await engine.dispose()
 
 
+@pytest.mark.unit
 def test_format_aware_phase_assignment():
     """Verifies that phase assignment correctly adapts across T20, List A, and First-Class formats."""
     # 1. T20 (20 overs)
@@ -59,6 +60,7 @@ def test_format_aware_phase_assignment():
     assert DomesticMatchService.assign_phase(25, "First Class") == "Middle / Old Ball"
 
 
+@pytest.mark.unit
 def test_bowler_credited_dismissals_exclusion():
     """Verifies that non-bowler dismissals (run-outs, retired hurt) are never credited to bowlers."""
     assert "bowled" in BOWLER_CREDITED_DISMISSALS
@@ -74,6 +76,7 @@ def test_bowler_credited_dismissals_exclusion():
     assert "timed out" not in BOWLER_CREDITED_DISMISSALS
 
 
+@pytest.mark.unit
 def test_zero_denominator_and_edge_case_handling():
     """Verifies that zero denominators produce None or 0.0 rather than crashing or fabricating numbers."""
     # Batting strike rate: 0 balls -> 0.0
@@ -105,6 +108,7 @@ def test_zero_denominator_and_edge_case_handling():
     assert bowl_avg is None
 
 
+@pytest.mark.data_dependent
 @pytest.mark.asyncio
 async def test_domestic_season_service_competitions(async_test_session: AsyncSession):
     """Verifies listing of domestic competitions and seasons."""
@@ -122,6 +126,7 @@ async def test_domestic_season_service_competitions(async_test_session: AsyncSes
     assert smat.validation_pass_rate == 100.0
 
 
+@pytest.mark.data_dependent
 @pytest.mark.asyncio
 async def test_domestic_season_service_matches(async_test_session: AsyncSession):
     """Verifies listing season matches with team filtering and pagination."""
@@ -139,6 +144,7 @@ async def test_domestic_season_service_matches(async_test_session: AsyncSession)
     assert m1.home_team_code in ["DEL", "MP", "CHG"]
 
 
+@pytest.mark.unit
 @pytest.mark.asyncio
 async def test_domestic_match_detail_and_innings(async_test_session: AsyncSession):
     """Verifies deep match scorecard, FoW, partnerships, and progression."""
@@ -172,6 +178,7 @@ async def test_domestic_match_detail_and_innings(async_test_session: AsyncSessio
     assert harshit.economy_rate == 8.0
 
 
+@pytest.mark.unit
 @pytest.mark.asyncio
 async def test_player_domestic_season_stats_and_allround(async_test_session: AsyncSession):
     """Verifies season statistics and evidence-based non-composite all-round contribution."""
@@ -195,6 +202,7 @@ async def test_player_domestic_season_stats_and_allround(async_test_session: Asy
     assert len(allround.role_archetype_context) > 10
 
 
+@pytest.mark.data_dependent
 def test_domestic_api_endpoints_integration():
     """Tests all 9 Stage 3 FastAPI endpoints under /api/v1/domestic."""
     # 1. Competitions directory
