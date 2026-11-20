@@ -12,6 +12,7 @@ from typing import Optional, List, Dict, Any
 import numpy as np
 import pandas as pd
 from pydantic import BaseModel, Field
+from app.core.logging import logger
 
 
 # ---------------------------------------------------------------------------
@@ -123,7 +124,10 @@ class DatasetCricketIntelligenceEngine:
             return
 
         if not self.data_dir.exists():
-            raise FileNotFoundError(f"Official data pack directory not found: {self.data_dir}")
+            logger.warning(f"Official data pack directory not found: {self.data_dir}; running in standby mode.")
+            self._bbb_df = pd.DataFrame()
+            self._is_loaded = True
+            return
 
         # 1. Load mapping and build player lookup dict
         mapping_path = self.data_dir / "competition_team_player_mapping.csv"
@@ -203,6 +207,9 @@ class DatasetCricketIntelligenceEngine:
             self._bowler_ids = set(bowlers["bowler_id"].dropna().astype(int).tolist())
 
             self._bbb_df = bbb
+
+        if self._bbb_df is None:
+            self._bbb_df = pd.DataFrame()
 
         self._is_loaded = True
 
@@ -382,13 +389,31 @@ class DatasetCricketIntelligenceEngine:
     ) -> List[HandednessSplit]:
         """Computes the 4-way stance/bowling cross-split, with optional player filters."""
         df = self.bbb
+        target_btypes = [batting_type] if batting_type else ["RHB", "LHB"]
+        target_ps = [pace_or_spin] if pace_or_spin else ["Pace", "Spin"]
+
+        if df is None or df.empty:
+            return [
+                HandednessSplit(
+                    batting_type=btype,
+                    pace_or_spin=ps,
+                    balls_faced=0,
+                    runs_scored=0,
+                    wickets=0,
+                    strike_rate=0.0,
+                    economy_rate=0.0,
+                    bowling_average=None,
+                    boundary_pct=0.0,
+                    dot_pct=0.0,
+                )
+                for btype in target_btypes
+                for ps in target_ps
+            ]
+
         if striker_id is not None:
             df = df[df["striker_id"] == striker_id]
         if bowler_id is not None:
             df = df[df["bowler_id"] == bowler_id]
-
-        target_btypes = [batting_type] if batting_type else ["RHB", "LHB"]
-        target_ps = [pace_or_spin] if pace_or_spin else ["Pace", "Spin"]
 
         matrix: List[HandednessSplit] = []
         for btype in target_btypes:
@@ -430,6 +455,8 @@ class DatasetCricketIntelligenceEngine:
         stroke_name: Optional[str] = None,
     ) -> List[TacticalStrokeProfile]:
         """Profiles stroke efficiency across all batters or for a single batter."""
+        if self.bbb is None or self.bbb.empty:
+            return []
         df = self.bbb[self.bbb["stroke"].notna()]
         if striker_id is not None:
             df = df[df["striker_id"] == striker_id]
@@ -476,6 +503,8 @@ class DatasetCricketIntelligenceEngine:
         delivery_style_name: Optional[str] = None,
     ) -> List[DeliveryStyleProfile]:
         """Profiles bowling variations and movement styles."""
+        if self.bbb is None or self.bbb.empty:
+            return []
         df = self.bbb[self.bbb["delivery_style"].notna()]
         if bowler_id is not None:
             df = df[df["bowler_id"] == bowler_id]
@@ -528,6 +557,21 @@ class DatasetCricketIntelligenceEngine:
         Scales 10x sensor anomalies (speeds >= 500 scaled by /10) and filters offline sensors.
         """
         df = self.bbb
+        if df is None or df.empty:
+            if bowler_id is not None:
+                return {}
+            return {
+                "overall_valid_speed_deliveries": 0,
+                "speed_coverage_pct": 0.0,
+                "mean_speed_kmh": None,
+                "median_speed_kmh": None,
+                "min_speed_kmh": None,
+                "max_speed_kmh": None,
+                "top_fastest_bowlers": [],
+                "sensor_safeguards_applied": True,
+                "data_quality_note": "Dataset running in unhydrated standby mode.",
+            }
+
         if bowler_id is not None:
             bdf = df[df["bowler_id"] == bowler_id]
             if bdf.empty:
@@ -704,6 +748,8 @@ class DatasetCricketIntelligenceEngine:
 
     def get_top_death_batters(self, min_balls: int = 100, top_n: int = 10) -> List[Dict[str, Any]]:
         """Identifies elite finishers in overs 16–20."""
+        if self.bbb is None or self.bbb.empty:
+            return []
         df = self.bbb[self.bbb["phase"] == "Death"]
         agg = df.groupby(["striker_id", "striker_name"]).agg(
             runs=("runs", "sum"),
@@ -723,6 +769,8 @@ class DatasetCricketIntelligenceEngine:
 
     def get_top_death_bowlers(self, min_balls: int = 150, top_n: int = 10) -> List[Dict[str, Any]]:
         """Identifies elite containment and wicket-taking bowlers in overs 16–20."""
+        if self.bbb is None or self.bbb.empty:
+            return []
         df = self.bbb[self.bbb["phase"] == "Death"]
         agg = df.groupby(["bowler_id", "bowler_name", "bowling_type"]).agg(
             legal_balls=("is_legal_delivery", "sum"),
@@ -741,6 +789,8 @@ class DatasetCricketIntelligenceEngine:
 
     def get_head_to_head(self, striker_id: int, bowler_id: int) -> Optional[HeadToHeadMatchupProfile]:
         """Extracts the exact historical micro-battle between a batter and bowler."""
+        if self.bbb is None or self.bbb.empty:
+            return None
         df = self.bbb[(self.bbb["striker_id"] == striker_id) & (self.bbb["bowler_id"] == bowler_id)]
         if df.empty:
             return None
