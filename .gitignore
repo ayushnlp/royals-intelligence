@@ -71,6 +71,8 @@ data/raw/**/*
 data/processed/**/*
 !data/processed/**/.gitkeep
 !data/processed/**/
+!data/processed/auction_intelligence/canonical_player_registry.parquet
+!data/processed/auction_intelligence/senior_international_eligibility_ledger.parquet
 data/validation/**/*
 !data/validation/**/.gitkeep
 !data/validation/**/
@@ -83,9 +85,14 @@ data/proprietary/**/*
 round1_pressure/data/raw/**/*
 !round1_pressure/data/raw/**/.gitkeep
 !round1_pressure/data/raw/**/
+!round1_pressure/data/raw/competition_team_player_mapping.csv
 round1_pressure/data/processed/**/*
 !round1_pressure/data/processed/**/.gitkeep
 !round1_pressure/data/processed/**/
+!round1_pressure/data/processed/batting_leaderboard.parquet
+!round1_pressure/data/processed/bowling_leaderboard.parquet
+!round1_pressure/data/processed/batting_evidence_profiles.parquet
+!round1_pressure/data/processed/bowling_evidence_profiles.parquet
 round1_pressure/data/outputs/**/*
 !round1_pressure/data/outputs/**/.gitkeep
 !round1_pressure/data/outputs/**/
