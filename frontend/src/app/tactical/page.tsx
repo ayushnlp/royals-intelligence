@@ -150,8 +150,8 @@ export default function TacticalIntelligencePage() {
       if (!sumRes && !phaseRes) {
         setErrorMsg("Tactical Intelligence backend service offline or in standby. Ensure backend is running on port 8000.");
       }
-    } catch {
-      setErrorMsg("Failed to communicate with Tactical Intelligence backend services.");
+    } catch (err: any) {
+      setErrorMsg(err.message || "Failed to communicate with Tactical Intelligence backend services.");
     } finally {
       setLoading(false);
     }
@@ -164,59 +164,105 @@ export default function TacticalIntelligencePage() {
 
   // 2. Load Player Tactical Profile when selected
   useEffect(() => {
+    let isCurrent = true;
     async function loadPlayerDossier() {
       if (!selectedPlayerId) return;
-      const dossier = await fetchPlayerTacticalProfile(selectedPlayerId);
-      if (dossier) {
-        setPlayerProfile(dossier);
+      try {
+        const dossier = await fetchPlayerTacticalProfile(selectedPlayerId);
+        if (isCurrent && dossier) {
+          setPlayerProfile(dossier);
+        }
+      } catch (err) {
+        if (isCurrent) {
+          console.warn(`Could not load tactical profile for player ${selectedPlayerId}:`, err);
+        }
       }
     }
     loadPlayerDossier();
+    return () => {
+      isCurrent = false;
+    };
   }, [selectedPlayerId]);
 
   // 3. Load Head to Head Matchup
   useEffect(() => {
+    let isCurrent = true;
     async function loadH2H() {
       if (!h2hStrikerId || !h2hBowlerId) return;
       setH2hLoading(true);
-      const matchRes = await fetchTacticalMatchup(h2hStrikerId, h2hBowlerId);
-      if (matchRes) {
-        setH2hData(matchRes);
+      try {
+        const matchRes = await fetchTacticalMatchup(h2hStrikerId, h2hBowlerId);
+        if (isCurrent && matchRes) {
+          setH2hData(matchRes);
+        }
+      } catch (err) {
+        if (isCurrent) {
+          console.warn("Could not load head-to-head matchup:", err);
+          setH2hData(null);
+        }
+      } finally {
+        if (isCurrent) setH2hLoading(false);
       }
-      setH2hLoading(false);
     }
     loadH2H();
+    return () => {
+      isCurrent = false;
+    };
   }, [h2hStrikerId, h2hBowlerId]);
 
   // 4. Update Death Overs Rankings on Filter Changes
   useEffect(() => {
+    let isCurrent = true;
     async function reloadDeathOvers() {
-      const deathRes = await fetchTacticalDeathOvers({
-        discipline: deathDiscipline,
-        min_balls: deathMinBalls,
-        limit: 10,
-      });
-      if (deathRes) setDeathOversData(deathRes);
+      try {
+        const deathRes = await fetchTacticalDeathOvers({
+          discipline: deathDiscipline,
+          min_balls: deathMinBalls,
+          limit: 10,
+        });
+        if (isCurrent && deathRes) setDeathOversData(deathRes);
+      } catch (err) {
+        if (isCurrent) console.warn("Could not reload death overs rankings:", err);
+      }
     }
     reloadDeathOvers();
+    return () => {
+      isCurrent = false;
+    };
   }, [deathDiscipline, deathMinBalls]);
 
   // 5. Update Strokes on Min Balls Change
   useEffect(() => {
+    let isCurrent = true;
     async function reloadStrokes() {
-      const strokeRes = await fetchTacticalStrokes({ min_balls: strokeMinBalls });
-      if (strokeRes) setStrokesData(strokeRes);
+      try {
+        const strokeRes = await fetchTacticalStrokes({ min_balls: strokeMinBalls });
+        if (isCurrent && strokeRes) setStrokesData(strokeRes);
+      } catch (err) {
+        if (isCurrent) console.warn("Could not reload strokes:", err);
+      }
     }
     reloadStrokes();
+    return () => {
+      isCurrent = false;
+    };
   }, [strokeMinBalls]);
 
   // 6. Update Variations on Min Balls Change
   useEffect(() => {
+    let isCurrent = true;
     async function reloadVariations() {
-      const varRes = await fetchTacticalVariations({ min_balls: variationMinBalls });
-      if (varRes) setVariationsData(varRes);
+      try {
+        const varRes = await fetchTacticalVariations({ min_balls: variationMinBalls });
+        if (isCurrent && varRes) setVariationsData(varRes);
+      } catch (err) {
+        if (isCurrent) console.warn("Could not reload variations:", err);
+      }
     }
     reloadVariations();
+    return () => {
+      isCurrent = false;
+    };
   }, [variationMinBalls]);
 
   // 7. Interactive Player Search
@@ -331,11 +377,11 @@ export default function TacticalIntelligencePage() {
               Total Deliveries
             </span>
             <div className="text-2xl md:text-3xl font-extrabold text-[#111827] font-mono tracking-tight flex items-baseline gap-1.5">
-              <span>{summary ? summary.total_deliveries.toLocaleString() : "200,999"}</span>
+              <span>{summary ? summary.total_deliveries.toLocaleString() : "—"}</span>
               <span className="w-1.5 h-1.5 rounded-full bg-[#E91E8C]" />
             </div>
             <p className="text-[11px] text-slate-500 truncate">
-              {summary ? summary.legal_deliveries.toLocaleString() : "192,709"} legal deliveries
+              {summary ? `${summary.legal_deliveries.toLocaleString()} legal deliveries` : "—"}
             </p>
           </div>
 
@@ -344,10 +390,10 @@ export default function TacticalIntelligencePage() {
               Matches Covered
             </span>
             <div className="text-2xl md:text-3xl font-extrabold text-[#111827] font-mono tracking-tight">
-              {summary ? summary.total_matches_with_deliveries : "867"}
+              {summary ? summary.total_matches_with_deliveries : "—"}
             </div>
             <p className="text-[11px] text-slate-500 truncate">
-              +16 abandoned without ball
+              {summary ? "Matches with deliveries indexed" : "—"}
             </p>
           </div>
 
@@ -356,10 +402,10 @@ export default function TacticalIntelligencePage() {
               Runs Off Bat
             </span>
             <div className="text-2xl md:text-3xl font-extrabold text-[#111827] font-mono tracking-tight">
-              {summary ? summary.total_runs_off_bat.toLocaleString() : "260,209"}
+              {summary ? summary.total_runs_off_bat.toLocaleString() : "—"}
             </div>
             <p className="text-[11px] text-slate-500 truncate">
-              Run rate: {summary ? summary.overall_run_rate_per_6_balls.toFixed(2) : "8.10"} rpo
+              Run rate: {summary ? `${summary.overall_run_rate_per_6_balls.toFixed(2)} rpo` : "—"}
             </p>
           </div>
 
@@ -368,10 +414,10 @@ export default function TacticalIntelligencePage() {
               Total Wickets
             </span>
             <div className="text-2xl md:text-3xl font-extrabold text-[#111827] font-mono tracking-tight">
-              {summary ? summary.total_wickets_fallen.toLocaleString() : "11,460"}
+              {summary ? summary.total_wickets_fallen.toLocaleString() : "—"}
             </div>
             <p className="text-[11px] text-slate-500 truncate">
-              {summary ? summary.total_bowler_wickets.toLocaleString() : "10,489"} bowler wickets
+              {summary ? `${summary.total_bowler_wickets.toLocaleString()} bowler wickets` : "—"}
             </p>
           </div>
 
@@ -380,7 +426,7 @@ export default function TacticalIntelligencePage() {
               Active Players
             </span>
             <div className="text-2xl md:text-3xl font-extrabold text-[#111827] font-mono tracking-tight">
-              {summary ? `${summary.total_unique_strikers} / ${summary.total_unique_bowlers}` : "618 / 460"}
+              {summary ? `${summary.total_unique_strikers} / ${summary.total_unique_bowlers}` : "—"}
             </div>
             <p className="text-[11px] text-slate-500 truncate">
               Batters / Bowlers mapped
@@ -392,10 +438,10 @@ export default function TacticalIntelligencePage() {
               Radar Speeds
             </span>
             <div className="text-2xl md:text-3xl font-extrabold text-[#111827] font-mono tracking-tight">
-              {summary ? summary.valid_radar_speed_records.toLocaleString() : "123,113"}
+              {summary ? summary.valid_radar_speed_records.toLocaleString() : "—"}
             </div>
             <p className="text-[11px] text-emerald-700 font-medium truncate">
-              61.3% sensor coverage
+              {summary ? `${((summary.valid_radar_speed_records / summary.total_deliveries) * 100).toFixed(1)}% sensor coverage` : "—"}
             </p>
           </div>
         </div>

@@ -10,6 +10,7 @@ import pytest
 # 1. Dataset Tactical Summary
 # ---------------------------------------------------------------------------
 
+@pytest.mark.data_dependent
 def test_get_tactical_summary(client):
     """Verifies GET /api/v1/analytics/tactical/summary returns official data counts."""
     response = client.get("/api/v1/analytics/tactical/summary")
@@ -31,6 +32,7 @@ def test_get_tactical_summary(client):
 # 2. Phase-wise Performance
 # ---------------------------------------------------------------------------
 
+@pytest.mark.data_dependent
 def test_get_phase_performance_overall(client):
     """Verifies tournament-wide phase splits."""
     response = client.get("/api/v1/analytics/tactical/phases")
@@ -45,6 +47,7 @@ def test_get_phase_performance_overall(client):
     assert pp["dot_ball_percentage"] > 45.0
 
 
+@pytest.mark.data_dependent
 def test_get_phase_performance_batter(client):
     """Verifies phase splits for Jos Buttler (striker_id 813)."""
     response = client.get("/api/v1/analytics/tactical/phases?striker_id=813")
@@ -56,6 +59,7 @@ def test_get_phase_performance_batter(client):
     assert data["phases"]["Powerplay"]["runs"] > 800
 
 
+@pytest.mark.data_dependent
 def test_get_phase_performance_bowler(client):
     """Verifies phase splits for Yuzvendra Chahal (bowler_id 1612)."""
     response = client.get("/api/v1/analytics/tactical/phases?bowler_id=1612")
@@ -67,6 +71,7 @@ def test_get_phase_performance_bowler(client):
     assert data["phases"]["Middle"]["wickets"] > 70
 
 
+@pytest.mark.data_dependent
 def test_get_phase_performance_single_phase_filter(client):
     """Verifies filtering by single phase."""
     response = client.get("/api/v1/analytics/tactical/phases?phase=Powerplay")
@@ -76,6 +81,7 @@ def test_get_phase_performance_single_phase_filter(client):
     assert "Powerplay" in data["phases"]
 
 
+@pytest.mark.unit
 def test_get_phase_performance_invalid_phase(client):
     """Verifies error handling for invalid phase parameter."""
     response = client.get("/api/v1/analytics/tactical/phases?phase=SuperOver")
@@ -84,6 +90,7 @@ def test_get_phase_performance_invalid_phase(client):
     assert "Invalid phase" in data["detail"]
 
 
+@pytest.mark.unit
 def test_get_phase_performance_conflicting_filters(client):
     """Verifies error handling when both striker_id and bowler_id are provided."""
     response = client.get("/api/v1/analytics/tactical/phases?striker_id=813&bowler_id=1612")
@@ -92,6 +99,7 @@ def test_get_phase_performance_conflicting_filters(client):
     assert "Cannot filter by both" in data["detail"]
 
 
+@pytest.mark.data_dependent
 def test_get_phase_performance_unknown_player(client):
     """Verifies 404 response for unknown player ID."""
     response = client.get("/api/v1/analytics/tactical/phases?striker_id=9999999")
@@ -104,6 +112,7 @@ def test_get_phase_performance_unknown_player(client):
 # 3. Stroke-wise Batting Efficiency
 # ---------------------------------------------------------------------------
 
+@pytest.mark.data_dependent
 def test_get_stroke_efficiency_overall(client):
     """Verifies overall stroke efficiency ranking."""
     response = client.get("/api/v1/analytics/tactical/strokes?min_balls=100")
@@ -115,6 +124,7 @@ def test_get_stroke_efficiency_overall(client):
     assert "Cover Drive" in strokes
 
 
+@pytest.mark.data_dependent
 def test_get_stroke_efficiency_single_player(client):
     """Verifies stroke efficiency for Yashasvi Jaiswal (6819)."""
     response = client.get("/api/v1/analytics/tactical/strokes?striker_id=6819")
@@ -125,6 +135,7 @@ def test_get_stroke_efficiency_single_player(client):
     assert len(data["strokes"]) > 0
 
 
+@pytest.mark.data_dependent
 def test_get_stroke_efficiency_empty_result(client):
     """Verifies empty list returned when non-existent stroke is requested."""
     response = client.get("/api/v1/analytics/tactical/strokes?stroke=HelicopterBicycleKick")
@@ -134,6 +145,7 @@ def test_get_stroke_efficiency_empty_result(client):
     assert data["strokes"] == []
 
 
+@pytest.mark.unit
 def test_get_stroke_efficiency_invalid_param(client):
     """Verifies 422 for invalid negative min_balls."""
     response = client.get("/api/v1/analytics/tactical/strokes?min_balls=-10")
@@ -144,6 +156,7 @@ def test_get_stroke_efficiency_invalid_param(client):
 # 4. Handedness Matchup Matrix
 # ---------------------------------------------------------------------------
 
+@pytest.mark.data_dependent
 def test_get_handedness_matrix_overall(client):
     """Verifies 4-way handedness matrix."""
     response = client.get("/api/v1/analytics/tactical/handedness")
@@ -157,6 +170,7 @@ def test_get_handedness_matrix_overall(client):
     assert ("LHB", "Spin") in combos
 
 
+@pytest.mark.data_dependent
 def test_get_handedness_matrix_filtered(client):
     """Verifies filtering by batting_type=LHB and pace_or_spin=Pace."""
     response = client.get("/api/v1/analytics/tactical/handedness?batting_type=LHB&pace_or_spin=Pace")
@@ -167,6 +181,7 @@ def test_get_handedness_matrix_filtered(client):
     assert data["matrix"][0]["pace_or_spin"] == "Pace"
 
 
+@pytest.mark.unit
 def test_get_handedness_matrix_invalid_params(client):
     """Verifies 400 response for invalid batting_type or pace_or_spin."""
     response = client.get("/api/v1/analytics/tactical/handedness?batting_type=AMBIDEXTROUS")
@@ -180,6 +195,7 @@ def test_get_handedness_matrix_invalid_params(client):
 # 5. Delivery Variations
 # ---------------------------------------------------------------------------
 
+@pytest.mark.data_dependent
 def test_get_delivery_variations_overall(client):
     """Verifies bowling delivery variation rankings."""
     response = client.get("/api/v1/analytics/tactical/variations?min_balls=100")
@@ -191,6 +207,7 @@ def test_get_delivery_variations_overall(client):
     assert "Leg Break" in styles
 
 
+@pytest.mark.data_dependent
 def test_get_delivery_variations_bowler(client):
     """Verifies delivery variation breakdown for Trent Boult (2320)."""
     response = client.get("/api/v1/analytics/tactical/variations?bowler_id=2320")
@@ -205,6 +222,7 @@ def test_get_delivery_variations_bowler(client):
 # 6. Speed Profiles & Sensor Safeguards
 # ---------------------------------------------------------------------------
 
+@pytest.mark.data_dependent
 def test_get_speed_profiles_overall(client):
     """Verifies tournament-wide speed telemetry profile."""
     response = client.get("/api/v1/analytics/tactical/speed-profiles")
@@ -218,6 +236,7 @@ def test_get_speed_profiles_overall(client):
     assert len(data["top_fastest_bowlers"]) > 0
 
 
+@pytest.mark.data_dependent
 def test_get_speed_profiles_bowler(client):
     """Verifies speed profile for Arshdeep Singh (bowler_id 5328 or name check)."""
     # Prasidh Krishna (player_id 4489)
@@ -231,6 +250,7 @@ def test_get_speed_profiles_bowler(client):
     assert data["speed_brackets"]["express_over_140"] > 0
 
 
+@pytest.mark.data_dependent
 def test_get_speed_profiles_unknown_bowler(client):
     """Verifies 404 response for unknown bowler."""
     response = client.get("/api/v1/analytics/tactical/speed-profiles?bowler_id=9999999")
@@ -241,6 +261,7 @@ def test_get_speed_profiles_unknown_bowler(client):
 # 7. Player Comprehensive Tactical Profile
 # ---------------------------------------------------------------------------
 
+@pytest.mark.data_dependent
 def test_get_player_tactical_profile_batter(client):
     """Verifies complete tactical profile for Sanju Samson (2258)."""
     response = client.get("/api/v1/analytics/tactical/players/2258")
@@ -254,6 +275,7 @@ def test_get_player_tactical_profile_batter(client):
     assert "top_strokes" in data["batting_profile"]
 
 
+@pytest.mark.data_dependent
 def test_get_player_tactical_profile_unknown(client):
     """Verifies 404 response for unknown player ID."""
     response = client.get("/api/v1/analytics/tactical/players/9999999")
@@ -264,6 +286,7 @@ def test_get_player_tactical_profile_unknown(client):
 # 8. Death Overs (16–20) Rankings
 # ---------------------------------------------------------------------------
 
+@pytest.mark.data_dependent
 def test_get_death_overs_rankings_all(client):
     """Verifies death overs rankings for both batting and bowling."""
     response = client.get("/api/v1/analytics/tactical/death-overs?discipline=all&limit=5")
@@ -278,6 +301,7 @@ def test_get_death_overs_rankings_all(client):
     assert data["batting_finishers"][0]["strike_rate"] > 200.0
 
 
+@pytest.mark.unit
 def test_get_death_overs_rankings_invalid_discipline(client):
     """Verifies 400 for invalid discipline."""
     response = client.get("/api/v1/analytics/tactical/death-overs?discipline=fielding")
@@ -288,6 +312,7 @@ def test_get_death_overs_rankings_invalid_discipline(client):
 # 9. Head-to-Head Micro-Battles
 # ---------------------------------------------------------------------------
 
+@pytest.mark.data_dependent
 def test_get_head_to_head_matchup(client):
     """Verifies Kohli (47) vs Rashid Khan (4722) head-to-head matchup."""
     response = client.get("/api/v1/analytics/tactical/matchups?striker_id=47&bowler_id=4722")
@@ -300,6 +325,7 @@ def test_get_head_to_head_matchup(client):
     assert data["strike_rate"] >= 140.0
 
 
+@pytest.mark.data_dependent
 def test_get_head_to_head_no_deliveries(client):
     """Verifies empty micro-battle profile when two players never faced each other."""
     # Yuzvendra Chahal (1612) as striker vs Trent Boult (2320) as bowler
@@ -311,6 +337,7 @@ def test_get_head_to_head_no_deliveries(client):
     assert data["dismissals"] == 0
 
 
+@pytest.mark.data_dependent
 def test_get_head_to_head_unknown_player(client):
     """Verifies 404 when either striker or bowler is unknown."""
     response = client.get("/api/v1/analytics/tactical/matchups?striker_id=9999999&bowler_id=4722")
@@ -321,6 +348,7 @@ def test_get_head_to_head_unknown_player(client):
 # 10. Player Search & Autocomplete
 # ---------------------------------------------------------------------------
 
+@pytest.mark.data_dependent
 def test_search_players(client):
     """Verifies player search returns list of matching players."""
     response = client.get("/api/v1/analytics/tactical/players?query=samson")

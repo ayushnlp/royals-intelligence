@@ -116,6 +116,16 @@ export interface DatasetManifestData {
   completeness_percentage: number;
 }
 
+export interface UploadDatasetResponse {
+  status: string;
+  message: string;
+  filename: string;
+  size_bytes: number;
+  sha256_hash: string;
+  competition_id: string;
+  season: string;
+}
+
 // --- Stage 2: Uncapped Players, Eligibility & Analytics ---
 
 export type EligibilityStatus =

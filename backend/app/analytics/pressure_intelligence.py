@@ -79,7 +79,7 @@ class PressureIntelligenceEngine:
             "death_overs_batting_pressure_share_pct": 78.95,
             "total_evaluated_batters": bat_count,
             "total_evaluated_bowlers": bowl_count,
-            "sample_qualification_threshold": ">= 60 pressure balls (or >= 50 balls across >= 10 matches)",
+            "sample_qualification_threshold": ">= 60 pressure balls",
             "governing_ranking_methodology": "Empirical Bayes Shrinkage with 1-SE Conservative Lower Credible Bound",
             "data_provenance": "Official Rajasthan Royals Round 1 Data Pack",
         }
@@ -328,7 +328,7 @@ class PressureIntelligenceEngine:
                 "bowling": "Conservative Runs Saved = -(theta_hat_i + 1.0 * SE_i) (Runs saved per 6 balls lower bound)",
             },
             "qualification_criteria": {
-                "primary_threshold": ">= 60 pressure balls (or >= 50 balls across >= 10 matches)",
+                "primary_threshold": ">= 60 pressure balls",
                 "competition_support": "IPL_QUALIFIED, T20I_QUALIFIED, or DUAL_TOURNAMENT_QUALIFIED",
             },
             "limitations": [

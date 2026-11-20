@@ -40,6 +40,7 @@ export default function AcquisitionPage() {
   const [runs, setRuns] = useState<IngestionRunData[]>([]);
   const [datasets, setDatasets] = useState<DatasetManifestData[]>([]);
   const [loading, setLoading] = useState(true);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [selectedTier, setSelectedTier] = useState<string>("ALL");
 
   // Manual Upload Form State
@@ -49,17 +50,38 @@ export default function AcquisitionPage() {
 
   const loadAllData = async () => {
     setLoading(true);
-    const [sData, cData, rData, dData] = await Promise.all([
-      fetchSources(),
-      fetchCoverage(),
-      fetchIngestionRuns(),
-      fetchDatasets(),
-    ]);
-    setSources(sData);
-    setCoverage(cData);
-    setRuns(rData);
-    setDatasets(dData);
-    setLoading(false);
+    setErrorMsg(null);
+    try {
+      const [sData, cData, rData, dData] = await Promise.all([
+        fetchSources().catch((e) => {
+          console.warn("Sources fetch notice:", e);
+          return [];
+        }),
+        fetchCoverage().catch((e) => {
+          console.warn("Coverage fetch notice:", e);
+          return null;
+        }),
+        fetchIngestionRuns().catch((e) => {
+          console.warn("Runs fetch notice:", e);
+          return [];
+        }),
+        fetchDatasets().catch((e) => {
+          console.warn("Datasets fetch notice:", e);
+          return [];
+        }),
+      ]);
+      setSources(sData);
+      setCoverage(cData);
+      setRuns(rData);
+      setDatasets(dData);
+      if (sData.length === 0 && !cData && rData.length === 0 && dData.length === 0) {
+        setErrorMsg("Failed to communicate with Data Acquisition backend. Ensure FastAPI server is running on port 8000.");
+      }
+    } catch (err: any) {
+      setErrorMsg(err.message || "Failed to load data acquisition telemetry from server.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -135,6 +157,26 @@ export default function AcquisitionPage() {
         </div>
       </section>
 
+      {/* Connection Notice */}
+      {errorMsg && (
+        <div className="p-4 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <AlertCircle className="w-5 h-5 text-amber-600 shrink-0" />
+            <div>
+              <div className="text-xs font-bold">Acquisition Hub Connection Notice</div>
+              <div className="text-xs text-amber-800 mt-0.5">{errorMsg}</div>
+            </div>
+          </div>
+          <button
+            onClick={loadAllData}
+            className="px-3 py-1.5 rounded-lg bg-amber-600 text-white font-bold text-xs hover:bg-amber-700 transition-colors shrink-0 flex items-center gap-1.5"
+          >
+            <RefreshCw className="w-3.5 h-3.5" />
+            <span>Retry</span>
+          </button>
+        </div>
+      )}
+
       {/* Top Metrics Open Telemetry Strip */}
       <section className="py-5 border-y border-slate-200/70">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
@@ -143,7 +185,7 @@ export default function AcquisitionPage() {
               Registered Sources
             </span>
             <div className="text-xl md:text-2xl font-extrabold text-slate-900 font-mono tracking-tight">
-              {sources.length || 7} Sources
+              {sources.length > 0 ? `${sources.length} Sources` : "—"}
             </div>
             <p className="text-xs text-slate-500 mt-0.5">
               4 Reliability Tiers (Open, Official, Curated, Manual)
@@ -155,7 +197,7 @@ export default function AcquisitionPage() {
               Parquet Lakehouse
             </span>
             <div className="text-xl md:text-2xl font-extrabold text-slate-900 font-mono tracking-tight">
-              {coverage?.total_deliveries_indexed ? coverage.total_deliveries_indexed.toLocaleString() : "200,999"}
+              {coverage?.total_deliveries_indexed ? coverage.total_deliveries_indexed.toLocaleString() : "—"}
             </div>
             <p className="text-xs text-slate-500 mt-0.5">
               Columnar Snappy Parquet delivery stream
@@ -167,7 +209,7 @@ export default function AcquisitionPage() {
               Matches Indexed
             </span>
             <div className="text-xl md:text-2xl font-extrabold text-slate-900 font-mono tracking-tight">
-              {coverage?.total_matches_acquired || 883}
+              {coverage?.total_matches_acquired ? coverage.total_matches_acquired.toLocaleString() : "—"}
             </div>
             <p className="text-xs text-slate-500 mt-0.5">
               Deduplicated match format records
@@ -242,69 +284,75 @@ export default function AcquisitionPage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {filteredSources.map((source) => (
-              <div
-                key={source.source_id}
-                className="bg-white rounded-xl border border-slate-200/80 p-5 shadow-sm hover:border-[#E91E8C]/40 transition-all flex flex-col justify-between"
-              >
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <span
-                      className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded border ${
-                        source.tier === "TIER_1"
-                          ? "bg-emerald-50 text-emerald-700 border-emerald-200"
-                          : source.tier === "TIER_2"
-                          ? "bg-blue-50 text-blue-700 border-blue-200"
-                          : source.tier === "TIER_3"
-                          ? "bg-purple-50 text-purple-700 border-purple-200"
-                          : "bg-amber-50 text-amber-700 border-amber-200"
-                      }`}
-                    >
-                      {source.tier}
-                    </span>
-                    <span className="text-[11px] font-mono text-slate-400">
-                      {source.category}
-                    </span>
+          {filteredSources.length === 0 ? (
+            <div className="py-12 text-center text-xs text-slate-500 bg-slate-50/60 rounded-xl border border-dashed border-slate-200">
+              No registered cricket data sources found. Ensure backend acquisition service is running.
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {filteredSources.map((source) => (
+                <div
+                  key={source.source_id}
+                  className="bg-white rounded-xl border border-slate-200/80 p-5 shadow-sm hover:border-[#E91E8C]/40 transition-all flex flex-col justify-between"
+                >
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <span
+                        className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded border ${
+                          source.tier === "TIER_1"
+                            ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                            : source.tier === "TIER_2"
+                            ? "bg-blue-50 text-blue-700 border-blue-200"
+                            : source.tier === "TIER_3"
+                            ? "bg-purple-50 text-purple-700 border-purple-200"
+                            : "bg-amber-50 text-amber-700 border-amber-200"
+                        }`}
+                      >
+                        {source.tier}
+                      </span>
+                      <span className="text-[11px] font-mono text-slate-400">
+                        {source.category}
+                      </span>
+                    </div>
+
+                    <h4 className="text-base font-bold text-[#111C38] mb-1">{source.name}</h4>
+                    <p className="text-xs font-mono text-slate-400 mb-3">{source.source_id}</p>
+
+                    <div className="space-y-1.5 text-xs text-slate-600 mb-4 bg-slate-50 p-3 rounded-lg border border-slate-100">
+                      <div className="flex justify-between">
+                        <span className="text-slate-400">Access Mode:</span>
+                        <span className="font-semibold text-slate-700">{source.access_method}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-slate-400">Licensing:</span>
+                        <span className="font-semibold text-slate-700">{source.licensing?.license_name || "Proprietary"}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-slate-400">Update Frequency:</span>
+                        <span className="font-semibold text-slate-700">{source.update_frequency}</span>
+                      </div>
+                    </div>
                   </div>
 
-                  <h4 className="text-base font-bold text-[#111C38] mb-1">{source.name}</h4>
-                  <p className="text-xs font-mono text-slate-400 mb-3">{source.source_id}</p>
-
-                  <div className="space-y-1.5 text-xs text-slate-600 mb-4 bg-slate-50 p-3 rounded-lg border border-slate-100">
-                    <div className="flex justify-between">
-                      <span className="text-slate-400">Access Mode:</span>
-                      <span className="font-semibold text-slate-700">{source.access_method}</span>
+                  <div className="pt-3 border-t border-slate-100 flex items-center justify-between mt-auto">
+                    <div className="flex items-center gap-1.5">
+                      <span
+                        className={`w-2 h-2 rounded-full ${
+                          source.status === "active" ? "bg-emerald-500 animate-pulse" : "bg-amber-500"
+                        }`}
+                      />
+                      <span className="text-xs font-medium text-slate-600 capitalize">
+                        {source.status === "active" ? "Operational" : "Manual Route Only"}
+                      </span>
                     </div>
-                    <div className="flex justify-between">
-                      <span className="text-slate-400">Licensing:</span>
-                      <span className="font-semibold text-slate-700">{source.licensing?.license_name || "Proprietary"}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-slate-400">Update Frequency:</span>
-                      <span className="font-semibold text-slate-700">{source.update_frequency}</span>
-                    </div>
+                    <span className="text-[11px] text-[#E91E8C] font-semibold">
+                      {source.reliability_assessment.split(" ")[0]} Reliability
+                    </span>
                   </div>
                 </div>
-
-                <div className="pt-3 border-t border-slate-100 flex items-center justify-between mt-auto">
-                  <div className="flex items-center gap-1.5">
-                    <span
-                      className={`w-2 h-2 rounded-full ${
-                        source.status === "active" ? "bg-emerald-500 animate-pulse" : "bg-amber-500"
-                      }`}
-                    />
-                    <span className="text-xs font-medium text-slate-600 capitalize">
-                      {source.status === "active" ? "Operational" : "Manual Route Only"}
-                    </span>
-                  </div>
-                  <span className="text-[11px] text-[#E91E8C] font-semibold">
-                    {source.reliability_assessment.split(" ")[0]} Reliability
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
 
@@ -319,62 +367,68 @@ export default function AcquisitionPage() {
               </p>
             </div>
 
-            <div className="space-y-3">
-              {(coverage?.competitions || []).map((comp) => (
-                <div
-                  key={`${comp.competition_id}_${comp.season}`}
-                  className="p-4 rounded-xl bg-slate-50 border border-slate-200/80 space-y-2"
-                >
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h4 className="text-sm font-bold text-[#111C38]">
-                        {comp.competition_name} ({comp.season})
-                      </h4>
-                      <span className="text-[11px] text-slate-500 font-mono">
-                        Target ID: {comp.competition_id}
+            {coverage?.competitions && coverage.competitions.length > 0 ? (
+              <div className="space-y-3">
+                {coverage.competitions.map((comp) => (
+                  <div
+                    key={`${comp.competition_id}_${comp.season}`}
+                    className="p-4 rounded-xl bg-slate-50 border border-slate-200/80 space-y-2"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h4 className="text-sm font-bold text-[#111C38]">
+                          {comp.competition_name} ({comp.season})
+                        </h4>
+                        <span className="text-[11px] text-slate-500 font-mono">
+                          Target ID: {comp.competition_id}
+                        </span>
+                      </div>
+                      <span
+                        className={`text-xs font-mono font-bold px-2.5 py-1 rounded-full border ${
+                          comp.status === "ACQUIRED"
+                            ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                            : comp.status === "PARTIALLY_ACQUIRED"
+                            ? "bg-amber-50 text-amber-700 border-amber-200"
+                            : "bg-slate-100 text-slate-600 border-slate-300"
+                        }`}
+                      >
+                        {comp.status}
                       </span>
                     </div>
-                    <span
-                      className={`text-xs font-mono font-bold px-2.5 py-1 rounded-full border ${
-                        comp.status === "ACQUIRED"
-                          ? "bg-emerald-50 text-emerald-700 border-emerald-200"
-                          : comp.status === "PARTIALLY_ACQUIRED"
-                          ? "bg-amber-50 text-amber-700 border-amber-200"
-                          : "bg-slate-100 text-slate-600 border-slate-300"
-                      }`}
-                    >
-                      {comp.status}
-                    </span>
-                  </div>
 
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs pt-2 border-t border-slate-200/60">
-                    <div>
-                      <span className="text-slate-400 block">Matches:</span>
-                      <span className="font-bold font-mono text-[#111C38]">{comp.matches_acquired}</span>
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs pt-2 border-t border-slate-200/60">
+                      <div>
+                        <span className="text-slate-400 block">Matches:</span>
+                        <span className="font-bold font-mono text-[#111C38]">{comp.matches_acquired}</span>
+                      </div>
+                      <div>
+                        <span className="text-slate-400 block">Ball-by-Ball:</span>
+                        <span className="font-bold font-mono text-[#111C38]">{comp.ball_by_ball_available} rows</span>
+                      </div>
+                      <div>
+                        <span className="text-slate-400 block">Scorecards:</span>
+                        <span className="font-bold font-mono text-[#111C38]">{comp.scorecards_available}</span>
+                      </div>
+                      <div>
+                        <span className="text-slate-400 block">Squads:</span>
+                        <span className="font-bold text-emerald-600">{comp.squads_available ? "Verified" : "Pending"}</span>
+                      </div>
                     </div>
-                    <div>
-                      <span className="text-slate-400 block">Ball-by-Ball:</span>
-                      <span className="font-bold font-mono text-[#111C38]">{comp.ball_by_ball_available} rows</span>
-                    </div>
-                    <div>
-                      <span className="text-slate-400 block">Scorecards:</span>
-                      <span className="font-bold font-mono text-[#111C38]">{comp.scorecards_available}</span>
-                    </div>
-                    <div>
-                      <span className="text-slate-400 block">Squads:</span>
-                      <span className="font-bold text-emerald-600">{comp.squads_available ? "Verified" : "Pending"}</span>
-                    </div>
-                  </div>
 
-                  {comp.data_gaps.length > 0 && (
-                    <div className="mt-2 text-xs text-amber-700 bg-amber-50 p-2 rounded border border-amber-100 flex items-start gap-1.5">
-                      <AlertCircle size={14} className="shrink-0 mt-0.5 text-amber-600" />
-                      <span>{comp.data_gaps.join(" ")}</span>
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
+                    {comp.data_gaps.length > 0 && (
+                      <div className="mt-2 text-xs text-amber-700 bg-amber-50 p-2 rounded border border-amber-100 flex items-start gap-1.5">
+                        <AlertCircle size={14} className="shrink-0 mt-0.5 text-amber-600" />
+                        <span>{comp.data_gaps.join(" ")}</span>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="py-8 text-center text-xs text-slate-500 bg-slate-50/60 rounded-xl border border-dashed border-slate-200">
+                Tournament coverage audit records currently unavailable from backend service.
+              </div>
+            )}
           </div>
 
           {/* Dataset Manifests Table */}

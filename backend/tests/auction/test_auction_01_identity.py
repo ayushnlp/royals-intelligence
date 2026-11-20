@@ -35,6 +35,7 @@ def registry_data():
     return registry, summary
 
 
+@pytest.mark.data_dependent
 def test_canonical_universe_breadth(registry_data):
     """Verifies candidate universe includes all 1,217 players and is not restricted to 268."""
     registry, summary = registry_data
@@ -49,6 +50,7 @@ def test_canonical_universe_breadth(registry_data):
     assert summary.conflicting_evidence_count == 0
 
 
+@pytest.mark.data_dependent
 def test_source_id_preservation_and_canonical_key(registry_data):
     """Verifies that source IDs are preserved and canonical keys are globally unique."""
     registry, _ = registry_data
@@ -66,6 +68,7 @@ def test_source_id_preservation_and_canonical_key(registry_data):
     assert len(seen_keys) == 1217
 
 
+@pytest.mark.unit
 def test_alias_resolution_all_23_cases():
     """Verifies that all 23 known name aliases resolve to valid canonical entities."""
     for raw_alias, (expected_id, expected_name) in KNOWN_NAME_ALIASES.items():
@@ -74,6 +77,7 @@ def test_alias_resolution_all_23_cases():
         assert res[0] == expected_id, f"ID mismatch for {raw_alias}: expected {expected_id}, got {res[0]}"
 
 
+@pytest.mark.unit
 def test_duplicate_name_disambiguation():
     """Verifies that identical strings (Abdul Samad, Rashid Khan, Haider Ali) disambiguate correctly."""
     # Abdul Samad
@@ -95,6 +99,7 @@ def test_duplicate_name_disambiguation():
     assert uae_haider[0] == 28756
 
 
+@pytest.mark.data_dependent
 def test_unmatched_player_coverage(registry_data):
     """Verifies that 100% of the 268 records in ipl_players.csv resolve cleanly."""
     registry, summary = registry_data
@@ -106,7 +111,7 @@ def test_unmatched_player_coverage(registry_data):
     for _, row in df.iterrows():
         pname = str(row["Name"]).strip()
         team = str(row["Team"]).strip()
-        
+
         matched = False
         for pid, ent in registry.items():
             if pname == ent.canonical_name or pname in ent.aliases:
@@ -118,6 +123,7 @@ def test_unmatched_player_coverage(registry_data):
     assert matched_count == 268
 
 
+@pytest.mark.data_dependent
 def test_ravi_bishnoi_identity_semantics(registry_data):
     """
     Verifies that Ravi Bishnoi is ONE human individual:
@@ -140,6 +146,7 @@ def test_ravi_bishnoi_identity_semantics(registry_data):
     assert rb.cap_certification_status == "VERIFIED_CAPPED"
 
 
+@pytest.mark.data_dependent
 def test_rr_squad_strict_decoupling(registry_data):
     """Verifies strict decoupling of historical RR association from verified current squad."""
     registry, summary = registry_data
@@ -152,10 +159,11 @@ def test_rr_squad_strict_decoupling(registry_data):
         assert ent.auction_registration_status == "PENDING_OFFICIAL_IPL_2027_LONGLIST"
 
 
+@pytest.mark.data_dependent
 def test_capped_reclassifications_and_downgrades(registry_data):
     """Verifies that Sai Kishore is CAPPED, and Vyshak + unproven players are PENDING."""
     registry, _ = registry_data
-    
+
     # Sai Kishore (Asian Games 2023 T20I Cap #108)
     sk = registry[5577]
     assert sk.cap_certification_status == "VERIFIED_CAPPED"
@@ -173,6 +181,7 @@ def test_capped_reclassifications_and_downgrades(registry_data):
         assert p.cap_certification_status == "PENDING_VERIFICATION", f"Player {pid} ({p.canonical_name}) should be PENDING"
 
 
+@pytest.mark.data_dependent
 def test_four_eligibility_states_governance(registry_data):
     """Verifies four discrete eligibility states without inferring uncapped from omission."""
     registry, summary = registry_data
@@ -193,6 +202,7 @@ def test_four_eligibility_states_governance(registry_data):
     assert summary.conflicting_evidence_count == 0
 
 
+@pytest.mark.data_dependent
 def test_provenance_and_traceability(registry_data):
     """Verifies that all entities track provenance sources."""
     registry, _ = registry_data
@@ -201,6 +211,7 @@ def test_provenance_and_traceability(registry_data):
         assert "competition_team_player_mapping.csv" in ent.provenance_sources
 
 
+@pytest.mark.data_integrity
 def test_protected_parquet_hashes_unmodified():
     """Verifies that all 4 Round 1 Parquet artifacts remain byte-for-byte untouched."""
     expected_hashes = {

@@ -13,6 +13,7 @@ def client():
     return TestClient(app)
 
 
+@pytest.mark.data_dependent
 def test_get_uncapped_overview(client):
     """Verifies uncapped overview counts and metadata."""
     response = client.get("/api/v1/analytics/uncapped/overview")
@@ -24,6 +25,7 @@ def test_get_uncapped_overview(client):
     assert data["top_uncapped_bowler"] == "Vaibhav Arora"
 
 
+@pytest.mark.data_dependent
 def test_get_uncapped_leaderboards_all(client):
     """Verifies combined uncapped leaderboards return verified domestic talents."""
     response = client.get("/api/v1/analytics/uncapped/leaderboards?discipline=all&limit=5")
@@ -46,6 +48,7 @@ def test_get_uncapped_leaderboards_all(client):
     assert bowl_leader["eligibility_status"] == "VERIFIED"
 
 
+@pytest.mark.data_dependent
 def test_uncapped_eligibility_exclusion_legends(client):
     """Verifies that retired stars and senior capped players are excluded from uncapped status."""
     # MS Dhoni (ID 8)
@@ -65,6 +68,7 @@ def test_uncapped_eligibility_exclusion_legends(client):
     assert resp_bumrah.json()["eligibility_status"] == "NOT_ELIGIBLE"
 
 
+@pytest.mark.data_dependent
 def test_uncapped_eligibility_verified_talent(client):
     """Verifies that Ashutosh Sharma (ID 8101) is verified uncapped."""
     resp = client.get("/api/v1/analytics/uncapped/eligibility/8101")
@@ -73,6 +77,7 @@ def test_uncapped_eligibility_verified_talent(client):
     assert resp.json()["is_uncapped"] is True
 
 
+@pytest.mark.data_dependent
 def test_configurable_pressure_deliveries_threshold(client):
     """Verifies configurable pressure delivery thresholds (20, 30, 40, 50, 60)."""
     # 60 balls default
@@ -100,6 +105,7 @@ def test_configurable_pressure_deliveries_threshold(client):
     assert d20["excluded_count"] == 0
 
 
+@pytest.mark.data_dependent
 def test_configurable_matches_threshold(client):
     """Verifies configurable matches played threshold (0, 20, 25, 50)."""
     # All matches (min_matches=0)
@@ -128,6 +134,7 @@ def test_configurable_matches_threshold(client):
     assert res_50m.json()["excluded_count"] == 30
 
 
+@pytest.mark.data_dependent
 def test_combined_sample_gate_and_overview(client):
     """Verifies combined independent filters and dynamic overview calculations."""
     res_ov = client.get("/api/v1/analytics/uncapped/overview?min_balls=40&min_matches=20")

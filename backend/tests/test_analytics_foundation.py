@@ -22,7 +22,7 @@ async def async_test_session():
     engine = create_async_engine("sqlite+aiosqlite:///:memory:", echo=False)
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
-    
+
     async_session = async_sessionmaker(bind=engine, class_=AsyncSession, expire_on_commit=False)
     async with async_session() as session:
         yield session
@@ -32,6 +32,7 @@ async def async_test_session():
     await engine.dispose()
 
 
+@pytest.mark.unit
 @pytest.mark.asyncio
 async def test_batting_aggregates_and_phase_splits(async_test_session: AsyncSession):
     """Verifies batting calculation totals, boundary %, dot %, and phase breakdown."""
@@ -131,6 +132,7 @@ async def test_batting_aggregates_and_phase_splits(async_test_session: AsyncSess
     assert round(aggs.phase_splits["Powerplay"].strike_rate, 1) == 218.8
 
 
+@pytest.mark.unit
 @pytest.mark.asyncio
 async def test_bowling_aggregates_and_recent_form(async_test_session: AsyncSession):
     """Verifies bowling metrics (economy, wickets, average) and recent form window."""

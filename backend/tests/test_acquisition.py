@@ -23,6 +23,7 @@ from datetime import datetime, timezone
 
 # --- 1. Source Registry Tests ---
 
+@pytest.mark.unit
 def test_source_registry_listing():
     sources = source_registry.list_sources()
     assert len(sources) >= 5
@@ -33,6 +34,7 @@ def test_source_registry_listing():
     assert "espncricinfo_reference" in source_ids
 
 
+@pytest.mark.unit
 def test_source_registry_tier_filtering():
     tier1_sources = source_registry.list_sources(tier="TIER_1")
     assert all(s["tier"] == "TIER_1" for s in tier1_sources)
@@ -43,6 +45,7 @@ def test_source_registry_tier_filtering():
     assert any(s["source_id"] == "espncricinfo_reference" for s in tier4_sources)
 
 
+@pytest.mark.unit
 def test_source_availability_check():
     diag_cricsheet = source_registry.check_source_availability("cricsheet_open")
     assert diag_cricsheet["is_accessible"] is True
@@ -55,6 +58,7 @@ def test_source_availability_check():
 
 # --- 2. Cricket Data Contract & Anti-Fabrication Rules ---
 
+@pytest.mark.unit
 def test_ball_by_ball_delivery_contract_valid():
     source_ref = SourceReference(
         source_id="cricsheet_open",
@@ -87,6 +91,7 @@ def test_ball_by_ball_delivery_contract_valid():
     assert delivery.delivery_classification is None
 
 
+@pytest.mark.unit
 def test_ball_by_ball_arithmetic_mismatch_rejected():
     source_ref = SourceReference(
         source_id="cricsheet_open",
@@ -115,6 +120,7 @@ def test_ball_by_ball_arithmetic_mismatch_rejected():
 
 # --- 3. Cricket Data Validation Engine Tests ---
 
+@pytest.mark.unit
 def test_validator_detects_arithmetic_mismatch():
     corrupted_match = {
         "info": {
@@ -146,6 +152,7 @@ def test_validator_detects_arithmetic_mismatch():
     assert any(e.error_type == "ARITHMETIC_MISMATCH" for e in summary.errors)
 
 
+@pytest.mark.data_dependent
 def test_validator_passes_valid_sample_match():
     root_dir = Path(__file__).resolve().parent.parent.parent
     sample_file = root_dir / "data" / "raw" / "public" / "samples" / "sample_match_rr_csk.json"
@@ -160,6 +167,7 @@ def test_validator_passes_valid_sample_match():
 
 # --- 4. Normalization Layer Tests ---
 
+@pytest.mark.unit
 def test_team_and_venue_normalization():
     assert CricketDataNormalizer.normalize_team("Kings XI Punjab") == "PBKS"
     assert CricketDataNormalizer.normalize_team("Royal Challengers Bangalore") == "RCB"
@@ -170,6 +178,7 @@ def test_team_and_venue_normalization():
     assert CricketDataNormalizer.normalize_venue("Wankhede Stadium, Mumbai") == "WANKHEDE_MUMBAI"
 
 
+@pytest.mark.unit
 def test_phase_assignment():
     assert CricketDataNormalizer.get_phase(0) == "Powerplay"
     assert CricketDataNormalizer.get_phase(5) == "Powerplay"
@@ -181,6 +190,7 @@ def test_phase_assignment():
 
 # --- 5. Storage & Idempotent Ingestion Tests ---
 
+@pytest.mark.unit
 def test_raw_storage_checksum_and_idempotency(tmp_path):
     storage = RawStorageManager(base_raw_dir=tmp_path)
     test_file = tmp_path / "test_match.json"
@@ -196,6 +206,7 @@ def test_raw_storage_checksum_and_idempotency(tmp_path):
     assert meta1.checksum_sha256 == meta2.checksum_sha256
 
 
+@pytest.mark.data_dependent
 def test_parquet_deliveries_query():
     storage = ParquetStorageManager()
     stats = storage.get_storage_stats()
@@ -210,6 +221,7 @@ def test_parquet_deliveries_query():
 
 # --- 6. API Endpoint Tests ---
 
+@pytest.mark.unit
 def test_api_list_sources(client):
     res = client.get("/api/v1/acquisition/sources")
     assert res.status_code == 200
@@ -218,6 +230,7 @@ def test_api_list_sources(client):
     assert any(s["source_id"] == "cricsheet_open" for s in sources)
 
 
+@pytest.mark.unit
 def test_api_get_source_detail(client):
     res = client.get("/api/v1/acquisition/sources/cricsheet_open")
     assert res.status_code == 200
@@ -227,6 +240,7 @@ def test_api_get_source_detail(client):
     assert data["tier"] == "TIER_1"
 
 
+@pytest.mark.unit
 def test_api_get_source_health(client):
     res = client.get("/api/v1/acquisition/sources/cricsheet_open/health")
     assert res.status_code == 200
@@ -235,6 +249,7 @@ def test_api_get_source_health(client):
     assert data["is_accessible"] is True
 
 
+@pytest.mark.unit
 def test_api_get_coverage_report(client):
     res = client.get("/api/v1/acquisition/coverage")
     assert res.status_code == 200
@@ -244,6 +259,7 @@ def test_api_get_coverage_report(client):
     assert "competitions" in data
 
 
+@pytest.mark.unit
 def test_api_list_runs_and_datasets(client):
     runs_res = client.get("/api/v1/acquisition/runs")
     assert runs_res.status_code == 200
@@ -254,6 +270,7 @@ def test_api_list_runs_and_datasets(client):
     assert isinstance(datasets_res.json(), list)
 
 
+@pytest.mark.unit
 def test_api_manual_upload_unsupported_format_rejected(client):
     files = {"file": ("unsupported.exe", b"malicious binary", "application/octet-stream")}
     res = client.post("/api/v1/acquisition/upload", files=files)
@@ -261,6 +278,7 @@ def test_api_manual_upload_unsupported_format_rejected(client):
     assert "Unsupported file type" in res.json()["detail"]
 
 
+@pytest.mark.unit
 def test_api_manual_upload_valid_json(client):
     valid_json = json.dumps({"note": "vetted domestic trial observation", "player": "Sanju Samson"})
     files = {"file": ("trial_notes.json", valid_json.encode("utf-8"), "application/json")}

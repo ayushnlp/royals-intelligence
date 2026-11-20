@@ -114,7 +114,7 @@ def get_uncapped_leaderboards(
     excluded_count = max(0, total_pool - qualified_count)
 
     if not is_exploratory:
-        gate_desc = ">= 60 pressure deliveries (or >= 50 balls & 10 matches) [Official R1 Benchmark]"
+        gate_desc = ">= 60 pressure deliveries [Official R1 Benchmark]"
     else:
         m_str = f" & >= {min_matches} matches" if min_matches > 0 else " & All Matches"
         gate_desc = f">= {min_balls} pressure deliveries{m_str} [Exploratory Scouting Filter]"

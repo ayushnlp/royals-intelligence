@@ -47,6 +47,8 @@ class BattingAggregates(BaseModel):
     boundary_percentage: float = 0.0
     high_score: int = 0
     phase_splits: Dict[str, PhaseMetrics] = Field(default_factory=dict)
+    is_degraded_reference: bool = Field(default=False, description="Flag indicating degraded offline reference data")
+    data_source: str = Field(default="live_database", description="Data provenance: live_database or reference_seed_not_live")
 
 
 class BowlingAggregates(BaseModel):
@@ -63,6 +65,8 @@ class BowlingAggregates(BaseModel):
     dot_balls: int = 0
     dot_ball_percentage: float = 0.0
     phase_splits: Dict[str, PhaseMetrics] = Field(default_factory=dict)
+    is_degraded_reference: bool = Field(default=False, description="Flag indicating degraded offline reference data")
+    data_source: str = Field(default="live_database", description="Data provenance: live_database or reference_seed_not_live")
 
 
 class MatchScorecardItem(BaseModel):

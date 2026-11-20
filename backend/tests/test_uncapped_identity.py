@@ -24,7 +24,7 @@ async def async_test_session():
     engine = create_async_engine("sqlite+aiosqlite:///:memory:", echo=False)
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
-    
+
     async_session = async_sessionmaker(bind=engine, class_=AsyncSession, expire_on_commit=False)
     async with async_session() as session:
         yield session
@@ -34,6 +34,7 @@ async def async_test_session():
     await engine.dispose()
 
 
+@pytest.mark.unit
 def test_player_name_normalization():
     """Verifies that player names with dots, whitespace, or initial quirks are standardized."""
     assert PlayerIdentityService.normalize_name("R. Parag") == "R Parag"
@@ -42,6 +43,7 @@ def test_player_name_normalization():
     assert PlayerIdentityService.normalize_name("") == ""
 
 
+@pytest.mark.unit
 def test_age_calculation_from_reference_date():
     """Verifies age calculation is precise, requires an explicit cutoff, and never fabricates dates."""
     # 1. Valid verified DOB and confirmed reference date
@@ -65,6 +67,7 @@ def test_age_calculation_from_reference_date():
     assert PlayerIdentityService.calculate_age(future_dob, ref) is None
 
 
+@pytest.mark.unit
 def test_conflict_detection():
     """Verifies detection of discrepancies between existing player and incoming data."""
     existing = PlayerModel(
@@ -106,6 +109,7 @@ def test_conflict_detection():
     assert "Cap status discrepancy" in conflicts[0]
 
 
+@pytest.mark.unit
 def test_uncapped_eligibility_states_and_rules():
     """Verifies eligibility evaluation decoupling international cap facts from competition rules."""
     ref_date = date(2026, 12, 1)
@@ -211,6 +215,7 @@ def test_uncapped_eligibility_states_and_rules():
     assert status == "FLAGGED_CONFLICT"
 
 
+@pytest.mark.unit
 @pytest.mark.asyncio
 async def test_resolve_or_create_player_workflow(async_test_session: AsyncSession):
     """Verifies idempotent player resolution, external identity creation, and profile building."""

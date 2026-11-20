@@ -42,6 +42,7 @@ import {
   X,
   Search,
   Database,
+  RefreshCw,
 } from "lucide-react";
 
 export default function DomesticIntelligencePage() {
@@ -67,7 +68,8 @@ export default function DomesticIntelligencePage() {
   const [playerSearch, setPlayerSearch] = useState("");
   const [playerEligibilityFilter, setPlayerEligibilityFilter] = useState<string>("ALL");
   const [playerRoleFilter, setPlayerRoleFilter] = useState<string>("");
-  const [selectedPlayerId, setSelectedPlayerId] = useState<string>("8101");
+  const [selectedPlayerId, setSelectedPlayerId] = useState<string>("");
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [eligibilityCounts, setEligibilityCounts] = useState<{
     ALL: number;
     VERIFIED_UNCAPPED: number;
@@ -81,48 +83,80 @@ export default function DomesticIntelligencePage() {
 
   // Load live eligibility totals on mount
   useEffect(() => {
+    let isCurrent = true;
     async function loadCounts() {
-      const [allRes, uncappedRes, pendingRes] = await Promise.all([
-        fetchDomesticPlayers({ page: 1, page_size: 1, eligibility_status: "ALL" }),
-        fetchDomesticPlayers({ page: 1, page_size: 1, eligibility_status: "VERIFIED_UNCAPPED" }),
-        fetchDomesticPlayers({ page: 1, page_size: 1, eligibility_status: "PENDING_VERIFICATION" }),
-      ]);
-      setEligibilityCounts({
-        ALL: allRes.total,
-        VERIFIED_UNCAPPED: uncappedRes.total,
-        PENDING_VERIFICATION: pendingRes.total,
-      });
+      try {
+        const [allRes, uncappedRes, pendingRes] = await Promise.all([
+          fetchDomesticPlayers({ page: 1, page_size: 1, eligibility_status: "ALL" }),
+          fetchDomesticPlayers({ page: 1, page_size: 1, eligibility_status: "VERIFIED_UNCAPPED" }),
+          fetchDomesticPlayers({ page: 1, page_size: 1, eligibility_status: "PENDING_VERIFICATION" }),
+        ]);
+        if (isCurrent) {
+          setEligibilityCounts({
+            ALL: allRes.total,
+            VERIFIED_UNCAPPED: uncappedRes.total,
+            PENDING_VERIFICATION: pendingRes.total,
+          });
+        }
+      } catch (err) {
+        if (isCurrent) console.warn("Failed to load domestic eligibility counts:", err);
+      }
     }
     loadCounts();
+    return () => {
+      isCurrent = false;
+    };
   }, []);
 
   // Load competitions on initial mount
-  useEffect(() => {
-    async function loadComps() {
-      setLoading(true);
+  const loadComps = async () => {
+    setLoading(true);
+    setErrorMsg(null);
+    try {
       const res = await fetchDomesticCompetitions();
       setCompetitions(res);
-      if (res.length > 0 && !res.some((c) => c.competition_id === selectedCompId)) {
-        setSelectedCompId(res[0].competition_id);
-        setSelectedSeason(res[0].season);
+      if (res.length > 0) {
+        setSelectedCompId((prev) => (!prev || !res.some((c) => c.competition_id === prev) ? res[0].competition_id : prev));
+        setSelectedSeason((prev) => (!prev || !res.some((c) => c.season === prev) ? res[0].season : prev));
       }
+    } catch (err: any) {
+      setErrorMsg(err.message || "Failed to load domestic competitions.");
+    } finally {
       setLoading(false);
     }
+  };
+
+  useEffect(() => {
     loadComps();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Load matches when competition or season or team changes
   useEffect(() => {
+    let isCurrent = true;
     async function loadMatches() {
-      const res = await fetchSeasonMatches(selectedCompId, selectedSeason, {
-        team: teamFilter || undefined,
-        page: 1,
-        page_size: 20,
-      });
-      setMatches(res.matches);
-      setMatchTotal(res.total);
+      try {
+        const res = await fetchSeasonMatches(selectedCompId, selectedSeason, {
+          team: teamFilter || undefined,
+          page: 1,
+          page_size: 20,
+        });
+        if (isCurrent) {
+          setMatches(res.matches);
+          setMatchTotal(res.total);
+        }
+      } catch (err) {
+        if (isCurrent) {
+          console.warn("Failed to load season matches:", err);
+          setMatches([]);
+          setMatchTotal(0);
+        }
+      }
     }
     loadMatches();
+    return () => {
+      isCurrent = false;
+    };
   }, [selectedCompId, selectedSeason, teamFilter]);
 
   // Load match scorecard when a match is selected
@@ -131,53 +165,104 @@ export default function DomesticIntelligencePage() {
       setMatchScorecard(null);
       return;
     }
+    let isCurrent = true;
     async function loadCard() {
       setLoadingScorecard(true);
-      const card = await fetchMatchScorecard(selectedMatchId!);
-      setMatchScorecard(card);
-      setActiveInningsIdx(0);
-      setLoadingScorecard(false);
+      try {
+        const card = await fetchMatchScorecard(selectedMatchId!);
+        if (isCurrent) {
+          setMatchScorecard(card);
+          setActiveInningsIdx(0);
+        }
+      } catch (err) {
+        if (isCurrent) {
+          console.warn("Failed to load match scorecard:", err);
+          setMatchScorecard(null);
+        }
+      } finally {
+        if (isCurrent) setLoadingScorecard(false);
+      }
     }
     loadCard();
+    return () => {
+      isCurrent = false;
+    };
   }, [selectedMatchId]);
 
   // Load dynamic player discovery catalog
   useEffect(() => {
+    let isCurrent = true;
     async function loadPlayers() {
       setLoadingPlayerList(true);
-      const res = await fetchDomesticPlayers({
-        page: playerPage,
-        page_size: 12,
-        search: playerSearch || undefined,
-        eligibility_status: playerEligibilityFilter,
-        role: playerRoleFilter || undefined,
-      });
-      setDomesticPlayers(res.items);
-      setPlayerTotal(res.total);
-      if (res.items.length > 0 && !res.items.some((p) => String(p.canonical_id) === selectedPlayerId)) {
-        setSelectedPlayerId(String(res.items[0].canonical_id));
+      try {
+        const res = await fetchDomesticPlayers({
+          page: playerPage,
+          page_size: 12,
+          search: playerSearch || undefined,
+          eligibility_status: playerEligibilityFilter,
+          role: playerRoleFilter || undefined,
+        });
+        if (isCurrent) {
+          setDomesticPlayers(res.items);
+          setPlayerTotal(res.total);
+          if (res.items.length > 0) {
+            setSelectedPlayerId((prev) => (!prev || !res.items.some((p) => String(p.canonical_id) === prev) ? String(res.items[0].canonical_id) : prev));
+          } else {
+            setSelectedPlayerId("");
+          }
+        }
+      } catch (err) {
+        if (isCurrent) {
+          console.warn("Failed to load domestic players:", err);
+          setDomesticPlayers([]);
+          setPlayerTotal(0);
+        }
+      } finally {
+        if (isCurrent) setLoadingPlayerList(false);
       }
-      setLoadingPlayerList(false);
     }
     loadPlayers();
+    return () => {
+      isCurrent = false;
+    };
   }, [playerPage, playerSearch, playerEligibilityFilter, playerRoleFilter]);
 
   // Load player all-round data when player tab is viewed or player changed
   useEffect(() => {
     if (activeTab !== "player_profile" || !selectedPlayerId) return;
+    let isCurrent = true;
     async function loadProfile() {
       setLoadingPlayer(true);
-      const [allRound, stats, splits] = await Promise.all([
-        fetchPlayerAllRoundSummary(selectedPlayerId),
-        fetchPlayerDomesticStats(selectedPlayerId),
-        fetchPlayerPhaseSplits(selectedPlayerId),
-      ]);
-      setAllRoundData(allRound);
-      setPlayerSeasonStats(stats);
-      setPlayerPhaseSplits(splits);
-      setLoadingPlayer(false);
+      try {
+        const [allRound, stats, splits] = await Promise.all([
+          fetchPlayerAllRoundSummary(selectedPlayerId).catch((e) => {
+            console.warn("All-round summary fetch notice:", e);
+            return null;
+          }),
+          fetchPlayerDomesticStats(selectedPlayerId).catch((e) => {
+            console.warn("Domestic stats fetch notice:", e);
+            return [];
+          }),
+          fetchPlayerPhaseSplits(selectedPlayerId).catch((e) => {
+            console.warn("Phase splits fetch notice:", e);
+            return [];
+          }),
+        ]);
+        if (isCurrent) {
+          setAllRoundData(allRound);
+          setPlayerSeasonStats(stats);
+          setPlayerPhaseSplits(splits);
+        }
+      } catch (err) {
+        if (isCurrent) console.warn("Failed to load player dossier:", err);
+      } finally {
+        if (isCurrent) setLoadingPlayer(false);
+      }
     }
     loadProfile();
+    return () => {
+      isCurrent = false;
+    };
   }, [selectedPlayerId, activeTab]);
 
   const activeInnings: InningsAnalysisResponse | undefined =
@@ -262,6 +347,26 @@ export default function DomesticIntelligencePage() {
           </div>
         </div>
       </section>
+
+      {/* Connection Notice */}
+      {errorMsg && (
+        <div className="p-4 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <AlertCircle className="w-5 h-5 text-amber-600 shrink-0" />
+            <div>
+              <div className="text-xs font-bold">Domestic Service Connection Notice</div>
+              <div className="text-xs text-amber-800 mt-0.5">{errorMsg}</div>
+            </div>
+          </div>
+          <button
+            onClick={loadComps}
+            className="px-3 py-1.5 rounded-lg bg-amber-600 text-white font-bold text-xs hover:bg-amber-700 transition-colors shrink-0 flex items-center gap-1.5"
+          >
+            <RefreshCw className="w-3.5 h-3.5" />
+            <span>Retry</span>
+          </button>
+        </div>
+      )}
 
       {/* Navigation Tabs */}
       <div className="flex items-center gap-6 border-b border-slate-200">

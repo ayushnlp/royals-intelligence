@@ -53,6 +53,7 @@ def normalization_artifacts():
     }
 
 
+@pytest.mark.data_dependent
 def test_competition_benchmarks_integrity(normalization_artifacts):
     """Verifies that all three competition tiers have empirical benchmarks matching exact delivery totals."""
     benchmarks = normalization_artifacts["benchmarks"]
@@ -86,6 +87,7 @@ def test_competition_benchmarks_integrity(normalization_artifacts):
     assert ipl["total_wickets"] == 4458
 
 
+@pytest.mark.data_dependent
 def test_population_counts_reconciliation(normalization_artifacts):
     """Verifies exact population counts across registry, active players, batters and bowlers."""
     can_df = normalization_artifacts["canonical_df"]
@@ -115,6 +117,7 @@ def test_population_counts_reconciliation(normalization_artifacts):
     assert len(inactive_ids) == 259  # 1217 - 958 = 259
 
 
+@pytest.mark.data_dependent
 def test_canonical_player_id_joins(normalization_artifacts):
     """Verifies 100% of batting and bowling profile IDs exist in the canonical registry."""
     can_ids = set(normalization_artifacts["canonical_df"]["canonical_id"].unique())
@@ -127,6 +130,7 @@ def test_canonical_player_id_joins(normalization_artifacts):
     assert len(bowl_ids) == 647
 
 
+@pytest.mark.data_dependent
 def test_batting_bowling_domain_separation(normalization_artifacts):
     """Verifies strict domain separation between batting and bowling (no composite scores)."""
     batting_cols = set(normalization_artifacts["batting_df"].columns)
@@ -147,6 +151,7 @@ def test_batting_bowling_domain_separation(normalization_artifacts):
     assert "composite_player_score" not in bowling_cols
 
 
+@pytest.mark.data_dependent
 def test_bayesian_shrinkage_properties(normalization_artifacts):
     """Verifies that empirical Bayes shrinkage shrinks low-sample players towards prior mean."""
     bdf = normalization_artifacts["batting_df"]
@@ -168,6 +173,7 @@ def test_bayesian_shrinkage_properties(normalization_artifacts):
         assert diff_pct < 0.10
 
 
+@pytest.mark.data_dependent
 def test_sample_confidence_tiers(normalization_artifacts):
     """Verifies that confidence tiers align with legal ball volume."""
     bdf = normalization_artifacts["batting_df"]
@@ -184,6 +190,7 @@ def test_sample_confidence_tiers(normalization_artifacts):
         assert r["is_sample_qualified"] == (balls >= 30)
 
 
+@pytest.mark.data_dependent
 def test_phase_splits_json_serialization(normalization_artifacts):
     """Verifies that phase splits deserialize into Powerplay, Middle, and Death and include independent confidence."""
     bdf = normalization_artifacts["batting_df"]
@@ -197,6 +204,7 @@ def test_phase_splits_json_serialization(normalization_artifacts):
     assert "is_phase_qualified" in splits["Powerplay"]
 
 
+@pytest.mark.data_dependent
 def test_phase_level_exposure_independence(normalization_artifacts):
     """Verifies that phase confidence is evaluated independently from overall career confidence.
 
@@ -227,6 +235,7 @@ def test_phase_level_exposure_independence(normalization_artifacts):
     assert phase_divergence_count > 50
 
 
+@pytest.mark.data_integrity
 def test_sensitivity_analysis_artifact():
     """Verifies that the sensitivity analysis summary exists and covers m=30, 60, 100, 200."""
     sens_file = PROCESSED_DIR / "sensitivity_analysis_summary.json"
@@ -247,6 +256,7 @@ def test_sensitivity_analysis_artifact():
     assert phase_audit["high_bowlers_with_at_least_one_low_phase"] == 29
 
 
+@pytest.mark.data_dependent
 def test_bowler_extras_and_wicket_credit(normalization_artifacts):
     """Verifies that bowling profiles exclude fielding extras from runs conceded and run-outs from wickets."""
     bowling_df = normalization_artifacts["bowling_df"]
@@ -259,6 +269,7 @@ def test_bowler_extras_and_wicket_credit(normalization_artifacts):
         assert abs(r["raw_economy_rate"] - expected_econ) <= 0.05
 
 
+@pytest.mark.data_integrity
 def test_protected_parquet_hashes_unmodified():
     """Verifies that all 4 Round 1 Parquet artifacts remain byte-for-byte untouched."""
     expected_hashes = {

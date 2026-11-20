@@ -7,17 +7,20 @@ from app.db.base import Base
 from app.db.session import engine, check_database_connection
 
 
+@pytest.mark.environment
 def test_declarative_base_instantiation():
     assert Base.metadata is not None
     # In Stage 2, core, performance, governance, and scouting tables are registered
     assert len(Base.metadata.tables) >= 29
 
 
+@pytest.mark.environment
 def test_async_engine_configuration():
     assert engine.url.drivername == "postgresql+asyncpg"
     assert engine.pool is not None
 
 
+@pytest.mark.environment
 @pytest.mark.asyncio
 async def test_db_check_graceful_handling():
     # Calling check_database_connection should return structured dict without crashing

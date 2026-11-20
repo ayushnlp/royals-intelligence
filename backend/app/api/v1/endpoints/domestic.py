@@ -93,6 +93,7 @@ async def list_season_matches(
     competition_id: str,
     season: str,
     team_code: Optional[str] = Query(None, description="Filter by team code (e.g. DEL, PUN, MP, RAJ)"),
+    team: Optional[str] = Query(None, description="Filter by team code (alias for team_code)"),
     page: int = Query(1, ge=1, description="Page number"),
     page_size: int = Query(20, ge=1, le=100, description="Items per page"),
     db: Optional[AsyncSession] = Depends(get_db),
@@ -100,11 +101,12 @@ async def list_season_matches(
     """
     Retrieves season match listings with scores, venues, outcomes, and ball-by-ball availability flags.
     """
+    filter_team = team_code or team
     matches, total = await DomesticSeasonService.list_season_matches(
         session=db,
         competition_id=competition_id.lower(),
         season=season,
-        team_code=team_code,
+        team_code=filter_team,
         page=page,
         page_size=page_size,
     )
@@ -222,8 +224,10 @@ async def get_player_match_history(
             "page": page,
             "page_size": page_size,
             "total_matches": total,
+            "total": total,
             "total_pages": (total + page_size - 1) // page_size if total > 0 else 1,
             "matches": history,
+            "history": history,
         }
     except KeyError as exc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))

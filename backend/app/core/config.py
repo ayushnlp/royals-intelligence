@@ -5,7 +5,7 @@ Uses Pydantic BaseSettings for strong typing and environment parsing.
 
 from typing import List, Union
 from pathlib import Path
-from pydantic import AnyHttpUrl, field_validator
+from pydantic import AnyHttpUrl, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -97,6 +97,25 @@ class Settings(BaseSettings):
     DATA_RAW_DIR: str = "../data/raw"
     DATA_PROCESSED_DIR: str = "../data/processed"
     DATA_EXTERNAL_DIR: str = "../data/external"
+
+    @model_validator(mode="after")
+    def validate_production_security(self) -> "Settings":
+        """Ensures that default development credentials and secrets cannot run in production."""
+        if self.ENVIRONMENT.lower() == "production":
+            insecure_items: List[str] = []
+            if self.SECRET_KEY == "development-secret-key-change-in-production-min-32-chars" or len(self.SECRET_KEY) < 32:
+                insecure_items.append("SECRET_KEY (must be unique and >= 32 characters)")
+            if self.SCOUT_ADMIN_API_KEY == "rr_scout_admin_secret_token_2026":
+                insecure_items.append("SCOUT_ADMIN_API_KEY (must be explicitly set)")
+            if self.LEAD_ANALYST_API_KEY == "rr_lead_analyst_secret_token_2026":
+                insecure_items.append("LEAD_ANALYST_API_KEY (must be explicitly set)")
+            
+            if insecure_items:
+                raise ValueError(
+                    f"Insecure production configuration: Privileged keys and secrets must be explicitly configured "
+                    f"in production environment. Insecure keys: {', '.join(insecure_items)}"
+                )
+        return self
 
     model_config = SettingsConfigDict(
         env_file=".env",

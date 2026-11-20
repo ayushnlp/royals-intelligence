@@ -2,7 +2,9 @@
 Royals Intelligence - Health Probes Test Suite
 Verifies GET /health and GET /api/v1/health endpoints.
 """
+import pytest
 
+@pytest.mark.environment
 def test_root_health_endpoint(client):
     response = client.get("/health")
     assert response.status_code == 200
@@ -14,6 +16,7 @@ def test_root_health_endpoint(client):
     assert "timestamp" in data
 
 
+@pytest.mark.environment
 def test_api_v1_health_endpoint(client):
     response = client.get("/api/v1/health")
     assert response.status_code == 200

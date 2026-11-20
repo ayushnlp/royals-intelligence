@@ -58,7 +58,7 @@ def run_checks():
     print("[4/6] Initializing FastAPI App & Routes ... ", end="")
     try:
         from app.main import app
-        route_paths = [r.path for r in app.routes]
+        route_paths = list(app.openapi()["paths"].keys())
         assert "/health" in route_paths
         assert "/api/v1/health" in route_paths
         print(f"PASS ({len(route_paths)} routes registered)")

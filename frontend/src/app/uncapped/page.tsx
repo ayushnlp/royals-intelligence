@@ -12,7 +12,6 @@ import {
   fetchUncappedOverview,
   fetchUncappedLeaderboards,
 } from "@/lib/api";
-import uncappedFallbackData from "@/lib/uncapped_fallback_data.json";
 import {
   Shield,
   Award,
@@ -66,93 +65,6 @@ export default function UncappedIntelligencePage() {
   const [selectedPlayer, setSelectedPlayer] = useState<UncappedBattingItem | UncappedBowlingItem | null>(null);
   const [selectedDiscipline, setSelectedDiscipline] = useState<"batting" | "bowling">("batting");
 
-  // Client-side fallback dynamic calculator (for offline/resilience)
-  const computeClientFallback = useCallback((balls: number, matches: number) => {
-    const rawBatters = (uncappedFallbackData.batters as any[]) || [];
-    const rawBowlers = (uncappedFallbackData.bowlers as any[]) || [];
-
-    const isOfficial = balls === 60 && matches === 0;
-
-    const filteredBatters: UncappedBattingItem[] = rawBatters
-      .filter((b) => {
-        const pBalls = Number(b.pressure_legal_balls || 0);
-        const pMatches = Number(b.pressure_matches || 0);
-        if (isOfficial) {
-          return pBalls >= 60 || (pBalls >= 50 && pMatches >= 10);
-        }
-        return pBalls >= balls && (matches === 0 || pMatches >= matches);
-      })
-      .map((b, idx) => ({
-        ...b,
-        uncapped_rank: idx + 1,
-        is_official_r1_qualified: Boolean(
-          Number(b.pressure_legal_balls || 0) >= 60 ||
-          (Number(b.pressure_legal_balls || 0) >= 50 && Number(b.pressure_matches || 0) >= 10)
-        ),
-        meets_active_gate: true,
-      }));
-
-    const filteredBowlers: UncappedBowlingItem[] = rawBowlers
-      .filter((bw) => {
-        const pBalls = Number(bw.pressure_legal_balls || 0);
-        const pMatches = Number(bw.pressure_matches || 0);
-        if (isOfficial) {
-          return pBalls >= 60 || (pBalls >= 50 && pMatches >= 10);
-        }
-        return pBalls >= balls && (matches === 0 || pMatches >= matches);
-      })
-      .map((bw, idx) => ({
-        ...bw,
-        uncapped_rank: idx + 1,
-        is_official_r1_qualified: Boolean(
-          Number(bw.pressure_legal_balls || 0) >= 60 ||
-          (Number(bw.pressure_legal_balls || 0) >= 50 && Number(bw.pressure_matches || 0) >= 10)
-        ),
-        meets_active_gate: true,
-      }));
-
-    const isExploratory = !isOfficial;
-    const matchStr = matches > 0 ? ` & >= ${matches} matches` : " & All Matches";
-    const gateDesc = isOfficial
-      ? ">= 60 pressure deliveries (or >= 50 balls & 10 matches) [Official R1 Benchmark]"
-      : `>= ${balls} pressure deliveries${matchStr} [Exploratory Scouting Filter]`;
-
-    return {
-      overview: {
-        total_verified_uncapped_batters: filteredBatters.length,
-        total_verified_uncapped_bowlers: filteredBowlers.length,
-        top_uncapped_batter: filteredBatters.length > 0 ? filteredBatters[0].player_name : null,
-        top_uncapped_bowler: filteredBowlers.length > 0 ? filteredBowlers[0].player_name : null,
-        sample_gate_applied: gateDesc,
-        governing_statute: "BCCI IPL Player Regulations 2025/2026",
-        audit_date: "2026-11-16",
-        min_balls_applied: balls,
-        min_matches_applied: matches,
-        is_exploratory_filter: isExploratory,
-        total_pool_batters: rawBatters.length,
-        total_pool_bowlers: rawBowlers.length,
-        excluded_batters_count: rawBatters.length - filteredBatters.length,
-        excluded_bowlers_count: rawBowlers.length - filteredBowlers.length,
-      },
-      leaderboards: {
-        discipline_filter: "all",
-        qualified_only: true,
-        batting_count: filteredBatters.length,
-        bowling_count: filteredBowlers.length,
-        batting_leaderboard: filteredBatters,
-        bowling_leaderboard: filteredBowlers,
-        sample_gate: gateDesc,
-        governing_statute: "BCCI IPL Player Regulations 2025/2026",
-        audit_date: "2026-11-16",
-        min_balls_applied: balls,
-        min_matches_applied: matches,
-        is_exploratory_filter: isExploratory,
-        excluded_count: (rawBatters.length + rawBowlers.length) - (filteredBatters.length + filteredBowlers.length),
-        total_pool_count: rawBatters.length + rawBowlers.length,
-      },
-    };
-  }, []);
-
   const loadUncappedData = useCallback(async (balls: number = minBalls, matches: number = minMatches) => {
     setLoading(true);
     setErrorMsg(null);
@@ -168,24 +80,29 @@ export default function UncappedIntelligencePage() {
         }),
       ]);
 
-      if (ovRes && lbRes) {
+      if (
+        ovRes &&
+        lbRes &&
+        ((lbRes.batting_leaderboard?.length ?? 0) > 0 || (lbRes.bowling_leaderboard?.length ?? 0) > 0)
+      ) {
         setOverview(ovRes);
         setLeaderboards(lbRes);
+        setErrorMsg(null);
       } else {
-        // Graceful client fallback using verified domestic dataset
-        const fallback = computeClientFallback(balls, matches);
-        setOverview(fallback.overview);
-        setLeaderboards(fallback.leaderboards);
+        setOverview(ovRes || null);
+        setLeaderboards(lbRes || null);
+        if (!ovRes && !lbRes) {
+          setErrorMsg("Uncapped player intelligence data is currently unavailable from backend service.");
+        }
       }
     } catch (err: any) {
-      // Graceful fallback on network error
-      const fallback = computeClientFallback(balls, matches);
-      setOverview(fallback.overview);
-      setLeaderboards(fallback.leaderboards);
+      setOverview(null);
+      setLeaderboards(null);
+      setErrorMsg(err.message || "Failed to communicate with Uncapped Intelligence backend service. Ensure backend is running on port 8000.");
     } finally {
       setLoading(false);
     }
-  }, [minBalls, minMatches, computeClientFallback]);
+  }, [minBalls, minMatches]);
 
   useEffect(() => {
     loadUncappedData(minBalls, minMatches);
@@ -279,15 +196,17 @@ export default function UncappedIntelligencePage() {
         </div>
       </section>
 
-      {/* Connection Notice (if backend unreachable) */}
+      {/* Connection Notice */}
       {errorMsg && (
-        <div className="p-4 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 flex items-center justify-between gap-4">
+        <div className="p-4 rounded-xl bg-amber-50/90 border border-amber-200 text-amber-900 flex items-center justify-between gap-4 shadow-xs">
           <div className="flex items-center gap-3">
             <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0" />
             <div>
-              <div className="text-xs font-bold">Backend Standby Notice</div>
-              <div className="text-xs text-amber-800 mt-0.5">
-                {errorMsg} Local high-fidelity domestic dataset active.
+              <div className="text-xs font-bold uppercase tracking-wider flex items-center gap-2">
+                <span>BACKEND CONNECTION NOTICE</span>
+              </div>
+              <div className="text-xs text-amber-800 mt-1">
+                {errorMsg}
               </div>
             </div>
           </div>
@@ -296,7 +215,7 @@ export default function UncappedIntelligencePage() {
             className="px-3 py-1.5 rounded-lg bg-amber-600 text-white font-bold text-xs hover:bg-amber-700 transition-colors shrink-0 flex items-center gap-1.5"
           >
             <RefreshCw className="w-3.5 h-3.5" />
-            <span>Retry</span>
+            <span>Retry Connection</span>
           </button>
         </div>
       )}
@@ -311,7 +230,7 @@ export default function UncappedIntelligencePage() {
               Top Uncapped Batter
             </span>
             <div className="text-xl md:text-2xl font-extrabold text-[#111827] tracking-tight flex items-baseline gap-1.5">
-              <span>{overview?.top_uncapped_batter ?? "Ashutosh Sharma"}</span>
+              <span>{overview?.top_uncapped_batter ?? "—"}</span>
               <span className="w-1.5 h-1.5 rounded-full bg-[#E91E8C]" />
             </div>
             <p className="text-xs text-slate-500 mt-0.5">
@@ -324,7 +243,7 @@ export default function UncappedIntelligencePage() {
               Top Uncapped Bowler
             </span>
             <div className="text-xl md:text-2xl font-extrabold text-[#111827] tracking-tight flex items-baseline gap-1.5">
-              <span>{overview?.top_uncapped_bowler ?? "Vaibhav Arora"}</span>
+              <span>{overview?.top_uncapped_bowler ?? "—"}</span>
               <span className="w-1.5 h-1.5 rounded-full bg-[#E91E8C]" />
             </div>
             <p className="text-xs text-slate-500 mt-0.5">
@@ -339,7 +258,7 @@ export default function UncappedIntelligencePage() {
             <div className="text-xl md:text-2xl font-extrabold text-[#111827] font-mono tracking-tight">
               {overview
                 ? `${overview.total_verified_uncapped_batters} Bat / ${overview.total_verified_uncapped_bowlers} Bowl`
-                : "14 Bat / 15 Bowl"}
+                : "—"}
             </div>
             <p className="text-xs text-slate-500 mt-0.5">
               {isExploratory
@@ -355,12 +274,12 @@ export default function UncappedIntelligencePage() {
             <div className="text-xl md:text-2xl font-extrabold text-amber-700 font-mono tracking-tight">
               {overview?.excluded_batters_count !== undefined
                 ? `${overview.excluded_batters_count} Bat / ${overview.excluded_bowlers_count} Bowl`
-                : "16 Bat / 7 Bowl"}
+                : "—"}
             </div>
             <p className="text-xs text-slate-500 mt-0.5">
               {overview?.excluded_batters_count !== undefined
                 ? `${overview.excluded_batters_count + (overview.excluded_bowlers_count ?? 0)} candidates below active gate`
-                : "23 candidates below active gate"}
+                : "Awaiting backend telemetry"}
             </p>
           </div>
         </div>
@@ -501,7 +420,7 @@ export default function UncappedIntelligencePage() {
               <span className="font-bold text-amber-700">
                 {overview?.excluded_batters_count !== undefined
                   ? `${overview.excluded_batters_count} Bat / ${overview.excluded_bowlers_count} Bowl (${(overview.excluded_batters_count || 0) + (overview.excluded_bowlers_count || 0)} total)`
-                  : "16 Bat / 7 Bowl (23 total)"}
+                  : "—"}
               </span>
             </div>
           </div>
@@ -613,7 +532,7 @@ export default function UncappedIntelligencePage() {
                     leaderboards.batting_leaderboard.map((batter) => {
                       const isTop1 = batter.uncapped_rank === 1;
                       const isTop3 = batter.uncapped_rank <= 3;
-                      const isOfficial = batter.is_official_r1_qualified ?? (batter.pressure_legal_balls >= 60 || (batter.pressure_legal_balls >= 50 && batter.pressure_matches >= 10));
+                      const isOfficial = batter.is_official_r1_qualified ?? (batter.pressure_legal_balls >= 60);
                       return (
                         <tr key={batter.player_id} className="hover:bg-slate-50/70 transition-colors">
                           <td className="px-4 py-3 font-sans text-slate-900">
@@ -782,7 +701,7 @@ export default function UncappedIntelligencePage() {
                     leaderboards.bowling_leaderboard.map((bowler) => {
                       const isTop1 = bowler.uncapped_rank === 1;
                       const isTop3 = bowler.uncapped_rank <= 3;
-                      const isOfficial = bowler.is_official_r1_qualified ?? (bowler.pressure_legal_balls >= 60 || (bowler.pressure_legal_balls >= 50 && bowler.pressure_matches >= 10));
+                      const isOfficial = bowler.is_official_r1_qualified ?? (bowler.pressure_legal_balls >= 60);
                       return (
                         <tr key={bowler.player_id} className="hover:bg-slate-50/70 transition-colors">
                           <td className="px-4 py-3 font-sans text-slate-900">
@@ -940,7 +859,7 @@ export default function UncappedIntelligencePage() {
                   <span>Rule 3: Configurable Sample Gate</span>
                 </div>
                 <p className="text-xs text-slate-600 leading-relaxed">
-                  Default strict benchmark requires &ge; 60 pressure deliveries (or &ge; 50 balls across &ge; 10 matches). Exploratory filters allow adjusting down to 20 balls for early scouting without corrupting official rankings.
+                  Default strict benchmark requires &ge; 60 pressure deliveries. Exploratory filters allow adjusting down to 20 balls for early scouting without corrupting official rankings.
                 </p>
               </div>
             </div>
