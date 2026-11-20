@@ -111,7 +111,12 @@ class UncappedPressureIntelligenceService:
     def __init__(self, processed_dir: Optional[Path] = None, raw_dir: Optional[Path] = None):
         base_dir = Path(__file__).resolve().parent.parent.parent.parent
         self.processed_dir = processed_dir or (base_dir / "round1_pressure" / "data" / "processed")
-        self.raw_dir = raw_dir or (base_dir / "data" / "raw" / "rajasthan_royals" / "round_1_data_pack")
+        if raw_dir is not None:
+            self.raw_dir = Path(raw_dir)
+        else:
+            primary_raw = base_dir / "data" / "raw" / "rajasthan_royals" / "round_1_data_pack"
+            alt_raw = base_dir / "round1_pressure" / "data" / "raw"
+            self.raw_dir = primary_raw if primary_raw.exists() else alt_raw
 
         self._batting_lb: Optional[pd.DataFrame] = None
         self._bowling_lb: Optional[pd.DataFrame] = None
@@ -126,10 +131,15 @@ class UncappedPressureIntelligenceService:
         if self._is_loaded:
             return
 
+        base_dir = Path(__file__).resolve().parent.parent.parent.parent
         try:
             bat_path = self.processed_dir / "batting_leaderboard.parquet"
             bowl_path = self.processed_dir / "bowling_leaderboard.parquet"
             map_path = self.raw_dir / "competition_team_player_mapping.csv"
+            if not map_path.exists():
+                alt_map = base_dir / "round1_pressure" / "data" / "raw" / "competition_team_player_mapping.csv"
+                if alt_map.exists():
+                    map_path = alt_map
 
             if bat_path.exists() and bowl_path.exists():
                 self._batting_lb = pd.read_parquet(bat_path)
