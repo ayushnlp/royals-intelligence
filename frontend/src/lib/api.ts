@@ -59,11 +59,11 @@ export const getApiBaseUrl = (): string => {
     if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") {
       return `http://${window.location.hostname}:8000/api/v1`;
     }
-    // Remote production deployment without explicit env var
-    return `${window.location.origin}/api/v1`;
+    // Remote production deployment: target the live production Render API
+    return "https://royals-intelligence-api.onrender.com/api/v1";
   }
   if (process.env.NODE_ENV === "production") {
-    return "/api/v1";
+    return "https://royals-intelligence-api.onrender.com/api/v1";
   }
   return "http://localhost:8000/api/v1";
 };

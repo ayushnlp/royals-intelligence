@@ -67,8 +67,13 @@ class DomesticSeasonService:
             mapping_path = REPO_ROOT / "data" / "raw" / "rajasthan_royals" / "round_1_data_pack" / "competition_team_player_mapping.csv"
 
             # 1. Load registry and ledger
-            reg_df = pd.read_parquet(reg_path)
-            led_df = pd.read_parquet(led_path)
+            if reg_path.exists() and led_path.exists():
+                reg_df = pd.read_parquet(reg_path)
+                led_df = pd.read_parquet(led_path)
+            else:
+                logger.warning(f"Authoritative registry/ledger missing in {reg_path.parent}; running in standby mode.")
+                reg_df = pd.DataFrame(columns=["canonical_id", "canonical_name", "canonical_key", "aliases", "primary_role", "current_domestic_team", "current_ipl_franchise"])
+                led_df = pd.DataFrame(columns=["canonical_id", "final_eligibility_state", "reviewer_notes", "test_caps_count", "odi_caps_count", "t20i_caps_count"])
             
             # Overseas identification from mapping
             if mapping_path.exists():

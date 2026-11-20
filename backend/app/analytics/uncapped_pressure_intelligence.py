@@ -131,11 +131,13 @@ class UncappedPressureIntelligenceService:
             bowl_path = self.processed_dir / "bowling_leaderboard.parquet"
             map_path = self.raw_dir / "competition_team_player_mapping.csv"
 
-            if not bat_path.exists() or not bowl_path.exists():
-                raise FileNotFoundError(f"Parquet leaderboards missing in {self.processed_dir}")
-
-            self._batting_lb = pd.read_parquet(bat_path)
-            self._bowling_lb = pd.read_parquet(bowl_path)
+            if bat_path.exists() and bowl_path.exists():
+                self._batting_lb = pd.read_parquet(bat_path)
+                self._bowling_lb = pd.read_parquet(bowl_path)
+            else:
+                logger.warning(f"Uncapped leaderboards missing in {self.processed_dir}; running in standby mode.")
+                self._batting_lb = pd.DataFrame()
+                self._bowling_lb = pd.DataFrame()
 
             if map_path.exists():
                 self._mapping_df = pd.read_csv(map_path)
