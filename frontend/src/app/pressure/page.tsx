@@ -149,34 +149,14 @@ export default function PressureIntelligencePage() {
           </span>
         </div>
 
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-          <div className="max-w-3xl space-y-2">
-            <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-[#E4005A] leading-tight font-heading">
-              Pressure Reliability & Ranking Engine
-            </h1>
-            <p className="text-sm md:text-base text-[#52627A] leading-relaxed font-normal">
-              Official Top 10 Batters and Top 10 Bowlers Under Pressure. Benchmarked against 12-cell
-              non-pressure context strata, Empirical Bayes shrinkage, and 1-SE Conservative lower credible bounds.
-            </p>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-3 shrink-0">
-            <Link
-              href="/uncapped"
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-white border border-[#E7EAF0] text-[#17294B] text-xs font-semibold hover:bg-white transition-colors shadow-soft"
-            >
-              <Sparkles size={14} className="text-[#17294B]" />
-              <span>Uncapped Scouting</span>
-              <ArrowRight size={13} className="text-[#52627A]" />
-            </Link>
-            <Link
-              href="/tactical"
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#17294B] text-white text-xs font-semibold hover:bg-[#17294B] transition-colors shadow-soft"
-            >
-              <Crosshair size={14} className="text-[#E4005A]" />
-              <span>Tactical Analytics</span>
-            </Link>
-          </div>
+        <div className="space-y-2 max-w-4xl">
+          <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-[#E4005A] leading-tight font-heading">
+            Pressure Reliability & Ranking Engine
+          </h1>
+          <p className="text-sm md:text-base text-[#52627A] leading-relaxed font-normal">
+            Official Top 10 Batters and Top 10 Bowlers Under Pressure. Benchmarked against 12-cell
+            non-pressure context strata, Empirical Bayes shrinkage, and 1-SE Conservative lower credible bounds.
+          </p>
         </div>
       </section>
 

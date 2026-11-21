@@ -322,27 +322,14 @@ export default function TacticalIntelligencePage() {
           </span>
         </div>
 
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-          <div className="max-w-3xl space-y-2">
-            <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-[#E4005A] leading-tight font-heading">
-              Tactical Cricket Intelligence
-            </h1>
-            <p className="text-sm md:text-base text-[#52627A] leading-relaxed font-normal">
-              Official Rajasthan Royals Data Pack • Phase Splits • Micro-Battles • Speed Telemetry.
-              867 active matches analyzed with 16 zero-delivery fixtures reconciled.
-            </p>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-3 shrink-0">
-            <Link
-              href="/pressure"
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[#17294B] text-white text-xs font-semibold hover:bg-[#17294B] transition-colors shadow-sm"
-            >
-              <Shield size={14} className="text-[#17294B]" />
-              <span>Pressure Leaderboards</span>
-              <ArrowRight size={13} className="text-[#52627A]" />
-            </Link>
-          </div>
+        <div className="space-y-2 max-w-4xl">
+          <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-[#E4005A] leading-tight font-heading">
+            Tactical Cricket Intelligence
+          </h1>
+          <p className="text-sm md:text-base text-[#52627A] leading-relaxed font-normal">
+            Official Rajasthan Royals Data Pack • Phase Splits • Micro-Battles • Speed Telemetry.
+            867 active matches analyzed with 16 zero-delivery fixtures reconciled.
+          </p>
         </div>
       </section>
 

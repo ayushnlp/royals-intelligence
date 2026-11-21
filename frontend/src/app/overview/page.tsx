@@ -138,35 +138,6 @@ export default function OverviewPage() {
           </p>
         </div>
 
-        {/* Primary Action Buttons */}
-        <div className="flex flex-wrap items-center gap-3 pt-2">
-          <Link
-            href="/pressure"
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-[#17294B] text-white text-xs font-semibold hover:bg-[#17294B] transition-colors shadow-soft group"
-          >
-            <Shield size={14} className="text-[#E4005A]/60" />
-            <span>Pressure Intelligence Dossier</span>
-            <ArrowRight size={13} className="text-[#17294B]/30 group-hover:translate-x-0.5 transition-transform" />
-          </Link>
-
-          <Link
-            href="/uncapped"
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-white border border-[#E7EAF0] text-[#17294B] text-xs font-semibold hover:bg-white transition-colors shadow-soft group"
-          >
-            <Sparkles size={14} className="text-[#17294B]" />
-            <span>Uncapped Scouting Shortlist</span>
-            <ArrowRight size={13} className="text-[#52627A] group-hover:translate-x-0.5 transition-transform" />
-          </Link>
-
-          <Link
-            href="/tactical"
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg text-[#52627A] text-xs font-medium hover:text-[#17294B] transition-colors"
-          >
-            <Crosshair size={14} className="text-[#E4005A]" />
-            <span>Tactical Analytics</span>
-          </Link>
-        </div>
-
         {/* Connection Notice */}
         {(!isLive || errorMsg) && (
           <div className="p-3.5 rounded-xl bg-[#E4005A]/10 border border-[#E4005A]/30 text-[#E4005A] text-xs flex items-center justify-between gap-3 shadow-xs">
@@ -236,9 +207,9 @@ export default function OverviewPage() {
             <span className="text-xs sm:text-[13px] font-semibold uppercase tracking-wider text-[#52627A] block mb-1">
               Verification Health
             </span>
-            <div className="text-2xl sm:text-[28px] lg:text-[30px] font-extrabold text-[#E4005A] font-mono tracking-tight flex items-baseline gap-2.5 leading-tight my-1">
+            <div className="text-xl sm:text-2xl lg:text-[26px] font-extrabold text-[#E4005A] font-mono tracking-tight flex items-center gap-2 leading-tight my-1 whitespace-nowrap">
               <span>{isLive ? "Engine Online" : "Service Standby"}</span>
-              <span className={`w-2.5 h-2.5 rounded-full ${isLive ? "bg-[#E4005A] animate-pulse" : "bg-[#E4005A]"}`} />
+              <span className={`w-2.5 h-2.5 rounded-full shrink-0 ${isLive ? "bg-[#E4005A] animate-pulse" : "bg-[#E4005A]"}`} />
             </div>
             <p className="text-xs sm:text-[13px] text-[#52627A] mt-1 leading-snug">
               {isLive ? `FastAPI v${health?.version || "0.1.0"} active` : "Backend service awaiting initialization"}

@@ -103,17 +103,17 @@ export default function HomePage() {
       {/* =================================================================== */}
       {/* 2. UNIFIED SEGMENTED MODULE NAVIGATION BAR — BOTTOM-CENTERED */}
       {/* =================================================================== */}
-      <section className="pt-1 sm:pt-2 w-full flex justify-center">
+      <section className="pt-2 sm:pt-3 w-full flex justify-center">
         <nav
           aria-label="Module Quick Navigation"
-          className="inline-flex items-center p-1 sm:p-1.5 rounded-full bg-[#FCE8F0]/40 border border-[#E7EAF0] shadow-2xs max-w-full overflow-x-auto"
+          className="inline-flex items-center p-1 rounded-full bg-[#FCE8F0]/40 border border-[#E7EAF0] shadow-2xs max-w-full overflow-x-auto"
         >
           {featureCards.map((card) => {
             return (
               <Link
                 key={card.title}
                 href={card.href}
-                className="px-3 sm:px-4 lg:px-5 py-2 sm:py-2.5 rounded-full text-xs sm:text-[13px] font-heading font-extrabold text-[#17294B] hover:text-[#E4005A] hover:bg-white active:bg-white/90 transition-all duration-150 whitespace-nowrap cursor-pointer text-center outline-none focus-visible:ring-2 focus-visible:ring-[#E4005A]"
+                className="px-2.5 sm:px-3 lg:px-4 py-1.5 sm:py-2 rounded-full text-[11px] sm:text-xs font-heading font-extrabold text-[#17294B] hover:text-[#E4005A] hover:bg-white active:bg-white/90 transition-all duration-150 whitespace-nowrap cursor-pointer text-center outline-none focus-visible:ring-2 focus-visible:ring-[#E4005A]"
               >
                 {card.title}
               </Link>
@@ -121,13 +121,6 @@ export default function HomePage() {
           })}
         </nav>
       </section>
-
-      {/* =================================================================== */}
-      {/* 3. FOOTER — CENTERED AT THE BOTTOM */}
-      {/* =================================================================== */}
-      <footer className="pt-2 sm:pt-3 pb-1 text-center text-[10px] sm:text-[11px] text-[#52627A]">
-        <span>Royals Intelligence Season 02 · Rajasthan Royals Cricket Analytics · Built to Find the Difference.</span>
-      </footer>
 
       {/* =================================================================== */}
       {/* 4. METHODOLOGY MODAL DIALOG — PRESIGNED ACCESS */}
