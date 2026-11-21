@@ -57,7 +57,7 @@ export const ConnectionWaveform: React.FC<ConnectionWaveformProps> = ({
         xmlns="http://www.w3.org/2000/svg"
       >
         <defs>
-          {/* Authentic Rajasthan Royals Waveform Gradient: Royal Pink (#D4145A) to Deep Pink (#A80F50) */}
+          {/* Authentic Rajasthan Royals Waveform Gradient: RR Deep Pink (#E4005A) to Cardinal Pink (#950460) */}
           <linearGradient
             id="rr-waveform-gradient"
             x1="0%"
@@ -65,9 +65,9 @@ export const ConnectionWaveform: React.FC<ConnectionWaveformProps> = ({
             x2="100%"
             y2="0%"
           >
-            <stop offset="0%" stopColor="#D4145A" />
-            <stop offset="50%" stopColor="#A80F50" />
-            <stop offset="100%" stopColor="#D4145A" />
+            <stop offset="0%" stopColor="#E4005A" />
+            <stop offset="50%" stopColor="#950460" />
+            <stop offset="100%" stopColor="#E4005A" />
           </linearGradient>
         </defs>
 
@@ -88,7 +88,7 @@ export const ConnectionWaveform: React.FC<ConnectionWaveformProps> = ({
           <g>
             <path
               d={flatlinePath}
-              stroke="#52627A"
+              stroke="#17294B"
               strokeOpacity="0.3"
               strokeWidth="1.5"
               strokeLinecap="round"

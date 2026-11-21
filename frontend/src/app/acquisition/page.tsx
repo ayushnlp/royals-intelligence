@@ -32,6 +32,7 @@ import {
   IngestionRunData,
   DatasetManifestData,
 } from "@/types";
+import { cn } from "@/lib/utils";
 
 export default function AcquisitionPage() {
   const [activeTab, setActiveTab] = useState<"sources" | "coverage" | "runs" | "upload">("sources");
@@ -447,18 +448,25 @@ export default function AcquisitionPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
-                  {datasets.map((d) => (
-                    <tr key={d.dataset_id} className="hover:hover:bg-[#101D3A]/03 font-mono">
-                      <td className="px-4 py-3 font-bold text-[#101D3A]">{d.dataset_id}</td>
-                      <td className="px-4 py-3 text-[#52627A]">{d.source_id}</td>
-                      <td className="px-4 py-3 text-[#101D3A] font-bold">{d.total_matches}</td>
-                      <td className="px-4 py-3 text-[#101D3A] font-bold">{d.total_deliveries}</td>
+                  {datasets.map((d, idx) => (
+                    <tr
+                      key={d.dataset_id}
+                      className={cn(
+                        "font-mono transition-colors",
+                        idx % 2 === 0 ? "bg-[#FCE8F0]/35" : "bg-[#EEF4FC]/35",
+                        "hover:bg-[#FCE8F0]/80"
+                      )}
+                    >
+                      <td className="px-4 py-3 font-bold text-[#17294B]">{d.dataset_id}</td>
+                      <td className="px-4 py-3 text-[#74658F]">{d.source_id}</td>
+                      <td className="px-4 py-3 text-[#17294B] font-bold">{d.total_matches}</td>
+                      <td className="px-4 py-3 text-[#17294B] font-bold">{d.total_deliveries}</td>
                       <td className="px-4 py-3">
-                        <span className="text-[#D4145A] bg-[#D4145A]/10 px-2 py-0.5 rounded border border-[#D4145A]/30">
+                        <span className="text-[#E4005A] bg-[#FCE8F0] px-2 py-0.5 rounded border border-[#E4005A]/30">
                           {d.validation_status}
                         </span>
                       </td>
-                      <td className="px-4 py-3 text-[#101D3A] font-bold">{d.completeness_percentage}%</td>
+                      <td className="px-4 py-3 text-[#17294B] font-bold">{d.completeness_percentage}%</td>
                     </tr>
                   ))}
                   {datasets.length === 0 && (
@@ -501,18 +509,25 @@ export default function AcquisitionPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {runs.map((r) => (
-                  <tr key={r.run_id} className="hover:hover:bg-[#101D3A]/03 font-mono">
-                    <td className="px-4 py-3 font-bold text-[#101D3A]">{r.run_id}</td>
-                    <td className="px-4 py-3 text-[#52627A]">{r.source_id}</td>
-                    <td className="px-4 py-3 text-[#52627A]">{r.season}</td>
-                    <td className="px-4 py-3 text-[#52627A]">{r.duration_seconds}s</td>
+                {runs.map((r, idx) => (
+                  <tr
+                    key={r.run_id}
+                    className={cn(
+                      "font-mono transition-colors",
+                      idx % 2 === 0 ? "bg-[#FCE8F0]/35" : "bg-[#EEF4FC]/35",
+                      "hover:bg-[#FCE8F0]/80"
+                    )}
+                  >
+                    <td className="px-4 py-3 font-bold text-[#17294B]">{r.run_id}</td>
+                    <td className="px-4 py-3 text-[#74658F]">{r.source_id}</td>
+                    <td className="px-4 py-3 text-[#74658F]">{r.season}</td>
+                    <td className="px-4 py-3 text-[#74658F]">{r.duration_seconds}s</td>
                     <td className="px-4 py-3">
                       <span
                         className={`px-2 py-0.5 rounded text-[11px] font-bold ${
                           r.status === "COMPLETED"
-                            ? "bg-[#D4145A]/10 text-[#D4145A] border border-[#D4145A]/30"
-                            : "bg-[#D4145A]/10 text-[#D4145A] border border-[#D4145A]/30"
+                            ? "bg-[#15966B]/15 text-[#15966B] border border-[#15966B]/30"
+                            : "bg-[#E4005A]/10 text-[#E4005A] border border-[#E4005A]/30"
                         }`}
                       >
                         {r.status}

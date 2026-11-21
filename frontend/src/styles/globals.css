@@ -4,21 +4,27 @@
 
 :root {
   --background: #FFFFFF;
-  --foreground: #101D3A;
-  --royals-navy: #101D3A;
-  --royals-pink: #D4145A;
-  --royals-pink-deep: #A80F50;
-  --royals-rose: #F8E8EF;
+  --foreground: #17294B;
+  --royals-navy: #17294B;
+  --royals-deep-navy: #17294B;
+  --royals-pink: #E4005A;
+  --royals-deep-pink: #E4005A;
+  --royals-cardinal-pink: #950460;
+  --royals-light-pink: #FCE8F0;
+  --royals-light-blue: #EEF4FC;
+  --royals-rose: #FCE8F0;
   --royals-white: #FFFFFF;
   --royals-border: #E7EAF0;
-  --royals-body: #52627A;
+  --royals-body: #263653;
+  --royals-muted: #74658F;
   --royals-orange: #F28C28;
   --royals-green: #15966B;
+  --royals-verified-green: #15966B;
   --royals-bg: #FFFFFF;
   --royals-card: #FFFFFF;
   --royals-surface: #FFFFFF;
-  --royals-text: #101D3A;
-  --royals-muted: #52627A;
+  --royals-text: #17294B;
+  --royals-muted: #74658F;
   --royals-success: #15966B;
   --royals-warning: #F28C28;
 }

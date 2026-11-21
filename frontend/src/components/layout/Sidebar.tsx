@@ -90,15 +90,15 @@ export const Sidebar: React.FC<SidebarProps> = ({ className }) => {
         className={cn(
           "flex items-center gap-3 px-3 py-2 rounded-lg text-xs transition-all duration-150 group relative",
           isActive
-            ? "bg-[#F8E8EF] text-[#D4145A] font-bold border-l-4 border-[#D4145A] pl-2.5 shadow-sm"
-            : "text-[#52627A] hover:text-[#D4145A] hover:bg-[#F8E8EF]"
+            ? "bg-[#FCE8F0] text-[#E4005A] font-bold border-l-4 border-[#E4005A] pl-2.5 shadow-sm"
+            : "text-[#263653] hover:text-[#E4005A] hover:bg-[#FCE8F0]"
         )}
       >
         <Icon
           size={16}
           className={cn(
             "shrink-0 transition-colors",
-            isActive ? "text-[#D4145A]" : "text-[#52627A] group-hover:text-[#D4145A]"
+            isActive ? "text-[#E4005A]" : "text-[#74658F] group-hover:text-[#E4005A]"
           )}
         />
 
@@ -108,7 +108,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ className }) => {
 
         {/* Collapsed Tooltip */}
         {collapsed && (
-          <div className="absolute left-full ml-2.5 px-2.5 py-1 rounded-md bg-[#101D3A] text-white text-[11px] font-medium whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-50 shadow-elevation">
+          <div className="absolute left-full ml-2.5 px-2.5 py-1 rounded-md bg-[#17294B] text-white text-[11px] font-medium whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-50 shadow-elevation">
             {item.title}
           </div>
         )}

@@ -44,6 +44,7 @@ import {
   Database,
   RefreshCw,
 } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export default function DomesticIntelligencePage() {
   const [activeTab, setActiveTab] = useState<"tournaments" | "matches" | "player_profile">("tournaments");
@@ -409,7 +410,7 @@ export default function DomesticIntelligencePage() {
       {activeTab === "tournaments" && (
         <div className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-            {competitions.map((comp) => (
+            {competitions.map((comp, idx) => (
               <div
                 key={`${comp.competition_id}_${comp.season}`}
                 onClick={() => {
@@ -417,47 +418,51 @@ export default function DomesticIntelligencePage() {
                   setSelectedSeason(comp.season);
                   setActiveTab("matches");
                 }}
-                className={`group p-5 rounded-2xl bg-white border cursor-pointer transition-all hover:shadow-md ${
+                className={cn(
+                  "group p-5 rounded-2xl border cursor-pointer transition-all hover:shadow-md",
                   selectedCompId === comp.competition_id && selectedSeason === comp.season
-                    ? "border-[#101D3A] ring-2 ring-[#D4145A]/30"
-                    : "border-[#E7EAF0] hover:border-[#101D3A]/20"
-                }`}
+                    ? "border-[#E4005A] ring-2 ring-[#E4005A]/30 bg-white shadow-sm"
+                    : idx % 2 === 0
+                    ? "bg-[#FCE8F0]/40 border-[#E7EAF0] hover:border-[#E4005A]/40"
+                    : "bg-[#EEF4FC]/50 border-[#E7EAF0] hover:border-[#E4005A]/40"
+                )}
               >
                 <div className="flex items-center justify-between mb-3">
-                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-[#F8E8EF] text-[#101D3A]">
+                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-[#FCE8F0] text-[#950460]">
                     {comp.competition_type}
                   </span>
-                  <span className="text-xs font-mono font-bold text-[#101D3A]">{comp.season}</span>
+                  <span className="text-xs font-mono font-bold text-[#17294B]">{comp.season}</span>
                 </div>
 
-                <h3 className="font-bold text-base text-[#101D3A] group-hover:text-[#101D3A] transition-colors mb-1">
+                <h3 className="font-bold text-base text-[#17294B] group-hover:text-[#E4005A] transition-colors mb-1">
                   {comp.competition_name}
                 </h3>
-                <p className="text-xs text-[#52627A] mb-4">Governing Body: {comp.governing_body}</p>
+                <p className="text-xs text-[#74658F] mb-4">Governing Body: {comp.governing_body}</p>
 
-                <div className="grid grid-cols-3 gap-2 py-3 px-3 bg-white rounded-xl border border-[#E7EAF0] text-center mb-4">
+                <div className="grid grid-cols-3 gap-2 py-3 px-3 bg-white/90 rounded-xl border border-[#E7EAF0] text-center mb-4">
                   <div>
-                    <div className="text-[10px] uppercase font-bold text-[#52627A]">Matches</div>
-                    <div className="text-sm font-extrabold text-[#101D3A]">{comp.match_count}</div>
+                    <div className="text-[10px] uppercase font-bold text-[#74658F]">Matches</div>
+                    <div className="text-sm font-extrabold text-[#17294B]">{comp.match_count}</div>
                   </div>
                   <div>
-                    <div className="text-[10px] uppercase font-bold text-[#52627A]">Teams</div>
-                    <div className="text-sm font-extrabold text-[#101D3A]">{comp.teams_count}</div>
+                    <div className="text-[10px] uppercase font-bold text-[#74658F]">Teams</div>
+                    <div className="text-sm font-extrabold text-[#17294B]">{comp.teams_count}</div>
                   </div>
                   <div>
-                    <div className="text-[10px] uppercase font-bold text-[#52627A]">Ball-by-Ball</div>
-                    <div className="text-sm font-extrabold text-[#D4145A]">
-                      {comp.has_ball_by_ball ? "Verified" : "Pending"}
+                    <div className="text-[10px] uppercase font-bold text-[#74658F]">Ball-by-Ball</div>
+                    <div className="text-sm font-extrabold text-[#15966B] flex items-center justify-center gap-1">
+                      <CheckCircle2 size={12} className="text-[#15966B]" />
+                      <span>{comp.has_ball_by_ball ? "Verified" : "Pending"}</span>
                     </div>
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between text-xs text-[#52627A] pt-2 border-t border-[#E7EAF0]">
-                  <span className="flex items-center gap-1 text-[11px]">
-                    <CheckCircle2 size={13} className="text-[#D4145A]" />
+                <div className="flex items-center justify-between text-xs text-[#74658F] pt-2 border-t border-[#E7EAF0]">
+                  <span className="flex items-center gap-1 text-[11px] text-[#15966B] font-semibold">
+                    <CheckCircle2 size={13} className="text-[#15966B]" />
                     Audit Pass: {comp.validation_pass_rate}%
                   </span>
-                  <span className="text-[11px] font-mono font-bold text-[#101D3A] flex items-center">
+                  <span className="text-[11px] font-mono font-bold text-[#E4005A] flex items-center">
                     Explore Fixtures <ChevronRight size={13} />
                   </span>
                 </div>
@@ -473,49 +478,52 @@ export default function DomesticIntelligencePage() {
           {/* Match Filter & List */}
           <div className="flex flex-col md:flex-row items-center justify-between gap-4 bg-white p-4 rounded-xl border border-[#E7EAF0]">
             <div className="flex items-center gap-3 w-full md:w-auto">
-              <Filter size={16} className="text-[#52627A]" />
+              <Filter size={16} className="text-[#74658F]" />
               <input
                 type="text"
                 placeholder="Filter by Team Name / Code..."
                 value={teamFilter}
                 onChange={(e) => setTeamFilter(e.target.value)}
-                className="bg-white border border-[#E7EAF0] rounded-lg px-3 py-1.5 text-xs text-[#101D3A] focus:outline-none focus:ring-2 focus:ring-[#101D3A]"
+                className="bg-white border border-[#E7EAF0] rounded-lg px-3 py-1.5 text-xs text-[#17294B] focus:outline-none focus:ring-2 focus:ring-[#E4005A]"
               />
             </div>
-            <span className="text-xs text-[#52627A] font-mono">
+            <span className="text-xs text-[#74658F] font-mono">
               Displaying {matches.length} of {matchTotal} Recorded Matches
             </span>
           </div>
 
           {/* Matches Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {matches.map((m) => (
+            {matches.map((m, mIdx) => (
               <div
                 key={m.match_id}
                 onClick={() => setSelectedMatchId(m.match_id)}
-                className="p-4 bg-white rounded-xl border border-[#E7EAF0] hover:border-[#101D3A] cursor-pointer transition-all hover:shadow-sm"
+                className={cn(
+                  "p-4 rounded-xl border cursor-pointer transition-all hover:shadow-sm",
+                  mIdx % 2 === 0 ? "bg-[#FCE8F0]/30 border-[#E7EAF0] hover:border-[#E4005A]" : "bg-[#EEF4FC]/40 border-[#E7EAF0] hover:border-[#E4005A]"
+                )}
               >
-                <div className="flex items-center justify-between text-[11px] text-[#52627A] font-mono mb-2">
+                <div className="flex items-center justify-between text-[11px] text-[#74658F] font-mono mb-2">
                   <span>Match #{m.match_number || "—"}</span>
                   <span>{m.match_date}</span>
                 </div>
 
                 <div className="flex items-center justify-between my-2">
                   <div className="flex items-center gap-2">
-                    <span className="font-extrabold text-sm text-[#101D3A]">{m.home_team_name}</span>
-                    <span className="text-xs text-[#52627A] font-mono">vs</span>
-                    <span className="font-extrabold text-sm text-[#101D3A]">{m.away_team_name}</span>
+                    <span className="font-extrabold text-sm text-[#950460]">{m.home_team_name}</span>
+                    <span className="text-xs text-[#74658F] font-mono">vs</span>
+                    <span className="font-extrabold text-sm text-[#950460]">{m.away_team_name}</span>
                   </div>
                   {m.winner_team_code && (
-                    <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-[#D4145A]/10 text-[#D4145A]">
+                    <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-[#FCE8F0] text-[#E4005A] border border-[#E4005A]/20">
                       Won: {m.winner_team_code}
                     </span>
                   )}
                 </div>
 
-                <div className="flex items-center justify-between text-xs text-[#52627A] pt-2 border-t border-[#E7EAF0] mt-2">
+                <div className="flex items-center justify-between text-xs text-[#74658F] pt-2 border-t border-[#E7EAF0] mt-2">
                   <span>{m.venue_name}, {m.venue_city}</span>
-                  <span className="text-[#101D3A] font-bold flex items-center text-[11px]">
+                  <span className="text-[#E4005A] font-bold flex items-center text-[11px]">
                     Full Scorecard <ChevronRight size={12} />
                   </span>
                 </div>

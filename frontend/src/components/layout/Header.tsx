@@ -53,12 +53,12 @@ export const Header: React.FC = () => {
       <div className="flex items-center gap-2.5">
         <Link
           href="/"
-          className="text-xs font-semibold text-[#52627A] hover:text-[#D4145A] transition-colors"
+          className="text-xs font-semibold text-[#74658F] hover:text-[#E4005A] transition-colors"
         >
           Royals Intelligence
         </Link>
-        <span className="text-[#101D3A]/30 font-light">/</span>
-        <h1 className="text-sm font-bold tracking-tight text-[#101D3A]">
+        <span className="text-[#17294B]/30 font-light">/</span>
+        <h1 className="text-sm font-bold tracking-tight text-[#17294B]">
           {currentPageTitle}
         </h1>
       </div>
@@ -69,10 +69,10 @@ export const Header: React.FC = () => {
         {pathname !== "/" && (
           <Link
             href="/"
-            className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#E7EAF0] bg-[#F8E8EF] hover:bg-[#A80F50]/10 text-[#101D3A] hover:text-[#D4145A] text-xs font-semibold transition-colors"
+            className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#E7EAF0] bg-[#FCE8F0] hover:bg-[#950460]/10 text-[#17294B] hover:text-[#E4005A] text-xs font-semibold transition-colors"
           >
             <span>Public Home</span>
-            <ExternalLink size={12} className="text-[#D4145A]" />
+            <ExternalLink size={12} className="text-[#E4005A]" />
           </Link>
         )}
 

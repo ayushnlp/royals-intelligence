@@ -529,81 +529,84 @@ export default function UncappedIntelligencePage() {
                       </td>
                     </tr>
                   ) : leaderboards?.batting_leaderboard && leaderboards.batting_leaderboard.length > 0 ? (
-                    leaderboards.batting_leaderboard.map((batter) => {
+                    leaderboards.batting_leaderboard.map((batter, idx) => {
                       const isTop1 = batter.uncapped_rank === 1;
                       const isTop3 = batter.uncapped_rank <= 3;
                       const isOfficial = batter.is_official_r1_qualified ?? (batter.pressure_legal_balls >= 60);
                       return (
-                        <tr key={batter.player_id} className="hover:bg-white/70 transition-colors">
-                          <td className="px-4 py-3 font-sans text-[#101D3A]">
+                        <tr
+                          key={batter.player_id}
+                          className={cn(
+                            "transition-colors",
+                            idx % 2 === 0 ? "bg-[#FCE8F0]/35" : "bg-[#EEF4FC]/35",
+                            "hover:bg-[#FCE8F0]/80"
+                          )}
+                        >
+                          <td className="px-4 py-3 font-sans text-[#17294B]">
                             <div className="flex items-center gap-2.5">
                               <span
                                 className={cn(
                                   "w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-mono font-bold shrink-0",
                                   isTop1
-                                    ? "bg-[#D4145A] text-white"
+                                    ? "bg-[#E4005A] text-white"
                                     : isTop3
-                                      ? "bg-[#101D3A] text-white"
-                                      : "bg-[#F8E8EF] text-[#52627A]"
+                                      ? "bg-[#17294B] text-white"
+                                      : "bg-[#FCE8F0] text-[#74658F]"
                                 )}
                               >
                                 {batter.uncapped_rank}
                               </span>
                               <div>
-                                <div className="font-bold text-[#101D3A]">{batter.player_name}</div>
-                                <div className="text-[10px] font-mono text-[#52627A]">
+                                <div className="font-bold text-[#17294B]">{batter.player_name}</div>
+                                <div className="text-[10px] font-mono text-[#74658F]">
                                   Overall R1 #{batter.overall_r1_rank} • ID: {batter.player_id}
                                 </div>
                               </div>
                             </div>
                           </td>
-                          <td className="px-4 py-3 font-sans text-[#101D3A]">
-                            <div className="font-semibold text-[#101D3A]">{batter.franchise}</div>
-                            <div className="text-[10px] text-[#52627A] font-mono">{batter.tactical_role}</div>
+                          <td className="px-4 py-3 font-sans">
+                            <div className="font-semibold text-[#950460]">{batter.franchise}</div>
+                            <div className="text-[10px] text-[#74658F] font-mono">{batter.tactical_role}</div>
                           </td>
                           <td className="px-4 py-3 text-right">
-                            <span className="font-bold text-sm text-[#D4145A] font-mono">
+                            <span className="font-bold text-sm text-[#E4005A] font-mono">
                               {batter.conservative_pri > 0
                                 ? `+${batter.conservative_pri.toFixed(2)}`
                                 : batter.conservative_pri.toFixed(2)}{" "}
-                              <span className="text-[10px] font-normal text-[#52627A]">SR</span>
+                              <span className="text-[10px] font-normal text-[#74658F]">SR</span>
                             </span>
                           </td>
-                          <td className="px-4 py-3 text-right text-[#101D3A] font-bold">
+                          <td className="px-4 py-3 text-right text-[#17294B] font-bold">
                             {batter.posterior_mean > 0
                               ? `+${batter.posterior_mean.toFixed(2)}`
                               : batter.posterior_mean.toFixed(2)}
                           </td>
-                          <td className="px-4 py-3 text-right text-[#52627A]">
+                          <td className="px-4 py-3 text-right text-[#74658F]">
                             &plusmn;{batter.posterior_se.toFixed(2)}
                           </td>
-                          <td className="px-4 py-3 text-right text-[#52627A] text-[11px]">
+                          <td className="px-4 py-3 text-right text-[#74658F] text-[11px]">
                             [{batter.ci_95_lower.toFixed(1)}, +{batter.ci_95_upper.toFixed(1)}]
                           </td>
-                          <td className="px-4 py-3 text-right text-[#101D3A] font-bold">
+                          <td className="px-4 py-3 text-right text-[#17294B] font-bold">
                             {batter.pressure_legal_balls}
                           </td>
-                          <td className="px-4 py-3 text-right text-[#101D3A] font-bold">
+                          <td className="px-4 py-3 text-right text-[#17294B] font-bold">
                             {batter.observed_strike_rate.toFixed(1)}
                           </td>
                           <td className="px-4 py-3 text-center font-sans">
-                            <div className="flex flex-col items-center gap-1">
+                            <div className="flex flex-col items-center gap-0.5">
                               <span
-                                className={cn(
-                                  "text-[10px] font-mono font-medium px-2 py-0.5 rounded-full border",
-                                  isOfficial
-                                    ? "bg-[#D4145A]/10 text-[#D4145A] border-[#D4145A]/30/60"
-                                    : "bg-[#D4145A]/10 text-[#101D3A] border-[#D4145A]/30"
-                                )}
+                                className="inline-flex items-center gap-1 text-[11px] font-bold text-[#15966B]"
                                 title={
                                   isOfficial
                                     ? "Meets strict Official Round 1 gate (>=60 pressure balls)"
                                     : "Qualified under active exploratory scouting filter"
                                 }
                               >
-                                {isOfficial ? "VERIFIED • OFFICIAL" : "VERIFIED • EXPLORATORY"}
+                                <CheckCircle2 size={12} className="text-[#15966B]" />
+                                <span>Verified</span>
                               </span>
-                              <span className="text-[9px] font-mono text-[#52627A]">
+                              <span className="text-[9px] font-mono text-[#74658F]">
                                 {batter.pressure_legal_balls}b / {batter.pressure_matches}m
                               </span>
                             </div>
@@ -698,79 +701,82 @@ export default function UncappedIntelligencePage() {
                       </td>
                     </tr>
                   ) : leaderboards?.bowling_leaderboard && leaderboards.bowling_leaderboard.length > 0 ? (
-                    leaderboards.bowling_leaderboard.map((bowler) => {
+                    leaderboards.bowling_leaderboard.map((bowler, idx) => {
                       const isTop1 = bowler.uncapped_rank === 1;
                       const isTop3 = bowler.uncapped_rank <= 3;
                       const isOfficial = bowler.is_official_r1_qualified ?? (bowler.pressure_legal_balls >= 60);
                       return (
-                        <tr key={bowler.player_id} className="hover:bg-white/70 transition-colors">
-                          <td className="px-4 py-3 font-sans text-[#101D3A]">
+                        <tr
+                          key={bowler.player_id}
+                          className={cn(
+                            "transition-colors",
+                            idx % 2 === 0 ? "bg-[#FCE8F0]/35" : "bg-[#EEF4FC]/35",
+                            "hover:bg-[#FCE8F0]/80"
+                          )}
+                        >
+                          <td className="px-4 py-3 font-sans text-[#17294B]">
                             <div className="flex items-center gap-2.5">
                               <span
                                 className={cn(
                                   "w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-mono font-bold shrink-0",
                                   isTop1
-                                    ? "bg-[#D4145A] text-white"
+                                    ? "bg-[#E4005A] text-white"
                                     : isTop3
-                                      ? "bg-[#101D3A] text-white"
-                                      : "bg-[#F8E8EF] text-[#52627A]"
+                                      ? "bg-[#17294B] text-white"
+                                      : "bg-[#FCE8F0] text-[#74658F]"
                                 )}
                               >
                                 {bowler.uncapped_rank}
                               </span>
                               <div>
-                                <div className="font-bold text-[#101D3A]">{bowler.player_name}</div>
-                                <div className="text-[10px] font-mono text-[#52627A]">
+                                <div className="font-bold text-[#17294B]">{bowler.player_name}</div>
+                                <div className="text-[10px] font-mono text-[#74658F]">
                                   Overall R1 #{bowler.overall_r1_rank} • ID: {bowler.player_id}
                                 </div>
                               </div>
                             </div>
                           </td>
-                          <td className="px-4 py-3 font-sans text-[#101D3A]">
-                            <div className="font-semibold text-[#101D3A]">{bowler.franchise}</div>
-                            <div className="text-[10px] text-[#52627A] font-mono">{bowler.tactical_role}</div>
+                          <td className="px-4 py-3 font-sans">
+                            <div className="font-semibold text-[#950460]">{bowler.franchise}</div>
+                            <div className="text-[10px] text-[#74658F] font-mono">{bowler.tactical_role}</div>
                           </td>
                           <td className="px-4 py-3 text-right">
-                            <span className="font-bold text-sm text-[#101D3A] font-mono">
+                            <span className="font-bold text-sm text-[#17294B] font-mono">
                               {bowler.conservative_runs_saved.toFixed(2)}{" "}
-                              <span className="text-[10px] font-normal text-[#52627A]">RPO</span>
+                              <span className="text-[10px] font-normal text-[#74658F]">RPO</span>
                             </span>
                           </td>
-                          <td className="px-4 py-3 text-right text-[#101D3A] font-bold">
+                          <td className="px-4 py-3 text-right text-[#17294B] font-bold">
                             {bowler.posterior_mean > 0
                               ? `+${bowler.posterior_mean.toFixed(2)}`
                               : bowler.posterior_mean.toFixed(2)}
                           </td>
-                          <td className="px-4 py-3 text-right text-[#52627A]">
+                          <td className="px-4 py-3 text-right text-[#74658F]">
                             &plusmn;{bowler.posterior_se.toFixed(2)}
                           </td>
-                          <td className="px-4 py-3 text-right text-[#52627A] text-[11px]">
+                          <td className="px-4 py-3 text-right text-[#74658F] text-[11px]">
                             [{bowler.ci_95_lower.toFixed(2)}, +{bowler.ci_95_upper.toFixed(2)}]
                           </td>
-                          <td className="px-4 py-3 text-right text-[#101D3A] font-bold">
+                          <td className="px-4 py-3 text-right text-[#17294B] font-bold">
                             {bowler.pressure_legal_balls}
                           </td>
-                          <td className="px-4 py-3 text-right text-[#101D3A] font-bold">
+                          <td className="px-4 py-3 text-right text-[#17294B] font-bold">
                             {bowler.observed_economy.toFixed(2)}
                           </td>
                           <td className="px-4 py-3 text-center font-sans">
-                            <div className="flex flex-col items-center gap-1">
+                            <div className="flex flex-col items-center gap-0.5">
                               <span
-                                className={cn(
-                                  "text-[10px] font-mono font-medium px-2 py-0.5 rounded-full border",
-                                  isOfficial
-                                    ? "bg-[#D4145A]/10 text-[#D4145A] border-[#D4145A]/30/60"
-                                    : "bg-[#D4145A]/10 text-[#101D3A] border-[#D4145A]/30"
-                                )}
+                                className="inline-flex items-center gap-1 text-[11px] font-bold text-[#15966B]"
                                 title={
                                   isOfficial
                                     ? "Meets strict Official Round 1 gate (>=60 pressure balls)"
                                     : "Qualified under active exploratory scouting filter"
                                 }
                               >
-                                {isOfficial ? "VERIFIED • OFFICIAL" : "VERIFIED • EXPLORATORY"}
+                                <CheckCircle2 size={12} className="text-[#15966B]" />
+                                <span>Verified</span>
                               </span>
-                              <span className="text-[9px] font-mono text-[#52627A]">
+                              <span className="text-[9px] font-mono text-[#74658F]">
                                 {bowler.pressure_legal_balls}b / {bowler.pressure_matches}m
                               </span>
                             </div>

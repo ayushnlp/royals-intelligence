@@ -798,7 +798,14 @@ export default function TacticalIntelligencePage() {
                       const isHighYield = stroke.runs_per_shot >= 1.5;
                       const isHighRisk = stroke.dismissal_rate_pct >= 6.0;
                       return (
-                        <tr key={idx} className="hover:bg-[#F8E8EF] transition-colors">
+                        <tr
+                          key={idx}
+                          className={cn(
+                            "transition-colors",
+                            idx % 2 === 0 ? "bg-[#FCE8F0]/35" : "bg-[#EEF4FC]/35",
+                            "hover:bg-[#FCE8F0]/80"
+                          )}
+                        >
                           <td className="px-4 py-3 font-semibold text-[#101D3A] font-sans flex items-center gap-2">
                             <span className="w-1.5 h-1.5 rounded-full bg-[#101D3A]" />
                             {stroke.stroke}
@@ -1051,7 +1058,14 @@ export default function TacticalIntelligencePage() {
                     {speedData?.top_fastest_bowlers?.map((bowler, idx) => {
                       const isRR = [2320, 4489].includes(bowler.bowler_id);
                       return (
-                        <tr key={idx} className="hover:bg-[#F8E8EF] transition-colors">
+                        <tr
+                          key={idx}
+                          className={cn(
+                            "transition-colors",
+                            idx % 2 === 0 ? "bg-[#FCE8F0]/35" : "bg-[#EEF4FC]/35",
+                            "hover:bg-[#FCE8F0]/80"
+                          )}
+                        >
                           <td className="px-4 py-3 font-sans font-semibold text-[#101D3A] flex items-center gap-2.5">
                             <span className={cn(
                               "w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-mono font-bold",
@@ -1157,7 +1171,14 @@ export default function TacticalIntelligencePage() {
                       const isContainment = style.economy_rate <= 7.5;
                       const isHighThreat = style.wickets >= 50;
                       return (
-                        <tr key={idx} className="hover:bg-[#F8E8EF] transition-colors">
+                        <tr
+                          key={idx}
+                          className={cn(
+                            "transition-colors",
+                            idx % 2 === 0 ? "bg-[#FCE8F0]/35" : "bg-[#EEF4FC]/35",
+                            "hover:bg-[#FCE8F0]/80"
+                          )}
+                        >
                           <td className="px-4 py-3 font-sans font-semibold text-[#101D3A] flex items-center gap-2">
                             <span className="w-1.5 h-1.5 rounded-full bg-[#D4145A]" />
                             {style.delivery_style}
@@ -1307,7 +1328,14 @@ export default function TacticalIntelligencePage() {
                       </thead>
                       <tbody className="divide-y divide-[#E7EAF0]">
                         {deathOversData?.batting_finishers?.map((batter, idx) => (
-                          <tr key={idx} className="hover:bg-[#F8E8EF] transition-colors">
+                          <tr
+                          key={idx}
+                          className={cn(
+                            "transition-colors",
+                            idx % 2 === 0 ? "bg-[#FCE8F0]/35" : "bg-[#EEF4FC]/35",
+                            "hover:bg-[#FCE8F0]/80"
+                          )}
+                        >
                             <td className="px-4 py-3 font-sans font-semibold text-[#101D3A] flex items-center gap-2.5">
                               <span className={cn(
                                 "w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-mono font-bold",
@@ -1358,7 +1386,14 @@ export default function TacticalIntelligencePage() {
                       </thead>
                       <tbody className="divide-y divide-[#E7EAF0]">
                         {deathOversData?.bowling_containment?.map((bowler, idx) => (
-                          <tr key={idx} className="hover:bg-[#F8E8EF] transition-colors">
+                          <tr
+                          key={idx}
+                          className={cn(
+                            "transition-colors",
+                            idx % 2 === 0 ? "bg-[#FCE8F0]/35" : "bg-[#EEF4FC]/35",
+                            "hover:bg-[#FCE8F0]/80"
+                          )}
+                        >
                             <td className="px-4 py-3 font-sans font-semibold text-[#101D3A] flex items-center gap-2.5">
                               <span className={cn(
                                 "w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-mono font-bold",

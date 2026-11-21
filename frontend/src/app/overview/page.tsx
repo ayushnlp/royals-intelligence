@@ -33,6 +33,7 @@ import {
   ExternalLink,
   RefreshCw,
 } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export default function OverviewPage() {
   const [health, setHealth] = useState<SystemHealth | null>(null);
@@ -296,20 +297,27 @@ export default function OverviewPage() {
 
             {isLiveBatters ? (
               <div className="divide-y divide-[#E7EAF0] border-t border-[#E7EAF0] text-xs">
-                {battersToDisplay.map((p) => (
-                  <div key={p.rank} className="py-2.5 flex items-center justify-between hover:bg-white px-2 rounded-md transition-colors">
+                {battersToDisplay.map((p, idx) => (
+                  <div
+                    key={p.rank}
+                    className={cn(
+                      "py-2.5 flex items-center justify-between px-3 rounded-md transition-colors",
+                      idx % 2 === 0 ? "bg-[#FCE8F0]/35" : "bg-[#EEF4FC]/35",
+                      "hover:bg-[#FCE8F0]/80"
+                    )}
+                  >
                     <div className="flex items-center gap-3">
-                      <span className="font-mono font-bold text-[#52627A] w-4 text-center">{p.rank}</span>
+                      <span className="font-mono font-bold text-[#74658F] w-4 text-center">{p.rank}</span>
                       <div>
-                        <span className="font-bold text-[#101D3A] block">{p.name}</span>
-                        <span className="text-[11px] text-[#52627A] font-mono">{p.team}</span>
+                        <span className="font-bold text-[#17294B] block">{p.name}</span>
+                        <span className="text-[11px] text-[#950460] font-semibold font-mono">{p.team}</span>
                       </div>
                     </div>
                     <div className="text-right">
-                      <span className={`font-mono font-bold ${p.val.startsWith("+") ? "text-[#D4145A]" : "text-[#101D3A]"}`}>
+                      <span className={`font-mono font-bold ${p.val.startsWith("+") ? "text-[#E4005A]" : "text-[#17294B]"}`}>
                         {p.val} pts
                       </span>
-                      <span className="text-[11px] font-mono text-[#52627A] block">{p.balls}b • {p.matches}m</span>
+                      <span className="text-[11px] font-mono text-[#74658F] block">{p.balls}b • {p.matches}m</span>
                     </div>
                   </div>
                 ))}
@@ -356,20 +364,27 @@ export default function OverviewPage() {
 
             {isLiveBowlers ? (
               <div className="divide-y divide-[#E7EAF0] border-t border-[#E7EAF0] text-xs">
-                {bowlersToDisplay.map((p) => (
-                  <div key={p.rank} className="py-2.5 flex items-center justify-between hover:bg-white px-2 rounded-md transition-colors">
+                {bowlersToDisplay.map((p, idx) => (
+                  <div
+                    key={p.rank}
+                    className={cn(
+                      "py-2.5 flex items-center justify-between px-3 rounded-md transition-colors",
+                      idx % 2 === 0 ? "bg-[#FCE8F0]/35" : "bg-[#EEF4FC]/35",
+                      "hover:bg-[#FCE8F0]/80"
+                    )}
+                  >
                     <div className="flex items-center gap-3">
-                      <span className="font-mono font-bold text-[#52627A] w-4 text-center">{p.rank}</span>
+                      <span className="font-mono font-bold text-[#74658F] w-4 text-center">{p.rank}</span>
                       <div>
-                        <span className="font-bold text-[#101D3A] block">{p.name}</span>
-                        <span className="text-[11px] text-[#52627A] font-mono">{p.team}</span>
+                        <span className="font-bold text-[#17294B] block">{p.name}</span>
+                        <span className="text-[11px] text-[#950460] font-semibold font-mono">{p.team}</span>
                       </div>
                     </div>
                     <div className="text-right">
-                      <span className={`font-mono font-bold ${p.val.startsWith("-") ? "text-[#D4145A]" : "text-[#101D3A]"}`}>
+                      <span className={`font-mono font-bold ${p.val.startsWith("-") ? "text-[#E4005A]" : "text-[#17294B]"}`}>
                         {p.val} rpo
                       </span>
-                      <span className="text-[11px] font-mono text-[#52627A] block">{p.balls}b • {p.matches}m</span>
+                      <span className="text-[11px] font-mono text-[#74658F] block">{p.balls}b • {p.matches}m</span>
                     </div>
                   </div>
                 ))}
@@ -431,19 +446,29 @@ export default function OverviewPage() {
                 { rank: 1, name: "Ashutosh Sharma", team: "Railways / PBKS", metric: "-3.63 PRI", fit: "93.20 Fit", desc: "Provable domestic death finisher (+10.3 SR delta)" },
                 { rank: 2, name: "Shashank Singh", team: "Chhattisgarh / PBKS", metric: "-11.07 PRI", fit: "87.85 Fit", desc: "Composed middle-overs aggregator and accelerator" },
                 { rank: 3, name: "Rahul Tewatia", team: "Haryana / GT", metric: "-11.37 PRI", fit: "87.05 Fit", desc: "Clutch chase equity with situational leg-spin utility" },
-              ].map((p) => (
-                <div key={p.rank} className="py-2.5 flex items-center justify-between hover:bg-white px-2 rounded-md transition-colors">
+              ].map((p, idx) => (
+                <div
+                  key={p.rank}
+                  className={cn(
+                    "py-2.5 flex items-center justify-between px-3 rounded-md transition-colors",
+                    idx % 2 === 0 ? "bg-[#FCE8F0]/35" : "bg-[#EEF4FC]/35",
+                    "hover:bg-[#FCE8F0]/80"
+                  )}
+                >
                   <div>
                     <div className="flex items-center gap-2">
-                      <span className="font-mono font-bold text-[#52627A] w-4">{p.rank}</span>
-                      <span className="font-bold text-[#101D3A]">{p.name}</span>
-                      <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-[#D4145A]/10 text-[#D4145A]">Verified</span>
+                      <span className="font-mono font-bold text-[#74658F] w-4">{p.rank}</span>
+                      <span className="font-bold text-[#17294B]">{p.name}</span>
+                      <span className="inline-flex items-center gap-1 text-[11px] font-bold text-[#15966B]">
+                        <CheckCircle2 size={12} className="text-[#15966B]" />
+                        <span>Verified</span>
+                      </span>
                     </div>
-                    <p className="text-[11px] text-[#52627A] mt-0.5 pl-6">{p.desc}</p>
+                    <p className="text-[11px] text-[#74658F] mt-0.5 pl-6">{p.desc}</p>
                   </div>
                   <div className="text-right">
-                    <span className="font-mono font-bold text-[#101D3A]">{p.fit}</span>
-                    <span className="text-[10px] font-mono text-[#52627A] block">{p.metric}</span>
+                    <span className="font-mono font-bold text-[#17294B]">{p.fit}</span>
+                    <span className="text-[10px] font-mono text-[#74658F] block">{p.metric}</span>
                   </div>
                 </div>
               ))}
@@ -452,8 +477,8 @@ export default function OverviewPage() {
 
           {/* Top Uncapped Bowlers */}
           <div className="space-y-3 p-6 rounded-2xl bg-white border border-[#E7EAF0]">
-            <span className="text-xs font-semibold text-[#101D3A] flex items-center gap-2">
-              <Crosshair size={14} className="text-[#101D3A]" />
+            <span className="text-xs font-semibold text-[#17294B] flex items-center gap-2">
+              <Crosshair size={14} className="text-[#17294B]" />
               Verified Uncapped Bowlers (Top 3)
             </span>
             <div className="divide-y divide-[#E7EAF0] border-t border-[#E7EAF0] text-xs">
@@ -461,19 +486,29 @@ export default function OverviewPage() {
                 { rank: 1, name: "Vaibhav Arora", team: "Himachal / KKR", metric: "-2.36 RPO", fit: "90.00 Fit", desc: "Dual-phase swing in PP and disciplined death yorkers" },
                 { rank: 2, name: "Suyash Sharma", team: "Delhi / KKR", metric: "-2.41 RPO", fit: "82.95 Fit", desc: "Attacking wrist-spin option with deceptive googly" },
                 { rank: 3, name: "Akash Madhwal", team: "Uttarakhand / MI", metric: "-2.42 RPO", fit: "87.20 Fit", desc: "Specialist death-overs blockhole execution" },
-              ].map((p) => (
-                <div key={p.rank} className="py-2.5 flex items-center justify-between hover:bg-white px-2 rounded-md transition-colors">
+              ].map((p, idx) => (
+                <div
+                  key={p.rank}
+                  className={cn(
+                    "py-2.5 flex items-center justify-between px-3 rounded-md transition-colors",
+                    idx % 2 === 0 ? "bg-[#FCE8F0]/35" : "bg-[#EEF4FC]/35",
+                    "hover:bg-[#FCE8F0]/80"
+                  )}
+                >
                   <div>
                     <div className="flex items-center gap-2">
-                      <span className="font-mono font-bold text-[#52627A] w-4">{p.rank}</span>
-                      <span className="font-bold text-[#101D3A]">{p.name}</span>
-                      <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-[#D4145A]/10 text-[#D4145A]">Verified</span>
+                      <span className="font-mono font-bold text-[#74658F] w-4">{p.rank}</span>
+                      <span className="font-bold text-[#17294B]">{p.name}</span>
+                      <span className="inline-flex items-center gap-1 text-[11px] font-bold text-[#15966B]">
+                        <CheckCircle2 size={12} className="text-[#15966B]" />
+                        <span>Verified</span>
+                      </span>
                     </div>
-                    <p className="text-[11px] text-[#52627A] mt-0.5 pl-6">{p.desc}</p>
+                    <p className="text-[11px] text-[#74658F] mt-0.5 pl-6">{p.desc}</p>
                   </div>
                   <div className="text-right">
-                    <span className="font-mono font-bold text-[#101D3A]">{p.fit}</span>
-                    <span className="text-[10px] font-mono text-[#52627A] block">{p.metric}</span>
+                    <span className="font-mono font-bold text-[#17294B]">{p.fit}</span>
+                    <span className="text-[10px] font-mono text-[#74658F] block">{p.metric}</span>
                   </div>
                 </div>
               ))}

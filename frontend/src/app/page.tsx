@@ -27,39 +27,29 @@ export default function HomePage() {
 
   const featureCards = [
     {
-      id: "01",
       title: "PRESSURE INTELLIGENCE",
       href: "/pressure",
-      icon: Shield,
     },
     {
-      id: "02",
       title: "UNCAPPED SCOUTING",
       href: "/uncapped",
-      icon: Sparkles,
     },
     {
-      id: "03",
       title: "TACTICAL INTELLIGENCE",
       href: "/tactical",
-      icon: Crosshair,
     },
     {
-      id: "04",
       title: "DOMESTIC & MATCHES",
       href: "/domestic",
-      icon: Swords,
     },
     {
-      id: "05",
       title: "VENUE & PITCH INTELLIGENCE",
       href: "/venues",
-      icon: MapPin,
     },
   ];
 
   return (
-    <div className="min-h-screen lg:h-screen lg:max-h-screen flex flex-col bg-white text-[#101D3A] overflow-x-hidden selection:bg-[#D4145A]/20 selection:text-[#101D3A]">
+    <div className="min-h-screen lg:h-screen lg:max-h-screen flex flex-col bg-white text-[#17294B] overflow-x-hidden selection:bg-[#E4005A]/20 selection:text-[#17294B]">
       {/* =================================================================== */}
       {/* 1. HEADER — AUTHENTIC RAJASTHAN ROYALS BRANDING */}
       {/* =================================================================== */}
@@ -67,7 +57,7 @@ export default function HomePage() {
         {/* Left: Pure Brand Text */}
         <Link
           href="/"
-          className="font-heading font-extrabold text-base sm:text-lg tracking-tight text-[#101D3A] hover:text-[#D4145A] transition-colors"
+          className="font-heading font-extrabold text-base sm:text-lg tracking-tight text-[#17294B] hover:text-[#E4005A] transition-colors"
         >
           ROYALS INTELLIGENCE
         </Link>
@@ -75,10 +65,10 @@ export default function HomePage() {
         {/* Right: Prominent Header Explore Button */}
         <Link
           href="/overview"
-          className="group inline-flex items-center gap-2 px-4 py-2 sm:px-5 sm:py-2.5 rounded-xl bg-[#101D3A] hover:bg-[#A80F50] text-white text-xs sm:text-[13px] font-bold tracking-wider transition-all duration-200 shadow-md hover:shadow-lg hover:scale-[1.02] active:scale-[0.98]"
+          className="group inline-flex items-center gap-2 px-4 py-2 sm:px-5 sm:py-2.5 rounded-xl bg-[#17294B] hover:bg-[#950460] text-white text-xs sm:text-[13px] font-bold tracking-wider transition-all duration-200 shadow-md hover:shadow-lg hover:scale-[1.02] active:scale-[0.98]"
         >
           <span>EXPLORE INTELLIGENCE</span>
-          <ArrowRight size={14} className="text-[#D4145A] group-hover:text-white transition-colors group-hover:translate-x-0.5" />
+          <ArrowRight size={14} className="text-[#E4005A] group-hover:text-white transition-colors group-hover:translate-x-0.5" />
         </Link>
       </header>
 
@@ -90,33 +80,33 @@ export default function HomePage() {
         <section className="flex flex-col items-center text-center my-auto pt-2 sm:pt-4 pb-2">
           {/* Eyebrow: ROYALS INTELLIGENCE */}
           <div className="mb-1">
-            <span className="font-heading font-extrabold text-[11px] sm:text-xs tracking-[0.25em] text-[#101D3A] uppercase">
+            <span className="font-heading font-extrabold text-[11px] sm:text-xs tracking-[0.25em] text-[#17294B] uppercase">
               ROYALS INTELLIGENCE
             </span>
           </div>
 
           {/* Badge: SEASON 02 */}
           <div className="mb-1.5">
-            <span className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full text-[10px] sm:text-[11px] font-mono font-bold tracking-wider bg-[#F8E8EF] text-[#D4145A] border border-[#D4145A]/30 shadow-2xs">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#D4145A]" />
+            <span className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full text-[10px] sm:text-[11px] font-mono font-bold tracking-wider bg-[#FCE8F0] text-[#E4005A] border border-[#E4005A]/30 shadow-2xs">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#E4005A]" />
               SEASON 02
             </span>
           </div>
 
           {/* Sublabel: RAJASTHAN ROYALS · DATA-DRIVEN CRICKET */}
           <div className="mb-2">
-            <p className="text-[11px] sm:text-xs font-semibold tracking-[0.18em] text-[#52627A] uppercase">
+            <p className="text-[11px] sm:text-xs font-semibold tracking-[0.18em] text-[#74658F] uppercase">
               RAJASTHAN ROYALS · DATA-DRIVEN CRICKET
             </p>
           </div>
 
           {/* Headline: INTELLIGENCE FOR RAJASTHAN ROYALS. */}
-          <h1 className="font-heading font-extrabold text-[clamp(1.5rem,2.6vw,2.4rem)] text-[#101D3A] tracking-tight leading-[1.12] max-w-4xl mx-auto mb-1.5">
+          <h1 className="font-heading font-extrabold text-[clamp(1.5rem,2.6vw,2.4rem)] text-[#17294B] tracking-tight leading-[1.12] max-w-4xl mx-auto mb-1.5">
             INTELLIGENCE FOR RAJASTHAN ROYALS.
           </h1>
 
           {/* Subtitle: Built to Find the Difference. */}
-          <h3 className="font-heading font-bold text-[clamp(0.95rem,1.35vw,1.25rem)] text-[#D4145A] tracking-tight mb-4">
+          <h3 className="font-heading font-bold text-[clamp(0.95rem,1.35vw,1.25rem)] text-[#E4005A] tracking-tight mb-4">
             Built to Find the Difference.
           </h3>
 
@@ -124,7 +114,7 @@ export default function HomePage() {
           <div className="flex flex-row items-center justify-center gap-3.5">
             <Link
               href="/overview"
-              className="group inline-flex items-center justify-center gap-2.5 px-7 py-3 sm:px-8 sm:py-3.5 rounded-xl bg-gradient-to-r from-[#101D3A] to-[#D4145A] hover:from-[#101D3A] hover:to-[#D4145A] text-white text-xs sm:text-sm font-bold tracking-wider uppercase transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98]"
+              className="group inline-flex items-center justify-center gap-2.5 px-7 py-3 sm:px-8 sm:py-3.5 rounded-xl bg-gradient-to-r from-[#17294B] to-[#E4005A] hover:from-[#17294B] hover:to-[#950460] text-white text-xs sm:text-sm font-bold tracking-wider uppercase transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98]"
             >
               <span>EXPLORE INTELLIGENCE</span>
               <ArrowRight size={16} className="text-white transition-transform group-hover:translate-x-0.5" />
@@ -132,7 +122,7 @@ export default function HomePage() {
 
             <button
               onClick={() => setMethodologyOpen(true)}
-              className="inline-flex items-center justify-center gap-1.5 px-5 py-3 sm:px-6 sm:py-3.5 rounded-xl bg-white text-[#101D3A] text-xs font-semibold tracking-wider uppercase border border-[#E7EAF0] hover:bg-[#F8E8EF] hover:text-[#D4145A] hover:border-[#D4145A]/30 transition-all shadow-2xs cursor-pointer"
+              className="inline-flex items-center justify-center gap-1.5 px-5 py-3 sm:px-6 sm:py-3.5 rounded-xl bg-white text-[#17294B] text-xs font-semibold tracking-wider uppercase border border-[#E7EAF0] hover:bg-[#FCE8F0] hover:text-[#E4005A] hover:border-[#E4005A]/30 transition-all shadow-2xs cursor-pointer"
             >
               <span>OUR METHODOLOGY</span>
             </button>
@@ -141,36 +131,26 @@ export default function HomePage() {
 
         {/* =================================================================== */}
         {/* 3. COMPACT FEATURE CARDS — ALL FIVE IN ONE ROW (DESKTOP) */}
-        {/* Descriptions completely removed; displays icon, name, ID & link */}
+        {/* Simplified: No icons, no numbering, no descriptions. ONLY title & link */}
         {/* =================================================================== */}
         <section className="my-auto py-2 w-full">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2.5 sm:gap-3 max-w-6xl mx-auto w-full">
             {featureCards.map((card) => {
-              const Icon = card.icon;
               return (
                 <Link
-                  key={card.id}
+                  key={card.title}
                   href={card.href}
-                  className="group min-h-[82px] lg:h-[90px] p-2.5 sm:p-3 rounded-xl border border-[#E7EAF0] bg-white hover:border-[#D4145A] hover:bg-[#F8E8EF]/60 hover:shadow-sm transition-all flex flex-col justify-between"
+                  className="group min-h-[82px] lg:h-[90px] p-3 rounded-xl border border-[#E7EAF0] bg-white hover:border-[#E4005A] hover:bg-[#FCE8F0]/40 hover:shadow-sm transition-all flex flex-col justify-between"
                 >
                   <div>
-                    <div className="flex items-center justify-between mb-1.5">
-                      <div className="w-5 h-5 rounded-md bg-[#D4145A]/10 border border-[#D4145A]/30 flex items-center justify-center text-[#D4145A] shrink-0 group-hover:bg-[#A80F50] group-hover:text-white transition-colors">
-                        <Icon size={12} />
-                      </div>
-                      <span className="text-[10px] font-mono font-bold text-[#D4145A]">
-                        {card.id}
-                      </span>
-                    </div>
-
-                    <h4 className="text-[11px] sm:text-xs font-heading font-bold text-[#101D3A] group-hover:text-[#D4145A] transition-colors tracking-tight leading-tight">
+                    <h4 className="text-xs sm:text-[13px] lg:text-sm font-heading font-extrabold text-[#17294B] group-hover:text-[#E4005A] transition-colors tracking-tight leading-snug">
                       {card.title}
                     </h4>
                   </div>
 
-                  <div className="flex items-center gap-1 text-[10px] font-bold text-[#D4145A] group-hover:translate-x-0.5 transition-all mt-auto pt-1">
+                  <div className="flex items-center gap-1.5 text-[11px] font-bold text-[#E4005A] group-hover:translate-x-0.5 transition-all mt-auto pt-1">
                     <span>Access Module</span>
-                    <ChevronRight size={11} />
+                    <ArrowRight size={12} className="text-[#E4005A]" />
                   </div>
                 </Link>
               );
