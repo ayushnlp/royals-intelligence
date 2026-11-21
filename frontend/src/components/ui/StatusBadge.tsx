@@ -15,13 +15,13 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({ status, label, classNa
       defaultLabel: "Healthy / Online",
     },
     standby: {
-      bg: "bg-[#F8E8EF] border-[#E7EAF0] text-[#52627A]",
-      dot: "bg-[#52627A]",
+      bg: "bg-[#FCE8F0] border-[#E7EAF0] text-[#17294B]",
+      dot: "bg-[#17294B]/60",
       defaultLabel: "Standby / Ready",
     },
     pending: {
-      bg: "bg-[#F8E8EF] border-[#E7EAF0] text-[#52627A]",
-      dot: "bg-[#52627A]",
+      bg: "bg-[#FCE8F0] border-[#E7EAF0] text-[#17294B]",
+      dot: "bg-[#17294B]/60",
       defaultLabel: "Integration Pending",
     },
     degraded: {
@@ -30,8 +30,8 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({ status, label, classNa
       defaultLabel: "Degraded",
     },
     stage0: {
-      bg: "bg-[#F8E8EF] border-[#D4145A]/30 text-[#D4145A]",
-      dot: "bg-[#D4145A]",
+      bg: "bg-[#FCE8F0] border-[#E4005A]/30 text-[#E4005A]",
+      dot: "bg-[#E4005A]",
       defaultLabel: "Stage 0 Baseline",
     },
   };

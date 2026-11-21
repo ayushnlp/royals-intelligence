@@ -15,14 +15,14 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
 
   if (isPublicHome) {
     return (
-      <div className="min-h-screen bg-white text-[#101D3A] antialiased selection:bg-[#D4145A]/20 selection:text-[#101D3A]">
+      <div className="min-h-screen bg-white text-[#17294B] antialiased selection:bg-[#E4005A]/20 selection:text-[#17294B]">
         {children}
       </div>
     );
   }
 
   return (
-    <div className="bg-[#FFFFFF] text-[#101D3A] antialiased flex min-h-screen selection:bg-[#D4145A]/20 selection:text-[#101D3A]">
+    <div className="bg-[#FFFFFF] text-[#17294B] antialiased flex min-h-screen selection:bg-[#E4005A]/20 selection:text-[#17294B]">
       {/* Dashboard Sidebar */}
       <Sidebar />
 

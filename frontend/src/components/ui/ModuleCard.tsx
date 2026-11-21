@@ -8,18 +8,18 @@ interface ModuleCardProps {
 
 export const ModuleCard: React.FC<ModuleCardProps> = ({ module }) => {
   return (
-    <div className="bg-white rounded-xl border border-[#E7EAF0] p-5 shadow-soft hover:border-[#D4145A] hover:shadow-elevation transition-all group flex flex-col justify-between">
+    <div className="bg-white rounded-xl border border-[#E7EAF0] p-5 shadow-soft hover:border-[#E4005A] hover:shadow-elevation transition-all group flex flex-col justify-between">
       <div>
         <div className="flex items-center justify-between mb-3">
-          <span className="text-[11px] font-mono font-bold text-[#52627A] group-hover:text-[#101D3A] transition-colors">
+          <span className="text-[11px] font-mono font-bold text-[#17294B]/70 group-hover:text-[#17294B] transition-colors">
             MOD-{String(module.number).padStart(2, "0")}
           </span>
-          <span className="text-[11px] font-medium text-[#101D3A] bg-[#F8E8EF] px-2 py-0.5 rounded">
+          <span className="text-[11px] font-semibold text-[#17294B] bg-[#FCE8F0] px-2 py-0.5 rounded border border-[#E4005A]/20">
             Stage {module.stage}
           </span>
         </div>
 
-        <h4 className="text-base font-semibold text-[#101D3A] mb-2 group-hover:text-[#D4145A] transition-colors font-heading">
+        <h4 className="text-base font-semibold text-[#17294B] mb-2 group-hover:text-[#E4005A] transition-colors font-heading">
           {module.title}
         </h4>
 

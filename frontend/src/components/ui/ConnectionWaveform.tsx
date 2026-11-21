@@ -12,7 +12,7 @@ interface ConnectionWaveformProps {
 /**
  * ConnectionWaveform:
  * Compact, elegant oscilloscope-style waveform indicator.
- * - Connected: Continuously animated up-and-down waveform in authentic Rajasthan Royals gradient (#101D3A to #D4145A).
+ * - Connected: Continuously animated up-and-down waveform in authentic Rajasthan Royals gradient (#17294B to #E4005A).
  * - Disconnected: Freezes immediately in a static neutral flatline state.
  * - Respects prefers-reduced-motion.
  */

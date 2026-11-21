@@ -174,7 +174,7 @@ export default function HomePage() {
           id="methodology"
           role="dialog"
           aria-modal="true"
-          className="fixed inset-0 z-50 bg-[#101D3A]/50 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto"
+          className="fixed inset-0 z-50 bg-[#17294B]/50 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto"
           onClick={() => setMethodologyOpen(false)}
         >
           <div
@@ -184,10 +184,10 @@ export default function HomePage() {
             {/* Modal Header */}
             <div className="flex items-start justify-between border-b border-[#E7EAF0] pb-4">
               <div>
-                <span className="text-[10px] font-mono font-bold tracking-wider text-[#D4145A] uppercase block mb-1">
+                <span className="text-[10px] font-mono font-bold tracking-wider text-[#E4005A] uppercase block mb-1">
                   Rigorous Mathematical Architecture
                 </span>
-                <h2 className="text-xl font-heading font-extrabold text-[#101D3A] tracking-tight">
+                <h2 className="text-xl font-heading font-extrabold text-[#17294B] tracking-tight">
                   OUR METHODOLOGY
                 </h2>
                 <p className="text-xs text-[#52627A] mt-1">
@@ -196,7 +196,7 @@ export default function HomePage() {
               </div>
               <button
                 onClick={() => setMethodologyOpen(false)}
-                className="p-1.5 rounded-lg text-[#52627A] hover:text-[#D4145A] hover:bg-[#F8E8EF] transition-colors"
+                className="p-1.5 rounded-lg text-[#52627A] hover:text-[#E4005A] hover:bg-[#FCE8F0] transition-colors"
                 aria-label="Close modal"
               >
                 <X size={18} />
@@ -205,50 +205,50 @@ export default function HomePage() {
 
             {/* 5 Pillars */}
             <div className="space-y-3.5 text-xs text-[#52627A]">
-              <div className="p-3.5 rounded-xl border border-[#E7EAF0] bg-[#F8E8EF]">
-                <div className="font-heading font-bold text-xs text-[#101D3A] mb-1 flex items-center justify-between">
+              <div className="p-3.5 rounded-xl border border-[#E7EAF0] bg-[#FCE8F0]">
+                <div className="font-heading font-bold text-xs text-[#17294B] mb-1 flex items-center justify-between">
                   <span>PILLAR 01: Contextual Benchmarking</span>
-                  <span className="text-[10px] font-mono font-bold text-[#D4145A]">12-Cell Strata</span>
+                  <span className="text-[10px] font-mono font-bold text-[#E4005A]">12-Cell Strata</span>
                 </div>
                 <p className="leading-relaxed">
                   Every delivery is benchmarked against Innings (2) &times; Phase (3) &times; Tier (2) strata to eliminate structural entry bias and determine true situational expectation.
                 </p>
               </div>
 
-              <div className="p-3.5 rounded-xl border border-[#E7EAF0] bg-[#F8E8EF]">
-                <div className="font-heading font-bold text-xs text-[#101D3A] mb-1 flex items-center justify-between">
+              <div className="p-3.5 rounded-xl border border-[#E7EAF0] bg-[#FCE8F0]">
+                <div className="font-heading font-bold text-xs text-[#17294B] mb-1 flex items-center justify-between">
                   <span>PILLAR 02: Empirical Bayes Shrinkage</span>
-                  <span className="text-[10px] font-mono font-bold text-[#D4145A]">Gaussian Prior</span>
+                  <span className="text-[10px] font-mono font-bold text-[#E4005A]">Gaussian Prior</span>
                 </div>
                 <p className="leading-relaxed">
                   Separates skill from noise using league population priors (&mu;<sub>0</sub>, &tau;<sup>2</sup>), shrinking small-sample outliers toward the true population mean.
                 </p>
               </div>
 
-              <div className="p-3.5 rounded-xl border border-[#E7EAF0] bg-[#F8E8EF]">
-                <div className="font-heading font-bold text-xs text-[#101D3A] mb-1 flex items-center justify-between">
+              <div className="p-3.5 rounded-xl border border-[#E7EAF0] bg-[#FCE8F0]">
+                <div className="font-heading font-bold text-xs text-[#17294B] mb-1 flex items-center justify-between">
                   <span>PILLAR 03: Conservative PRI</span>
-                  <span className="text-[10px] font-mono font-bold text-[#D4145A]">Uncertainty Penalty</span>
+                  <span className="text-[10px] font-mono font-bold text-[#E4005A]">Uncertainty Penalty</span>
                 </div>
                 <p className="leading-relaxed">
                   Ranks candidates conservatively by penalizing high posterior uncertainty, valuing repeatable execution over speculative high-volatility spikes.
                 </p>
               </div>
 
-              <div className="p-3.5 rounded-xl border border-[#E7EAF0] bg-[#F8E8EF]">
-                <div className="font-heading font-bold text-xs text-[#101D3A] mb-1 flex items-center justify-between">
+              <div className="p-3.5 rounded-xl border border-[#E7EAF0] bg-[#FCE8F0]">
+                <div className="font-heading font-bold text-xs text-[#17294B] mb-1 flex items-center justify-between">
                   <span>PILLAR 04: 1-SE Lower Credible Bounds</span>
-                  <span className="text-[10px] font-mono font-bold text-[#D4145A]">1-Standard-Error</span>
+                  <span className="text-[10px] font-mono font-bold text-[#E4005A]">1-Standard-Error</span>
                 </div>
                 <p className="leading-relaxed">
                   Calculates rigorous 1-standard-error defensive lower bounds across all posterior distributions for defensible worst-case reliability estimates.
                 </p>
               </div>
 
-              <div className="p-3.5 rounded-xl border border-[#E7EAF0] bg-[#F8E8EF]">
-                <div className="font-heading font-bold text-xs text-[#101D3A] mb-1 flex items-center justify-between">
+              <div className="p-3.5 rounded-xl border border-[#E7EAF0] bg-[#FCE8F0]">
+                <div className="font-heading font-bold text-xs text-[#17294B] mb-1 flex items-center justify-between">
                   <span>PILLAR 05: Official Qualification Threshold</span>
-                  <span className="text-[10px] font-mono font-bold text-[#D4145A]">&ge; 60 Balls</span>
+                  <span className="text-[10px] font-mono font-bold text-[#E4005A]">&ge; 60 Balls</span>
                 </div>
                 <p className="leading-relaxed">
                   Strict qualification standard enforcing at least 60 pressure deliveries to guarantee sample adequacy before candidate ranking.
@@ -261,14 +261,14 @@ export default function HomePage() {
               <Link
                 href="/overview"
                 onClick={() => setMethodologyOpen(false)}
-                className="text-xs font-bold text-[#101D3A] hover:text-[#D4145A] hover:underline inline-flex items-center gap-1"
+                className="text-xs font-bold text-[#17294B] hover:text-[#E4005A] hover:underline inline-flex items-center gap-1"
               >
                 <span>View Full Executive Architecture</span>
                 <ArrowRight size={12} />
               </Link>
               <button
                 onClick={() => setMethodologyOpen(false)}
-                className="px-4 py-1.5 rounded-xl bg-[#101D3A] text-white text-xs font-semibold hover:bg-[#A80F50] transition-colors"
+                className="px-4 py-1.5 rounded-xl bg-[#17294B] text-white text-xs font-semibold hover:bg-[#950460] transition-colors"
               >
                 Close
               </button>

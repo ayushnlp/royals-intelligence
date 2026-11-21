@@ -126,17 +126,17 @@ export default function OverviewPage() {
       {/* ------------------------------------------------------------------- */}
       <section className="space-y-4">
         <div className="flex items-center gap-2">
-          <span className="text-[11px] font-mono font-bold tracking-widest text-[#101D3A] uppercase">
+          <span className="text-[11px] font-mono font-bold tracking-widest text-[#17294B] uppercase">
             RAJASTHAN ROYALS · CRICKET ANALYTICS
           </span>
-          <span className="text-[11px] font-mono text-[#D4145A]/60">/</span>
+          <span className="text-[11px] font-mono text-[#E4005A]/60">/</span>
           <span className="text-[11px] font-mono text-[#52627A]">
             COMPETITION PHASE 1
           </span>
         </div>
 
         <div className="space-y-2 max-w-4xl">
-          <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-[#101D3A] leading-tight font-heading">
+          <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-[#17294B] leading-tight font-heading">
             Executive Intelligence Overview
           </h1>
           <p className="text-sm md:text-base text-[#52627A] leading-relaxed font-normal">
@@ -148,43 +148,43 @@ export default function OverviewPage() {
         <div className="flex flex-wrap items-center gap-3 pt-2">
           <Link
             href="/pressure"
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-[#101D3A] text-white text-xs font-semibold hover:bg-[#101D3A] transition-colors shadow-soft group"
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-[#17294B] text-white text-xs font-semibold hover:bg-[#17294B] transition-colors shadow-soft group"
           >
-            <Shield size={14} className="text-[#D4145A]/60" />
+            <Shield size={14} className="text-[#E4005A]/60" />
             <span>Pressure Intelligence Dossier</span>
-            <ArrowRight size={13} className="text-[#101D3A]/30 group-hover:translate-x-0.5 transition-transform" />
+            <ArrowRight size={13} className="text-[#17294B]/30 group-hover:translate-x-0.5 transition-transform" />
           </Link>
 
           <Link
             href="/uncapped"
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-white border border-[#E7EAF0] text-[#101D3A] text-xs font-semibold hover:bg-white transition-colors shadow-soft group"
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-white border border-[#E7EAF0] text-[#17294B] text-xs font-semibold hover:bg-white transition-colors shadow-soft group"
           >
-            <Sparkles size={14} className="text-[#101D3A]" />
+            <Sparkles size={14} className="text-[#17294B]" />
             <span>Uncapped Scouting Shortlist</span>
             <ArrowRight size={13} className="text-[#52627A] group-hover:translate-x-0.5 transition-transform" />
           </Link>
 
           <Link
             href="/tactical"
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg text-[#52627A] text-xs font-medium hover:text-[#101D3A] transition-colors"
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg text-[#52627A] text-xs font-medium hover:text-[#17294B] transition-colors"
           >
-            <Crosshair size={14} className="text-[#D4145A]" />
+            <Crosshair size={14} className="text-[#E4005A]" />
             <span>Tactical Analytics</span>
           </Link>
         </div>
 
         {/* Connection Notice */}
         {(!isLive || errorMsg) && (
-          <div className="p-3.5 rounded-xl bg-[#D4145A]/10 border border-[#D4145A]/30 text-[#D4145A] text-xs flex items-center justify-between gap-3 shadow-xs">
+          <div className="p-3.5 rounded-xl bg-[#E4005A]/10 border border-[#E4005A]/30 text-[#E4005A] text-xs flex items-center justify-between gap-3 shadow-xs">
             <div className="flex items-center gap-2.5">
-              <span className="w-2 h-2 rounded-full bg-[#D4145A] animate-pulse shrink-0" />
+              <span className="w-2 h-2 rounded-full bg-[#E4005A] animate-pulse shrink-0" />
               <span>
                 <strong>BACKEND STANDBY NOTICE:</strong> Backend analytics service is offline or unreachable. Ensure the FastAPI backend is running on port 8000.
               </span>
             </div>
             <button
               onClick={loadOverviewData}
-              className="px-2.5 py-1 rounded bg-[#D4145A]/20 hover:bg-[#A80F50]/30 text-[#D4145A] font-bold text-[11px] shrink-0 flex items-center gap-1 transition-colors"
+              className="px-2.5 py-1 rounded bg-[#E4005A]/20 hover:bg-[#950460]/30 text-[#E4005A] font-bold text-[11px] shrink-0 flex items-center gap-1 transition-colors"
             >
               <RefreshCw size={12} className={loading ? "animate-spin" : ""} />
               <span>Retry</span>
@@ -202,7 +202,7 @@ export default function OverviewPage() {
             <span className="text-[11px] font-mono uppercase tracking-wider text-[#52627A] block mb-1">
               Controlling Data Pack
             </span>
-            <div className="text-2xl md:text-3xl font-extrabold text-[#101D3A] font-mono tracking-tight">
+            <div className="text-2xl md:text-3xl font-extrabold text-[#17294B] font-mono tracking-tight">
               {pressureOverview?.total_deliveries ? pressureOverview.total_deliveries.toLocaleString() : "—"}
             </div>
             <p className="text-xs text-[#52627A] mt-1">
@@ -216,7 +216,7 @@ export default function OverviewPage() {
             <span className="text-[11px] font-mono uppercase tracking-wider text-[#52627A] block mb-1">
               Official Deliverables
             </span>
-            <div className="text-2xl md:text-3xl font-extrabold text-[#101D3A] font-mono tracking-tight">
+            <div className="text-2xl md:text-3xl font-extrabold text-[#17294B] font-mono tracking-tight">
               Top 10 / Top 10
             </div>
             <p className="text-xs text-[#52627A] mt-1">
@@ -228,7 +228,7 @@ export default function OverviewPage() {
             <span className="text-[11px] font-mono uppercase tracking-wider text-[#52627A] block mb-1">
               Uncapped Domestic Intelligence
             </span>
-            <div className="text-2xl md:text-3xl font-extrabold text-[#101D3A] font-mono tracking-tight">
+            <div className="text-2xl md:text-3xl font-extrabold text-[#17294B] font-mono tracking-tight">
               {uncappedOverview
                 ? `${uncappedOverview.total_verified_uncapped_batters + uncappedOverview.total_verified_uncapped_bowlers} Verified`
                 : "—"}
@@ -242,9 +242,9 @@ export default function OverviewPage() {
             <span className="text-[11px] font-mono uppercase tracking-wider text-[#52627A] block mb-1">
               Verification Health
             </span>
-            <div className="text-2xl md:text-3xl font-extrabold text-[#D4145A] font-mono tracking-tight flex items-baseline gap-2">
+            <div className="text-2xl md:text-3xl font-extrabold text-[#E4005A] font-mono tracking-tight flex items-baseline gap-2">
               <span>{isLive ? "Engine Online" : "Service Standby"}</span>
-              <span className={`w-2 h-2 rounded-full ${isLive ? "bg-[#D4145A] animate-pulse" : "bg-[#D4145A]"}`} />
+              <span className={`w-2 h-2 rounded-full ${isLive ? "bg-[#E4005A] animate-pulse" : "bg-[#E4005A]"}`} />
             </div>
             <p className="text-xs text-[#52627A] mt-1">
               {isLive ? `FastAPI v${health?.version || "0.1.0"} active` : "Backend service awaiting initialization"}
@@ -259,7 +259,7 @@ export default function OverviewPage() {
       <section className="space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-2 border-b border-[#E7EAF0] pb-3">
           <div>
-            <h2 className="text-lg font-bold text-[#101D3A] tracking-tight">
+            <h2 className="text-lg font-bold text-[#17294B] tracking-tight">
               Official Round 1 Leaderboards Under Pressure
             </h2>
             <p className="text-xs text-[#52627A]">
@@ -268,7 +268,7 @@ export default function OverviewPage() {
           </div>
           <Link
             href="/pressure"
-            className="text-xs font-semibold text-[#101D3A] hover:text-[#101D3A] transition-colors inline-flex items-center gap-1"
+            className="text-xs font-semibold text-[#17294B] hover:text-[#17294B] transition-colors inline-flex items-center gap-1"
           >
             <span>View Complete Leaderboards & Dossiers</span>
             <ArrowRight size={13} />
@@ -278,12 +278,12 @@ export default function OverviewPage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Batting Top 5 Preview */}
           <div className="space-y-3 p-6 rounded-2xl bg-white border border-[#E7EAF0]">
-            <div className="flex items-center justify-between text-xs font-semibold text-[#101D3A]">
+            <div className="flex items-center justify-between text-xs font-semibold text-[#17294B]">
               <span className="flex items-center gap-2">
-                <TrendingUp size={15} className="text-[#101D3A]" />
+                <TrendingUp size={15} className="text-[#17294B]" />
                 <span>Top 5 Batters Under Pressure (Conservative PRI)</span>
                 {isLiveBatters ? (
-                  <span className="px-1.5 py-0.5 rounded text-[9px] font-mono font-bold bg-[#D4145A]/10 text-[#101D3A] border border-[#D4145A]/30">
+                  <span className="px-1.5 py-0.5 rounded text-[9px] font-mono font-bold bg-[#E4005A]/10 text-[#17294B] border border-[#E4005A]/30">
                     LIVE ENGINE
                   </span>
                 ) : (
@@ -327,7 +327,7 @@ export default function OverviewPage() {
                 <div className="text-xs text-[#52627A] font-medium">Official pressure batting leaderboards currently unavailable.</div>
                 <button
                   onClick={loadOverviewData}
-                  className="mt-2 inline-flex items-center gap-1.5 px-3 py-1 bg-white border border-[#E7EAF0] rounded text-xs font-semibold text-[#101D3A] hover:bg-white shadow-xs"
+                  className="mt-2 inline-flex items-center gap-1.5 px-3 py-1 bg-white border border-[#E7EAF0] rounded text-xs font-semibold text-[#17294B] hover:bg-white shadow-xs"
                 >
                   <RefreshCw size={12} className={loading ? "animate-spin" : ""} />
                   <span>Retry Connection</span>
@@ -337,7 +337,7 @@ export default function OverviewPage() {
 
             <div className="pt-2 text-[11px] text-[#52627A] font-mono flex justify-between">
               <span>{ranks6to10Batters ? `Ranks 6–10: ${ranks6to10Batters}` : "Ranks 6–10 viewable on full leaderboard"}</span>
-              <Link href="/pressure?tab=batting" className="text-[#101D3A] hover:text-[#101D3A] font-sans font-medium">
+              <Link href="/pressure?tab=batting" className="text-[#17294B] hover:text-[#17294B] font-sans font-medium">
                 Full Batters &rarr;
               </Link>
             </div>
@@ -345,12 +345,12 @@ export default function OverviewPage() {
 
           {/* Bowling Top 5 Preview */}
           <div className="space-y-3 p-6 rounded-2xl bg-white border border-[#E7EAF0]">
-            <div className="flex items-center justify-between text-xs font-semibold text-[#101D3A]">
+            <div className="flex items-center justify-between text-xs font-semibold text-[#17294B]">
               <span className="flex items-center gap-2">
-                <Target size={15} className="text-[#D4145A]" />
+                <Target size={15} className="text-[#E4005A]" />
                 <span>Top 5 Bowlers Under Pressure (Conservative Runs Saved)</span>
                 {isLiveBowlers ? (
-                  <span className="px-1.5 py-0.5 rounded text-[9px] font-mono font-bold bg-[#D4145A]/10 text-[#101D3A] border border-[#D4145A]/30">
+                  <span className="px-1.5 py-0.5 rounded text-[9px] font-mono font-bold bg-[#E4005A]/10 text-[#17294B] border border-[#E4005A]/30">
                     LIVE ENGINE
                   </span>
                 ) : (
@@ -394,7 +394,7 @@ export default function OverviewPage() {
                 <div className="text-xs text-[#52627A] font-medium">Official pressure bowling leaderboards currently unavailable.</div>
                 <button
                   onClick={loadOverviewData}
-                  className="mt-2 inline-flex items-center gap-1.5 px-3 py-1 bg-white border border-[#E7EAF0] rounded text-xs font-semibold text-[#101D3A] hover:bg-white shadow-xs"
+                  className="mt-2 inline-flex items-center gap-1.5 px-3 py-1 bg-white border border-[#E7EAF0] rounded text-xs font-semibold text-[#17294B] hover:bg-white shadow-xs"
                 >
                   <RefreshCw size={12} className={loading ? "animate-spin" : ""} />
                   <span>Retry Connection</span>
@@ -404,7 +404,7 @@ export default function OverviewPage() {
 
             <div className="pt-2 text-[11px] text-[#52627A] font-mono flex justify-between">
               <span>{ranks6to10Bowlers ? `Ranks 6–10: ${ranks6to10Bowlers}` : "Ranks 6–10 viewable on full leaderboard"}</span>
-              <Link href="/pressure?tab=bowling" className="text-[#101D3A] hover:text-[#101D3A] font-sans font-medium">
+              <Link href="/pressure?tab=bowling" className="text-[#17294B] hover:text-[#17294B] font-sans font-medium">
                 Full Bowlers &rarr;
               </Link>
             </div>
@@ -418,7 +418,7 @@ export default function OverviewPage() {
       <section className="space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-2 border-b border-[#E7EAF0] pb-3">
           <div>
-            <h2 className="text-lg font-bold text-[#101D3A] tracking-tight">
+            <h2 className="text-lg font-bold text-[#17294B] tracking-tight">
               Supplementary Uncapped Indian Domestic Intelligence
             </h2>
             <p className="text-xs text-[#52627A]">
@@ -427,7 +427,7 @@ export default function OverviewPage() {
           </div>
           <Link
             href="/uncapped"
-            className="text-xs font-semibold text-[#D4145A] hover:text-[#101D3A] transition-colors inline-flex items-center gap-1"
+            className="text-xs font-semibold text-[#E4005A] hover:text-[#17294B] transition-colors inline-flex items-center gap-1"
           >
             <span>View Full 20-Player Shortlist & Squad Fit Ratings</span>
             <ArrowRight size={13} />
@@ -437,8 +437,8 @@ export default function OverviewPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {/* Top Uncapped Batters */}
           <div className="space-y-3 p-6 rounded-2xl bg-white border border-[#E7EAF0]">
-            <span className="text-xs font-semibold text-[#101D3A] flex items-center gap-2">
-              <Sparkles size={14} className="text-[#D4145A]" />
+            <span className="text-xs font-semibold text-[#17294B] flex items-center gap-2">
+              <Sparkles size={14} className="text-[#E4005A]" />
               Verified Uncapped Batters (Top 3)
             </span>
             <div className="divide-y divide-[#E7EAF0] border-t border-[#E7EAF0] text-xs">
@@ -522,7 +522,7 @@ export default function OverviewPage() {
       {/* ------------------------------------------------------------------- */}
       <section className="space-y-4 pt-4 border-t border-[#E7EAF0]">
         <div>
-          <h2 className="text-base font-bold text-[#101D3A] tracking-tight">
+          <h2 className="text-base font-bold text-[#17294B] tracking-tight">
             Methodological Architecture
           </h2>
           <p className="text-xs text-[#52627A]">
@@ -532,8 +532,8 @@ export default function OverviewPage() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 text-xs">
           <div className="p-5 rounded-xl bg-white border border-[#E7EAF0] space-y-1.5">
-            <div className="flex items-center gap-2 font-bold text-[#101D3A]">
-              <Flame size={15} className="text-[#101D3A]" />
+            <div className="flex items-center gap-2 font-bold text-[#17294B]">
+              <Flame size={15} className="text-[#17294B]" />
               <span>1. Dynamic Pressure</span>
             </div>
             <p className="text-[#52627A] leading-relaxed">
@@ -543,8 +543,8 @@ export default function OverviewPage() {
           </div>
 
           <div className="p-5 rounded-xl bg-white border border-[#E7EAF0] space-y-1.5">
-            <div className="flex items-center gap-2 font-bold text-[#101D3A]">
-              <Layers size={15} className="text-[#101D3A]" />
+            <div className="flex items-center gap-2 font-bold text-[#17294B]">
+              <Layers size={15} className="text-[#17294B]" />
               <span>2. 12-Cell Baselines</span>
             </div>
             <p className="text-[#52627A] leading-relaxed">
@@ -554,8 +554,8 @@ export default function OverviewPage() {
           </div>
 
           <div className="p-5 rounded-xl bg-white border border-[#E7EAF0] space-y-1.5">
-            <div className="flex items-center gap-2 font-bold text-[#101D3A]">
-              <Sparkles size={15} className="text-[#D4145A]" />
+            <div className="flex items-center gap-2 font-bold text-[#17294B]">
+              <Sparkles size={15} className="text-[#E4005A]" />
               <span>3. Empirical Bayes</span>
             </div>
             <p className="text-[#52627A] leading-relaxed">
@@ -565,8 +565,8 @@ export default function OverviewPage() {
           </div>
 
           <div className="p-5 rounded-xl bg-white border border-[#E7EAF0] space-y-1.5">
-            <div className="flex items-center gap-2 font-bold text-[#101D3A]">
-              <Shield size={15} className="text-[#D4145A]" />
+            <div className="flex items-center gap-2 font-bold text-[#17294B]">
+              <Shield size={15} className="text-[#E4005A]" />
               <span>4. Conservative PRI</span>
             </div>
             <p className="text-[#52627A] leading-relaxed">
@@ -582,7 +582,7 @@ export default function OverviewPage() {
       {/* ------------------------------------------------------------------- */}
       <section className="space-y-4 pt-4 border-t border-[#E7EAF0]">
         <div>
-          <h2 className="text-base font-bold text-[#101D3A] tracking-tight">
+          <h2 className="text-base font-bold text-[#17294B] tracking-tight">
             Intelligence Modules
           </h2>
           <p className="text-xs text-[#52627A]">
@@ -593,13 +593,13 @@ export default function OverviewPage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <Link
             href="/pressure"
-            className="p-5 rounded-xl bg-white border border-[#E7EAF0] hover:border-[#D4145A] hover:shadow-soft transition-all group block"
+            className="p-5 rounded-xl bg-white border border-[#E7EAF0] hover:border-[#E4005A] hover:shadow-soft transition-all group block"
           >
             <div className="flex items-center justify-between mb-2">
-              <Shield size={18} className="text-[#101D3A]" />
-              <ArrowRight size={13} className="text-[#52627A] group-hover:translate-x-0.5 group-hover:text-[#101D3A] transition-all" />
+              <Shield size={18} className="text-[#17294B]" />
+              <ArrowRight size={13} className="text-[#52627A] group-hover:translate-x-0.5 group-hover:text-[#17294B] transition-all" />
             </div>
-            <h3 className="font-bold text-xs text-[#101D3A]">Pressure Intelligence</h3>
+            <h3 className="font-bold text-xs text-[#17294B]">Pressure Intelligence</h3>
             <p className="text-[11px] text-[#52627A] mt-1 leading-normal">
               Official Top 10 leaderboards, uncertainty forest plots, and candidate evidence dossiers.
             </p>
@@ -607,13 +607,13 @@ export default function OverviewPage() {
 
           <Link
             href="/tactical"
-            className="p-5 rounded-xl bg-white border border-[#E7EAF0] hover:border-[#D4145A] hover:shadow-soft transition-all group block"
+            className="p-5 rounded-xl bg-white border border-[#E7EAF0] hover:border-[#E4005A] hover:shadow-soft transition-all group block"
           >
             <div className="flex items-center justify-between mb-2">
-              <Crosshair size={18} className="text-[#D4145A]" />
-              <ArrowRight size={13} className="text-[#52627A] group-hover:translate-x-0.5 group-hover:text-[#101D3A] transition-all" />
+              <Crosshair size={18} className="text-[#E4005A]" />
+              <ArrowRight size={13} className="text-[#52627A] group-hover:translate-x-0.5 group-hover:text-[#17294B] transition-all" />
             </div>
-            <h3 className="font-bold text-xs text-[#101D3A]">Tactical Intelligence</h3>
+            <h3 className="font-bold text-xs text-[#17294B]">Tactical Intelligence</h3>
             <p className="text-[11px] text-[#52627A] mt-1 leading-normal">
               Phase splits (PP, Middle, Death), shot archetypes, bowling variations, and radar speeds.
             </p>
@@ -621,13 +621,13 @@ export default function OverviewPage() {
 
           <Link
             href="/uncapped"
-            className="p-5 rounded-xl bg-white border border-[#E7EAF0] hover:border-[#D4145A] hover:shadow-soft transition-all group block"
+            className="p-5 rounded-xl bg-white border border-[#E7EAF0] hover:border-[#E4005A] hover:shadow-soft transition-all group block"
           >
             <div className="flex items-center justify-between mb-2">
-              <Sparkles size={18} className="text-[#D4145A]" />
-              <ArrowRight size={13} className="text-[#52627A] group-hover:translate-x-0.5 group-hover:text-[#101D3A] transition-all" />
+              <Sparkles size={18} className="text-[#E4005A]" />
+              <ArrowRight size={13} className="text-[#52627A] group-hover:translate-x-0.5 group-hover:text-[#17294B] transition-all" />
             </div>
-            <h3 className="font-bold text-xs text-[#101D3A]">Uncapped Talent</h3>
+            <h3 className="font-bold text-xs text-[#17294B]">Uncapped Talent</h3>
             <p className="text-[11px] text-[#52627A] mt-1 leading-normal">
               Verified Indian domestic batters & bowlers, Rajasthan Royals squad fit ratings, and reserves.
             </p>
@@ -635,13 +635,13 @@ export default function OverviewPage() {
 
           <Link
             href="/domestic"
-            className="p-5 rounded-xl bg-white border border-[#E7EAF0] hover:border-[#D4145A] hover:shadow-soft transition-all group block"
+            className="p-5 rounded-xl bg-white border border-[#E7EAF0] hover:border-[#E4005A] hover:shadow-soft transition-all group block"
           >
             <div className="flex items-center justify-between mb-2">
-              <Swords size={18} className="text-[#101D3A]" />
-              <ArrowRight size={13} className="text-[#52627A] group-hover:translate-x-0.5 group-hover:text-[#101D3A] transition-all" />
+              <Swords size={18} className="text-[#17294B]" />
+              <ArrowRight size={13} className="text-[#52627A] group-hover:translate-x-0.5 group-hover:text-[#17294B] transition-all" />
             </div>
-            <h3 className="font-bold text-xs text-[#101D3A]">Domestic & Matches</h3>
+            <h3 className="font-bold text-xs text-[#17294B]">Domestic & Matches</h3>
             <p className="text-[11px] text-[#52627A] mt-1 leading-normal">
               287-player directory, match scorecards, player histories, and all-round dual contributions.
             </p>
