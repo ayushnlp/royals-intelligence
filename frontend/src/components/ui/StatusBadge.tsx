@@ -10,28 +10,28 @@ interface StatusBadgeProps {
 export const StatusBadge: React.FC<StatusBadgeProps> = ({ status, label, className }) => {
   const configs = {
     healthy: {
-      bg: "bg-emerald-500/10 border-emerald-500/30 text-emerald-600 dark:text-emerald-400",
-      dot: "bg-emerald-500",
+      bg: "bg-[#950460]/10 border-[#950460]/30 text-[#950460]",
+      dot: "bg-[#950460]",
       defaultLabel: "Healthy / Online",
     },
     standby: {
-      bg: "bg-amber-500/10 border-amber-500/30 text-amber-600 dark:text-amber-400",
-      dot: "bg-amber-500",
+      bg: "bg-[#31136C]/08 border-[#31136C]/20 text-[#31136C]",
+      dot: "bg-[#31136C]",
       defaultLabel: "Standby / Ready",
     },
     pending: {
-      bg: "bg-blue-500/10 border-blue-500/30 text-blue-600 dark:text-blue-400",
-      dot: "bg-blue-500",
+      bg: "bg-[#31136C]/08 border-[#31136C]/20 text-[#31136C]",
+      dot: "bg-[#31136C]",
       defaultLabel: "Integration Pending",
     },
     degraded: {
-      bg: "bg-rose-500/10 border-rose-500/30 text-rose-600 dark:text-rose-400",
-      dot: "bg-rose-500",
+      bg: "bg-[#950460]/10 border-[#950460]/30 text-[#950460]",
+      dot: "bg-[#950460]",
       defaultLabel: "Degraded",
     },
     stage0: {
-      bg: "bg-pink-500/10 border-pink-500/30 text-pink-600 dark:text-pink-400",
-      dot: "bg-[#E91E8C]",
+      bg: "bg-[#950460]/10 border-[#950460]/30 text-[#31136C]",
+      dot: "bg-[#950460]",
       defaultLabel: "Stage 0 Baseline",
     },
   };
@@ -41,12 +41,12 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({ status, label, classNa
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border",
+        "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border",
         config.bg,
         className
       )}
     >
-      <span className={cn("w-1.5 h-1.5 rounded-full animate-pulse", config.dot)} />
+      <span className={cn("w-1.5 h-1.5 rounded-full", config.dot)} />
       {label || config.defaultLabel}
     </span>
   );

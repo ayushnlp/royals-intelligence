@@ -3,13 +3,25 @@
 @tailwind utilities;
 
 :root {
-  --background: #F5F6FA;
-  --foreground: #111827;
-  --royals-navy: #111C38;
-  --royals-pink: #E91E8C;
-  --royals-pink-soft: #FCE7F3;
-  --royals-gold: #D6B56D;
-  --border-color: #E5E7EB;
+  --background: #FFFFFF;
+  --foreground: #31136C;
+  --royals-navy: #31136C;
+  --royals-pink: #950460;
+  --royals-white: #FFFFFF;
+  --royals-orange: #950460;
+  --royals-green: #950460;
+  --royals-bg: #FFFFFF;
+  --royals-card: #FFFFFF;
+  --royals-surface: #FFFFFF;
+  --royals-text: #31136C;
+  --royals-muted: rgba(23, 43, 73, 0.7);
+  --royals-border: rgba(23, 43, 73, 0.12);
+  --royals-success: #950460;
+  --royals-warning: #950460;
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 body {
@@ -20,21 +32,94 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Custom scrollbars - Light & Clean */
+/* Custom scrollbars - Minimal Pure Palette */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #F5F6FA;
+  background: #FFFFFF;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #CBD5E1;
+  background: rgba(23, 43, 73, 0.18);
   border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #E91E8C;
+  background: rgba(23, 43, 73, 0.32);
+}
+
+/* Hero Keyframe Animations (Cinematic & Restrained) */
+@keyframes heroFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes heroPillEntrance {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes heroWordReveal {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-hero-fade {
+  animation: heroFadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-hero-pill {
+  animation: heroPillEntrance 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.15s forwards;
+  opacity: 0;
+}
+
+.animate-hero-sublabel {
+  animation: heroFadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.3s forwards;
+  opacity: 0;
+}
+
+.animate-hero-word {
+  animation: heroWordReveal 0.65s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  opacity: 0;
+}
+
+.animate-hero-tagline {
+  animation: heroFadeIn 0.9s cubic-bezier(0.16, 1, 0.3, 1) 0.75s forwards;
+  opacity: 0;
+}
+
+.animate-hero-cta {
+  animation: heroFadeIn 0.9s cubic-bezier(0.16, 1, 0.3, 1) 0.95s forwards;
+  opacity: 0;
+}
+
+/* Accessibility: Respect Reduced Motion Preferences */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

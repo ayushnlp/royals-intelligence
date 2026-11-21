@@ -3,612 +3,299 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import {
-  fetchSystemHealth,
-  fetchPressureOverview,
-  fetchPressureLeaderboards,
-  fetchUncappedOverview,
-} from "@/lib/api";
-import {
-  SystemHealth,
-  PressureOverviewResponse,
-  PressureLeaderboardResponse,
-  UncappedOverviewResponse,
-} from "@/types";
-import {
   Shield,
-  Layers,
-  Database,
-  ArrowRight,
-  CheckCircle2,
-  Crosshair,
-  Award,
   Sparkles,
-  Flame,
-  TrendingUp,
-  Target,
+  Crosshair,
   Swords,
   MapPin,
-  DownloadCloud,
-  FileText,
-  ExternalLink,
-  RefreshCw,
+  ArrowRight,
+  X,
+  ChevronRight,
 } from "lucide-react";
 
-export default function OverviewPage() {
-  const [health, setHealth] = useState<SystemHealth | null>(null);
-  const [pressureOverview, setPressureOverview] = useState<PressureOverviewResponse | null>(null);
-  const [leaderboards, setLeaderboards] = useState<PressureLeaderboardResponse | null>(null);
-  const [uncappedOverview, setUncappedOverview] = useState<UncappedOverviewResponse | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+export default function HomePage() {
+  const [methodologyOpen, setMethodologyOpen] = useState(false);
 
-  const loadOverviewData = async () => {
-    setLoading(true);
-    setErrorMsg(null);
-    try {
-      const [hRes, pOvRes, lbRes, uncRes] = await Promise.all([
-        fetchSystemHealth(),
-        fetchPressureOverview(),
-        fetchPressureLeaderboards({ discipline: "all", limit: 10, qualified_only: true }),
-        fetchUncappedOverview(),
-      ]);
-      if (hRes) setHealth(hRes);
-      if (pOvRes) setPressureOverview(pOvRes);
-      if (lbRes) setLeaderboards(lbRes);
-      if (uncRes) setUncappedOverview(uncRes);
-
-      if (!hRes && !pOvRes && !lbRes) {
-        setErrorMsg("Failed to connect to backend API service. Ensure backend server is operational.");
-      }
-    } catch {
-      setErrorMsg("Error communicating with backend service.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
+  // Close modal on Escape key
   useEffect(() => {
-    loadOverviewData();
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setMethodologyOpen(false);
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
-  const isLiveBatters = Boolean(leaderboards?.batting_leaderboard && leaderboards.batting_leaderboard.length > 0);
-  const isLiveBowlers = Boolean(leaderboards?.bowling_leaderboard && leaderboards.bowling_leaderboard.length > 0);
+  const featureCards = [
+    {
+      id: "01",
+      title: "PRESSURE INTELLIGENCE",
+      href: "/pressure",
+      icon: Shield,
+    },
+    {
+      id: "02",
+      title: "UNCAPPED SCOUTING",
+      href: "/uncapped",
+      icon: Sparkles,
+    },
+    {
+      id: "03",
+      title: "TACTICAL INTELLIGENCE",
+      href: "/tactical",
+      icon: Crosshair,
+    },
+    {
+      id: "04",
+      title: "DOMESTIC & MATCHES",
+      href: "/domestic",
+      icon: Swords,
+    },
+    {
+      id: "05",
+      title: "VENUE & PITCH INTELLIGENCE",
+      href: "/venues",
+      icon: MapPin,
+    },
+  ];
 
-  const battersToDisplay = isLiveBatters && leaderboards?.batting_leaderboard
-    ? leaderboards.batting_leaderboard.slice(0, 5).map((b) => ({
-        rank: b.rank,
-        name: b.player_name,
-        team: b.competition_qualification || "Qualified Candidate",
-        balls: b.pressure_legal_balls,
-        matches: b.pressure_matches,
-        val: b.conservative_pri > 0 ? `+${b.conservative_pri.toFixed(2)}` : b.conservative_pri.toFixed(2),
-        ci: `[${b.ci_95_lower.toFixed(1)}, +${b.ci_95_upper.toFixed(1)}]`,
-      }))
-    : [];
-
-  const bowlersToDisplay = isLiveBowlers && leaderboards?.bowling_leaderboard
-    ? leaderboards.bowling_leaderboard.slice(0, 5).map((bw) => ({
-        rank: bw.rank,
-        name: bw.player_name,
-        team: bw.competition_qualification || "Qualified Candidate",
-        balls: bw.pressure_legal_balls,
-        matches: bw.pressure_matches,
-        val: bw.conservative_runs_saved.toFixed(2),
-        ci: `[${bw.ci_95_lower.toFixed(2)}, +${bw.ci_95_upper.toFixed(2)}]`,
-      }))
-    : [];
-
-  const ranks6to10Batters = leaderboards?.batting_leaderboard && leaderboards.batting_leaderboard.length > 5
-    ? leaderboards.batting_leaderboard.slice(5, 10).map((b) => b.player_name).join(", ")
-    : null;
-
-  const ranks6to10Bowlers = leaderboards?.bowling_leaderboard && leaderboards.bowling_leaderboard.length > 5
-    ? leaderboards.bowling_leaderboard.slice(5, 10).map((bw) => bw.player_name).join(", ")
-    : null;
-
-  const isLive = health?.status === "healthy";
   return (
-    <div className="space-y-12 pb-10">
-      {/* ------------------------------------------------------------------- */}
-      {/* 1. Editorial Header & Challenge Statement */}
-      {/* ------------------------------------------------------------------- */}
-      <section className="space-y-4">
-        <div className="flex flex-wrap items-center gap-3 text-xs">
-          <span className="font-mono font-bold tracking-widest text-[#E91E8C] uppercase">
-            Rajasthan Royals SupeRR Selector
-          </span>
-          <span className="text-slate-300">•</span>
-          <span className="font-mono text-slate-500">
-            Season 2 — Round 1 Final Submission
-          </span>
-          <span className="text-slate-300">•</span>
-          <span className="inline-flex items-center gap-1.5 text-emerald-700 font-medium">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-            100% Bitwise Verified
-          </span>
-        </div>
+    <div className="min-h-screen lg:h-screen lg:max-h-screen flex flex-col bg-white text-[#31136C] overflow-x-hidden selection:bg-[#950460]/20 selection:text-[#31136C]">
+      {/* =================================================================== */}
+      {/* 1. HEADER — AUTHENTIC RAJASTHAN ROYALS BRANDING */}
+      {/* =================================================================== */}
+      <header className="h-14 sm:h-16 shrink-0 bg-white border-b border-[#31136C]/12 px-4 sm:px-6 lg:px-8 flex items-center justify-between z-30">
+        {/* Left: Pure Brand Text */}
+        <Link
+          href="/"
+          className="font-heading font-extrabold text-base sm:text-lg tracking-tight text-[#31136C] hover:text-[#950460] transition-colors"
+        >
+          ROYALS INTELLIGENCE
+        </Link>
 
-        <div className="max-w-4xl space-y-3">
-          <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-slate-900 leading-tight">
-            The Most Reliable Players Under Pressure
+        {/* Right: Prominent Header Explore Button */}
+        <Link
+          href="/overview"
+          className="group inline-flex items-center gap-2 px-4 py-2 sm:px-5 sm:py-2.5 rounded-xl bg-[#31136C] hover:bg-[#950460] text-white text-xs sm:text-[13px] font-bold tracking-wider transition-all duration-200 shadow-md hover:shadow-lg hover:scale-[1.02] active:scale-[0.98]"
+        >
+          <span>EXPLORE INTELLIGENCE</span>
+          <ArrowRight size={14} className="text-[#950460] group-hover:text-white transition-colors group-hover:translate-x-0.5" />
+        </Link>
+      </header>
+
+      {/* =================================================================== */}
+      {/* 2. MAIN VIEWPORT CONTENT CONTAINER */}
+      {/* =================================================================== */}
+      <main className="flex-1 flex flex-col justify-between px-4 sm:px-6 lg:px-8 py-2 sm:py-3 lg:py-4 max-w-7xl mx-auto w-full">
+        {/* HERO SECTION — Upper-middle anchor with official RR Jersey treatment */}
+        <section className="flex flex-col items-center text-center my-auto pt-2 sm:pt-4 pb-2">
+          {/* Eyebrow: ROYALS INTELLIGENCE */}
+          <div className="mb-1">
+            <span className="font-heading font-extrabold text-[11px] sm:text-xs tracking-[0.25em] text-[#31136C] uppercase">
+              ROYALS INTELLIGENCE
+            </span>
+          </div>
+
+          {/* Badge: SEASON 02 */}
+          <div className="mb-1.5">
+            <span className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full text-[10px] sm:text-[11px] font-mono font-bold tracking-wider bg-[#F7F6FB] text-[#950460] border border-[#950460]/30 shadow-2xs">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#950460]" />
+              SEASON 02
+            </span>
+          </div>
+
+          {/* Sublabel: RAJASTHAN ROYALS · DATA-DRIVEN CRICKET */}
+          <div className="mb-2">
+            <p className="text-[11px] sm:text-xs font-semibold tracking-[0.18em] text-[#31136C]/70 uppercase">
+              RAJASTHAN ROYALS · DATA-DRIVEN CRICKET
+            </p>
+          </div>
+
+          {/* Headline: INTELLIGENCE FOR RAJASTHAN ROYALS. */}
+          <h1 className="font-heading font-extrabold text-[clamp(1.5rem,2.6vw,2.4rem)] text-[#31136C] tracking-tight leading-[1.12] max-w-4xl mx-auto mb-1.5">
+            INTELLIGENCE FOR RAJASTHAN ROYALS.
           </h1>
-          <p className="text-sm md:text-base text-slate-600 leading-relaxed font-normal">
-            Official Rajasthan Royals analytical engine evaluating 200,999 deliveries across 883 matches. Benchmarked
-            against 12-cell context strata, Empirical Bayes shrinkage, and 1-SE Conservative lower credible bounds.
-            Delivering the official Top 10 Batters, Top 10 Bowlers, and 20 verified uncapped Indian domestic assets.
-          </p>
-        </div>
 
-        {/* Primary Action Links */}
-        <div className="flex flex-wrap items-center gap-4 pt-2">
-          <Link
-            href="/pressure"
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-[#111C38] text-white text-xs font-semibold hover:bg-[#1A2B50] transition-colors shadow-sm group"
-          >
-            <Shield size={14} className="text-[#E91E8C]" />
-            <span>Official Pressure Leaderboards</span>
-            <ArrowRight size={13} className="text-slate-400 group-hover:translate-x-0.5 transition-transform" />
-          </Link>
+          {/* Subtitle: Built to Find the Difference. */}
+          <h3 className="font-heading font-bold text-[clamp(0.95rem,1.35vw,1.25rem)] text-[#950460] tracking-tight mb-4">
+            Built to Find the Difference.
+          </h3>
 
-          <Link
-            href="/uncapped"
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-white border border-slate-200 text-slate-800 text-xs font-semibold hover:bg-slate-50 transition-colors shadow-sm group"
-          >
-            <Sparkles size={14} className="text-emerald-600" />
-            <span>Uncapped Scouting Shortlist</span>
-            <ArrowRight size={13} className="text-slate-400 group-hover:translate-x-0.5 transition-transform" />
-          </Link>
-
-          <Link
-            href="/tactical"
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg text-slate-600 text-xs font-medium hover:text-slate-900 transition-colors"
-          >
-            <Crosshair size={14} className="text-[#D6B56D]" />
-            <span>Tactical Analytics</span>
-          </Link>
-        </div>
-
-        {/* Connection Notice (if live analytical engine is offline or errored) */}
-        {(!isLive || errorMsg) && (
-          <div className="p-3.5 rounded-xl bg-amber-50/90 border border-amber-200 text-amber-900 text-xs flex items-center justify-between gap-3 shadow-xs">
-            <div className="flex items-center gap-2.5">
-              <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse shrink-0" />
-              <span>
-                <strong>BACKEND STANDBY NOTICE:</strong> Backend analytics service is offline or unreachable. Ensure the FastAPI backend is running on port 8000.
-              </span>
-            </div>
-            <button
-              onClick={loadOverviewData}
-              className="px-2.5 py-1 rounded bg-amber-200/80 hover:bg-amber-300 text-amber-900 font-bold text-[11px] shrink-0 flex items-center gap-1 transition-colors"
+          {/* Hero CTAs */}
+          <div className="flex flex-row items-center justify-center gap-3.5">
+            <Link
+              href="/overview"
+              className="group inline-flex items-center justify-center gap-2.5 px-7 py-3 sm:px-8 sm:py-3.5 rounded-xl bg-gradient-to-r from-[#31136C] to-[#950460] hover:from-[#31136C] hover:to-[#950460] text-white text-xs sm:text-sm font-bold tracking-wider uppercase transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98]"
             >
-              <RefreshCw size={12} className={loading ? "animate-spin" : ""} />
-              <span>Retry</span>
+              <span>EXPLORE INTELLIGENCE</span>
+              <ArrowRight size={16} className="text-white transition-transform group-hover:translate-x-0.5" />
+            </Link>
+
+            <button
+              onClick={() => setMethodologyOpen(true)}
+              className="inline-flex items-center justify-center gap-1.5 px-5 py-3 sm:px-6 sm:py-3.5 rounded-xl bg-white text-[#31136C] text-xs font-semibold tracking-wider uppercase border border-[#31136C]/15 hover:bg-[#F7F6FB] hover:text-[#950460] hover:border-[#950460]/30 transition-all shadow-2xs cursor-pointer"
+            >
+              <span>OUR METHODOLOGY</span>
             </button>
           </div>
-        )}
-      </section>
+        </section>
 
-      {/* ------------------------------------------------------------------- */}
-      {/* 2. Open Editorial Telemetry Strip (No Card Boxes) */}
-      {/* ------------------------------------------------------------------- */}
-      <section className="py-5 border-y border-slate-200/70">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
-          <div>
-            <span className="text-[11px] font-mono uppercase tracking-wider text-slate-400 block mb-1">
-              Controlling Data Pack
-            </span>
-            <div className="text-2xl md:text-3xl font-extrabold text-slate-900 font-mono tracking-tight">
-              {pressureOverview?.total_deliveries ? pressureOverview.total_deliveries.toLocaleString() : "—"}
-            </div>
-            <p className="text-xs text-slate-500 mt-1">
-              {pressureOverview
-                ? `Deliveries across ${pressureOverview.matches_with_deliveries + pressureOverview.reconciled_abandoned_matches} matches (${pressureOverview.total_competitions} tournaments)`
-                : "Awaiting backend telemetry"}
-            </p>
-          </div>
-
-          <div>
-            <span className="text-[11px] font-mono uppercase tracking-wider text-slate-400 block mb-1">
-              Official Deliverables
-            </span>
-            <div className="text-2xl md:text-3xl font-extrabold text-slate-900 font-mono tracking-tight">
-              Top 10 / Top 10
-            </div>
-            <p className="text-xs text-slate-500 mt-1">
-              1-SE Conservative lower bounds (100% qualified)
-            </p>
-          </div>
-
-          <div>
-            <span className="text-[11px] font-mono uppercase tracking-wider text-slate-400 block mb-1">
-              Uncapped Domestic Intelligence
-            </span>
-            <div className="text-2xl md:text-3xl font-extrabold text-slate-900 font-mono tracking-tight">
-              {uncappedOverview
-                ? `${uncappedOverview.total_verified_uncapped_batters + uncappedOverview.total_verified_uncapped_bowlers} Verified`
-                : "—"}
-            </div>
-            <p className="text-xs text-slate-500 mt-1">
-              Certified 0 senior caps in AUCTION-02 ledger
-            </p>
-          </div>
-
-          <div>
-            <span className="text-[11px] font-mono uppercase tracking-wider text-slate-400 block mb-1">
-              Verification Health
-            </span>
-            <div className="text-2xl md:text-3xl font-extrabold text-emerald-700 font-mono tracking-tight flex items-baseline gap-2">
-              <span>{isLive ? "Engine Online" : "Service Standby"}</span>
-              <span className={`w-2 h-2 rounded-full ${isLive ? "bg-emerald-500 animate-pulse" : "bg-amber-500"}`} />
-            </div>
-            <p className="text-xs text-slate-500 mt-1">
-              {isLive ? `FastAPI v${health?.version || "0.1.0"} active` : "Backend service awaiting initialization"}
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* ------------------------------------------------------------------- */}
-      {/* 3. Official Round 1 Deliverables: Batting & Bowling Leaderboards */}
-      {/* ------------------------------------------------------------------- */}
-      <section className="space-y-6">
-        <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-2 border-b border-slate-200/60 pb-3">
-          <div>
-            <h2 className="text-lg font-bold text-slate-900 tracking-tight">
-              Official Round 1 Leaderboards Under Pressure
-            </h2>
-            <p className="text-xs text-slate-500">
-              Primary Unstop selections: overall qualified batters and bowlers (&ge; 60 pressure deliveries).
-            </p>
-          </div>
-          <Link
-            href="/pressure"
-            className="text-xs font-semibold text-[#E91E8C] hover:text-[#C2185B] transition-colors inline-flex items-center gap-1"
-          >
-            <span>View Complete Leaderboards & Dossiers</span>
-            <ArrowRight size={13} />
-          </Link>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Batting Top 5 Preview */}
-          <div className="space-y-3">
-            <div className="flex items-center justify-between text-xs font-semibold text-slate-700">
-              <span className="flex items-center gap-2">
-                <TrendingUp size={15} className="text-[#E91E8C]" />
-                <span>Top 5 Batters Under Pressure (Conservative PRI)</span>
-                {isLiveBatters ? (
-                  <span className="px-1.5 py-0.5 rounded text-[9px] font-mono font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                    LIVE ENGINE
-                  </span>
-                ) : (
-                  <span className="px-1.5 py-0.5 rounded text-[9px] font-mono font-bold bg-slate-100 text-slate-600 border border-slate-200">
-                    STANDBY
-                  </span>
-                )}
-              </span>
-              <span className="font-mono text-[11px] text-slate-400">Balls / Matches</span>
-            </div>
-
-            {isLiveBatters ? (
-              <div className="divide-y divide-slate-100 border-t border-slate-200/60 text-xs">
-                {battersToDisplay.map((p) => (
-                  <div key={p.rank} className="py-2.5 flex items-center justify-between hover:bg-slate-50/70 px-2 rounded-md transition-colors">
-                    <div className="flex items-center gap-3">
-                      <span className="font-mono font-bold text-slate-400 w-4 text-center">{p.rank}</span>
-                      <div>
-                        <span className="font-bold text-slate-900 block">{p.name}</span>
-                        <span className="text-[11px] text-slate-400 font-mono">{p.team}</span>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <span className={`font-mono font-bold ${p.val.startsWith("+") ? "text-emerald-600" : "text-slate-800"}`}>
-                        {p.val} pts
-                      </span>
-                      <span className="text-[11px] font-mono text-slate-400 block">{p.balls}b • {p.matches}m</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="py-8 px-4 text-center rounded-lg border border-dashed border-slate-200 bg-slate-50/50">
-                <div className="text-xs text-slate-500 font-medium">Official pressure batting leaderboards currently unavailable.</div>
-                <button
-                  onClick={loadOverviewData}
-                  className="mt-2 inline-flex items-center gap-1.5 px-3 py-1 bg-white border border-slate-200 rounded text-xs font-semibold text-slate-700 hover:bg-slate-50 shadow-xs"
+        {/* =================================================================== */}
+        {/* 3. COMPACT FEATURE CARDS — ALL FIVE IN ONE ROW (DESKTOP) */}
+        {/* Descriptions completely removed; displays icon, name, ID & link */}
+        {/* =================================================================== */}
+        <section className="my-auto py-2 w-full">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2.5 sm:gap-3 max-w-6xl mx-auto w-full">
+            {featureCards.map((card) => {
+              const Icon = card.icon;
+              return (
+                <Link
+                  key={card.id}
+                  href={card.href}
+                  className="group min-h-[82px] lg:h-[90px] p-2.5 sm:p-3 rounded-xl border border-[#31136C]/12 bg-white hover:border-[#950460] hover:bg-[#F7F6FB]/60 hover:shadow-sm transition-all flex flex-col justify-between"
                 >
-                  <RefreshCw size={12} className={loading ? "animate-spin" : ""} />
-                  <span>Retry Connection</span>
-                </button>
-              </div>
-            )}
-
-            <div className="pt-2 text-[11px] text-slate-400 font-mono flex justify-between">
-              <span>{ranks6to10Batters ? `Ranks 6–10: ${ranks6to10Batters}` : "Ranks 6–10 viewable on full leaderboard"}</span>
-              <Link href="/pressure?tab=batting" className="text-slate-600 hover:text-slate-900 font-sans font-medium">
-                Full Batters &rarr;
-              </Link>
-            </div>
-          </div>
-
-          {/* Bowling Top 5 Preview */}
-          <div className="space-y-3">
-            <div className="flex items-center justify-between text-xs font-semibold text-slate-700">
-              <span className="flex items-center gap-2">
-                <Target size={15} className="text-[#D6B56D]" />
-                <span>Top 5 Bowlers Under Pressure (Conservative Runs Saved)</span>
-                {isLiveBowlers ? (
-                  <span className="px-1.5 py-0.5 rounded text-[9px] font-mono font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                    LIVE ENGINE
-                  </span>
-                ) : (
-                  <span className="px-1.5 py-0.5 rounded text-[9px] font-mono font-bold bg-slate-100 text-slate-600 border border-slate-200">
-                    STANDBY
-                  </span>
-                )}
-              </span>
-              <span className="font-mono text-[11px] text-slate-400">Balls / Matches</span>
-            </div>
-
-            {isLiveBowlers ? (
-              <div className="divide-y divide-slate-100 border-t border-slate-200/60 text-xs">
-                {bowlersToDisplay.map((p) => (
-                  <div key={p.rank} className="py-2.5 flex items-center justify-between hover:bg-slate-50/70 px-2 rounded-md transition-colors">
-                    <div className="flex items-center gap-3">
-                      <span className="font-mono font-bold text-slate-400 w-4 text-center">{p.rank}</span>
-                      <div>
-                        <span className="font-bold text-slate-900 block">{p.name}</span>
-                        <span className="text-[11px] text-slate-400 font-mono">{p.team}</span>
+                  <div>
+                    <div className="flex items-center justify-between mb-1.5">
+                      <div className="w-5 h-5 rounded-md bg-[#950460]/10 border border-[#950460]/30 flex items-center justify-center text-[#950460] shrink-0 group-hover:bg-[#950460] group-hover:text-white transition-colors">
+                        <Icon size={12} />
                       </div>
-                    </div>
-                    <div className="text-right">
-                      <span className="font-mono font-bold text-slate-800">
-                        {p.val} RPO
+                      <span className="text-[10px] font-mono font-bold text-[#950460]">
+                        {card.id}
                       </span>
-                      <span className="text-[11px] font-mono text-slate-400 block">{p.balls}b • {p.matches}m</span>
                     </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="py-8 px-4 text-center rounded-lg border border-dashed border-slate-200 bg-slate-50/50">
-                <div className="text-xs text-slate-500 font-medium">Official pressure bowling leaderboards currently unavailable.</div>
-                <button
-                  onClick={loadOverviewData}
-                  className="mt-2 inline-flex items-center gap-1.5 px-3 py-1 bg-white border border-slate-200 rounded text-xs font-semibold text-slate-700 hover:bg-slate-50 shadow-xs"
-                >
-                  <RefreshCw size={12} className={loading ? "animate-spin" : ""} />
-                  <span>Retry Connection</span>
-                </button>
-              </div>
-            )}
 
-            <div className="pt-2 text-[11px] text-slate-400 font-mono flex justify-between">
-              <span>{ranks6to10Bowlers ? `Ranks 6–10: ${ranks6to10Bowlers}` : "Ranks 6–10 viewable on full leaderboard"}</span>
-              <Link href="/pressure?tab=bowling" className="text-slate-600 hover:text-slate-900 font-sans font-medium">
-                Full Bowlers &rarr;
+                    <h4 className="text-[11px] sm:text-xs font-heading font-bold text-[#31136C] group-hover:text-[#950460] transition-colors tracking-tight leading-tight">
+                      {card.title}
+                    </h4>
+                  </div>
+
+                  <div className="flex items-center gap-1 text-[10px] font-bold text-[#950460] group-hover:translate-x-0.5 transition-all mt-auto pt-1">
+                    <span>Access Module</span>
+                    <ChevronRight size={11} />
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        </section>
+
+        {/* =================================================================== */}
+        {/* 4. FOOTER — CENTERED AT THE BOTTOM */}
+        {/* =================================================================== */}
+        <footer className="shrink-0 py-1.5 text-center text-[10px] sm:text-[11px] text-[#31136C]/70">
+          <span>Royals Intelligence Season 02 · Rajasthan Royals Cricket Analytics · Built to Find the Difference.</span>
+        </footer>
+      </main>
+
+      {/* =================================================================== */}
+      {/* 5. METHODOLOGY MODAL DIALOG — PRESIGNED ACCESS */}
+      {/* =================================================================== */}
+      {methodologyOpen && (
+        <div
+          id="methodology"
+          role="dialog"
+          aria-modal="true"
+          className="fixed inset-0 z-50 bg-[#31136C]/50 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto"
+          onClick={() => setMethodologyOpen(false)}
+        >
+          <div
+            className="bg-white rounded-2xl border border-[#31136C]/15 max-w-2xl w-full p-6 sm:p-8 shadow-xl space-y-6 animate-hero-fade relative"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div className="flex items-start justify-between border-b border-[#31136C]/12 pb-4">
+              <div>
+                <span className="text-[10px] font-mono font-bold tracking-wider text-[#950460] uppercase block mb-1">
+                  Rigorous Mathematical Architecture
+                </span>
+                <h2 className="text-xl font-heading font-extrabold text-[#31136C] tracking-tight">
+                  OUR METHODOLOGY
+                </h2>
+                <p className="text-xs text-[#31136C]/70 mt-1">
+                  Built on evidence. Driven by context. Five scientific pillars governing player valuation.
+                </p>
+              </div>
+              <button
+                onClick={() => setMethodologyOpen(false)}
+                className="p-1.5 rounded-lg text-[#31136C]/70 hover:text-[#950460] hover:bg-[#F7F6FB] transition-colors"
+                aria-label="Close modal"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            {/* 5 Pillars */}
+            <div className="space-y-3.5 text-xs text-[#31136C]/70">
+              <div className="p-3.5 rounded-xl border border-[#31136C]/12 bg-[#F7F6FB]">
+                <div className="font-heading font-bold text-xs text-[#31136C] mb-1 flex items-center justify-between">
+                  <span>PILLAR 01: Contextual Benchmarking</span>
+                  <span className="text-[10px] font-mono font-bold text-[#950460]">12-Cell Strata</span>
+                </div>
+                <p className="leading-relaxed">
+                  Every delivery is benchmarked against Innings (2) &times; Phase (3) &times; Tier (2) strata to eliminate structural entry bias and determine true situational expectation.
+                </p>
+              </div>
+
+              <div className="p-3.5 rounded-xl border border-[#31136C]/12 bg-[#F7F6FB]">
+                <div className="font-heading font-bold text-xs text-[#31136C] mb-1 flex items-center justify-between">
+                  <span>PILLAR 02: Empirical Bayes Shrinkage</span>
+                  <span className="text-[10px] font-mono font-bold text-[#950460]">Gaussian Prior</span>
+                </div>
+                <p className="leading-relaxed">
+                  Separates skill from noise using league population priors (&mu;<sub>0</sub>, &tau;<sup>2</sup>), shrinking small-sample outliers toward the true population mean.
+                </p>
+              </div>
+
+              <div className="p-3.5 rounded-xl border border-[#31136C]/12 bg-[#F7F6FB]">
+                <div className="font-heading font-bold text-xs text-[#31136C] mb-1 flex items-center justify-between">
+                  <span>PILLAR 03: Conservative PRI</span>
+                  <span className="text-[10px] font-mono font-bold text-[#950460]">Uncertainty Penalty</span>
+                </div>
+                <p className="leading-relaxed">
+                  Ranks candidates conservatively by penalizing high posterior uncertainty, valuing repeatable execution over speculative high-volatility spikes.
+                </p>
+              </div>
+
+              <div className="p-3.5 rounded-xl border border-[#31136C]/12 bg-[#F7F6FB]">
+                <div className="font-heading font-bold text-xs text-[#31136C] mb-1 flex items-center justify-between">
+                  <span>PILLAR 04: 1-SE Lower Credible Bounds</span>
+                  <span className="text-[10px] font-mono font-bold text-[#950460]">1-Standard-Error</span>
+                </div>
+                <p className="leading-relaxed">
+                  Calculates rigorous 1-standard-error defensive lower bounds across all posterior distributions for defensible worst-case reliability estimates.
+                </p>
+              </div>
+
+              <div className="p-3.5 rounded-xl border border-[#31136C]/12 bg-[#F7F6FB]">
+                <div className="font-heading font-bold text-xs text-[#31136C] mb-1 flex items-center justify-between">
+                  <span>PILLAR 05: Official Qualification Threshold</span>
+                  <span className="text-[10px] font-mono font-bold text-[#950460]">&ge; 60 Balls</span>
+                </div>
+                <p className="leading-relaxed">
+                  Strict qualification standard enforcing at least 60 pressure deliveries to guarantee sample adequacy before candidate ranking.
+                </p>
+              </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="pt-2 border-t border-[#31136C]/12 flex items-center justify-between">
+              <Link
+                href="/overview"
+                onClick={() => setMethodologyOpen(false)}
+                className="text-xs font-bold text-[#31136C] hover:text-[#950460] hover:underline inline-flex items-center gap-1"
+              >
+                <span>View Full Executive Architecture</span>
+                <ArrowRight size={12} />
               </Link>
+              <button
+                onClick={() => setMethodologyOpen(false)}
+                className="px-4 py-1.5 rounded-xl bg-[#31136C] text-white text-xs font-semibold hover:bg-[#950460] transition-colors"
+              >
+                Close
+              </button>
             </div>
           </div>
         </div>
-      </section>
-
-      {/* ------------------------------------------------------------------- */}
-      {/* 4. Supplementary Uncapped Domestic Intelligence Showcase */}
-      {/* ------------------------------------------------------------------- */}
-      <section className="space-y-6">
-        <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-2 border-b border-slate-200/60 pb-3">
-          <div>
-            <h2 className="text-lg font-bold text-slate-900 tracking-tight">
-              Supplementary Uncapped Indian Domestic Intelligence
-            </h2>
-            <p className="text-xs text-slate-500">
-              Specialized franchise auction intelligence for Rajasthan Royals — 100% verified zero senior international caps.
-            </p>
-          </div>
-          <Link
-            href="/uncapped"
-            className="text-xs font-semibold text-emerald-700 hover:text-emerald-800 transition-colors inline-flex items-center gap-1"
-          >
-            <span>View Full 20-Player Shortlist & Squad Fit Ratings</span>
-            <ArrowRight size={13} />
-          </Link>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {/* Top Uncapped Batters */}
-          <div className="space-y-3">
-            <span className="text-xs font-semibold text-slate-700 flex items-center gap-2">
-              <Sparkles size={14} className="text-emerald-600" />
-              Verified Uncapped Batters (Top 3)
-            </span>
-            <div className="divide-y divide-slate-100 border-t border-slate-200/60 text-xs">
-              {[
-                { rank: 1, name: "Ashutosh Sharma", team: "Railways / PBKS", metric: "-3.63 PRI", fit: "93.20 Fit", desc: "Provable domestic death finisher (+10.3 SR delta)" },
-                { rank: 2, name: "Shashank Singh", team: "Chhattisgarh / PBKS", metric: "-11.07 PRI", fit: "87.85 Fit", desc: "Composed middle-overs aggregator and accelerator" },
-                { rank: 3, name: "Rahul Tewatia", team: "Haryana / GT", metric: "-11.37 PRI", fit: "87.05 Fit", desc: "Clutch chase equity with situational leg-spin utility" },
-              ].map((p) => (
-                <div key={p.rank} className="py-2.5 flex items-center justify-between hover:bg-slate-50/70 px-2 rounded-md transition-colors">
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <span className="font-mono font-bold text-slate-400 w-4">{p.rank}</span>
-                      <span className="font-bold text-slate-900">{p.name}</span>
-                      <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700">Verified</span>
-                    </div>
-                    <p className="text-[11px] text-slate-500 mt-0.5 pl-6">{p.desc}</p>
-                  </div>
-                  <div className="text-right">
-                    <span className="font-mono font-bold text-slate-800">{p.fit}</span>
-                    <span className="text-[10px] font-mono text-slate-400 block">{p.metric}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Top Uncapped Bowlers */}
-          <div className="space-y-3">
-            <span className="text-xs font-semibold text-slate-700 flex items-center gap-2">
-              <Crosshair size={14} className="text-cyan-600" />
-              Verified Uncapped Bowlers (Top 3)
-            </span>
-            <div className="divide-y divide-slate-100 border-t border-slate-200/60 text-xs">
-              {[
-                { rank: 1, name: "Vaibhav Arora", team: "Himachal / KKR", metric: "-2.36 RPO", fit: "90.00 Fit", desc: "Dual-phase swing in PP and disciplined death yorkers" },
-                { rank: 2, name: "Suyash Sharma", team: "Delhi / KKR", metric: "-2.41 RPO", fit: "82.95 Fit", desc: "Attacking wrist-spin option with deceptive googly" },
-                { rank: 3, name: "Akash Madhwal", team: "Uttarakhand / MI", metric: "-2.42 RPO", fit: "87.20 Fit", desc: "Specialist death-overs blockhole execution" },
-              ].map((p) => (
-                <div key={p.rank} className="py-2.5 flex items-center justify-between hover:bg-slate-50/70 px-2 rounded-md transition-colors">
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <span className="font-mono font-bold text-slate-400 w-4">{p.rank}</span>
-                      <span className="font-bold text-slate-900">{p.name}</span>
-                      <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700">Verified</span>
-                    </div>
-                    <p className="text-[11px] text-slate-500 mt-0.5 pl-6">{p.desc}</p>
-                  </div>
-                  <div className="text-right">
-                    <span className="font-mono font-bold text-slate-800">{p.fit}</span>
-                    <span className="text-[10px] font-mono text-slate-400 block">{p.metric}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ------------------------------------------------------------------- */}
-      {/* 5. Methodological Rigor & Data Governance Overview */}
-      {/* ------------------------------------------------------------------- */}
-      <section className="space-y-4 pt-4 border-t border-slate-200/60">
-        <div>
-          <h2 className="text-base font-bold text-slate-900 tracking-tight">
-            Methodological Architecture
-          </h2>
-          <p className="text-xs text-slate-500">
-            Four core scientific pillars governing the ROYALS INTELLIGENCE pressure evaluation system.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 text-xs">
-          <div className="space-y-1.5">
-            <div className="flex items-center gap-2 font-bold text-slate-900">
-              <Flame size={15} className="text-[#E91E8C]" />
-              <span>1. Dynamic Pressure</span>
-            </div>
-            <p className="text-slate-600 leading-relaxed">
-              Multi-factor leverage model: Chasing Required Run Rate &ge; 9.0 with &le; 36 balls, wickets in hand &le; 4,
-              and death-over target acceleration.
-            </p>
-          </div>
-
-          <div className="space-y-1.5">
-            <div className="flex items-center gap-2 font-bold text-slate-900">
-              <Layers size={15} className="text-slate-800" />
-              <span>2. 12-Cell Baselines</span>
-            </div>
-            <p className="text-slate-600 leading-relaxed">
-              Every delivery is benchmarked against Innings (2) &times; Phase (3) &times; Tier (2) strata,
-              eliminating structural death-over entry bias.
-            </p>
-          </div>
-
-          <div className="space-y-1.5">
-            <div className="flex items-center gap-2 font-bold text-slate-900">
-              <Sparkles size={15} className="text-[#D6B56D]" />
-              <span>3. Empirical Bayes</span>
-            </div>
-            <p className="text-slate-600 leading-relaxed">
-              Separates skill from noise using Gaussian population priors (&mu;<sub>0</sub>, &tau;<sup>2</sup>). Low-sample outliers shrink toward
-              the league mean.
-            </p>
-          </div>
-
-          <div className="space-y-1.5">
-            <div className="flex items-center gap-2 font-bold text-slate-900">
-              <Shield size={15} className="text-emerald-700" />
-              <span>4. Conservative PRI</span>
-            </div>
-            <p className="text-slate-600 leading-relaxed">
-              Rankings govern by Conservative PRI = Shrunk Posterior Mean minus 1.0 SE, directly penalizing high
-              estimation uncertainty.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* ------------------------------------------------------------------- */}
-      {/* 6. Navigation to Analytical Modules */}
-      {/* ------------------------------------------------------------------- */}
-      <section className="space-y-4 pt-4 border-t border-slate-200/60">
-        <div>
-          <h2 className="text-base font-bold text-slate-900 tracking-tight">
-            Intelligence Modules
-          </h2>
-          <p className="text-xs text-slate-500">
-            Dedicated research environments connected to the verified tournament database.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Link
-            href="/pressure"
-            className="p-4 rounded-lg bg-white border border-slate-200/80 hover:border-slate-400 hover:shadow-sm transition-all group block"
-          >
-            <div className="flex items-center justify-between mb-2">
-              <Shield size={18} className="text-[#E91E8C]" />
-              <ArrowRight size={13} className="text-slate-400 group-hover:translate-x-0.5 group-hover:text-slate-800 transition-all" />
-            </div>
-            <h3 className="font-bold text-xs text-slate-900">Pressure Intelligence</h3>
-            <p className="text-[11px] text-slate-500 mt-1 leading-normal">
-              Official Top 10 leaderboards, uncertainty forest plots, and candidate evidence dossiers.
-            </p>
-          </Link>
-
-          <Link
-            href="/tactical"
-            className="p-4 rounded-lg bg-white border border-slate-200/80 hover:border-slate-400 hover:shadow-sm transition-all group block"
-          >
-            <div className="flex items-center justify-between mb-2">
-              <Crosshair size={18} className="text-[#D6B56D]" />
-              <ArrowRight size={13} className="text-slate-400 group-hover:translate-x-0.5 group-hover:text-slate-800 transition-all" />
-            </div>
-            <h3 className="font-bold text-xs text-slate-900">Tactical Intelligence</h3>
-            <p className="text-[11px] text-slate-500 mt-1 leading-normal">
-              Phase splits (PP, Middle, Death), shot archetypes, bowling variations, and radar speeds.
-            </p>
-          </Link>
-
-          <Link
-            href="/uncapped"
-            className="p-4 rounded-lg bg-white border border-slate-200/80 hover:border-slate-400 hover:shadow-sm transition-all group block"
-          >
-            <div className="flex items-center justify-between mb-2">
-              <Sparkles size={18} className="text-emerald-600" />
-              <ArrowRight size={13} className="text-slate-400 group-hover:translate-x-0.5 group-hover:text-slate-800 transition-all" />
-            </div>
-            <h3 className="font-bold text-xs text-slate-900">Uncapped Talent</h3>
-            <p className="text-[11px] text-slate-500 mt-1 leading-normal">
-              Verified Indian domestic batters & bowlers, Rajasthan Royals squad fit ratings, and reserves.
-            </p>
-          </Link>
-
-          <Link
-            href="/domestic"
-            className="p-4 rounded-lg bg-white border border-slate-200/80 hover:border-slate-400 hover:shadow-sm transition-all group block"
-          >
-            <div className="flex items-center justify-between mb-2">
-              <Swords size={18} className="text-slate-700" />
-              <ArrowRight size={13} className="text-slate-400 group-hover:translate-x-0.5 group-hover:text-slate-800 transition-all" />
-            </div>
-            <h3 className="font-bold text-xs text-slate-900">Domestic & Matches</h3>
-            <p className="text-[11px] text-slate-500 mt-1 leading-normal">
-              287-player directory, match scorecards, player histories, and all-round dual contributions.
-            </p>
-          </Link>
-        </div>
-      </section>
+      )}
     </div>
   );
 }
