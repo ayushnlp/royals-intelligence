@@ -3,14 +3,8 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import {
-  Shield,
-  Sparkles,
-  Crosshair,
-  Swords,
-  MapPin,
   ArrowRight,
   X,
-  ChevronRight,
 } from "lucide-react";
 
 export default function HomePage() {
@@ -79,50 +73,50 @@ export default function HomePage() {
         {/* HERO SECTION — Upper-middle anchor with official RR Jersey treatment */}
         <section className="flex flex-col items-center text-center my-auto pt-2 sm:pt-4 pb-2">
           {/* Eyebrow: ROYALS INTELLIGENCE */}
-          <div className="mb-1">
-            <span className="font-heading font-extrabold text-[11px] sm:text-xs tracking-[0.25em] text-[#17294B] uppercase">
+          <div className="mb-1.5">
+            <span className="font-heading font-extrabold text-xs sm:text-[13px] tracking-[0.28em] text-[#17294B] uppercase">
               ROYALS INTELLIGENCE
             </span>
           </div>
 
           {/* Badge: SEASON 02 */}
-          <div className="mb-1.5">
-            <span className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full text-[10px] sm:text-[11px] font-mono font-bold tracking-wider bg-[#FCE8F0] text-[#E4005A] border border-[#E4005A]/30 shadow-2xs">
+          <div className="mb-2">
+            <span className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full text-xs font-mono font-bold tracking-wider bg-[#FCE8F0] text-[#E4005A] border border-[#E4005A]/30 shadow-2xs">
               <span className="w-1.5 h-1.5 rounded-full bg-[#E4005A]" />
               SEASON 02
             </span>
           </div>
 
           {/* Sublabel: RAJASTHAN ROYALS · DATA-DRIVEN CRICKET */}
-          <div className="mb-2">
-            <p className="text-[11px] sm:text-xs font-semibold tracking-[0.18em] text-[#74658F] uppercase">
+          <div className="mb-2.5">
+            <p className="text-xs sm:text-[13px] font-semibold tracking-[0.22em] text-[#74658F] uppercase">
               RAJASTHAN ROYALS · DATA-DRIVEN CRICKET
             </p>
           </div>
 
           {/* Headline: INTELLIGENCE FOR RAJASTHAN ROYALS. */}
-          <h1 className="font-heading font-extrabold text-[clamp(1.5rem,2.6vw,2.4rem)] text-[#17294B] tracking-tight leading-[1.12] max-w-4xl mx-auto mb-1.5">
+          <h1 className="font-heading font-extrabold text-[32px] sm:text-[42px] md:text-[48px] lg:text-[54px] text-[#17294B] tracking-tight leading-[1.08] max-w-4xl mx-auto mb-2.5">
             INTELLIGENCE FOR RAJASTHAN ROYALS.
           </h1>
 
           {/* Subtitle: Built to Find the Difference. */}
-          <h3 className="font-heading font-bold text-[clamp(0.95rem,1.35vw,1.25rem)] text-[#E4005A] tracking-tight mb-4">
+          <h3 className="font-heading font-bold text-lg sm:text-xl lg:text-[22px] text-[#E4005A] tracking-tight mb-6">
             Built to Find the Difference.
           </h3>
 
           {/* Hero CTAs */}
-          <div className="flex flex-row items-center justify-center gap-3.5">
+          <div className="flex flex-row items-center justify-center gap-4">
             <Link
               href="/overview"
-              className="group inline-flex items-center justify-center gap-2.5 px-7 py-3 sm:px-8 sm:py-3.5 rounded-xl bg-gradient-to-r from-[#17294B] to-[#E4005A] hover:from-[#17294B] hover:to-[#950460] text-white text-xs sm:text-sm font-bold tracking-wider uppercase transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98]"
+              className="group inline-flex items-center justify-center gap-2.5 px-8 py-3.5 sm:px-9 sm:py-4 rounded-xl bg-gradient-to-r from-[#17294B] to-[#E4005A] hover:from-[#17294B] hover:to-[#950460] text-white text-sm sm:text-[15px] font-bold tracking-wider uppercase transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] min-h-[48px] sm:min-h-[52px]"
             >
               <span>EXPLORE INTELLIGENCE</span>
-              <ArrowRight size={16} className="text-white transition-transform group-hover:translate-x-0.5" />
+              <ArrowRight size={17} className="text-white transition-transform group-hover:translate-x-0.5" />
             </Link>
 
             <button
               onClick={() => setMethodologyOpen(true)}
-              className="inline-flex items-center justify-center gap-1.5 px-5 py-3 sm:px-6 sm:py-3.5 rounded-xl bg-white text-[#17294B] text-xs font-semibold tracking-wider uppercase border border-[#E7EAF0] hover:bg-[#FCE8F0] hover:text-[#E4005A] hover:border-[#E4005A]/30 transition-all shadow-2xs cursor-pointer"
+              className="inline-flex items-center justify-center gap-1.5 px-6 py-3.5 sm:px-7 sm:py-4 rounded-xl bg-white text-[#17294B] text-sm sm:text-[15px] font-semibold tracking-wider uppercase border border-[#E7EAF0] hover:bg-[#FCE8F0] hover:text-[#E4005A] hover:border-[#E4005A]/30 transition-all shadow-2xs cursor-pointer min-h-[48px] sm:min-h-[52px]"
             >
               <span>OUR METHODOLOGY</span>
             </button>
@@ -140,17 +134,17 @@ export default function HomePage() {
                 <Link
                   key={card.title}
                   href={card.href}
-                  className="group min-h-[82px] lg:h-[90px] p-3 rounded-xl border border-[#E7EAF0] bg-white hover:border-[#E4005A] hover:bg-[#FCE8F0]/40 hover:shadow-sm transition-all flex flex-col justify-between"
+                  className="group min-h-[92px] lg:h-[100px] p-3.5 rounded-xl border border-[#E7EAF0] bg-white hover:border-[#E4005A] hover:bg-[#FCE8F0]/40 hover:shadow-sm transition-all flex flex-col justify-between"
                 >
                   <div>
-                    <h4 className="text-xs sm:text-[13px] lg:text-sm font-heading font-extrabold text-[#17294B] group-hover:text-[#E4005A] transition-colors tracking-tight leading-snug">
+                    <h4 className="text-xs sm:text-[13px] lg:text-[14px] font-heading font-extrabold text-[#17294B] group-hover:text-[#E4005A] transition-colors tracking-tight leading-snug">
                       {card.title}
                     </h4>
                   </div>
 
-                  <div className="flex items-center gap-1.5 text-[11px] font-bold text-[#E4005A] group-hover:translate-x-0.5 transition-all mt-auto pt-1">
+                  <div className="flex items-center gap-1.5 text-xs font-bold text-[#E4005A] group-hover:translate-x-0.5 transition-all mt-auto pt-1">
                     <span>Access Module</span>
-                    <ArrowRight size={12} className="text-[#E4005A]" />
+                    <ArrowRight size={13} className="text-[#E4005A]" />
                   </div>
                 </Link>
               );

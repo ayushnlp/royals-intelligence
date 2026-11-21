@@ -2,20 +2,13 @@
 
 import React, { useState, useEffect } from "react";
 import {
-  Database,
-  ShieldCheck,
-  DownloadCloud,
-  FileCheck2,
   AlertCircle,
   Clock,
   Layers,
-  ArrowRight,
   Server,
   Upload,
   RefreshCw,
-  ExternalLink,
   CheckCircle2,
-  XCircle,
 } from "lucide-react";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { StatCard } from "@/components/ui/StatCard";

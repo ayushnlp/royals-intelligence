@@ -40,8 +40,8 @@ module.exports = {
         },
       },
       fontFamily: {
-        sans: ["Inter", "-apple-system", "BlinkMacSystemFont", "Segoe UI", "Roboto", "sans-serif"],
-        heading: ["Sora", "Inter", "-apple-system", "BlinkMacSystemFont", "sans-serif"],
+        sans: ["var(--font-poppins)", "Poppins", "-apple-system", "BlinkMacSystemFont", "Segoe UI", "Roboto", "sans-serif"],
+        heading: ["var(--font-poppins)", "Poppins", "sans-serif"],
         mono: ["JetBrains Mono", "IBM Plex Mono", "SFMono-Regular", "Menlo", "monospace"],
       },
       boxShadow: {

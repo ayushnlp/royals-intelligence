@@ -17,20 +17,14 @@ import {
 import {
   Shield,
   Layers,
-  Database,
   ArrowRight,
   CheckCircle2,
   Crosshair,
-  Award,
   Sparkles,
   Flame,
   TrendingUp,
   Target,
   Swords,
-  MapPin,
-  DownloadCloud,
-  FileText,
-  ExternalLink,
   RefreshCw,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -196,16 +190,16 @@ export default function OverviewPage() {
       {/* ------------------------------------------------------------------- */}
       {/* 2. Editorial Telemetry Strip */}
       {/* ------------------------------------------------------------------- */}
-      <section className="py-5 border-y border-[#E7EAF0]">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
+      <section className="py-6 border-y border-[#E7EAF0]">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
           <div>
-            <span className="text-[11px] font-mono uppercase tracking-wider text-[#52627A] block mb-1">
+            <span className="text-[13px] sm:text-sm font-semibold uppercase tracking-wider text-[#52627A] block mb-1.5">
               Controlling Data Pack
             </span>
-            <div className="text-2xl md:text-3xl font-extrabold text-[#17294B] font-mono tracking-tight">
+            <div className="text-3xl sm:text-[34px] lg:text-[36px] font-extrabold text-[#17294B] font-mono tracking-tight leading-tight my-1">
               {pressureOverview?.total_deliveries ? pressureOverview.total_deliveries.toLocaleString() : "—"}
             </div>
-            <p className="text-xs text-[#52627A] mt-1">
+            <p className="text-[13px] sm:text-[14px] text-[#52627A] mt-1.5 leading-snug">
               {pressureOverview
                 ? `Deliveries across ${pressureOverview.matches_with_deliveries + pressureOverview.reconciled_abandoned_matches} matches (${pressureOverview.total_competitions} tournaments)`
                 : "Awaiting backend telemetry"}
@@ -213,40 +207,40 @@ export default function OverviewPage() {
           </div>
 
           <div>
-            <span className="text-[11px] font-mono uppercase tracking-wider text-[#52627A] block mb-1">
+            <span className="text-[13px] sm:text-sm font-semibold uppercase tracking-wider text-[#52627A] block mb-1.5">
               Official Deliverables
             </span>
-            <div className="text-2xl md:text-3xl font-extrabold text-[#17294B] font-mono tracking-tight">
+            <div className="text-3xl sm:text-[34px] lg:text-[36px] font-extrabold text-[#17294B] font-mono tracking-tight leading-tight my-1">
               Top 10 / Top 10
             </div>
-            <p className="text-xs text-[#52627A] mt-1">
+            <p className="text-[13px] sm:text-[14px] text-[#52627A] mt-1.5 leading-snug">
               1-SE Conservative lower bounds (100% qualified)
             </p>
           </div>
 
           <div>
-            <span className="text-[11px] font-mono uppercase tracking-wider text-[#52627A] block mb-1">
+            <span className="text-[13px] sm:text-sm font-semibold uppercase tracking-wider text-[#52627A] block mb-1.5">
               Uncapped Domestic Intelligence
             </span>
-            <div className="text-2xl md:text-3xl font-extrabold text-[#17294B] font-mono tracking-tight">
+            <div className="text-3xl sm:text-[34px] lg:text-[36px] font-extrabold text-[#17294B] font-mono tracking-tight leading-tight my-1">
               {uncappedOverview
                 ? `${uncappedOverview.total_verified_uncapped_batters + uncappedOverview.total_verified_uncapped_bowlers} Verified`
                 : "—"}
             </div>
-            <p className="text-xs text-[#52627A] mt-1">
+            <p className="text-[13px] sm:text-[14px] text-[#52627A] mt-1.5 leading-snug">
               Certified 0 senior caps in AUCTION-02 ledger
             </p>
           </div>
 
           <div>
-            <span className="text-[11px] font-mono uppercase tracking-wider text-[#52627A] block mb-1">
+            <span className="text-[13px] sm:text-sm font-semibold uppercase tracking-wider text-[#52627A] block mb-1.5">
               Verification Health
             </span>
-            <div className="text-2xl md:text-3xl font-extrabold text-[#E4005A] font-mono tracking-tight flex items-baseline gap-2">
+            <div className="text-3xl sm:text-[34px] lg:text-[36px] font-extrabold text-[#E4005A] font-mono tracking-tight flex items-baseline gap-2.5 leading-tight my-1">
               <span>{isLive ? "Engine Online" : "Service Standby"}</span>
-              <span className={`w-2 h-2 rounded-full ${isLive ? "bg-[#E4005A] animate-pulse" : "bg-[#E4005A]"}`} />
+              <span className={`w-2.5 h-2.5 rounded-full ${isLive ? "bg-[#E4005A] animate-pulse" : "bg-[#E4005A]"}`} />
             </div>
-            <p className="text-xs text-[#52627A] mt-1">
+            <p className="text-[13px] sm:text-[14px] text-[#52627A] mt-1.5 leading-snug">
               {isLive ? `FastAPI v${health?.version || "0.1.0"} active` : "Backend service awaiting initialization"}
             </p>
           </div>

@@ -10,7 +10,6 @@ import {
   PlayerMatchHistoryItem,
   PlayerPhaseSplitDetail,
   AllRoundContributionResponse,
-  DomesticPlayerSummary,
   PaginatedDomesticPlayersResponse,
   VenueSummaryItem,
   VenueDetailResponse,

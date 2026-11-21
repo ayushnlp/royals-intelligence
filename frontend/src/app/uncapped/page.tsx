@@ -14,7 +14,6 @@ import {
 } from "@/lib/api";
 import {
   Shield,
-  Award,
   TrendingUp,
   Target,
   Sparkles,

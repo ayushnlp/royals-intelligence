@@ -17,7 +17,6 @@ import {
   fetchPressureMethodology,
 } from "@/lib/api";
 import {
-  Shield,
   TrendingUp,
   Target,
   Sparkles,

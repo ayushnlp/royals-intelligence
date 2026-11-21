@@ -42,7 +42,6 @@ import {
   Sparkles,
   Swords,
   Layers,
-  Zap,
   TrendingUp,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
