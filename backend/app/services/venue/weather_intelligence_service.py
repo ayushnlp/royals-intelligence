@@ -4,7 +4,7 @@ Integrates Open-Meteo CC-BY 4.0 Meteorological API for historical match conditio
 evening dew-point telemetry, and future fixture forecasts.
 """
 
-from typing import Optional, List, Dict, Any
+from typing import List, Dict
 from datetime import datetime, timezone, timedelta
 import httpx
 

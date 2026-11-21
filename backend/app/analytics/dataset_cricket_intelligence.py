@@ -11,7 +11,7 @@ from pathlib import Path
 from typing import Optional, List, Dict, Any
 import numpy as np
 import pandas as pd
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 from app.core.logging import logger
 
 

@@ -4,18 +4,17 @@ Provides deep match-level analytics, scorecards, fall of wickets,
 partnerships, format-aware phase summaries, and team scoring progression.
 """
 
-from typing import Optional, List, Dict, Any, Set
+from typing import Optional, List, Dict, Set
 from pathlib import Path
 import pandas as pd
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, and_
+from sqlalchemy import select
 
-from app.models.core import MatchModel, InningsModel, TeamModel, VenueModel, CompetitionModel, PlayerModel
+from app.models.core import MatchModel, InningsModel, PlayerModel
 from app.models.performance import (
     BattingScorecardModel,
     BowlingScorecardModel,
     BallByBallDeliveryModel,
-    PartnershipModel,
 )
 from app.schemas.domestic_api import (
     MatchScorecardResponse,

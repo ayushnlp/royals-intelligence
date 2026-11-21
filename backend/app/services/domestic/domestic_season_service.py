@@ -10,16 +10,7 @@ from typing import Optional, List, Dict, Any, Tuple, Set
 import pandas as pd
 import numpy as np
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, and_, func, or_
 
-from app.models.core import CompetitionModel, SeasonModel, MatchModel, TeamModel, VenueModel, PlayerModel
-from app.models.performance import (
-    BattingScorecardModel,
-    BowlingScorecardModel,
-    FieldingContributionModel,
-    PlayerMatchPerformanceModel,
-)
-from app.models.scouting import UncappedPlayerProfileModel
 from app.schemas.domestic_api import (
     CompetitionSeasonSummary,
     MatchSummaryItem,
@@ -32,7 +23,6 @@ from app.schemas.domestic_api import (
 from app.core.logging import logger
 from app.auction_intelligence.identity.canonical_registry import (
     SENIOR_NATIONAL_TEAMS,
-    VERIFIED_INDIAN_UNCAPPED,
 )
 
 # Resolve repository root

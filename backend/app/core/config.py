@@ -5,7 +5,7 @@ Uses Pydantic BaseSettings for strong typing and environment parsing.
 
 from typing import List, Union
 from pathlib import Path
-from pydantic import AnyHttpUrl, field_validator, model_validator
+from pydantic import field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
