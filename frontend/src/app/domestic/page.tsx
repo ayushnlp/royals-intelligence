@@ -111,13 +111,13 @@ export default function DomesticIntelligencePage() {
     async function loadSeasons() {
       try {
         const seasons = await fetchDomesticSeasons();
-        if (isCurrent && seasons && seasons.length > 0) {
+        if (isCurrent && Array.isArray(seasons) && seasons.length > 0) {
           setAvailableSeasons(seasons);
           // If current selected season has no verified data, switch to the first season that has data
-          const verified = seasons.find((s) => s.has_data);
+          const verified = seasons.find((s) => s && s.has_data);
           if (verified) {
             setSelectedSeason((prev) => {
-              const currentValid = seasons.some((s) => s.season === prev && s.has_data);
+              const currentValid = seasons.some((s) => s && s.season === prev && s.has_data);
               return currentValid ? prev : verified.season;
             });
           }
@@ -138,9 +138,10 @@ export default function DomesticIntelligencePage() {
     setErrorMsg(null);
     try {
       const res = await fetchDomesticCompetitions(seasonToLoad);
-      setCompetitions(res);
-      if (res.length > 0) {
-        setSelectedCompId((prev) => (!prev || !res.some((c) => c.competition_id === prev) ? res[0].competition_id : prev));
+      const safeComps = Array.isArray(res) ? res : [];
+      setCompetitions(safeComps);
+      if (safeComps.length > 0) {
+        setSelectedCompId((prev) => (!prev || !safeComps.some((c) => c && c.competition_id === prev) ? safeComps[0].competition_id : prev));
       }
     } catch (err: any) {
       setErrorMsg(err.message || `Failed to load domestic competitions for season ${seasonToLoad}.`);
@@ -165,8 +166,9 @@ export default function DomesticIntelligencePage() {
           page_size: 20,
         });
         if (isCurrent) {
-          setMatches(res.matches);
-          setMatchTotal(res.total);
+          const safeMatches = Array.isArray(res?.matches) ? res.matches : [];
+          setMatches(safeMatches);
+          setMatchTotal(res?.total ?? safeMatches.length);
         }
       } catch (err) {
         if (isCurrent) {
@@ -243,10 +245,11 @@ export default function DomesticIntelligencePage() {
           role: playerRoleFilter || undefined,
         });
         if (isCurrent) {
-          setDomesticPlayers(res.items);
-          setPlayerTotal(res.total);
-          if (res.items.length > 0) {
-            setSelectedPlayerId((prev) => (!prev || !res.items.some((p) => String(p.canonical_id) === prev) ? String(res.items[0].canonical_id) : prev));
+          const items = Array.isArray(res?.items) ? res.items : [];
+          setDomesticPlayers(items);
+          setPlayerTotal(res?.total ?? items.length);
+          if (items.length > 0) {
+            setSelectedPlayerId((prev) => (!prev || !items.some((p) => String(p.canonical_id) === prev) ? String(items[0].canonical_id) : prev));
           } else {
             setSelectedPlayerId("");
           }
@@ -290,8 +293,8 @@ export default function DomesticIntelligencePage() {
         ]);
         if (isCurrent) {
           setAllRoundData(allRound);
-          setPlayerSeasonStats(stats);
-          setPlayerPhaseSplits(splits);
+          setPlayerSeasonStats(Array.isArray(stats) ? stats : []);
+          setPlayerPhaseSplits(Array.isArray(splits) ? splits : []);
         }
       } catch (err) {
         if (isCurrent) console.warn("Failed to load player dossier:", err);
@@ -351,7 +354,7 @@ export default function DomesticIntelligencePage() {
                 onChange={(e) => setSelectedCompId(e.target.value)}
                 className="bg-white border border-[#E7EAF0] rounded-lg px-3 py-1.5 text-xs font-semibold text-[#17294B] focus:outline-none focus:ring-2 focus:ring-[#E4005A] shadow-sm cursor-pointer"
               >
-                {competitions.length > 0 ? (
+                {Array.isArray(competitions) && competitions.length > 0 ? (
                   competitions.map((c) => (
                     <option key={`${c.competition_id}_${c.season}`} value={c.competition_id}>
                       {c.competition_name} ({c.competition_type})
@@ -372,7 +375,7 @@ export default function DomesticIntelligencePage() {
                 onChange={(e) => setSelectedSeason(e.target.value)}
                 className="bg-white border border-[#E7EAF0] rounded-lg px-3 py-1.5 text-xs font-semibold text-[#17294B] focus:outline-none focus:ring-2 focus:ring-[#E4005A] shadow-sm cursor-pointer"
               >
-                {availableSeasons.length > 0 ? (
+                {Array.isArray(availableSeasons) && availableSeasons.length > 0 ? (
                   availableSeasons.map((s) => (
                     <option key={s.season} value={s.season}>
                       Season {s.season} {s.has_data ? `(${s.total_matches} matches)` : "(No Data)"}
@@ -452,7 +455,7 @@ export default function DomesticIntelligencePage() {
       {/* TAB 1: TOURNAMENT DIRECTORY */}
       {activeTab === "tournaments" && (
         <div className="space-y-6">
-          {competitions.length > 0 ? (
+          {Array.isArray(competitions) && competitions.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
               {competitions.map((comp, idx) => (
                 <div
@@ -555,7 +558,7 @@ export default function DomesticIntelligencePage() {
           </div>
 
           {/* Matches Grid */}
-          {matches.length > 0 ? (
+          {Array.isArray(matches) && matches.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {matches.map((m, mIdx) => (
                 <div
@@ -684,7 +687,7 @@ export default function DomesticIntelligencePage() {
               <div className="p-6 space-y-6">
                 {/* Innings Selector */}
                 <div className="flex items-center gap-2 border-b border-[#E7EAF0] pb-3">
-                  {matchScorecard.innings.map((inn, idx) => (
+                  {Array.isArray(matchScorecard.innings) && matchScorecard.innings.map((inn, idx) => (
                     <button
                       key={inn.innings_number}
                       onClick={() => setActiveInningsIdx(idx)}
@@ -705,7 +708,7 @@ export default function DomesticIntelligencePage() {
                     Phase-by-Phase Scoring Trajectory
                   </h4>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                    {activeInnings.phase_summaries.map((phase) => (
+                    {Array.isArray(activeInnings.phase_summaries) && activeInnings.phase_summaries.map((phase) => (
                       <div key={phase.phase_name} className="p-3 bg-white rounded-xl border border-[#E7EAF0]">
                         <div className="flex items-center justify-between mb-1">
                           <span className="text-xs font-bold text-[#17294B]">{phase.phase_name}</span>
@@ -749,7 +752,7 @@ export default function DomesticIntelligencePage() {
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-100">
-                        {activeInnings.batting_scorecards.map((b, bIdx) => (
+                        {Array.isArray(activeInnings.batting_scorecards) && activeInnings.batting_scorecards.map((b, bIdx) => (
                           <tr
                             key={b.player_id}
                             className={cn(
@@ -813,7 +816,7 @@ export default function DomesticIntelligencePage() {
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-100">
-                        {activeInnings.bowling_scorecards.map((bw, bwIdx) => (
+                        {Array.isArray(activeInnings.bowling_scorecards) && activeInnings.bowling_scorecards.map((bw, bwIdx) => (
                           <tr
                             key={bw.player_id}
                             className={cn(
@@ -848,7 +851,7 @@ export default function DomesticIntelligencePage() {
                 {/* Fall of Wickets & Partnerships Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {/* Fall of Wickets */}
-                  {activeInnings.fall_of_wickets && activeInnings.fall_of_wickets.length > 0 && (
+                  {Array.isArray(activeInnings.fall_of_wickets) && activeInnings.fall_of_wickets.length > 0 && (
                     <div className="p-4 bg-white rounded-xl border border-[#E7EAF0] space-y-2">
                       <h4 className="text-xs font-bold uppercase tracking-wider text-[#74658F]">
                         Fall of Wickets
@@ -871,7 +874,7 @@ export default function DomesticIntelligencePage() {
                   )}
 
                   {/* Key Partnerships */}
-                  {activeInnings.partnerships && activeInnings.partnerships.length > 0 && (
+                  {Array.isArray(activeInnings.partnerships) && activeInnings.partnerships.length > 0 && (
                     <div className="p-4 bg-white rounded-xl border border-[#E7EAF0] space-y-2">
                       <h4 className="text-xs font-bold uppercase tracking-wider text-[#74658F]">
                         Batting Partnerships
@@ -1010,7 +1013,7 @@ export default function DomesticIntelligencePage() {
 
             {/* Player Grid / Selector Strip */}
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
-              {domesticPlayers.map((p) => {
+              {Array.isArray(domesticPlayers) && domesticPlayers.map((p) => {
                 const isSelected = String(p.canonical_id) === selectedPlayerId;
                 return (
                   <button
@@ -1260,7 +1263,7 @@ export default function DomesticIntelligencePage() {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
-                      {playerPhaseSplits.map((split) => (
+                      {Array.isArray(playerPhaseSplits) && playerPhaseSplits.map((split) => (
                         <tr key={split.phase} className="hover:bg-white/80">
                           <td className="py-2.5 px-3 font-bold text-[#17294B]">{split.phase}</td>
                           <td className="py-2.5 px-3 font-mono text-[#52627A]">{split.overs_range}</td>
