@@ -3,6 +3,7 @@ Royals Intelligence - Application Configuration
 Uses Pydantic BaseSettings for strong typing and environment parsing.
 """
 
+import os
 from typing import List, Union
 from pathlib import Path
 from pydantic import field_validator, model_validator
@@ -10,12 +11,66 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 def get_repo_root() -> Path:
-    """Finds monorepo root by locating README.md and backend directory."""
+    """
+    Deterministically resolves monorepo root across local development,
+    Docker containers, and cloud deployment environments.
+    """
+    env_root = os.environ.get("ROYALS_REPO_ROOT")
+    if env_root and Path(env_root).exists():
+        return Path(env_root).resolve()
+
     current = Path(__file__).resolve()
     for parent in current.parents:
         if (parent / "README.md").exists() and (parent / "backend").exists():
             return parent
+        if (parent / "round1_pressure").exists() and (parent / "data").exists():
+            return parent
+
+    # Fallbacks for Docker (/app) or isolated backend root
+    for parent in current.parents:
+        if (parent / "data" / "runtime_assets").exists():
+            return parent
+
     return current.parents[2]  # Fallback: backend/app/core -> backend -> root
+
+
+def resolve_asset_path(relative_path: Union[str, Path], required: bool = True) -> Path:
+    """
+    Deterministically resolves a dataset asset path across monorepo root,
+    packaged runtime assets, Docker container paths, and local environments.
+    Fails explicitly with a descriptive RuntimeError if required=True and file is missing.
+    """
+    rel = Path(relative_path)
+    root = get_repo_root()
+    cwd = Path.cwd()
+    filename = rel.name
+
+    candidates = [
+        root / rel,
+        cwd / rel,
+        root / "backend" / rel,
+        cwd / "backend" / rel,
+        root / "backend" / "data" / "runtime_assets" / filename,
+        root / "data" / "runtime_assets" / filename,
+        cwd / "data" / "runtime_assets" / filename,
+        Path("/app") / rel,
+        Path("/app/data/runtime_assets") / filename,
+        Path("/data") / rel,
+    ]
+
+    for candidate in candidates:
+        if candidate.exists():
+            return candidate
+
+    if required:
+        searched = "\n  - ".join(str(c) for c in candidates[:6])
+        raise RuntimeError(
+            f"CRITICAL: Required dataset asset '{rel}' not found.\n"
+            f"Searched locations include:\n  - {searched}\n"
+            f"Ensure runtime datasets are properly hydrated or packaged."
+        )
+
+    return candidates[0]
 
 
 class Settings(BaseSettings):

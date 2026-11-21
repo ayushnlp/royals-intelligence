@@ -45,7 +45,7 @@ export default function DomesticIntelligencePage() {
   const [availableSeasons, setAvailableSeasons] = useState<DomesticSeasonSummary[]>([]);
   const [competitions, setCompetitions] = useState<CompetitionSeasonSummary[]>([]);
   const [selectedCompId, setSelectedCompId] = useState<string>("ipl");
-  const [selectedSeason, setSelectedSeason] = useState<string>("2026");
+  const [selectedSeason, setSelectedSeason] = useState<string>("2024");
   const [loading, setLoading] = useState(true);
 
   // Match List state
@@ -113,6 +113,14 @@ export default function DomesticIntelligencePage() {
         const seasons = await fetchDomesticSeasons();
         if (isCurrent && seasons && seasons.length > 0) {
           setAvailableSeasons(seasons);
+          // If current selected season has no verified data, switch to the first season that has data
+          const verified = seasons.find((s) => s.has_data);
+          if (verified) {
+            setSelectedSeason((prev) => {
+              const currentValid = seasons.some((s) => s.season === prev && s.has_data);
+              return currentValid ? prev : verified.season;
+            });
+          }
         }
       } catch (err) {
         if (isCurrent) console.warn("Failed to load domestic seasons:", err);
@@ -367,15 +375,15 @@ export default function DomesticIntelligencePage() {
                 {availableSeasons.length > 0 ? (
                   availableSeasons.map((s) => (
                     <option key={s.season} value={s.season}>
-                      {s.season}
+                      Season {s.season} {s.has_data ? `(${s.total_matches} matches)` : "(No Data)"}
                     </option>
                   ))
                 ) : (
                   <>
-                    <option value="2026">2026</option>
-                    <option value="2025">2025</option>
-                    <option value="2024">2024</option>
-                    <option value="2023">2023</option>
+                    <option value="2024">Season 2024 (Verified Domestic)</option>
+                    <option value="2026">Season 2026</option>
+                    <option value="2025">Season 2025</option>
+                    <option value="2023">Season 2023</option>
                   </>
                 )}
               </select>

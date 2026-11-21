@@ -21,12 +21,13 @@ from app.schemas.domestic_api import (
     DomesticPlayerSummary,
 )
 from app.core.logging import logger
+from app.core.config import get_repo_root, resolve_asset_path
 from app.auction_intelligence.identity.canonical_registry import (
     SENIOR_NATIONAL_TEAMS,
 )
 
 # Resolve repository root
-REPO_ROOT = Path(__file__).resolve().parent.parent.parent.parent.parent
+REPO_ROOT = get_repo_root()
 
 
 class DomesticSeasonService:
@@ -49,34 +50,26 @@ class DomesticSeasonService:
             return
 
         try:
-            reg_path = REPO_ROOT / "data" / "processed" / "auction_intelligence" / "canonical_player_registry.parquet"
-            led_path = REPO_ROOT / "data" / "processed" / "auction_intelligence" / "senior_international_eligibility_ledger.parquet"
-            deliv_path = REPO_ROOT / "round1_pressure" / "data" / "processed" / "delivery_states_strict.parquet"
-            matches_path = REPO_ROOT / "data" / "raw" / "rajasthan_royals" / "round_1_data_pack" / "matches.csv"
-            comps_path = REPO_ROOT / "data" / "raw" / "rajasthan_royals" / "round_1_data_pack" / "competitions.csv"
-            p11_path = REPO_ROOT / "data" / "raw" / "rajasthan_royals" / "round_1_data_pack" / "playing_eleven.csv"
-            mapping_path = REPO_ROOT / "data" / "raw" / "rajasthan_royals" / "round_1_data_pack" / "competition_team_player_mapping.csv"
+            reg_path = resolve_asset_path("data/processed/auction_intelligence/canonical_player_registry.parquet")
+            led_path = resolve_asset_path("data/processed/auction_intelligence/senior_international_eligibility_ledger.parquet")
+            deliv_path = resolve_asset_path("round1_pressure/data/processed/delivery_states_strict.parquet")
+            matches_path = resolve_asset_path("data/raw/rajasthan_royals/round_1_data_pack/matches.csv")
+            comps_path = resolve_asset_path("data/raw/rajasthan_royals/round_1_data_pack/competitions.csv")
+            p11_path = resolve_asset_path("data/raw/rajasthan_royals/round_1_data_pack/playing_eleven.csv")
+            mapping_path = resolve_asset_path("data/raw/rajasthan_royals/round_1_data_pack/competition_team_player_mapping.csv")
 
             # 1. Load registry and ledger
-            if reg_path.exists() and led_path.exists():
-                reg_df = pd.read_parquet(reg_path)
-                led_df = pd.read_parquet(led_path)
-            else:
-                logger.warning(f"Authoritative registry/ledger missing in {reg_path.parent}; running in standby mode.")
-                reg_df = pd.DataFrame(columns=["canonical_id", "canonical_name", "canonical_key", "aliases", "primary_role", "current_domestic_team", "current_ipl_franchise"])
-                led_df = pd.DataFrame(columns=["canonical_id", "final_eligibility_state", "reviewer_notes", "test_caps_count", "odi_caps_count", "t20i_caps_count"])
+            reg_df = pd.read_parquet(reg_path)
+            led_df = pd.read_parquet(led_path)
             
             # Overseas identification from mapping
-            if mapping_path.exists():
-                map_df = pd.read_csv(mapping_path)
-                overseas_teams = set(SENIOR_NATIONAL_TEAMS) - {"India"}
-                cls._overseas_pids = set(map_df[map_df["team_name"].isin(overseas_teams)]["player_id"].unique())
+            map_df = pd.read_csv(mapping_path)
+            overseas_teams = set(SENIOR_NATIONAL_TEAMS) - {"India"}
+            cls._overseas_pids = set(map_df[map_df["team_name"].isin(overseas_teams)]["player_id"].unique())
             
             # Match appearances count from playing_eleven.csv
-            p11_counts: Dict[int, int] = {}
-            if p11_path.exists():
-                cls._p11_df = pd.read_csv(p11_path)
-                p11_counts = cls._p11_df.groupby("player_id")["match_id"].nunique().to_dict()
+            cls._p11_df = pd.read_csv(p11_path)
+            p11_counts: Dict[int, int] = cls._p11_df.groupby("player_id")["match_id"].nunique().to_dict()
 
             # Merge canonical registry with ledger
             merged_reg = pd.merge(
@@ -94,19 +87,13 @@ class DomesticSeasonService:
             cls._registry_df = merged_reg
 
             # 2. Competitions and Matches
-            if comps_path.exists():
-                cls._competitions_df = pd.read_csv(comps_path)
-            if matches_path.exists():
-                cls._matches_df = pd.read_csv(matches_path)
-                if cls._competitions_df is not None:
-                    cls._matches_df = pd.merge(cls._matches_df, cls._competitions_df, on="comp_id", how="left")
+            cls._competitions_df = pd.read_csv(comps_path)
+            cls._matches_df = pd.read_csv(matches_path)
+            cls._matches_df = pd.merge(cls._matches_df, cls._competitions_df, on="comp_id", how="left")
 
             # 3. Delivery states strict (primary ball-by-ball source)
-            if deliv_path.exists():
-                cls._deliveries_df = pd.read_parquet(deliv_path)
-                cls._delivery_match_ids = set(cls._deliveries_df["match_id"].unique())
-            else:
-                cls._delivery_match_ids = set()
+            cls._deliveries_df = pd.read_parquet(deliv_path)
+            cls._delivery_match_ids = set(cls._deliveries_df["match_id"].unique())
 
             cls._data_initialized = True
             logger.info("DomesticSeasonService authoritative datasets loaded and cached successfully.")
