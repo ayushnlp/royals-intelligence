@@ -11,19 +11,15 @@ from pydantic import BaseModel, Field
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
-from app.models.core import PlayerModel
 from app.models.scouting import (
     UncappedPlayerProfileModel,
     ScoutingEvaluationModel,
-    ScoutingEvidenceModel,
 )
 from app.models.governance import (
     DataSourceModel,
-    DatasetModel,
     DataQualityRecordModel,
 )
-from app.services.identity.player_identity_service import PlayerIdentityService, EligibilityRuleConfig
-from app.core.logging import logger
+from app.services.identity.player_identity_service import PlayerIdentityService
 
 
 class ColumnMappingConfig(BaseModel):

@@ -17,7 +17,6 @@ from app.schemas.venue_api import (
     UncappedPlayerVenuePerformanceResponse,
 )
 from app.services.venue.venue_intelligence_service import VenueIntelligenceService
-from app.services.domestic.domestic_season_service import DomesticSeasonService
 
 router = APIRouter()
 

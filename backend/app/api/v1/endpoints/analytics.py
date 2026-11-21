@@ -5,7 +5,7 @@ and recent-form window queries.
 """
 
 from typing import Optional
-from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
+from fastapi import APIRouter, Depends, Query, Response
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.session import get_db

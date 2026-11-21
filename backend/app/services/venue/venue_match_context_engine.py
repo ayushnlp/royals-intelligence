@@ -7,14 +7,10 @@ and match scoring variance into a single holistic context dossier.
 from typing import Optional, Dict, Any
 from datetime import datetime, timezone
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
-
-from app.models.core import MatchModel
-from app.schemas.venue_api import MatchWeatherContextResponse, WeatherObservationItem
+from app.schemas.venue_api import MatchWeatherContextResponse
 from app.services.venue.venue_intelligence_service import VenueIntelligenceService, VERIFIED_VENUE_CATALOG
 from app.services.venue.weather_intelligence_service import WeatherIntelligenceService
 from app.services.domestic.domestic_match_service import DomesticMatchService
-from app.core.logging import logger
 
 
 class VenueMatchContextEngine:

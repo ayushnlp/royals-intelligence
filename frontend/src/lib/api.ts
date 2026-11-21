@@ -1,6 +1,7 @@
 import {
   SystemHealth,
   IngestionRunData,
+  DomesticSeasonSummary,
   CompetitionSeasonSummary,
   MatchSummaryItem,
   InningsAnalysisResponse,
@@ -9,7 +10,6 @@ import {
   PlayerMatchHistoryItem,
   PlayerPhaseSplitDetail,
   AllRoundContributionResponse,
-  DomesticPlayerSummary,
   PaginatedDomesticPlayersResponse,
   VenueSummaryItem,
   VenueDetailResponse,
@@ -319,8 +319,13 @@ export async function fetchPlayerEvaluations(playerId: string, userRole: string 
 // Stage 3: Domestic Season and Match Intelligence API
 // ============================================================================
 
-export async function fetchDomesticCompetitions(): Promise<CompetitionSeasonSummary[]> {
-  return await safeApiFetch<CompetitionSeasonSummary[]>("/domestic/competitions");
+export async function fetchDomesticCompetitions(season?: string): Promise<CompetitionSeasonSummary[]> {
+  const query = season ? `?season=${encodeURIComponent(season)}` : "";
+  return await safeApiFetch<CompetitionSeasonSummary[]>(`/domestic/competitions${query}`);
+}
+
+export async function fetchDomesticSeasons(): Promise<DomesticSeasonSummary[]> {
+  return await safeApiFetch<DomesticSeasonSummary[]>("/domestic/seasons");
 }
 
 export async function fetchSeasonMatches(

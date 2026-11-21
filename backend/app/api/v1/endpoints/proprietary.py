@@ -11,7 +11,6 @@ from sqlalchemy import select
 
 from app.db.session import get_db
 from app.models.scouting import ScoutingEvaluationModel, UncappedPlayerProfileModel
-from app.models.core import PlayerModel
 from app.services.proprietary.rr_data_pack_service import (
     RRDataPackService,
     ColumnMappingConfig,

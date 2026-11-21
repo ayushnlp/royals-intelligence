@@ -1,7 +1,6 @@
 "use client";
 
 import React from "react";
-import { usePathname } from "next/navigation";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { Header } from "@/components/layout/Header";
 
@@ -10,26 +9,15 @@ interface AppShellProps {
 }
 
 export const AppShell: React.FC<AppShellProps> = ({ children }) => {
-  const pathname = usePathname();
-  const isPublicHome = pathname === "/";
-
-  if (isPublicHome) {
-    return (
-      <div className="min-h-screen bg-white text-[#31136C] antialiased selection:bg-[#950460]/20 selection:text-[#31136C]">
-        {children}
-      </div>
-    );
-  }
-
   return (
-    <div className="bg-[#FFFFFF] text-[#31136C] antialiased flex min-h-screen selection:bg-[#950460]/20 selection:text-[#31136C]">
+    <div className="bg-[#FFFFFF] text-[#17294B] antialiased flex min-h-screen selection:bg-[#E4005A]/20 selection:text-[#17294B] overflow-x-hidden max-w-[100vw]">
       {/* Dashboard Sidebar */}
       <Sidebar />
 
       {/* Main Dashboard Application Shell */}
-      <div className="flex-1 flex flex-col min-w-0 bg-[#FFFFFF]">
+      <div className="flex-1 flex flex-col min-w-0 bg-[#FFFFFF] overflow-x-hidden">
         <Header />
-        <main className="flex-1 p-6 md:p-8 max-w-7xl w-full mx-auto overflow-y-auto bg-[#FFFFFF]">
+        <main className="flex-1 p-4 sm:p-6 md:p-8 max-w-7xl w-full mx-auto overflow-y-auto bg-[#FFFFFF] min-w-0">
           {children}
         </main>
       </div>

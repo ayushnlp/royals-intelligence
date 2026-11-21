@@ -5,18 +5,16 @@ Career aggregates, phase splits (Powerplay, Middle, Death), recent form windows,
 venue splits, and role-based benchmarking.
 """
 
-from typing import Optional, List, Dict, Any
+from typing import Optional, List, Dict
 from pydantic import BaseModel, Field
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, func, and_, desc
+from sqlalchemy import select, desc
 
-from app.models.core import PlayerModel, MatchModel, CompetitionModel, SeasonModel, VenueModel
+from app.models.core import MatchModel, VenueModel
 from app.models.performance import (
     BattingScorecardModel,
     BowlingScorecardModel,
-    BallByBallDeliveryModel,
 )
-from app.models.scouting import UncappedPlayerProfileModel
 
 
 class PhaseMetrics(BaseModel):

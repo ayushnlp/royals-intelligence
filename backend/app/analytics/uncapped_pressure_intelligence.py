@@ -10,7 +10,6 @@ Evaluates Indian domestic cricketers under pressure with strict eligibility audi
 from pathlib import Path
 from typing import Optional, List, Dict, Any, Set
 import pandas as pd
-import numpy as np
 
 from app.core.logging import logger
 
