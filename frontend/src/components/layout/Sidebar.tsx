@@ -88,17 +88,12 @@ export const Sidebar: React.FC<SidebarProps> = ({ className }) => {
         key={item.href}
         href={item.href}
         className={cn(
-          "flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs transition-all duration-150 group relative cursor-pointer outline-none focus:outline-none focus-visible:ring-2 focus-visible:ring-[#E4005A]",
+          "flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs transition-all duration-150 group relative cursor-pointer outline-none focus:outline-none",
           isActive
-            ? "bg-[#FCE8F0] text-[#17294B] font-bold border border-[#E4005A]/35 shadow-xs"
-            : "text-[#17294B] font-bold hover:text-[#E4005A] hover:bg-[#FCE8F0]/60"
+            ? "text-[#E4005A] font-bold"
+            : "text-[#17294B] font-bold hover:text-[#E4005A]"
         )}
       >
-        {/* Clean bright RR pink active pill indicator */}
-        {isActive && (
-          <span className="absolute left-0 top-2 bottom-2 w-1 bg-[#E4005A] rounded-r-full" />
-        )}
-
         <Icon
           size={16}
           className={cn(
@@ -108,7 +103,14 @@ export const Sidebar: React.FC<SidebarProps> = ({ className }) => {
         />
 
         {!collapsed && (
-          <span className="truncate tracking-tight font-bold text-[13px] text-[#17294B] group-hover:text-[#E4005A]">
+          <span
+            className={cn(
+              "truncate tracking-tight font-bold text-[13px] transition-colors",
+              isActive
+                ? "text-[#E4005A]"
+                : "text-[#17294B] group-hover:text-[#E4005A]"
+            )}
+          >
             {item.title}
           </span>
         )}

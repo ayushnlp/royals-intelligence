@@ -21,7 +21,7 @@ const PAGE_TITLES: Record<string, string> = {
 
 export const Header: React.FC = () => {
   const [health, setHealth] = useState<SystemHealth | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const pathname = usePathname();
 
   const checkHealth = async () => {

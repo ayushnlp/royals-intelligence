@@ -323,7 +323,7 @@ export default function DomesticIntelligencePage() {
 
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div className="max-w-3xl space-y-2">
-            <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-[#17294B] leading-tight">
+            <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-[#E4005A] leading-tight font-heading">
               Domestic Season & Match Intelligence
             </h1>
             <p className="text-sm md:text-base text-[#52627A] leading-relaxed font-normal">
@@ -456,11 +456,10 @@ export default function DomesticIntelligencePage() {
                   }}
                   className={cn(
                     "group p-5 rounded-2xl border cursor-pointer transition-all hover:shadow-md",
+                    idx % 2 === 0 ? "bg-[#FCE8F0]/40" : "bg-white",
                     selectedCompId === comp.competition_id && selectedSeason === comp.season
-                      ? "border-[#E4005A] ring-2 ring-[#E4005A]/30 bg-white shadow-sm"
-                      : idx % 2 === 0
-                      ? "bg-[#FCE8F0]/40 border-[#E7EAF0] hover:border-[#E4005A]/40"
-                      : "bg-white border-[#E7EAF0] hover:border-[#E4005A]/40"
+                      ? "border-[#E4005A] ring-2 ring-[#E4005A]/30 shadow-sm"
+                      : "border-[#E7EAF0] hover:border-[#E4005A]/40"
                   )}
                 >
                   <div className="flex items-center justify-between mb-3">
@@ -556,7 +555,7 @@ export default function DomesticIntelligencePage() {
                   onClick={() => setSelectedMatchId(m.match_id)}
                   className={cn(
                     "p-4 rounded-xl border cursor-pointer transition-all hover:shadow-sm",
-                    mIdx % 2 === 0 ? "bg-[#FCE8F0]/30 border-[#E7EAF0] hover:border-[#E4005A]" : "bg-[#EEF4FC]/40 border-[#E7EAF0] hover:border-[#E4005A]"
+                    mIdx % 2 === 0 ? "bg-[#FCE8F0]/30 border-[#E7EAF0] hover:border-[#E4005A]" : "bg-white border-[#E7EAF0] hover:border-[#E4005A]"
                   )}
                 >
                   <div className="flex items-center justify-between text-[11px] text-[#74658F] font-mono mb-2">
@@ -658,7 +657,7 @@ export default function DomesticIntelligencePage() {
               </div>
             ) : matchScorecard && String(matchScorecard.match_id) === String(selectedMatchId) && matchScorecard.innings.length === 0 ? (
               <div className="p-8 text-center space-y-3">
-                <div className="w-10 h-10 rounded-full bg-[#EEF4FC] text-[#17294B] flex items-center justify-center mx-auto">
+                <div className="w-10 h-10 rounded-full bg-[#FCE8F0] text-[#17294B] flex items-center justify-center mx-auto">
                   <AlertCircle size={20} />
                 </div>
                 <h4 className="text-sm font-bold text-[#17294B]">Ball-by-Ball Scorecard Unavailable</h4>
@@ -747,7 +746,7 @@ export default function DomesticIntelligencePage() {
                             key={b.player_id}
                             className={cn(
                               "transition-colors",
-                              bIdx % 2 === 0 ? "bg-[#FCE8F0]/30 hover:bg-[#FCE8F0]/60" : "bg-[#EEF4FC]/40 hover:bg-[#EEF4FC]/70"
+                              bIdx % 2 === 0 ? "bg-[#FCE8F0]/30 hover:bg-[#FCE8F0]/60" : "bg-white hover:bg-[#FCE8F0]/40"
                             )}
                           >
                             <td className="py-2.5 px-3 font-semibold text-[#17294B] flex items-center gap-1.5">
@@ -811,7 +810,7 @@ export default function DomesticIntelligencePage() {
                             key={bw.player_id}
                             className={cn(
                               "transition-colors",
-                              bwIdx % 2 === 0 ? "bg-[#FCE8F0]/30 hover:bg-[#FCE8F0]/60" : "bg-[#EEF4FC]/40 hover:bg-[#EEF4FC]/70"
+                              bwIdx % 2 === 0 ? "bg-[#FCE8F0]/30 hover:bg-[#FCE8F0]/60" : "bg-white hover:bg-[#FCE8F0]/40"
                             )}
                           >
                             <td className="py-2.5 px-3 font-semibold text-[#17294B] flex items-center gap-1.5">
@@ -850,7 +849,7 @@ export default function DomesticIntelligencePage() {
                         {activeInnings.fall_of_wickets.map((f) => (
                           <div
                             key={f.wicket_number}
-                            className="flex items-center justify-between text-xs py-1 px-2 rounded bg-[#EEF4FC]/30 text-[#17294B]"
+                            className="flex items-center justify-between text-xs py-1 px-2 rounded bg-[#FCE8F0]/30 text-[#17294B]"
                           >
                             <span className="font-mono text-[11px] font-bold text-[#E4005A]">
                               {f.wicket_number}-{f.runs}

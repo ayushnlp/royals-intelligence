@@ -151,7 +151,7 @@ export default function PressureIntelligencePage() {
 
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div className="max-w-3xl space-y-2">
-            <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-[#17294B] leading-tight font-heading">
+            <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-[#E4005A] leading-tight font-heading">
               Pressure Reliability & Ranking Engine
             </h1>
             <p className="text-sm md:text-base text-[#52627A] leading-relaxed font-normal">
@@ -410,7 +410,7 @@ export default function PressureIntelligencePage() {
                           key={batter.player_id}
                           className={cn(
                             "transition-colors",
-                            idx % 2 === 0 ? "bg-[#FCE8F0]/35" : "bg-[#EEF4FC]/35",
+                            idx % 2 === 0 ? "bg-[#FCE8F0]/35" : "bg-white",
                             "hover:bg-[#FCE8F0]/80"
                           )}
                         >
@@ -586,7 +586,7 @@ export default function PressureIntelligencePage() {
                           key={bowler.player_id}
                           className={cn(
                             "transition-colors",
-                            idx % 2 === 0 ? "bg-[#FCE8F0]/35" : "bg-[#EEF4FC]/35",
+                            idx % 2 === 0 ? "bg-[#FCE8F0]/35" : "bg-white",
                             "hover:bg-[#FCE8F0]/80"
                           )}
                         >

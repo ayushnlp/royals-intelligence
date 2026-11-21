@@ -130,7 +130,7 @@ export default function OverviewPage() {
         </div>
 
         <div className="space-y-2 max-w-4xl">
-          <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-[#17294B] leading-tight font-heading">
+          <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-[#E4005A] leading-tight font-heading">
             Executive Intelligence Overview
           </h1>
           <p className="text-sm md:text-base text-[#52627A] leading-relaxed font-normal">
@@ -287,7 +287,7 @@ export default function OverviewPage() {
                     key={p.rank}
                     className={cn(
                       "py-2.5 flex items-center justify-between px-3 rounded-md transition-colors",
-                      idx % 2 === 0 ? "bg-[#FCE8F0]/35" : "bg-[#EEF4FC]/35",
+                      idx % 2 === 0 ? "bg-[#FCE8F0]/35" : "bg-white",
                       "hover:bg-[#FCE8F0]/80"
                     )}
                   >
@@ -345,7 +345,7 @@ export default function OverviewPage() {
                     key={p.rank}
                     className={cn(
                       "py-2.5 flex items-center justify-between px-3 rounded-md transition-colors",
-                      idx % 2 === 0 ? "bg-[#FCE8F0]/35" : "bg-[#EEF4FC]/35",
+                      idx % 2 === 0 ? "bg-[#FCE8F0]/35" : "bg-white",
                       "hover:bg-[#FCE8F0]/80"
                     )}
                   >
@@ -427,7 +427,7 @@ export default function OverviewPage() {
                   key={p.rank}
                   className={cn(
                     "py-2.5 flex items-center justify-between px-3 rounded-md transition-colors",
-                    idx % 2 === 0 ? "bg-[#FCE8F0]/35" : "bg-[#EEF4FC]/35",
+                    idx % 2 === 0 ? "bg-[#FCE8F0]/35" : "bg-white",
                     "hover:bg-[#FCE8F0]/80"
                   )}
                 >
@@ -467,7 +467,7 @@ export default function OverviewPage() {
                   key={p.rank}
                   className={cn(
                     "py-2.5 flex items-center justify-between px-3 rounded-md transition-colors",
-                    idx % 2 === 0 ? "bg-[#FCE8F0]/35" : "bg-[#EEF4FC]/35",
+                    idx % 2 === 0 ? "bg-[#FCE8F0]/35" : "bg-white",
                     "hover:bg-[#FCE8F0]/80"
                   )}
                 >

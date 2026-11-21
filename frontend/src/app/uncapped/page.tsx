@@ -165,7 +165,7 @@ export default function UncappedIntelligencePage() {
 
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div className="max-w-3xl space-y-2">
-            <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-[#17294B] leading-tight font-heading">
+            <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-[#E4005A] leading-tight font-heading">
               Uncapped Player Intelligence
             </h1>
             <p className="text-sm md:text-base text-[#52627A] leading-relaxed font-normal">
@@ -537,7 +537,7 @@ export default function UncappedIntelligencePage() {
                           key={batter.player_id}
                           className={cn(
                             "transition-colors",
-                            idx % 2 === 0 ? "bg-[#FCE8F0]/35" : "bg-[#EEF4FC]/35",
+                            idx % 2 === 0 ? "bg-[#FCE8F0]/30" : "bg-white",
                             "hover:bg-[#FCE8F0]/80"
                           )}
                         >
@@ -549,7 +549,7 @@ export default function UncappedIntelligencePage() {
                                   isTop1
                                     ? "bg-[#E4005A] text-white"
                                     : isTop3
-                                      ? "bg-[#17294B] text-white"
+                                      ? "bg-[#FCE8F0] text-[#E4005A] font-bold border border-[#E4005A]/30"
                                       : "bg-[#FCE8F0] text-[#74658F]"
                                 )}
                               >
@@ -709,7 +709,7 @@ export default function UncappedIntelligencePage() {
                           key={bowler.player_id}
                           className={cn(
                             "transition-colors",
-                            idx % 2 === 0 ? "bg-[#FCE8F0]/35" : "bg-[#EEF4FC]/35",
+                            idx % 2 === 0 ? "bg-[#FCE8F0]/30" : "bg-white",
                             "hover:bg-[#FCE8F0]/80"
                           )}
                         >
@@ -721,7 +721,7 @@ export default function UncappedIntelligencePage() {
                                   isTop1
                                     ? "bg-[#E4005A] text-white"
                                     : isTop3
-                                      ? "bg-[#17294B] text-white"
+                                      ? "bg-[#FCE8F0] text-[#E4005A] font-bold border border-[#E4005A]/30"
                                       : "bg-[#FCE8F0] text-[#74658F]"
                                 )}
                               >

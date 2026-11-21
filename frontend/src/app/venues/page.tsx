@@ -154,7 +154,7 @@ export default function VenuePitchIntelligencePage() {
 
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div className="max-w-3xl space-y-2">
-            <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-[#17294B] leading-tight">
+            <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-[#E4005A] leading-tight font-heading">
               Stadium Geometry, Pitch Evidence & Weather Telemetry
             </h1>
             <p className="text-sm md:text-base text-[#52627A] leading-relaxed font-normal">
@@ -169,7 +169,7 @@ export default function VenuePitchIntelligencePage() {
               onClick={() => setRrOnly(false)}
               className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-all ${
                 !rrOnly
-                  ? "bg-white text-[#17294B] shadow-sm"
+                  ? "bg-white text-[#E4005A] font-bold shadow-xs"
                   : "text-[#52627A] hover:text-[#17294B]"
               }`}
             >
@@ -179,11 +179,11 @@ export default function VenuePitchIntelligencePage() {
               onClick={() => setRrOnly(true)}
               className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-md transition-all ${
                 rrOnly
-                  ? "bg-[#17294B] text-white shadow-sm"
+                  ? "bg-white text-[#E4005A] font-bold shadow-xs"
                   : "text-[#52627A] hover:text-[#17294B]"
               }`}
             >
-              <Shield size={13} className="text-[#17294B]" />
+              <Shield size={13} className={rrOnly ? "text-[#E4005A]" : "text-[#52627A]"} />
               <span>RR Grounds (2)</span>
             </button>
           </div>
@@ -238,14 +238,20 @@ export default function VenuePitchIntelligencePage() {
               onClick={() => setSelectedVenueCode(v.venue_code)}
               className={`flex-shrink-0 px-4 py-2.5 rounded-xl border text-left transition-all ${
                 selectedVenueCode === v.venue_code
-                  ? "bg-[#17294B] text-white border-[#17294B] shadow-md ring-2 ring-[#E4005A]/30"
-                  : "bg-white text-[#17294B] border-[#E7EAF0] hover:border-[#17294B]/20"
+                  ? "bg-[#FCE8F0] text-[#17294B] border-[#E4005A] ring-2 ring-[#E4005A]/30 shadow-sm"
+                  : "bg-white text-[#17294B] border-[#E7EAF0] hover:border-[#E4005A]/30"
               }`}
             >
               <div className="flex items-center justify-between gap-3">
                 <span className="font-bold text-xs">{v.name}</span>
                 {v.is_rr_home && (
-                  <span className="px-1.5 py-0.2 rounded text-[9px] font-mono font-bold bg-[#17294B] text-white">
+                  <span
+                    className={`px-1.5 py-0.5 rounded text-[9px] font-mono font-bold ${
+                      selectedVenueCode === v.venue_code
+                        ? "bg-[#E4005A] text-white"
+                        : "bg-[#FCE8F0] text-[#E4005A] border border-[#E4005A]/20"
+                    }`}
+                  >
                     RR HOME
                   </span>
                 )}
