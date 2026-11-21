@@ -114,8 +114,26 @@ body {
   opacity: 0;
 }
 
+/* Oscilloscope Waveform Animation */
+@keyframes waveformFlow {
+  0% {
+    transform: translateX(0px);
+  }
+  100% {
+    transform: translateX(-64px);
+  }
+}
+
+.animate-waveform-flow {
+  animation: waveformFlow 2.4s linear infinite;
+  will-change: transform;
+}
+
 /* Accessibility: Respect Reduced Motion Preferences */
 @media (prefers-reduced-motion: reduce) {
+  .animate-waveform-flow {
+    animation: none !important;
+  }
   *, ::before, ::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
