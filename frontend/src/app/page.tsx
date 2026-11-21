@@ -59,15 +59,15 @@ export default function HomePage() {
   ];
 
   return (
-    <div className="min-h-screen lg:h-screen lg:max-h-screen flex flex-col bg-white text-[#31136C] overflow-x-hidden selection:bg-[#950460]/20 selection:text-[#31136C]">
+    <div className="min-h-screen lg:h-screen lg:max-h-screen flex flex-col bg-white text-[#101D3A] overflow-x-hidden selection:bg-[#D4145A]/20 selection:text-[#101D3A]">
       {/* =================================================================== */}
       {/* 1. HEADER — AUTHENTIC RAJASTHAN ROYALS BRANDING */}
       {/* =================================================================== */}
-      <header className="h-14 sm:h-16 shrink-0 bg-white border-b border-[#31136C]/12 px-4 sm:px-6 lg:px-8 flex items-center justify-between z-30">
+      <header className="h-14 sm:h-16 shrink-0 bg-white border-b border-[#E7EAF0] px-4 sm:px-6 lg:px-8 flex items-center justify-between z-30">
         {/* Left: Pure Brand Text */}
         <Link
           href="/"
-          className="font-heading font-extrabold text-base sm:text-lg tracking-tight text-[#31136C] hover:text-[#950460] transition-colors"
+          className="font-heading font-extrabold text-base sm:text-lg tracking-tight text-[#101D3A] hover:text-[#D4145A] transition-colors"
         >
           ROYALS INTELLIGENCE
         </Link>
@@ -75,10 +75,10 @@ export default function HomePage() {
         {/* Right: Prominent Header Explore Button */}
         <Link
           href="/overview"
-          className="group inline-flex items-center gap-2 px-4 py-2 sm:px-5 sm:py-2.5 rounded-xl bg-[#31136C] hover:bg-[#950460] text-white text-xs sm:text-[13px] font-bold tracking-wider transition-all duration-200 shadow-md hover:shadow-lg hover:scale-[1.02] active:scale-[0.98]"
+          className="group inline-flex items-center gap-2 px-4 py-2 sm:px-5 sm:py-2.5 rounded-xl bg-[#101D3A] hover:bg-[#A80F50] text-white text-xs sm:text-[13px] font-bold tracking-wider transition-all duration-200 shadow-md hover:shadow-lg hover:scale-[1.02] active:scale-[0.98]"
         >
           <span>EXPLORE INTELLIGENCE</span>
-          <ArrowRight size={14} className="text-[#950460] group-hover:text-white transition-colors group-hover:translate-x-0.5" />
+          <ArrowRight size={14} className="text-[#D4145A] group-hover:text-white transition-colors group-hover:translate-x-0.5" />
         </Link>
       </header>
 
@@ -90,33 +90,33 @@ export default function HomePage() {
         <section className="flex flex-col items-center text-center my-auto pt-2 sm:pt-4 pb-2">
           {/* Eyebrow: ROYALS INTELLIGENCE */}
           <div className="mb-1">
-            <span className="font-heading font-extrabold text-[11px] sm:text-xs tracking-[0.25em] text-[#31136C] uppercase">
+            <span className="font-heading font-extrabold text-[11px] sm:text-xs tracking-[0.25em] text-[#101D3A] uppercase">
               ROYALS INTELLIGENCE
             </span>
           </div>
 
           {/* Badge: SEASON 02 */}
           <div className="mb-1.5">
-            <span className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full text-[10px] sm:text-[11px] font-mono font-bold tracking-wider bg-[#F7F6FB] text-[#950460] border border-[#950460]/30 shadow-2xs">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#950460]" />
+            <span className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full text-[10px] sm:text-[11px] font-mono font-bold tracking-wider bg-[#F8E8EF] text-[#D4145A] border border-[#D4145A]/30 shadow-2xs">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#D4145A]" />
               SEASON 02
             </span>
           </div>
 
           {/* Sublabel: RAJASTHAN ROYALS · DATA-DRIVEN CRICKET */}
           <div className="mb-2">
-            <p className="text-[11px] sm:text-xs font-semibold tracking-[0.18em] text-[#31136C]/70 uppercase">
+            <p className="text-[11px] sm:text-xs font-semibold tracking-[0.18em] text-[#52627A] uppercase">
               RAJASTHAN ROYALS · DATA-DRIVEN CRICKET
             </p>
           </div>
 
           {/* Headline: INTELLIGENCE FOR RAJASTHAN ROYALS. */}
-          <h1 className="font-heading font-extrabold text-[clamp(1.5rem,2.6vw,2.4rem)] text-[#31136C] tracking-tight leading-[1.12] max-w-4xl mx-auto mb-1.5">
+          <h1 className="font-heading font-extrabold text-[clamp(1.5rem,2.6vw,2.4rem)] text-[#101D3A] tracking-tight leading-[1.12] max-w-4xl mx-auto mb-1.5">
             INTELLIGENCE FOR RAJASTHAN ROYALS.
           </h1>
 
           {/* Subtitle: Built to Find the Difference. */}
-          <h3 className="font-heading font-bold text-[clamp(0.95rem,1.35vw,1.25rem)] text-[#950460] tracking-tight mb-4">
+          <h3 className="font-heading font-bold text-[clamp(0.95rem,1.35vw,1.25rem)] text-[#D4145A] tracking-tight mb-4">
             Built to Find the Difference.
           </h3>
 
@@ -124,7 +124,7 @@ export default function HomePage() {
           <div className="flex flex-row items-center justify-center gap-3.5">
             <Link
               href="/overview"
-              className="group inline-flex items-center justify-center gap-2.5 px-7 py-3 sm:px-8 sm:py-3.5 rounded-xl bg-gradient-to-r from-[#31136C] to-[#950460] hover:from-[#31136C] hover:to-[#950460] text-white text-xs sm:text-sm font-bold tracking-wider uppercase transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98]"
+              className="group inline-flex items-center justify-center gap-2.5 px-7 py-3 sm:px-8 sm:py-3.5 rounded-xl bg-gradient-to-r from-[#101D3A] to-[#D4145A] hover:from-[#101D3A] hover:to-[#D4145A] text-white text-xs sm:text-sm font-bold tracking-wider uppercase transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98]"
             >
               <span>EXPLORE INTELLIGENCE</span>
               <ArrowRight size={16} className="text-white transition-transform group-hover:translate-x-0.5" />
@@ -132,7 +132,7 @@ export default function HomePage() {
 
             <button
               onClick={() => setMethodologyOpen(true)}
-              className="inline-flex items-center justify-center gap-1.5 px-5 py-3 sm:px-6 sm:py-3.5 rounded-xl bg-white text-[#31136C] text-xs font-semibold tracking-wider uppercase border border-[#31136C]/15 hover:bg-[#F7F6FB] hover:text-[#950460] hover:border-[#950460]/30 transition-all shadow-2xs cursor-pointer"
+              className="inline-flex items-center justify-center gap-1.5 px-5 py-3 sm:px-6 sm:py-3.5 rounded-xl bg-white text-[#101D3A] text-xs font-semibold tracking-wider uppercase border border-[#E7EAF0] hover:bg-[#F8E8EF] hover:text-[#D4145A] hover:border-[#D4145A]/30 transition-all shadow-2xs cursor-pointer"
             >
               <span>OUR METHODOLOGY</span>
             </button>
@@ -151,24 +151,24 @@ export default function HomePage() {
                 <Link
                   key={card.id}
                   href={card.href}
-                  className="group min-h-[82px] lg:h-[90px] p-2.5 sm:p-3 rounded-xl border border-[#31136C]/12 bg-white hover:border-[#950460] hover:bg-[#F7F6FB]/60 hover:shadow-sm transition-all flex flex-col justify-between"
+                  className="group min-h-[82px] lg:h-[90px] p-2.5 sm:p-3 rounded-xl border border-[#E7EAF0] bg-white hover:border-[#D4145A] hover:bg-[#F8E8EF]/60 hover:shadow-sm transition-all flex flex-col justify-between"
                 >
                   <div>
                     <div className="flex items-center justify-between mb-1.5">
-                      <div className="w-5 h-5 rounded-md bg-[#950460]/10 border border-[#950460]/30 flex items-center justify-center text-[#950460] shrink-0 group-hover:bg-[#950460] group-hover:text-white transition-colors">
+                      <div className="w-5 h-5 rounded-md bg-[#D4145A]/10 border border-[#D4145A]/30 flex items-center justify-center text-[#D4145A] shrink-0 group-hover:bg-[#A80F50] group-hover:text-white transition-colors">
                         <Icon size={12} />
                       </div>
-                      <span className="text-[10px] font-mono font-bold text-[#950460]">
+                      <span className="text-[10px] font-mono font-bold text-[#D4145A]">
                         {card.id}
                       </span>
                     </div>
 
-                    <h4 className="text-[11px] sm:text-xs font-heading font-bold text-[#31136C] group-hover:text-[#950460] transition-colors tracking-tight leading-tight">
+                    <h4 className="text-[11px] sm:text-xs font-heading font-bold text-[#101D3A] group-hover:text-[#D4145A] transition-colors tracking-tight leading-tight">
                       {card.title}
                     </h4>
                   </div>
 
-                  <div className="flex items-center gap-1 text-[10px] font-bold text-[#950460] group-hover:translate-x-0.5 transition-all mt-auto pt-1">
+                  <div className="flex items-center gap-1 text-[10px] font-bold text-[#D4145A] group-hover:translate-x-0.5 transition-all mt-auto pt-1">
                     <span>Access Module</span>
                     <ChevronRight size={11} />
                   </div>
@@ -181,7 +181,7 @@ export default function HomePage() {
         {/* =================================================================== */}
         {/* 4. FOOTER — CENTERED AT THE BOTTOM */}
         {/* =================================================================== */}
-        <footer className="shrink-0 py-1.5 text-center text-[10px] sm:text-[11px] text-[#31136C]/70">
+        <footer className="shrink-0 py-1.5 text-center text-[10px] sm:text-[11px] text-[#52627A]">
           <span>Royals Intelligence Season 02 · Rajasthan Royals Cricket Analytics · Built to Find the Difference.</span>
         </footer>
       </main>
@@ -194,29 +194,29 @@ export default function HomePage() {
           id="methodology"
           role="dialog"
           aria-modal="true"
-          className="fixed inset-0 z-50 bg-[#31136C]/50 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto"
+          className="fixed inset-0 z-50 bg-[#101D3A]/50 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto"
           onClick={() => setMethodologyOpen(false)}
         >
           <div
-            className="bg-white rounded-2xl border border-[#31136C]/15 max-w-2xl w-full p-6 sm:p-8 shadow-xl space-y-6 animate-hero-fade relative"
+            className="bg-white rounded-2xl border border-[#E7EAF0] max-w-2xl w-full p-6 sm:p-8 shadow-xl space-y-6 animate-hero-fade relative"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Modal Header */}
-            <div className="flex items-start justify-between border-b border-[#31136C]/12 pb-4">
+            <div className="flex items-start justify-between border-b border-[#E7EAF0] pb-4">
               <div>
-                <span className="text-[10px] font-mono font-bold tracking-wider text-[#950460] uppercase block mb-1">
+                <span className="text-[10px] font-mono font-bold tracking-wider text-[#D4145A] uppercase block mb-1">
                   Rigorous Mathematical Architecture
                 </span>
-                <h2 className="text-xl font-heading font-extrabold text-[#31136C] tracking-tight">
+                <h2 className="text-xl font-heading font-extrabold text-[#101D3A] tracking-tight">
                   OUR METHODOLOGY
                 </h2>
-                <p className="text-xs text-[#31136C]/70 mt-1">
+                <p className="text-xs text-[#52627A] mt-1">
                   Built on evidence. Driven by context. Five scientific pillars governing player valuation.
                 </p>
               </div>
               <button
                 onClick={() => setMethodologyOpen(false)}
-                className="p-1.5 rounded-lg text-[#31136C]/70 hover:text-[#950460] hover:bg-[#F7F6FB] transition-colors"
+                className="p-1.5 rounded-lg text-[#52627A] hover:text-[#D4145A] hover:bg-[#F8E8EF] transition-colors"
                 aria-label="Close modal"
               >
                 <X size={18} />
@@ -224,51 +224,51 @@ export default function HomePage() {
             </div>
 
             {/* 5 Pillars */}
-            <div className="space-y-3.5 text-xs text-[#31136C]/70">
-              <div className="p-3.5 rounded-xl border border-[#31136C]/12 bg-[#F7F6FB]">
-                <div className="font-heading font-bold text-xs text-[#31136C] mb-1 flex items-center justify-between">
+            <div className="space-y-3.5 text-xs text-[#52627A]">
+              <div className="p-3.5 rounded-xl border border-[#E7EAF0] bg-[#F8E8EF]">
+                <div className="font-heading font-bold text-xs text-[#101D3A] mb-1 flex items-center justify-between">
                   <span>PILLAR 01: Contextual Benchmarking</span>
-                  <span className="text-[10px] font-mono font-bold text-[#950460]">12-Cell Strata</span>
+                  <span className="text-[10px] font-mono font-bold text-[#D4145A]">12-Cell Strata</span>
                 </div>
                 <p className="leading-relaxed">
                   Every delivery is benchmarked against Innings (2) &times; Phase (3) &times; Tier (2) strata to eliminate structural entry bias and determine true situational expectation.
                 </p>
               </div>
 
-              <div className="p-3.5 rounded-xl border border-[#31136C]/12 bg-[#F7F6FB]">
-                <div className="font-heading font-bold text-xs text-[#31136C] mb-1 flex items-center justify-between">
+              <div className="p-3.5 rounded-xl border border-[#E7EAF0] bg-[#F8E8EF]">
+                <div className="font-heading font-bold text-xs text-[#101D3A] mb-1 flex items-center justify-between">
                   <span>PILLAR 02: Empirical Bayes Shrinkage</span>
-                  <span className="text-[10px] font-mono font-bold text-[#950460]">Gaussian Prior</span>
+                  <span className="text-[10px] font-mono font-bold text-[#D4145A]">Gaussian Prior</span>
                 </div>
                 <p className="leading-relaxed">
                   Separates skill from noise using league population priors (&mu;<sub>0</sub>, &tau;<sup>2</sup>), shrinking small-sample outliers toward the true population mean.
                 </p>
               </div>
 
-              <div className="p-3.5 rounded-xl border border-[#31136C]/12 bg-[#F7F6FB]">
-                <div className="font-heading font-bold text-xs text-[#31136C] mb-1 flex items-center justify-between">
+              <div className="p-3.5 rounded-xl border border-[#E7EAF0] bg-[#F8E8EF]">
+                <div className="font-heading font-bold text-xs text-[#101D3A] mb-1 flex items-center justify-between">
                   <span>PILLAR 03: Conservative PRI</span>
-                  <span className="text-[10px] font-mono font-bold text-[#950460]">Uncertainty Penalty</span>
+                  <span className="text-[10px] font-mono font-bold text-[#D4145A]">Uncertainty Penalty</span>
                 </div>
                 <p className="leading-relaxed">
                   Ranks candidates conservatively by penalizing high posterior uncertainty, valuing repeatable execution over speculative high-volatility spikes.
                 </p>
               </div>
 
-              <div className="p-3.5 rounded-xl border border-[#31136C]/12 bg-[#F7F6FB]">
-                <div className="font-heading font-bold text-xs text-[#31136C] mb-1 flex items-center justify-between">
+              <div className="p-3.5 rounded-xl border border-[#E7EAF0] bg-[#F8E8EF]">
+                <div className="font-heading font-bold text-xs text-[#101D3A] mb-1 flex items-center justify-between">
                   <span>PILLAR 04: 1-SE Lower Credible Bounds</span>
-                  <span className="text-[10px] font-mono font-bold text-[#950460]">1-Standard-Error</span>
+                  <span className="text-[10px] font-mono font-bold text-[#D4145A]">1-Standard-Error</span>
                 </div>
                 <p className="leading-relaxed">
                   Calculates rigorous 1-standard-error defensive lower bounds across all posterior distributions for defensible worst-case reliability estimates.
                 </p>
               </div>
 
-              <div className="p-3.5 rounded-xl border border-[#31136C]/12 bg-[#F7F6FB]">
-                <div className="font-heading font-bold text-xs text-[#31136C] mb-1 flex items-center justify-between">
+              <div className="p-3.5 rounded-xl border border-[#E7EAF0] bg-[#F8E8EF]">
+                <div className="font-heading font-bold text-xs text-[#101D3A] mb-1 flex items-center justify-between">
                   <span>PILLAR 05: Official Qualification Threshold</span>
-                  <span className="text-[10px] font-mono font-bold text-[#950460]">&ge; 60 Balls</span>
+                  <span className="text-[10px] font-mono font-bold text-[#D4145A]">&ge; 60 Balls</span>
                 </div>
                 <p className="leading-relaxed">
                   Strict qualification standard enforcing at least 60 pressure deliveries to guarantee sample adequacy before candidate ranking.
@@ -277,18 +277,18 @@ export default function HomePage() {
             </div>
 
             {/* Modal Footer */}
-            <div className="pt-2 border-t border-[#31136C]/12 flex items-center justify-between">
+            <div className="pt-2 border-t border-[#E7EAF0] flex items-center justify-between">
               <Link
                 href="/overview"
                 onClick={() => setMethodologyOpen(false)}
-                className="text-xs font-bold text-[#31136C] hover:text-[#950460] hover:underline inline-flex items-center gap-1"
+                className="text-xs font-bold text-[#101D3A] hover:text-[#D4145A] hover:underline inline-flex items-center gap-1"
               >
                 <span>View Full Executive Architecture</span>
                 <ArrowRight size={12} />
               </Link>
               <button
                 onClick={() => setMethodologyOpen(false)}
-                className="px-4 py-1.5 rounded-xl bg-[#31136C] text-white text-xs font-semibold hover:bg-[#950460] transition-colors"
+                className="px-4 py-1.5 rounded-xl bg-[#101D3A] text-white text-xs font-semibold hover:bg-[#A80F50] transition-colors"
               >
                 Close
               </button>

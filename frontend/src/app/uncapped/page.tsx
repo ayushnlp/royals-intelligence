@@ -150,26 +150,26 @@ export default function UncappedIntelligencePage() {
       {/* ------------------------------------------------------------------- */}
       <section className="space-y-3">
         <div className="flex flex-wrap items-center gap-3 text-xs">
-          <span className="font-mono font-bold tracking-widest text-[#31136C] uppercase px-2.5 py-1 rounded-md bg-[#950460]/10 border border-[#950460]/30">
+          <span className="font-mono font-bold tracking-widest text-[#101D3A] uppercase px-2.5 py-1 rounded-md bg-[#D4145A]/10 border border-[#D4145A]/30">
             Rajasthan Royals Scouting
           </span>
-          <span className="text-[#31136C]/30">•</span>
-          <span className="font-mono text-[#31136C]/70">
+          <span className="text-[#101D3A]/30">•</span>
+          <span className="font-mono text-[#52627A]">
             AUCTION-02 Eligibility Ledger
           </span>
-          <span className="text-[#31136C]/30">•</span>
-          <span className="inline-flex items-center gap-1.5 text-[#950460] font-medium">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#950460]" />
+          <span className="text-[#101D3A]/30">•</span>
+          <span className="inline-flex items-center gap-1.5 text-[#D4145A] font-medium">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#D4145A]" />
             Strict Domestic Uncapped Scope
           </span>
         </div>
 
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div className="max-w-3xl space-y-2">
-            <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-[#31136C] leading-tight font-heading">
+            <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-[#101D3A] leading-tight font-heading">
               Uncapped Player Intelligence
             </h1>
-            <p className="text-sm md:text-base text-[#31136C]/70 leading-relaxed font-normal">
+            <p className="text-sm md:text-base text-[#52627A] leading-relaxed font-normal">
               Targeted talent discovery for Indian domestic prospects with zero senior international caps.
               Ranked under empirical high-pressure scenarios (&gt;1.50 Required Run Rate, middle/death overs, run-chases)
               with Empirical Bayes shrinkage and 1-SE conservative credible bounds.
@@ -179,17 +179,17 @@ export default function UncappedIntelligencePage() {
           <div className="flex flex-wrap items-center gap-3 shrink-0">
             <Link
               href="/pressure"
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#31136C] text-white text-xs font-semibold hover:bg-[#31136C] transition-colors shadow-soft"
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#101D3A] text-white text-xs font-semibold hover:bg-[#101D3A] transition-colors shadow-soft"
             >
-              <Shield size={14} className="text-[#950460]" />
+              <Shield size={14} className="text-[#D4145A]" />
               <span>Official Global Top 10</span>
-              <ArrowRight size={13} className="text-[#31136C]/30" />
+              <ArrowRight size={13} className="text-[#101D3A]/30" />
             </Link>
             <Link
               href="/domestic"
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-white border border-[#31136C]/12 text-[#31136C] text-xs font-semibold hover:bg-white transition-colors shadow-soft"
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-white border border-[#E7EAF0] text-[#101D3A] text-xs font-semibold hover:bg-white transition-colors shadow-soft"
             >
-              <Sparkles size={14} className="text-[#950460]" />
+              <Sparkles size={14} className="text-[#D4145A]" />
               <span>Domestic Match Dossiers</span>
             </Link>
           </div>
@@ -198,21 +198,21 @@ export default function UncappedIntelligencePage() {
 
       {/* Connection Notice */}
       {errorMsg && (
-        <div className="p-4 rounded-xl bg-[#950460]/10/90 border border-[#950460]/30 text-[#950460] flex items-center justify-between gap-4 shadow-xs">
+        <div className="p-4 rounded-xl bg-[#D4145A]/10/90 border border-[#D4145A]/30 text-[#D4145A] flex items-center justify-between gap-4 shadow-xs">
           <div className="flex items-center gap-3">
-            <AlertTriangle className="w-5 h-5 text-[#950460] shrink-0" />
+            <AlertTriangle className="w-5 h-5 text-[#D4145A] shrink-0" />
             <div>
               <div className="text-xs font-bold uppercase tracking-wider flex items-center gap-2">
                 <span>BACKEND CONNECTION NOTICE</span>
               </div>
-              <div className="text-xs text-[#950460] mt-1">
+              <div className="text-xs text-[#D4145A] mt-1">
                 {errorMsg}
               </div>
             </div>
           </div>
           <button
             onClick={() => loadUncappedData(minBalls, minMatches)}
-            className="px-3 py-1.5 rounded-lg bg-[#950460] text-white font-bold text-xs hover:bg-[#950460] transition-colors shrink-0 flex items-center gap-1.5"
+            className="px-3 py-1.5 rounded-lg bg-[#D4145A] text-white font-bold text-xs hover:bg-[#A80F50] transition-colors shrink-0 flex items-center gap-1.5"
           >
             <RefreshCw className="w-3.5 h-3.5" />
             <span>Retry Connection</span>
@@ -223,44 +223,44 @@ export default function UncappedIntelligencePage() {
       {/* ------------------------------------------------------------------- */}
       {/* 2. Open Editorial Telemetry Strip (No Heavy Boxes) */}
       {/* ------------------------------------------------------------------- */}
-      <section className="py-5 border-y border-[#31136C]/12">
+      <section className="py-5 border-y border-[#E7EAF0]">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
           <div>
-            <span className="text-[10px] font-mono uppercase tracking-wider text-[#31136C]/70 font-semibold block mb-1">
+            <span className="text-[10px] font-mono uppercase tracking-wider text-[#52627A] font-semibold block mb-1">
               Top Uncapped Batter
             </span>
-            <div className="text-xl md:text-2xl font-extrabold text-[#31136C] tracking-tight flex items-baseline gap-1.5">
+            <div className="text-xl md:text-2xl font-extrabold text-[#101D3A] tracking-tight flex items-baseline gap-1.5">
               <span>{overview?.top_uncapped_batter ?? "—"}</span>
-              <span className="w-1.5 h-1.5 rounded-full bg-[#950460]" />
+              <span className="w-1.5 h-1.5 rounded-full bg-[#D4145A]" />
             </div>
-            <p className="text-xs text-[#31136C]/70 mt-0.5">
+            <p className="text-xs text-[#52627A] mt-0.5">
               Rank #1 Qualified • Conservative PRI
             </p>
           </div>
 
           <div>
-            <span className="text-[10px] font-mono uppercase tracking-wider text-[#31136C]/70 font-semibold block mb-1">
+            <span className="text-[10px] font-mono uppercase tracking-wider text-[#52627A] font-semibold block mb-1">
               Top Uncapped Bowler
             </span>
-            <div className="text-xl md:text-2xl font-extrabold text-[#31136C] tracking-tight flex items-baseline gap-1.5">
+            <div className="text-xl md:text-2xl font-extrabold text-[#101D3A] tracking-tight flex items-baseline gap-1.5">
               <span>{overview?.top_uncapped_bowler ?? "—"}</span>
-              <span className="w-1.5 h-1.5 rounded-full bg-[#950460]" />
+              <span className="w-1.5 h-1.5 rounded-full bg-[#D4145A]" />
             </div>
-            <p className="text-xs text-[#31136C]/70 mt-0.5">
+            <p className="text-xs text-[#52627A] mt-0.5">
               Rank #1 Qualified • Runs Saved (1-SE)
             </p>
           </div>
 
           <div>
-            <span className="text-[10px] font-mono uppercase tracking-wider text-[#31136C]/70 font-semibold block mb-1">
+            <span className="text-[10px] font-mono uppercase tracking-wider text-[#52627A] font-semibold block mb-1">
               Qualified Prospects
             </span>
-            <div className="text-xl md:text-2xl font-extrabold text-[#31136C] font-mono tracking-tight">
+            <div className="text-xl md:text-2xl font-extrabold text-[#101D3A] font-mono tracking-tight">
               {overview
                 ? `${overview.total_verified_uncapped_batters} Bat / ${overview.total_verified_uncapped_bowlers} Bowl`
                 : "—"}
             </div>
-            <p className="text-xs text-[#31136C]/70 mt-0.5">
+            <p className="text-xs text-[#52627A] mt-0.5">
               {isExploratory
                 ? `Exploratory: ≥${minBalls}b ${minMatches > 0 ? `& ≥${minMatches}m` : "(All matches)"}`
                 : "Strict gate ≥ 60 pressure deliveries"}
@@ -268,15 +268,15 @@ export default function UncappedIntelligencePage() {
           </div>
 
           <div>
-            <span className="text-[10px] font-mono uppercase tracking-wider text-[#31136C]/70 font-semibold block mb-1">
+            <span className="text-[10px] font-mono uppercase tracking-wider text-[#52627A] font-semibold block mb-1">
               Sample Excluded
             </span>
-            <div className="text-xl md:text-2xl font-extrabold text-[#950460] font-mono tracking-tight">
+            <div className="text-xl md:text-2xl font-extrabold text-[#D4145A] font-mono tracking-tight">
               {overview?.excluded_batters_count !== undefined
                 ? `${overview.excluded_batters_count} Bat / ${overview.excluded_bowlers_count} Bowl`
                 : "—"}
             </div>
-            <p className="text-xs text-[#31136C]/70 mt-0.5">
+            <p className="text-xs text-[#52627A] mt-0.5">
               {overview?.excluded_batters_count !== undefined
                 ? `${overview.excluded_batters_count + (overview.excluded_bowlers_count ?? 0)} candidates below active gate`
                 : "Awaiting backend telemetry"}
@@ -288,20 +288,20 @@ export default function UncappedIntelligencePage() {
       {/* ------------------------------------------------------------------- */}
       {/* 3. Configurable Prospect Sample Gate & Qualification Filters */}
       {/* ------------------------------------------------------------------- */}
-      <section className="bg-white rounded-2xl border border-[#31136C]/12 p-5 shadow-sm space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#31136C]/10 pb-3">
+      <section className="bg-white rounded-2xl border border-[#E7EAF0] p-5 shadow-sm space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#E7EAF0] pb-3">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-[#950460]/10 border border-[#950460]/30 flex items-center justify-center text-[#31136C] shrink-0">
+            <div className="w-8 h-8 rounded-lg bg-[#D4145A]/10 border border-[#D4145A]/30 flex items-center justify-center text-[#101D3A] shrink-0">
               <SlidersHorizontal className="w-4 h-4" />
             </div>
             <div>
-              <h2 className="text-sm font-bold text-[#31136C] flex items-center gap-2">
+              <h2 className="text-sm font-bold text-[#101D3A] flex items-center gap-2">
                 <span>Prospect Qualification Gate & Scouting Filters</span>
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[#31136C]/05 text-[#31136C]/70 font-normal">
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[#F8E8EF] text-[#52627A] font-normal">
                   Configurable
                 </span>
               </h2>
-              <p className="text-xs text-[#31136C]/70 mt-0.5">
+              <p className="text-xs text-[#52627A] mt-0.5">
                 Dynamically adjust empirical sample gates. Official Round 1 Benchmark (≥60 balls) remains the default standard.
               </p>
             </div>
@@ -309,19 +309,19 @@ export default function UncappedIntelligencePage() {
 
           <div className="flex items-center gap-2 shrink-0 self-start sm:self-auto">
             {!isExploratory ? (
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-mono font-bold bg-[#950460]/10 text-[#950460] border border-[#950460]/30">
-                <Shield className="w-3.5 h-3.5 text-[#950460]" />
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-mono font-bold bg-[#D4145A]/10 text-[#D4145A] border border-[#D4145A]/30">
+                <Shield className="w-3.5 h-3.5 text-[#D4145A]" />
                 <span>Official R1 Gate Active (Strict ≥ 60 Balls)</span>
               </span>
             ) : (
               <div className="flex items-center gap-2">
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-mono font-bold bg-[#950460]/10 text-[#31136C] border border-[#950460]/30">
-                  <Sparkles className="w-3.5 h-3.5 text-[#31136C]" />
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-mono font-bold bg-[#D4145A]/10 text-[#101D3A] border border-[#D4145A]/30">
+                  <Sparkles className="w-3.5 h-3.5 text-[#101D3A]" />
                   <span>Exploratory Scouting Filter Active</span>
                 </span>
                 <button
                   onClick={resetToOfficial}
-                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold text-[#31136C]/70 hover:text-[#31136C] bg-[#31136C]/05 hover:bg-[#31136C]/08 transition-colors"
+                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold text-[#52627A] hover:text-[#101D3A] bg-[#F8E8EF] hover:bg-[#F8E8EF] transition-colors"
                   title="Reset to Official R1 Gate (60 Balls, All Matches)"
                 >
                   <RotateCcw className="w-3 h-3" />
@@ -336,11 +336,11 @@ export default function UncappedIntelligencePage() {
           {/* Selector 1: Minimum Pressure Deliveries */}
           <div className="space-y-2">
             <div className="flex items-center justify-between text-xs">
-              <span className="font-mono text-[10px] uppercase tracking-wider text-[#31136C]/70 font-semibold flex items-center gap-1.5">
-                <Crosshair className="w-3 h-3 text-[#31136C]" />
+              <span className="font-mono text-[10px] uppercase tracking-wider text-[#52627A] font-semibold flex items-center gap-1.5">
+                <Crosshair className="w-3 h-3 text-[#101D3A]" />
                 <span>Minimum Pressure Deliveries</span>
               </span>
-              <span className="font-mono font-bold text-[#31136C] text-xs">
+              <span className="font-mono font-bold text-[#101D3A] text-xs">
                 Active: {minBalls} Balls
               </span>
             </div>
@@ -354,8 +354,8 @@ export default function UncappedIntelligencePage() {
                     className={cn(
                       "px-3 py-1.5 rounded-lg text-xs transition-all font-mono",
                       isSelected
-                        ? "bg-[#31136C] text-white font-bold shadow-soft"
-                        : "bg-[#31136C]/05 text-[#31136C]/70 hover:bg-[#31136C]/08/80 font-medium"
+                        ? "bg-[#101D3A] text-white font-bold shadow-soft"
+                        : "bg-[#F8E8EF] text-[#52627A] hover:bg-[#F8E8EF]/80 font-medium"
                     )}
                   >
                     {opt.label}
@@ -368,11 +368,11 @@ export default function UncappedIntelligencePage() {
           {/* Selector 2: Minimum Matches Played */}
           <div className="space-y-2">
             <div className="flex items-center justify-between text-xs">
-              <span className="font-mono text-[10px] uppercase tracking-wider text-[#31136C]/70 font-semibold flex items-center gap-1.5">
-                <Filter className="w-3 h-3 text-[#31136C]" />
+              <span className="font-mono text-[10px] uppercase tracking-wider text-[#52627A] font-semibold flex items-center gap-1.5">
+                <Filter className="w-3 h-3 text-[#101D3A]" />
                 <span>Minimum Matches Played</span>
               </span>
-              <span className="font-mono font-bold text-[#31136C] text-xs">
+              <span className="font-mono font-bold text-[#101D3A] text-xs">
                 Active: {minMatches === 0 ? "All Matches" : `${minMatches} Matches`}
               </span>
             </div>
@@ -386,8 +386,8 @@ export default function UncappedIntelligencePage() {
                     className={cn(
                       "px-3 py-1.5 rounded-lg text-xs transition-all font-mono",
                       isSelected
-                        ? "bg-[#31136C] text-white font-bold shadow-soft"
-                        : "bg-[#31136C]/05 text-[#31136C]/70 hover:bg-[#31136C]/08/80 font-medium"
+                        ? "bg-[#101D3A] text-white font-bold shadow-soft"
+                        : "bg-[#F8E8EF] text-[#52627A] hover:bg-[#F8E8EF]/80 font-medium"
                     )}
                   >
                     {opt.label}
@@ -399,25 +399,25 @@ export default function UncappedIntelligencePage() {
         </div>
 
         {/* Dynamic Filter Feedback Telemetry Strip */}
-        <div className="pt-3 border-t border-[#31136C]/10 flex flex-wrap items-center justify-between gap-3 text-xs">
-          <div className="flex flex-wrap items-center gap-4 text-[#31136C]/70 font-mono text-[11px]">
+        <div className="pt-3 border-t border-[#E7EAF0] flex flex-wrap items-center justify-between gap-3 text-xs">
+          <div className="flex flex-wrap items-center gap-4 text-[#52627A] font-mono text-[11px]">
             <div>
-              <span className="text-[#31136C]/70">Qualified Batters:</span>{" "}
-              <span className="font-bold text-[#950460]">
+              <span className="text-[#52627A]">Qualified Batters:</span>{" "}
+              <span className="font-bold text-[#D4145A]">
                 {leaderboards?.batting_count ?? overview?.total_verified_uncapped_batters ?? 0}
               </span>
             </div>
-            <span className="text-[#31136C]/30">•</span>
+            <span className="text-[#101D3A]/30">•</span>
             <div>
-              <span className="text-[#31136C]/70">Qualified Bowlers:</span>{" "}
-              <span className="font-bold text-[#31136C]">
+              <span className="text-[#52627A]">Qualified Bowlers:</span>{" "}
+              <span className="font-bold text-[#101D3A]">
                 {leaderboards?.bowling_count ?? overview?.total_verified_uncapped_bowlers ?? 0}
               </span>
             </div>
-            <span className="text-[#31136C]/30">•</span>
+            <span className="text-[#101D3A]/30">•</span>
             <div>
-              <span className="text-[#31136C]/70">Excluded by Criteria:</span>{" "}
-              <span className="font-bold text-[#950460]">
+              <span className="text-[#52627A]">Excluded by Criteria:</span>{" "}
+              <span className="font-bold text-[#D4145A]">
                 {overview?.excluded_batters_count !== undefined
                   ? `${overview.excluded_batters_count} Bat / ${overview.excluded_bowlers_count} Bowl (${(overview.excluded_batters_count || 0) + (overview.excluded_bowlers_count || 0)} total)`
                   : "—"}
@@ -425,8 +425,8 @@ export default function UncappedIntelligencePage() {
             </div>
           </div>
 
-          <div className="text-[11px] font-mono text-[#31136C]/70 flex items-center gap-1.5">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#950460]" />
+          <div className="text-[11px] font-mono text-[#52627A] flex items-center gap-1.5">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#D4145A]" />
             <span>{overview?.sample_gate_applied ?? "Gate active"}</span>
           </div>
         </div>
@@ -435,17 +435,17 @@ export default function UncappedIntelligencePage() {
       {/* ------------------------------------------------------------------- */}
       {/* 4. Editorial Segmented Tab Navigation */}
       {/* ------------------------------------------------------------------- */}
-      <div className="flex items-center gap-6 border-b border-[#31136C]/12">
+      <div className="flex items-center gap-6 border-b border-[#E7EAF0]">
         <button
           onClick={() => setActiveTab("batting")}
           className={cn(
             "flex items-center gap-2 py-3 text-xs font-semibold transition-all border-b-2 -mb-px whitespace-nowrap",
             activeTab === "batting"
-              ? "border-[#31136C] text-[#31136C] font-bold"
-              : "border-transparent text-[#31136C]/70 hover:text-[#31136C]"
+              ? "border-[#101D3A] text-[#101D3A] font-bold"
+              : "border-transparent text-[#52627A] hover:text-[#101D3A]"
           )}
         >
-          <TrendingUp className="w-4 h-4 text-[#950460]" />
+          <TrendingUp className="w-4 h-4 text-[#D4145A]" />
           <span>
             Top Uncapped Batters Under Pressure ({leaderboards?.batting_count ?? 0})
           </span>
@@ -456,11 +456,11 @@ export default function UncappedIntelligencePage() {
           className={cn(
             "flex items-center gap-2 py-3 text-xs font-semibold transition-all border-b-2 -mb-px whitespace-nowrap",
             activeTab === "bowling"
-              ? "border-[#31136C] text-[#31136C] font-bold"
-              : "border-transparent text-[#31136C]/70 hover:text-[#31136C]"
+              ? "border-[#101D3A] text-[#101D3A] font-bold"
+              : "border-transparent text-[#52627A] hover:text-[#101D3A]"
           )}
         >
-          <Target className="w-4 h-4 text-[#31136C]" />
+          <Target className="w-4 h-4 text-[#101D3A]" />
           <span>
             Top Uncapped Bowlers Under Pressure ({leaderboards?.bowling_count ?? 0})
           </span>
@@ -471,11 +471,11 @@ export default function UncappedIntelligencePage() {
           className={cn(
             "flex items-center gap-2 py-3 text-xs font-semibold transition-all border-b-2 -mb-px whitespace-nowrap",
             activeTab === "governance"
-              ? "border-[#31136C] text-[#31136C] font-bold"
-              : "border-transparent text-[#31136C]/70 hover:text-[#31136C]"
+              ? "border-[#101D3A] text-[#101D3A] font-bold"
+              : "border-transparent text-[#52627A] hover:text-[#101D3A]"
           )}
         >
-          <FileText className="w-4 h-4 text-[#950460]" />
+          <FileText className="w-4 h-4 text-[#D4145A]" />
           <span>Eligibility Governance & Safeguards</span>
         </button>
       </div>
@@ -487,24 +487,24 @@ export default function UncappedIntelligencePage() {
         <div className="space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <div>
-              <h2 className="text-base font-bold text-[#31136C]">
+              <h2 className="text-base font-bold text-[#101D3A]">
                 Verified Indian Uncapped Batters Under Pressure
               </h2>
-              <p className="text-xs text-[#31136C]/70">
+              <p className="text-xs text-[#52627A]">
                 Ranked strictly by Conservative PRI (1-SE Lower Credible Bound in Strike Rate points). Domestic Indian players with 0 senior international caps.
               </p>
             </div>
             <div className="flex items-center gap-2 self-start sm:self-auto">
-              <span className="text-[11px] font-mono font-medium text-[#950460] bg-[#950460]/10 px-2.5 py-1 rounded-full border border-[#950460]/30/60">
+              <span className="text-[11px] font-mono font-medium text-[#D4145A] bg-[#D4145A]/10 px-2.5 py-1 rounded-full border border-[#D4145A]/30/60">
                 {leaderboards?.batting_count ?? 0} Qualified Batters
               </span>
             </div>
           </div>
 
-          <div className="bg-white rounded-2xl border border-[#31136C]/12 shadow-sm overflow-hidden">
+          <div className="bg-white rounded-2xl border border-[#E7EAF0] shadow-sm overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs">
-                <thead className="bg-white/80 text-[#31136C]/70 uppercase text-[10px] tracking-wider border-b border-[#31136C]/12 font-mono">
+                <thead className="bg-white/80 text-[#52627A] uppercase text-[10px] tracking-wider border-b border-[#E7EAF0] font-mono">
                   <tr>
                     <th className="px-4 py-3 font-sans font-semibold">Rank & Batter</th>
                     <th className="px-4 py-3 font-sans font-semibold">Franchise & Role</th>
@@ -521,9 +521,9 @@ export default function UncappedIntelligencePage() {
                 <tbody className="divide-y divide-slate-100 font-mono">
                   {loading ? (
                     <tr>
-                      <td colSpan={10} className="px-6 py-12 text-center text-[#31136C]/70">
+                      <td colSpan={10} className="px-6 py-12 text-center text-[#52627A]">
                         <div className="flex flex-col items-center justify-center gap-2">
-                          <RefreshCw className="w-5 h-5 animate-spin text-[#950460]" />
+                          <RefreshCw className="w-5 h-5 animate-spin text-[#D4145A]" />
                           <span className="text-xs">Loading uncapped batting intelligence...</span>
                         </div>
                       </td>
@@ -535,55 +535,55 @@ export default function UncappedIntelligencePage() {
                       const isOfficial = batter.is_official_r1_qualified ?? (batter.pressure_legal_balls >= 60);
                       return (
                         <tr key={batter.player_id} className="hover:bg-white/70 transition-colors">
-                          <td className="px-4 py-3 font-sans text-[#31136C]">
+                          <td className="px-4 py-3 font-sans text-[#101D3A]">
                             <div className="flex items-center gap-2.5">
                               <span
                                 className={cn(
                                   "w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-mono font-bold shrink-0",
                                   isTop1
-                                    ? "bg-[#950460] text-white"
+                                    ? "bg-[#D4145A] text-white"
                                     : isTop3
-                                      ? "bg-[#31136C] text-white"
-                                      : "bg-[#31136C]/05 text-[#31136C]/70"
+                                      ? "bg-[#101D3A] text-white"
+                                      : "bg-[#F8E8EF] text-[#52627A]"
                                 )}
                               >
                                 {batter.uncapped_rank}
                               </span>
                               <div>
-                                <div className="font-bold text-[#31136C]">{batter.player_name}</div>
-                                <div className="text-[10px] font-mono text-[#31136C]/70">
+                                <div className="font-bold text-[#101D3A]">{batter.player_name}</div>
+                                <div className="text-[10px] font-mono text-[#52627A]">
                                   Overall R1 #{batter.overall_r1_rank} • ID: {batter.player_id}
                                 </div>
                               </div>
                             </div>
                           </td>
-                          <td className="px-4 py-3 font-sans text-[#31136C]">
-                            <div className="font-semibold text-[#31136C]">{batter.franchise}</div>
-                            <div className="text-[10px] text-[#31136C]/70 font-mono">{batter.tactical_role}</div>
+                          <td className="px-4 py-3 font-sans text-[#101D3A]">
+                            <div className="font-semibold text-[#101D3A]">{batter.franchise}</div>
+                            <div className="text-[10px] text-[#52627A] font-mono">{batter.tactical_role}</div>
                           </td>
                           <td className="px-4 py-3 text-right">
-                            <span className="font-bold text-sm text-[#950460] font-mono">
+                            <span className="font-bold text-sm text-[#D4145A] font-mono">
                               {batter.conservative_pri > 0
                                 ? `+${batter.conservative_pri.toFixed(2)}`
                                 : batter.conservative_pri.toFixed(2)}{" "}
-                              <span className="text-[10px] font-normal text-[#31136C]/70">SR</span>
+                              <span className="text-[10px] font-normal text-[#52627A]">SR</span>
                             </span>
                           </td>
-                          <td className="px-4 py-3 text-right text-[#31136C] font-bold">
+                          <td className="px-4 py-3 text-right text-[#101D3A] font-bold">
                             {batter.posterior_mean > 0
                               ? `+${batter.posterior_mean.toFixed(2)}`
                               : batter.posterior_mean.toFixed(2)}
                           </td>
-                          <td className="px-4 py-3 text-right text-[#31136C]/70">
+                          <td className="px-4 py-3 text-right text-[#52627A]">
                             &plusmn;{batter.posterior_se.toFixed(2)}
                           </td>
-                          <td className="px-4 py-3 text-right text-[#31136C]/70 text-[11px]">
+                          <td className="px-4 py-3 text-right text-[#52627A] text-[11px]">
                             [{batter.ci_95_lower.toFixed(1)}, +{batter.ci_95_upper.toFixed(1)}]
                           </td>
-                          <td className="px-4 py-3 text-right text-[#31136C] font-bold">
+                          <td className="px-4 py-3 text-right text-[#101D3A] font-bold">
                             {batter.pressure_legal_balls}
                           </td>
-                          <td className="px-4 py-3 text-right text-[#31136C] font-bold">
+                          <td className="px-4 py-3 text-right text-[#101D3A] font-bold">
                             {batter.observed_strike_rate.toFixed(1)}
                           </td>
                           <td className="px-4 py-3 text-center font-sans">
@@ -592,8 +592,8 @@ export default function UncappedIntelligencePage() {
                                 className={cn(
                                   "text-[10px] font-mono font-medium px-2 py-0.5 rounded-full border",
                                   isOfficial
-                                    ? "bg-[#950460]/10 text-[#950460] border-[#950460]/30/60"
-                                    : "bg-[#950460]/10 text-[#31136C] border-[#950460]/30"
+                                    ? "bg-[#D4145A]/10 text-[#D4145A] border-[#D4145A]/30/60"
+                                    : "bg-[#D4145A]/10 text-[#101D3A] border-[#D4145A]/30"
                                 )}
                                 title={
                                   isOfficial
@@ -603,7 +603,7 @@ export default function UncappedIntelligencePage() {
                               >
                                 {isOfficial ? "VERIFIED • OFFICIAL" : "VERIFIED • EXPLORATORY"}
                               </span>
-                              <span className="text-[9px] font-mono text-[#31136C]/70">
+                              <span className="text-[9px] font-mono text-[#52627A]">
                                 {batter.pressure_legal_balls}b / {batter.pressure_matches}m
                               </span>
                             </div>
@@ -611,10 +611,10 @@ export default function UncappedIntelligencePage() {
                           <td className="px-4 py-3 text-center font-sans">
                             <button
                               onClick={() => openDossier(batter, "batting")}
-                              className="px-2.5 py-1 rounded-md bg-[#31136C]/05 hover:bg-[#31136C]/08 text-[#31136C] text-[11px] font-semibold transition-all inline-flex items-center gap-1"
+                              className="px-2.5 py-1 rounded-md bg-[#F8E8EF] hover:bg-[#F8E8EF] text-[#101D3A] text-[11px] font-semibold transition-all inline-flex items-center gap-1"
                             >
                               <span>Dossier</span>
-                              <ChevronRight className="w-3 h-3 text-[#31136C]/70" />
+                              <ChevronRight className="w-3 h-3 text-[#52627A]" />
                             </button>
                           </td>
                         </tr>
@@ -622,18 +622,18 @@ export default function UncappedIntelligencePage() {
                     })
                   ) : (
                     <tr>
-                      <td colSpan={10} className="px-6 py-12 text-center text-[#31136C]/70">
+                      <td colSpan={10} className="px-6 py-12 text-center text-[#52627A]">
                         <div className="flex flex-col items-center justify-center gap-2">
-                          <AlertTriangle className="w-7 h-7 text-[#950460]" />
-                          <span className="font-semibold text-[#31136C]">
+                          <AlertTriangle className="w-7 h-7 text-[#D4145A]" />
+                          <span className="font-semibold text-[#101D3A]">
                             No Uncapped Batters Match Current Filter Criteria
                           </span>
-                          <span className="text-xs text-[#31136C]/70 max-w-md">
+                          <span className="text-xs text-[#52627A] max-w-md">
                             Minimum requirements ({minBalls} Balls, {minMatches === 0 ? "All Matches" : `${minMatches} Matches`}) excluded all candidates.
                           </span>
                           <button
                             onClick={resetToOfficial}
-                            className="mt-2 px-3 py-1.5 rounded-lg bg-[#31136C] text-white text-xs font-semibold hover:bg-[#31136C] transition-colors flex items-center gap-1.5"
+                            className="mt-2 px-3 py-1.5 rounded-lg bg-[#101D3A] text-white text-xs font-semibold hover:bg-[#101D3A] transition-colors flex items-center gap-1.5"
                           >
                             <RotateCcw className="w-3.5 h-3.5" />
                             <span>Reset to Official Gate (60 Balls)</span>
@@ -656,24 +656,24 @@ export default function UncappedIntelligencePage() {
         <div className="space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <div>
-              <h2 className="text-base font-bold text-[#31136C]">
+              <h2 className="text-base font-bold text-[#101D3A]">
                 Verified Indian Uncapped Bowlers Under Pressure
               </h2>
-              <p className="text-xs text-[#31136C]/70">
+              <p className="text-xs text-[#52627A]">
                 Ranked strictly by Conservative Runs Saved per 6 balls (1-SE Lower Credible Bound in Economy). Crucial scouting insight since all official Top 10 bowlers are capped internationals.
               </p>
             </div>
             <div className="flex items-center gap-2 self-start sm:self-auto">
-              <span className="text-[11px] font-mono font-medium text-[#31136C] bg-[#31136C]/06 px-2.5 py-1 rounded-full border border-[#31136C]/20">
+              <span className="text-[11px] font-mono font-medium text-[#101D3A] bg-[#F8E8EF] px-2.5 py-1 rounded-full border border-[#101D3A]/20">
                 {leaderboards?.bowling_count ?? 0} Qualified Bowlers
               </span>
             </div>
           </div>
 
-          <div className="bg-white rounded-2xl border border-[#31136C]/12 shadow-sm overflow-hidden">
+          <div className="bg-white rounded-2xl border border-[#E7EAF0] shadow-sm overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs">
-                <thead className="bg-white/80 text-[#31136C]/70 uppercase text-[10px] tracking-wider border-b border-[#31136C]/12 font-mono">
+                <thead className="bg-white/80 text-[#52627A] uppercase text-[10px] tracking-wider border-b border-[#E7EAF0] font-mono">
                   <tr>
                     <th className="px-4 py-3 font-sans font-semibold">Rank & Bowler</th>
                     <th className="px-4 py-3 font-sans font-semibold">Franchise & Role</th>
@@ -690,9 +690,9 @@ export default function UncappedIntelligencePage() {
                 <tbody className="divide-y divide-slate-100 font-mono">
                   {loading ? (
                     <tr>
-                      <td colSpan={10} className="px-6 py-12 text-center text-[#31136C]/70">
+                      <td colSpan={10} className="px-6 py-12 text-center text-[#52627A]">
                         <div className="flex flex-col items-center justify-center gap-2">
-                          <RefreshCw className="w-5 h-5 animate-spin text-[#31136C]" />
+                          <RefreshCw className="w-5 h-5 animate-spin text-[#101D3A]" />
                           <span className="text-xs">Loading uncapped bowling intelligence...</span>
                         </div>
                       </td>
@@ -704,53 +704,53 @@ export default function UncappedIntelligencePage() {
                       const isOfficial = bowler.is_official_r1_qualified ?? (bowler.pressure_legal_balls >= 60);
                       return (
                         <tr key={bowler.player_id} className="hover:bg-white/70 transition-colors">
-                          <td className="px-4 py-3 font-sans text-[#31136C]">
+                          <td className="px-4 py-3 font-sans text-[#101D3A]">
                             <div className="flex items-center gap-2.5">
                               <span
                                 className={cn(
                                   "w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-mono font-bold shrink-0",
                                   isTop1
-                                    ? "bg-[#950460] text-white"
+                                    ? "bg-[#D4145A] text-white"
                                     : isTop3
-                                      ? "bg-[#31136C] text-white"
-                                      : "bg-[#31136C]/05 text-[#31136C]/70"
+                                      ? "bg-[#101D3A] text-white"
+                                      : "bg-[#F8E8EF] text-[#52627A]"
                                 )}
                               >
                                 {bowler.uncapped_rank}
                               </span>
                               <div>
-                                <div className="font-bold text-[#31136C]">{bowler.player_name}</div>
-                                <div className="text-[10px] font-mono text-[#31136C]/70">
+                                <div className="font-bold text-[#101D3A]">{bowler.player_name}</div>
+                                <div className="text-[10px] font-mono text-[#52627A]">
                                   Overall R1 #{bowler.overall_r1_rank} • ID: {bowler.player_id}
                                 </div>
                               </div>
                             </div>
                           </td>
-                          <td className="px-4 py-3 font-sans text-[#31136C]">
-                            <div className="font-semibold text-[#31136C]">{bowler.franchise}</div>
-                            <div className="text-[10px] text-[#31136C]/70 font-mono">{bowler.tactical_role}</div>
+                          <td className="px-4 py-3 font-sans text-[#101D3A]">
+                            <div className="font-semibold text-[#101D3A]">{bowler.franchise}</div>
+                            <div className="text-[10px] text-[#52627A] font-mono">{bowler.tactical_role}</div>
                           </td>
                           <td className="px-4 py-3 text-right">
-                            <span className="font-bold text-sm text-[#31136C] font-mono">
+                            <span className="font-bold text-sm text-[#101D3A] font-mono">
                               {bowler.conservative_runs_saved.toFixed(2)}{" "}
-                              <span className="text-[10px] font-normal text-[#31136C]/70">RPO</span>
+                              <span className="text-[10px] font-normal text-[#52627A]">RPO</span>
                             </span>
                           </td>
-                          <td className="px-4 py-3 text-right text-[#31136C] font-bold">
+                          <td className="px-4 py-3 text-right text-[#101D3A] font-bold">
                             {bowler.posterior_mean > 0
                               ? `+${bowler.posterior_mean.toFixed(2)}`
                               : bowler.posterior_mean.toFixed(2)}
                           </td>
-                          <td className="px-4 py-3 text-right text-[#31136C]/70">
+                          <td className="px-4 py-3 text-right text-[#52627A]">
                             &plusmn;{bowler.posterior_se.toFixed(2)}
                           </td>
-                          <td className="px-4 py-3 text-right text-[#31136C]/70 text-[11px]">
+                          <td className="px-4 py-3 text-right text-[#52627A] text-[11px]">
                             [{bowler.ci_95_lower.toFixed(2)}, +{bowler.ci_95_upper.toFixed(2)}]
                           </td>
-                          <td className="px-4 py-3 text-right text-[#31136C] font-bold">
+                          <td className="px-4 py-3 text-right text-[#101D3A] font-bold">
                             {bowler.pressure_legal_balls}
                           </td>
-                          <td className="px-4 py-3 text-right text-[#31136C] font-bold">
+                          <td className="px-4 py-3 text-right text-[#101D3A] font-bold">
                             {bowler.observed_economy.toFixed(2)}
                           </td>
                           <td className="px-4 py-3 text-center font-sans">
@@ -759,8 +759,8 @@ export default function UncappedIntelligencePage() {
                                 className={cn(
                                   "text-[10px] font-mono font-medium px-2 py-0.5 rounded-full border",
                                   isOfficial
-                                    ? "bg-[#950460]/10 text-[#950460] border-[#950460]/30/60"
-                                    : "bg-[#950460]/10 text-[#31136C] border-[#950460]/30"
+                                    ? "bg-[#D4145A]/10 text-[#D4145A] border-[#D4145A]/30/60"
+                                    : "bg-[#D4145A]/10 text-[#101D3A] border-[#D4145A]/30"
                                 )}
                                 title={
                                   isOfficial
@@ -770,7 +770,7 @@ export default function UncappedIntelligencePage() {
                               >
                                 {isOfficial ? "VERIFIED • OFFICIAL" : "VERIFIED • EXPLORATORY"}
                               </span>
-                              <span className="text-[9px] font-mono text-[#31136C]/70">
+                              <span className="text-[9px] font-mono text-[#52627A]">
                                 {bowler.pressure_legal_balls}b / {bowler.pressure_matches}m
                               </span>
                             </div>
@@ -778,10 +778,10 @@ export default function UncappedIntelligencePage() {
                           <td className="px-4 py-3 text-center font-sans">
                             <button
                               onClick={() => openDossier(bowler, "bowling")}
-                              className="px-2.5 py-1 rounded-md bg-[#31136C]/05 hover:bg-[#31136C]/08 text-[#31136C] text-[11px] font-semibold transition-all inline-flex items-center gap-1"
+                              className="px-2.5 py-1 rounded-md bg-[#F8E8EF] hover:bg-[#F8E8EF] text-[#101D3A] text-[11px] font-semibold transition-all inline-flex items-center gap-1"
                             >
                               <span>Dossier</span>
-                              <ChevronRight className="w-3 h-3 text-[#31136C]/70" />
+                              <ChevronRight className="w-3 h-3 text-[#52627A]" />
                             </button>
                           </td>
                         </tr>
@@ -789,18 +789,18 @@ export default function UncappedIntelligencePage() {
                     })
                   ) : (
                     <tr>
-                      <td colSpan={10} className="px-6 py-12 text-center text-[#31136C]/70">
+                      <td colSpan={10} className="px-6 py-12 text-center text-[#52627A]">
                         <div className="flex flex-col items-center justify-center gap-2">
-                          <AlertTriangle className="w-7 h-7 text-[#950460]" />
-                          <span className="font-semibold text-[#31136C]">
+                          <AlertTriangle className="w-7 h-7 text-[#D4145A]" />
+                          <span className="font-semibold text-[#101D3A]">
                             No Uncapped Bowlers Match Current Filter Criteria
                           </span>
-                          <span className="text-xs text-[#31136C]/70 max-w-md">
+                          <span className="text-xs text-[#52627A] max-w-md">
                             Minimum requirements ({minBalls} Balls, {minMatches === 0 ? "All Matches" : `${minMatches} Matches`}) excluded all candidates.
                           </span>
                           <button
                             onClick={resetToOfficial}
-                            className="mt-2 px-3 py-1.5 rounded-lg bg-[#31136C] text-white text-xs font-semibold hover:bg-[#31136C] transition-colors flex items-center gap-1.5"
+                            className="mt-2 px-3 py-1.5 rounded-lg bg-[#101D3A] text-white text-xs font-semibold hover:bg-[#101D3A] transition-colors flex items-center gap-1.5"
                           >
                             <RotateCcw className="w-3.5 h-3.5" />
                             <span>Reset to Official Gate (60 Balls)</span>
@@ -821,44 +821,44 @@ export default function UncappedIntelligencePage() {
       {/* ------------------------------------------------------------------- */}
       {activeTab === "governance" && (
         <div className="space-y-6">
-          <div className="bg-white rounded-2xl border border-[#31136C]/12 p-6 shadow-sm space-y-4">
-            <div className="flex items-center gap-3 border-b border-[#31136C]/10 pb-4">
-              <Shield className="w-5 h-5 text-[#950460]" />
-              <h2 className="text-lg font-bold text-[#31136C]">
+          <div className="bg-white rounded-2xl border border-[#E7EAF0] p-6 shadow-sm space-y-4">
+            <div className="flex items-center gap-3 border-b border-[#E7EAF0] pb-4">
+              <Shield className="w-5 h-5 text-[#D4145A]" />
+              <h2 className="text-lg font-bold text-[#101D3A]">
                 AUCTION-02 Domestic Eligibility Ledger & Protocols
               </h2>
             </div>
-            <p className="text-sm text-[#31136C]/70 leading-relaxed max-w-3xl">
+            <p className="text-sm text-[#52627A] leading-relaxed max-w-3xl">
               To prevent misclassification and preserve auction compliance, all uncapped evaluations adhere to strict BCCI Player Regulations for the IPL 2025/2026 cycle. Retired international stars (e.g., MS Dhoni) and multi-format international capped players (e.g., Virat Kohli, Rohit Sharma, Jasprit Bumrah) are categorically quarantined from uncapped discovery pipelines.
             </p>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
-              <div className="p-4 rounded-xl bg-white border border-[#31136C]/12 space-y-2">
-                <div className="flex items-center gap-2 text-xs font-bold text-[#31136C] font-mono uppercase">
-                  <CheckCircle2 className="w-4 h-4 text-[#950460]" />
+              <div className="p-4 rounded-xl bg-white border border-[#E7EAF0] space-y-2">
+                <div className="flex items-center gap-2 text-xs font-bold text-[#101D3A] font-mono uppercase">
+                  <CheckCircle2 className="w-4 h-4 text-[#D4145A]" />
                   <span>Rule 1: International Cap Barrier</span>
                 </div>
-                <p className="text-xs text-[#31136C]/70 leading-relaxed">
+                <p className="text-xs text-[#52627A] leading-relaxed">
                   Zero appearances in Senior Men&apos;s Tests, ODIs, or T20Is for India or any ICC Full Member nation. Any international appearance immediately revokes uncapped eligibility.
                 </p>
               </div>
 
-              <div className="p-4 rounded-xl bg-white border border-[#31136C]/12 space-y-2">
-                <div className="flex items-center gap-2 text-xs font-bold text-[#31136C] font-mono uppercase">
-                  <AlertTriangle className="w-4 h-4 text-[#950460]" />
+              <div className="p-4 rounded-xl bg-white border border-[#E7EAF0] space-y-2">
+                <div className="flex items-center gap-2 text-xs font-bold text-[#101D3A] font-mono uppercase">
+                  <AlertTriangle className="w-4 h-4 text-[#D4145A]" />
                   <span>Rule 2: Retirement Exclusion</span>
                 </div>
-                <p className="text-xs text-[#31136C]/70 leading-relaxed">
+                <p className="text-xs text-[#52627A] leading-relaxed">
                   The BCCI 5-year retirement clause (IPL Rule 4.3) is quarantined to administrative auction rosters and strictly excluded from primary talent discovery scouting models.
                 </p>
               </div>
 
-              <div className="p-4 rounded-xl bg-white border border-[#31136C]/12 space-y-2">
-                <div className="flex items-center gap-2 text-xs font-bold text-[#31136C] font-mono uppercase">
-                  <Crosshair className="w-4 h-4 text-[#31136C]" />
+              <div className="p-4 rounded-xl bg-white border border-[#E7EAF0] space-y-2">
+                <div className="flex items-center gap-2 text-xs font-bold text-[#101D3A] font-mono uppercase">
+                  <Crosshair className="w-4 h-4 text-[#101D3A]" />
                   <span>Rule 3: Configurable Sample Gate</span>
                 </div>
-                <p className="text-xs text-[#31136C]/70 leading-relaxed">
+                <p className="text-xs text-[#52627A] leading-relaxed">
                   Default strict benchmark requires &ge; 60 pressure deliveries. Exploratory filters allow adjusting down to 20 balls for early scouting without corrupting official rankings.
                 </p>
               </div>
@@ -871,51 +871,51 @@ export default function UncappedIntelligencePage() {
       {/* 5. Player Dossier Slide-Over / Modal */}
       {/* ------------------------------------------------------------------- */}
       {selectedPlayer && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#31136C]/50 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-white rounded-2xl max-w-2xl w-full p-6 shadow-2xl border border-[#31136C]/12 space-y-6 max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#101D3A]/50 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl max-w-2xl w-full p-6 shadow-2xl border border-[#E7EAF0] space-y-6 max-h-[90vh] overflow-y-auto">
             {/* Header */}
-            <div className="flex items-start justify-between border-b border-[#31136C]/10 pb-4">
+            <div className="flex items-start justify-between border-b border-[#E7EAF0] pb-4">
               <div>
                 <div className="flex items-center gap-2">
-                  <h3 className="text-xl font-extrabold text-[#31136C]">{selectedPlayer.player_name}</h3>
-                  <span className="text-xs font-mono font-bold text-[#31136C] px-2 py-0.5 rounded-full bg-[#950460]/10 border border-[#950460]/30">
+                  <h3 className="text-xl font-extrabold text-[#101D3A]">{selectedPlayer.player_name}</h3>
+                  <span className="text-xs font-mono font-bold text-[#101D3A] px-2 py-0.5 rounded-full bg-[#D4145A]/10 border border-[#D4145A]/30">
                     Uncapped #{selectedPlayer.uncapped_rank}
                   </span>
                   <span
                     className={cn(
                       "text-[10px] font-mono px-2 py-0.5 rounded-full border",
                       selectedPlayer.is_official_r1_qualified
-                        ? "bg-[#950460]/10 text-[#950460] border-[#950460]/30"
-                        : "bg-[#950460]/10 text-[#31136C] border-[#950460]/30"
+                        ? "bg-[#D4145A]/10 text-[#D4145A] border-[#D4145A]/30"
+                        : "bg-[#D4145A]/10 text-[#101D3A] border-[#D4145A]/30"
                     )}
                   >
                     {selectedPlayer.is_official_r1_qualified ? "Official R1 Benchmark" : "Exploratory Qualified"}
                   </span>
                 </div>
-                <div className="text-xs text-[#31136C]/70 font-mono mt-1">
+                <div className="text-xs text-[#52627A] font-mono mt-1">
                   {selectedPlayer.franchise} • Tactical Role: {selectedPlayer.tactical_role}
                 </div>
               </div>
               <button
                 onClick={closeDossier}
-                className="w-8 h-8 rounded-lg bg-[#31136C]/05 hover:bg-[#31136C]/08 text-[#31136C]/70 flex items-center justify-center transition-colors"
+                className="w-8 h-8 rounded-lg bg-[#F8E8EF] hover:bg-[#F8E8EF] text-[#52627A] flex items-center justify-center transition-colors"
               >
                 <X size={16} />
               </button>
             </div>
 
             {/* Audit Status Section */}
-            <div className="p-4 rounded-xl bg-[#950460]/10/70 border border-[#950460]/30/80 space-y-2">
+            <div className="p-4 rounded-xl bg-[#D4145A]/10/70 border border-[#D4145A]/30/80 space-y-2">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-mono font-bold text-[#950460] uppercase tracking-wider">
+                <span className="text-xs font-mono font-bold text-[#D4145A] uppercase tracking-wider">
                   BCCI Eligibility Status
                 </span>
-                <span className="px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-[#950460] text-white">
+                <span className="px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-[#D4145A] text-white">
                   {selectedPlayer.eligibility_status}
                 </span>
               </div>
-              <p className="text-xs text-[#31136C] leading-relaxed">{selectedPlayer.eligibility_reason}</p>
-              <div className="pt-2 border-t border-[#950460]/30/60 flex flex-wrap items-center justify-between text-[11px] font-mono text-[#31136C]/70">
+              <p className="text-xs text-[#101D3A] leading-relaxed">{selectedPlayer.eligibility_reason}</p>
+              <div className="pt-2 border-t border-[#D4145A]/30/60 flex flex-wrap items-center justify-between text-[11px] font-mono text-[#52627A]">
                 <span>Source: {selectedPlayer.verification_source}</span>
                 <span>Verified: {selectedPlayer.verification_date}</span>
               </div>
@@ -923,42 +923,42 @@ export default function UncappedIntelligencePage() {
 
             {/* Performance Metrics Strip */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              <div className="p-3.5 rounded-xl bg-white border border-[#31136C]/12">
-                <div className="text-[10px] text-[#31136C]/70 font-mono uppercase">Pressure Balls</div>
-                <div className="text-lg font-extrabold font-mono text-[#31136C] mt-1">
+              <div className="p-3.5 rounded-xl bg-white border border-[#E7EAF0]">
+                <div className="text-[10px] text-[#52627A] font-mono uppercase">Pressure Balls</div>
+                <div className="text-lg font-extrabold font-mono text-[#101D3A] mt-1">
                   {selectedPlayer.pressure_legal_balls}
                 </div>
               </div>
 
-              <div className="p-3.5 rounded-xl bg-white border border-[#31136C]/12">
-                <div className="text-[10px] text-[#31136C]/70 font-mono uppercase">Pressure Matches</div>
-                <div className="text-lg font-extrabold font-mono text-[#31136C] mt-1">
+              <div className="p-3.5 rounded-xl bg-white border border-[#E7EAF0]">
+                <div className="text-[10px] text-[#52627A] font-mono uppercase">Pressure Matches</div>
+                <div className="text-lg font-extrabold font-mono text-[#101D3A] mt-1">
                   {selectedPlayer.pressure_matches}
                 </div>
               </div>
 
-              <div className="p-3.5 rounded-xl bg-white border border-[#31136C]/12">
-                <div className="text-[10px] text-[#31136C]/70 font-mono uppercase">
+              <div className="p-3.5 rounded-xl bg-white border border-[#E7EAF0]">
+                <div className="text-[10px] text-[#52627A] font-mono uppercase">
                   {selectedDiscipline === "batting" ? "Conservative PRI" : "Runs Saved"}
                 </div>
-                <div className="text-lg font-extrabold font-mono text-[#950460] mt-1">
+                <div className="text-lg font-extrabold font-mono text-[#D4145A] mt-1">
                   {selectedDiscipline === "batting"
                     ? `${(selectedPlayer as UncappedBattingItem).conservative_pri.toFixed(2)} SR`
                     : `${(selectedPlayer as UncappedBowlingItem).conservative_runs_saved.toFixed(2)} RPO`}
                 </div>
               </div>
 
-              <div className="p-3.5 rounded-xl bg-white border border-[#31136C]/12">
-                <div className="text-[10px] text-[#31136C]/70 font-mono uppercase">Overall R1 Rank</div>
-                <div className="text-lg font-extrabold font-mono text-[#31136C] mt-1">
+              <div className="p-3.5 rounded-xl bg-white border border-[#E7EAF0]">
+                <div className="text-[10px] text-[#52627A] font-mono uppercase">Overall R1 Rank</div>
+                <div className="text-lg font-extrabold font-mono text-[#101D3A] mt-1">
                   #{selectedPlayer.overall_r1_rank}
                 </div>
               </div>
             </div>
 
-            <div className="p-4 rounded-xl bg-white border border-[#31136C]/12">
-              <div className="text-xs font-bold text-[#31136C] mb-1">Bayesian Reliability Summary</div>
-              <p className="text-xs text-[#31136C]/70 leading-relaxed">
+            <div className="p-4 rounded-xl bg-white border border-[#E7EAF0]">
+              <div className="text-xs font-bold text-[#101D3A] mb-1">Bayesian Reliability Summary</div>
+              <p className="text-xs text-[#52627A] leading-relaxed">
                 Posterior Mean (&theta;) is {selectedPlayer.posterior_mean > 0 ? `+${selectedPlayer.posterior_mean.toFixed(2)}` : selectedPlayer.posterior_mean.toFixed(2)} with standard error &plusmn;{selectedPlayer.posterior_se.toFixed(2)}. The 95% Bayesian credible interval spans [{selectedPlayer.ci_95_lower.toFixed(1)}, +{selectedPlayer.ci_95_upper.toFixed(1)}], confirming statistically significant pressure reliability under the 1-SE conservative rule.
               </p>
             </div>
@@ -966,7 +966,7 @@ export default function UncappedIntelligencePage() {
             <div className="flex justify-end pt-2">
               <button
                 onClick={closeDossier}
-                className="px-5 py-2 rounded-lg bg-[#31136C] hover:bg-[#31136C] text-xs font-semibold text-white transition-colors"
+                className="px-5 py-2 rounded-lg bg-[#101D3A] hover:bg-[#101D3A] text-xs font-semibold text-white transition-colors"
               >
                 Close Dossier
               </button>

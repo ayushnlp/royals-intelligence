@@ -275,26 +275,26 @@ export default function DomesticIntelligencePage() {
       {/* Top Header & Context */}
       <section className="space-y-3">
         <div className="flex flex-wrap items-center gap-3 text-xs">
-          <span className="font-mono font-bold tracking-widest text-[#31136C] uppercase px-2.5 py-1 rounded-md bg-[#950460]/10 border border-[#950460]/30">
+          <span className="font-mono font-bold tracking-widest text-[#101D3A] uppercase px-2.5 py-1 rounded-md bg-[#D4145A]/10 border border-[#D4145A]/30">
             Rajasthan Royals Recruitment
           </span>
-          <span className="text-[#31136C]/30">•</span>
-          <span className="font-mono text-[#31136C]/70">
+          <span className="text-[#101D3A]/30">•</span>
+          <span className="font-mono text-[#52627A]">
             IPL • SMAT • VHT • Ranji • DPL
           </span>
-          <span className="text-[#31136C]/30">•</span>
-          <span className="inline-flex items-center gap-1.5 text-[#950460] font-medium">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#950460]" />
+          <span className="text-[#101D3A]/30">•</span>
+          <span className="inline-flex items-center gap-1.5 text-[#D4145A] font-medium">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#D4145A]" />
             Verified Domestic Coverage
           </span>
         </div>
 
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div className="max-w-3xl space-y-2">
-            <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-[#31136C] leading-tight">
+            <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-[#101D3A] leading-tight">
               Domestic Season & Match Intelligence
             </h1>
-            <p className="text-sm md:text-base text-[#31136C]/70 leading-relaxed font-normal">
+            <p className="text-sm md:text-base text-[#52627A] leading-relaxed font-normal">
               Format-aware phase diagnostics, ball-by-ball scorecards, partnerships, progression worms,
               and uncompromised all-round dual-contribution tracking for IPL 2027 recruitment.
             </p>
@@ -303,13 +303,13 @@ export default function DomesticIntelligencePage() {
           {/* Global Selectors */}
           <div className="flex items-center gap-3 shrink-0">
             <div className="flex flex-col">
-              <label className="text-[10px] font-bold text-[#31136C]/70 uppercase tracking-wider mb-1 font-mono">
+              <label className="text-[10px] font-bold text-[#52627A] uppercase tracking-wider mb-1 font-mono">
                 Competition
               </label>
               <select
                 value={selectedCompId}
                 onChange={(e) => setSelectedCompId(e.target.value)}
-                className="bg-white border border-[#31136C]/12 rounded-lg px-3 py-1.5 text-xs font-semibold text-[#31136C] focus:outline-none focus:ring-2 focus:ring-[#31136C] shadow-sm"
+                className="bg-white border border-[#E7EAF0] rounded-lg px-3 py-1.5 text-xs font-semibold text-[#101D3A] focus:outline-none focus:ring-2 focus:ring-[#101D3A] shadow-sm"
               >
                 {competitions.length > 0 ? (
                   competitions.map((c) => (
@@ -330,13 +330,13 @@ export default function DomesticIntelligencePage() {
             </div>
 
             <div className="flex flex-col">
-              <label className="text-[10px] font-bold text-[#31136C]/70 uppercase tracking-wider mb-1 font-mono">
+              <label className="text-[10px] font-bold text-[#52627A] uppercase tracking-wider mb-1 font-mono">
                 Season
               </label>
               <select
                 value={selectedSeason}
                 onChange={(e) => setSelectedSeason(e.target.value)}
-                className="bg-white border border-[#31136C]/12 rounded-lg px-3 py-1.5 text-xs font-semibold text-[#31136C] focus:outline-none focus:ring-2 focus:ring-[#31136C] shadow-sm"
+                className="bg-white border border-[#E7EAF0] rounded-lg px-3 py-1.5 text-xs font-semibold text-[#101D3A] focus:outline-none focus:ring-2 focus:ring-[#101D3A] shadow-sm"
               >
                 <option value="2024">2024</option>
                 <option value="2025">2025</option>
@@ -350,17 +350,17 @@ export default function DomesticIntelligencePage() {
 
       {/* Connection Notice */}
       {errorMsg && (
-        <div className="p-4 rounded-xl bg-[#950460]/10 border border-[#950460]/30 text-[#950460] flex items-center justify-between gap-4">
+        <div className="p-4 rounded-xl bg-[#D4145A]/10 border border-[#D4145A]/30 text-[#D4145A] flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <AlertCircle className="w-5 h-5 text-[#950460] shrink-0" />
+            <AlertCircle className="w-5 h-5 text-[#D4145A] shrink-0" />
             <div>
               <div className="text-xs font-bold">Domestic Service Connection Notice</div>
-              <div className="text-xs text-[#950460] mt-0.5">{errorMsg}</div>
+              <div className="text-xs text-[#D4145A] mt-0.5">{errorMsg}</div>
             </div>
           </div>
           <button
             onClick={loadComps}
-            className="px-3 py-1.5 rounded-lg bg-[#950460] text-white font-bold text-xs hover:bg-[#950460] transition-colors shrink-0 flex items-center gap-1.5"
+            className="px-3 py-1.5 rounded-lg bg-[#D4145A] text-white font-bold text-xs hover:bg-[#A80F50] transition-colors shrink-0 flex items-center gap-1.5"
           >
             <RefreshCw className="w-3.5 h-3.5" />
             <span>Retry</span>
@@ -369,38 +369,38 @@ export default function DomesticIntelligencePage() {
       )}
 
       {/* Navigation Tabs */}
-      <div className="flex items-center gap-6 border-b border-[#31136C]/12">
+      <div className="flex items-center gap-6 border-b border-[#E7EAF0]">
         <button
           onClick={() => setActiveTab("tournaments")}
           className={`flex items-center gap-2 py-3 text-xs font-semibold transition-all border-b-2 -mb-px whitespace-nowrap ${
             activeTab === "tournaments"
-              ? "border-[#31136C] text-[#31136C] font-bold"
-              : "border-transparent text-[#31136C]/70 hover:text-[#31136C]"
+              ? "border-[#101D3A] text-[#101D3A] font-bold"
+              : "border-transparent text-[#52627A] hover:text-[#101D3A]"
           }`}
         >
-          <Trophy size={14} className="text-[#950460]" />
+          <Trophy size={14} className="text-[#D4145A]" />
           <span>Tournament Directory ({competitions.length})</span>
         </button>
         <button
           onClick={() => setActiveTab("matches")}
           className={`flex items-center gap-2 py-3 text-xs font-semibold transition-all border-b-2 -mb-px whitespace-nowrap ${
             activeTab === "matches"
-              ? "border-[#31136C] text-[#31136C] font-bold"
-              : "border-transparent text-[#31136C]/70 hover:text-[#31136C]"
+              ? "border-[#101D3A] text-[#101D3A] font-bold"
+              : "border-transparent text-[#52627A] hover:text-[#101D3A]"
           }`}
         >
-          <Swords size={14} className="text-[#31136C]/70" />
+          <Swords size={14} className="text-[#52627A]" />
           <span>Match Intelligence & Scorecards ({matchTotal})</span>
         </button>
         <button
           onClick={() => setActiveTab("player_profile")}
           className={`flex items-center gap-2 py-3 text-xs font-semibold transition-all border-b-2 -mb-px whitespace-nowrap ${
             activeTab === "player_profile"
-              ? "border-[#31136C] text-[#31136C] font-bold"
-              : "border-transparent text-[#31136C]/70 hover:text-[#31136C]"
+              ? "border-[#101D3A] text-[#101D3A] font-bold"
+              : "border-transparent text-[#52627A] hover:text-[#101D3A]"
           }`}
         >
-          <Target size={14} className="text-[#950460]" />
+          <Target size={14} className="text-[#D4145A]" />
           <span>Uncapped Player Dossier & Splits ({playerTotal})</span>
         </button>
       </div>
@@ -419,45 +419,45 @@ export default function DomesticIntelligencePage() {
                 }}
                 className={`group p-5 rounded-2xl bg-white border cursor-pointer transition-all hover:shadow-md ${
                   selectedCompId === comp.competition_id && selectedSeason === comp.season
-                    ? "border-[#31136C] ring-2 ring-[#950460]/30"
-                    : "border-[#31136C]/12 hover:border-[#31136C]/20"
+                    ? "border-[#101D3A] ring-2 ring-[#D4145A]/30"
+                    : "border-[#E7EAF0] hover:border-[#101D3A]/20"
                 }`}
               >
                 <div className="flex items-center justify-between mb-3">
-                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-[#31136C]/05 text-[#31136C]">
+                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-[#F8E8EF] text-[#101D3A]">
                     {comp.competition_type}
                   </span>
-                  <span className="text-xs font-mono font-bold text-[#31136C]">{comp.season}</span>
+                  <span className="text-xs font-mono font-bold text-[#101D3A]">{comp.season}</span>
                 </div>
 
-                <h3 className="font-bold text-base text-[#31136C] group-hover:text-[#31136C] transition-colors mb-1">
+                <h3 className="font-bold text-base text-[#101D3A] group-hover:text-[#101D3A] transition-colors mb-1">
                   {comp.competition_name}
                 </h3>
-                <p className="text-xs text-[#31136C]/70 mb-4">Governing Body: {comp.governing_body}</p>
+                <p className="text-xs text-[#52627A] mb-4">Governing Body: {comp.governing_body}</p>
 
-                <div className="grid grid-cols-3 gap-2 py-3 px-3 bg-white rounded-xl border border-[#31136C]/10 text-center mb-4">
+                <div className="grid grid-cols-3 gap-2 py-3 px-3 bg-white rounded-xl border border-[#E7EAF0] text-center mb-4">
                   <div>
-                    <div className="text-[10px] uppercase font-bold text-[#31136C]/70">Matches</div>
-                    <div className="text-sm font-extrabold text-[#31136C]">{comp.match_count}</div>
+                    <div className="text-[10px] uppercase font-bold text-[#52627A]">Matches</div>
+                    <div className="text-sm font-extrabold text-[#101D3A]">{comp.match_count}</div>
                   </div>
                   <div>
-                    <div className="text-[10px] uppercase font-bold text-[#31136C]/70">Teams</div>
-                    <div className="text-sm font-extrabold text-[#31136C]">{comp.teams_count}</div>
+                    <div className="text-[10px] uppercase font-bold text-[#52627A]">Teams</div>
+                    <div className="text-sm font-extrabold text-[#101D3A]">{comp.teams_count}</div>
                   </div>
                   <div>
-                    <div className="text-[10px] uppercase font-bold text-[#31136C]/70">Ball-by-Ball</div>
-                    <div className="text-sm font-extrabold text-[#950460]">
+                    <div className="text-[10px] uppercase font-bold text-[#52627A]">Ball-by-Ball</div>
+                    <div className="text-sm font-extrabold text-[#D4145A]">
                       {comp.has_ball_by_ball ? "Verified" : "Pending"}
                     </div>
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between text-xs text-[#31136C]/70 pt-2 border-t border-[#31136C]/10">
+                <div className="flex items-center justify-between text-xs text-[#52627A] pt-2 border-t border-[#E7EAF0]">
                   <span className="flex items-center gap-1 text-[11px]">
-                    <CheckCircle2 size={13} className="text-[#950460]" />
+                    <CheckCircle2 size={13} className="text-[#D4145A]" />
                     Audit Pass: {comp.validation_pass_rate}%
                   </span>
-                  <span className="text-[11px] font-mono font-bold text-[#31136C] flex items-center">
+                  <span className="text-[11px] font-mono font-bold text-[#101D3A] flex items-center">
                     Explore Fixtures <ChevronRight size={13} />
                   </span>
                 </div>
@@ -471,18 +471,18 @@ export default function DomesticIntelligencePage() {
       {activeTab === "matches" && (
         <div className="space-y-6">
           {/* Match Filter & List */}
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4 bg-white p-4 rounded-xl border border-[#31136C]/12">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4 bg-white p-4 rounded-xl border border-[#E7EAF0]">
             <div className="flex items-center gap-3 w-full md:w-auto">
-              <Filter size={16} className="text-[#31136C]/70" />
+              <Filter size={16} className="text-[#52627A]" />
               <input
                 type="text"
                 placeholder="Filter by Team Name / Code..."
                 value={teamFilter}
                 onChange={(e) => setTeamFilter(e.target.value)}
-                className="bg-white border border-[#31136C]/12 rounded-lg px-3 py-1.5 text-xs text-[#31136C] focus:outline-none focus:ring-2 focus:ring-[#31136C]"
+                className="bg-white border border-[#E7EAF0] rounded-lg px-3 py-1.5 text-xs text-[#101D3A] focus:outline-none focus:ring-2 focus:ring-[#101D3A]"
               />
             </div>
-            <span className="text-xs text-[#31136C]/70 font-mono">
+            <span className="text-xs text-[#52627A] font-mono">
               Displaying {matches.length} of {matchTotal} Recorded Matches
             </span>
           </div>
@@ -493,29 +493,29 @@ export default function DomesticIntelligencePage() {
               <div
                 key={m.match_id}
                 onClick={() => setSelectedMatchId(m.match_id)}
-                className="p-4 bg-white rounded-xl border border-[#31136C]/12 hover:border-[#31136C] cursor-pointer transition-all hover:shadow-sm"
+                className="p-4 bg-white rounded-xl border border-[#E7EAF0] hover:border-[#101D3A] cursor-pointer transition-all hover:shadow-sm"
               >
-                <div className="flex items-center justify-between text-[11px] text-[#31136C]/70 font-mono mb-2">
+                <div className="flex items-center justify-between text-[11px] text-[#52627A] font-mono mb-2">
                   <span>Match #{m.match_number || "—"}</span>
                   <span>{m.match_date}</span>
                 </div>
 
                 <div className="flex items-center justify-between my-2">
                   <div className="flex items-center gap-2">
-                    <span className="font-extrabold text-sm text-[#31136C]">{m.home_team_name}</span>
-                    <span className="text-xs text-[#31136C]/70 font-mono">vs</span>
-                    <span className="font-extrabold text-sm text-[#31136C]">{m.away_team_name}</span>
+                    <span className="font-extrabold text-sm text-[#101D3A]">{m.home_team_name}</span>
+                    <span className="text-xs text-[#52627A] font-mono">vs</span>
+                    <span className="font-extrabold text-sm text-[#101D3A]">{m.away_team_name}</span>
                   </div>
                   {m.winner_team_code && (
-                    <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-[#950460]/10 text-[#950460]">
+                    <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-[#D4145A]/10 text-[#D4145A]">
                       Won: {m.winner_team_code}
                     </span>
                   )}
                 </div>
 
-                <div className="flex items-center justify-between text-xs text-[#31136C]/70 pt-2 border-t border-[#31136C]/10 mt-2">
+                <div className="flex items-center justify-between text-xs text-[#52627A] pt-2 border-t border-[#E7EAF0] mt-2">
                   <span>{m.venue_name}, {m.venue_city}</span>
-                  <span className="text-[#31136C] font-bold flex items-center text-[11px]">
+                  <span className="text-[#101D3A] font-bold flex items-center text-[11px]">
                     Full Scorecard <ChevronRight size={12} />
                   </span>
                 </div>
@@ -528,46 +528,46 @@ export default function DomesticIntelligencePage() {
       {/* Match Scorecard Modal */}
       {selectedMatchId && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 overflow-y-auto">
-          <div className="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-[#31136C]/12">
+          <div className="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-[#E7EAF0]">
             {/* Modal Header */}
-            <div className="p-5 border-b border-[#31136C]/12 flex items-center justify-between bg-white sticky top-0 z-10">
+            <div className="p-5 border-b border-[#E7EAF0] flex items-center justify-between bg-white sticky top-0 z-10">
               <div>
-                <span className="text-[10px] font-mono font-bold text-[#31136C] uppercase tracking-wider">
+                <span className="text-[10px] font-mono font-bold text-[#101D3A] uppercase tracking-wider">
                   Verified Match Telemetry
                 </span>
-                <h3 className="text-lg font-extrabold text-[#31136C]">
+                <h3 className="text-lg font-extrabold text-[#101D3A]">
                   {matchScorecard ? `${matchScorecard.home_team.name} vs ${matchScorecard.away_team.name}` : "Loading Scorecard..."}
                 </h3>
                 {matchScorecard && (
-                  <p className="text-xs text-[#31136C]/70 mt-0.5">
+                  <p className="text-xs text-[#52627A] mt-0.5">
                     {matchScorecard.venue_name}, {matchScorecard.venue_city} • {matchScorecard.match_date} • {matchScorecard.win_margin}
                   </p>
                 )}
               </div>
               <button
                 onClick={() => setSelectedMatchId(null)}
-                className="p-1.5 rounded-lg text-[#31136C]/70 hover:text-[#31136C]/70 hover:bg-[#31136C]/08 transition-colors"
+                className="p-1.5 rounded-lg text-[#52627A] hover:text-[#52627A] hover:bg-[#F8E8EF] transition-colors"
               >
                 <X size={18} />
               </button>
             </div>
 
             {loadingScorecard ? (
-              <div className="p-12 text-center text-xs text-[#31136C]/70 font-mono">
+              <div className="p-12 text-center text-xs text-[#52627A] font-mono">
                 Extracting ball-by-ball match diagnostics...
               </div>
             ) : matchScorecard && activeInnings ? (
               <div className="p-6 space-y-6">
                 {/* Innings Selector */}
-                <div className="flex items-center gap-2 border-b border-[#31136C]/12 pb-3">
+                <div className="flex items-center gap-2 border-b border-[#E7EAF0] pb-3">
                   {matchScorecard.innings.map((inn, idx) => (
                     <button
                       key={inn.innings_number}
                       onClick={() => setActiveInningsIdx(idx)}
                       className={`px-4 py-1.5 rounded-xl text-xs font-bold transition-all ${
                         activeInningsIdx === idx
-                          ? "bg-[#31136C] text-white shadow-sm"
-                          : "bg-[#31136C]/05 text-[#31136C]/70 hover:bg-[#31136C]/08"
+                          ? "bg-[#101D3A] text-white shadow-sm"
+                          : "bg-[#F8E8EF] text-[#52627A] hover:bg-[#F8E8EF]"
                       }`}
                     >
                       Innings {inn.innings_number}: {inn.batting_team_name} ({inn.total_runs}/{inn.wickets})
@@ -577,20 +577,20 @@ export default function DomesticIntelligencePage() {
 
                 {/* Phase Summaries Cards */}
                 <div>
-                  <h4 className="text-xs font-bold uppercase tracking-wider text-[#31136C]/70 mb-3">
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-[#52627A] mb-3">
                     Phase-by-Phase Scoring Trajectory
                   </h4>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                     {activeInnings.phase_summaries.map((phase) => (
-                      <div key={phase.phase_name} className="p-3 bg-white rounded-xl border border-[#31136C]/12">
+                      <div key={phase.phase_name} className="p-3 bg-white rounded-xl border border-[#E7EAF0]">
                         <div className="flex items-center justify-between mb-1">
-                          <span className="text-xs font-bold text-[#31136C]">{phase.phase_name}</span>
-                          <span className="text-[10px] font-mono text-[#31136C]/70">{phase.overs_range}</span>
+                          <span className="text-xs font-bold text-[#101D3A]">{phase.phase_name}</span>
+                          <span className="text-[10px] font-mono text-[#52627A]">{phase.overs_range}</span>
                         </div>
-                        <div className="text-xl font-black text-[#31136C] my-1">
-                          {phase.runs} <span className="text-xs font-normal text-[#31136C]/70">runs / {phase.wickets} wkts</span>
+                        <div className="text-xl font-black text-[#101D3A] my-1">
+                          {phase.runs} <span className="text-xs font-normal text-[#52627A]">runs / {phase.wickets} wkts</span>
                         </div>
-                        <div className="flex items-center justify-between text-[11px] text-[#31136C]/70 pt-2 border-t border-[#31136C]/12">
+                        <div className="flex items-center justify-between text-[11px] text-[#52627A] pt-2 border-t border-[#E7EAF0]">
                           <span>Run Rate: {phase.run_rate}</span>
                           <span>Boundary: {phase.boundary_runs} runs</span>
                         </div>
@@ -602,16 +602,16 @@ export default function DomesticIntelligencePage() {
                 {/* Batting Scorecard */}
                 <div>
                   <div className="flex items-center justify-between mb-2">
-                    <h4 className="text-xs font-bold uppercase tracking-wider text-[#31136C]/70">
+                    <h4 className="text-xs font-bold uppercase tracking-wider text-[#52627A]">
                       Batting Scorecard — {activeInnings.batting_team_name}
                     </h4>
-                    <span className="text-xs font-mono text-[#31136C]/70">
+                    <span className="text-xs font-mono text-[#52627A]">
                       Total: {activeInnings.total_runs}/{activeInnings.wickets} ({activeInnings.overs_completed} ov, RR {activeInnings.run_rate})
                     </span>
                   </div>
-                  <div className="overflow-x-auto border border-[#31136C]/12 rounded-xl">
+                  <div className="overflow-x-auto border border-[#E7EAF0] rounded-xl">
                     <table className="w-full text-left text-xs">
-                      <thead className="bg-white text-[#31136C]/70 font-semibold border-b border-[#31136C]/12">
+                      <thead className="bg-white text-[#52627A] font-semibold border-b border-[#E7EAF0]">
                         <tr>
                           <th className="py-2.5 px-3">Batter</th>
                           <th className="py-2.5 px-3">Dismissal</th>
@@ -627,33 +627,33 @@ export default function DomesticIntelligencePage() {
                       <tbody className="divide-y divide-slate-100">
                         {activeInnings.batting_scorecards.map((b) => (
                           <tr key={b.player_id} className="hover:bg-white/80">
-                            <td className="py-2.5 px-3 font-semibold text-[#31136C] flex items-center gap-1.5">
+                            <td className="py-2.5 px-3 font-semibold text-[#101D3A] flex items-center gap-1.5">
                               {b.player_name}
                               {b.is_uncapped && (
-                                <span className="px-1.5 py-0.2 rounded text-[9px] font-mono font-bold bg-[#31136C]/15 text-[#31136C]">
+                                <span className="px-1.5 py-0.2 rounded text-[9px] font-mono font-bold bg-[#101D3A]/15 text-[#101D3A]">
                                   UNCAPPED
                                 </span>
                               )}
                             </td>
-                            <td className="py-2.5 px-3 text-[#31136C]/70 text-[11px]">
+                            <td className="py-2.5 px-3 text-[#52627A] text-[11px]">
                               {b.is_out ? (
                                 <span>
                                   {b.dismissal_kind} {b.bowler_name ? `b ${b.bowler_name}` : ""}{" "}
                                   {b.fielder_name ? `c ${b.fielder_name}` : ""}
                                 </span>
                               ) : (
-                                <span className="font-semibold text-[#950460]">not out</span>
+                                <span className="font-semibold text-[#D4145A]">not out</span>
                               )}
                             </td>
-                            <td className="py-2.5 px-3 text-right font-extrabold text-[#31136C]">{b.runs}</td>
-                            <td className="py-2.5 px-3 text-right text-[#31136C]/70">{b.balls_faced}</td>
-                            <td className="py-2.5 px-3 text-right text-[#31136C]/70">{b.fours}</td>
-                            <td className="py-2.5 px-3 text-right text-[#31136C]/70">{b.sixes}</td>
-                            <td className="py-2.5 px-3 text-right font-mono font-bold text-[#31136C]">{b.strike_rate}</td>
-                            <td className="py-2.5 px-3 text-right font-mono text-[#31136C]/70 text-[11px]">
+                            <td className="py-2.5 px-3 text-right font-extrabold text-[#101D3A]">{b.runs}</td>
+                            <td className="py-2.5 px-3 text-right text-[#52627A]">{b.balls_faced}</td>
+                            <td className="py-2.5 px-3 text-right text-[#52627A]">{b.fours}</td>
+                            <td className="py-2.5 px-3 text-right text-[#52627A]">{b.sixes}</td>
+                            <td className="py-2.5 px-3 text-right font-mono font-bold text-[#101D3A]">{b.strike_rate}</td>
+                            <td className="py-2.5 px-3 text-right font-mono text-[#52627A] text-[11px]">
                               {b.powerplay_runs !== undefined ? `${b.powerplay_runs}/${b.powerplay_balls}` : "-"}
                             </td>
-                            <td className="py-2.5 px-3 text-right font-mono text-[#31136C]/70 text-[11px]">
+                            <td className="py-2.5 px-3 text-right font-mono text-[#52627A] text-[11px]">
                               {b.death_runs !== undefined ? `${b.death_runs}/${b.death_balls}` : "-"}
                             </td>
                           </tr>
@@ -665,12 +665,12 @@ export default function DomesticIntelligencePage() {
 
                 {/* Bowling Scorecard */}
                 <div>
-                  <h4 className="text-xs font-bold uppercase tracking-wider text-[#31136C]/70 mb-2">
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-[#52627A] mb-2">
                     Bowling Scorecard — {activeInnings.bowling_team_name}
                   </h4>
-                  <div className="overflow-x-auto border border-[#31136C]/12 rounded-xl">
+                  <div className="overflow-x-auto border border-[#E7EAF0] rounded-xl">
                     <table className="w-full text-left text-xs">
-                      <thead className="bg-white text-[#31136C]/70 font-semibold border-b border-[#31136C]/12">
+                      <thead className="bg-white text-[#52627A] font-semibold border-b border-[#E7EAF0]">
                         <tr>
                           <th className="py-2.5 px-3">Bowler</th>
                           <th className="py-2.5 px-3 text-right">O</th>
@@ -685,21 +685,21 @@ export default function DomesticIntelligencePage() {
                       <tbody className="divide-y divide-slate-100">
                         {activeInnings.bowling_scorecards.map((bw) => (
                           <tr key={bw.player_id} className="hover:bg-white/80">
-                            <td className="py-2.5 px-3 font-semibold text-[#31136C] flex items-center gap-1.5">
+                            <td className="py-2.5 px-3 font-semibold text-[#101D3A] flex items-center gap-1.5">
                               {bw.player_name}
                               {bw.is_uncapped && (
-                                <span className="px-1.5 py-0.2 rounded text-[9px] font-mono font-bold bg-[#31136C]/15 text-[#31136C]">
+                                <span className="px-1.5 py-0.2 rounded text-[9px] font-mono font-bold bg-[#101D3A]/15 text-[#101D3A]">
                                   UNCAPPED
                                 </span>
                               )}
                             </td>
-                            <td className="py-2.5 px-3 text-right font-mono text-[#31136C]">{bw.overs}</td>
-                            <td className="py-2.5 px-3 text-right text-[#31136C]/70">{bw.maidens}</td>
-                            <td className="py-2.5 px-3 text-right font-extrabold text-[#31136C]">{bw.runs_conceded}</td>
-                            <td className="py-2.5 px-3 text-right font-extrabold text-[#31136C]">{bw.bowler_wickets}</td>
-                            <td className="py-2.5 px-3 text-right font-mono font-bold text-[#31136C]">{bw.economy_rate}</td>
-                            <td className="py-2.5 px-3 text-right text-[#31136C]/70">{bw.dot_balls ?? 0}</td>
-                            <td className="py-2.5 px-3 text-right text-[#31136C]/70 font-mono text-[11px]">
+                            <td className="py-2.5 px-3 text-right font-mono text-[#101D3A]">{bw.overs}</td>
+                            <td className="py-2.5 px-3 text-right text-[#52627A]">{bw.maidens}</td>
+                            <td className="py-2.5 px-3 text-right font-extrabold text-[#101D3A]">{bw.runs_conceded}</td>
+                            <td className="py-2.5 px-3 text-right font-extrabold text-[#101D3A]">{bw.bowler_wickets}</td>
+                            <td className="py-2.5 px-3 text-right font-mono font-bold text-[#101D3A]">{bw.economy_rate}</td>
+                            <td className="py-2.5 px-3 text-right text-[#52627A]">{bw.dot_balls ?? 0}</td>
+                            <td className="py-2.5 px-3 text-right text-[#52627A] font-mono text-[11px]">
                               w:{bw.wides} nb:{bw.noballs}
                             </td>
                           </tr>
@@ -712,11 +712,11 @@ export default function DomesticIntelligencePage() {
             ) : null}
 
             {/* Modal Footer */}
-            <div className="p-4 bg-white border-t border-[#31136C]/12 flex justify-between items-center text-xs text-[#31136C]/70">
+            <div className="p-4 bg-white border-t border-[#E7EAF0] flex justify-between items-center text-xs text-[#52627A]">
               <span className="font-mono text-[11px]">Provenance: Rajasthan Royals Analytics Pipeline (Stage 3)</span>
               <button
                 onClick={() => setSelectedMatchId(null)}
-                className="px-4 py-1.5 rounded-lg bg-[#31136C]/08 text-[#31136C] font-bold hover:bg-[#31136C]/20 transition-colors"
+                className="px-4 py-1.5 rounded-lg bg-[#F8E8EF] text-[#101D3A] font-bold hover:bg-[#101D3A]/20 transition-colors"
               >
                 Close
               </button>
@@ -729,11 +729,11 @@ export default function DomesticIntelligencePage() {
       {activeTab === "player_profile" && (
         <div className="space-y-6">
           {/* Dynamic Player Discovery & Search Bar */}
-          <div className="bg-white p-5 rounded-2xl border border-[#31136C]/12 shadow-sm space-y-4">
+          <div className="bg-white p-5 rounded-2xl border border-[#E7EAF0] shadow-sm space-y-4">
             <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
               {/* Search Input */}
               <div className="relative flex-1">
-                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#31136C]/70" size={15} />
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#52627A]" size={15} />
                 <input
                   type="text"
                   placeholder="Search domestic player by name, ID, or role..."
@@ -742,7 +742,7 @@ export default function DomesticIntelligencePage() {
                     setPlayerSearch(e.target.value);
                     setPlayerPage(1);
                   }}
-                  className="w-full pl-9 pr-4 py-2 bg-white/80 border border-[#31136C]/12 rounded-lg text-xs font-medium text-[#31136C] placeholder:text-[#31136C]/70 focus:outline-none focus:ring-2 focus:ring-[#31136C]"
+                  className="w-full pl-9 pr-4 py-2 bg-white/80 border border-[#E7EAF0] rounded-lg text-xs font-medium text-[#101D3A] placeholder:text-[#52627A] focus:outline-none focus:ring-2 focus:ring-[#101D3A]"
                 />
                 {playerSearch && (
                   <button
@@ -750,7 +750,7 @@ export default function DomesticIntelligencePage() {
                       setPlayerSearch("");
                       setPlayerPage(1);
                     }}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[#31136C]/70 hover:text-[#31136C]/70"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[#52627A] hover:text-[#52627A]"
                   >
                     <X size={14} />
                   </button>
@@ -758,7 +758,7 @@ export default function DomesticIntelligencePage() {
               </div>
 
               {/* Eligibility Filter Tabs */}
-              <div className="flex items-center gap-1 p-1 bg-[#31136C]/05 rounded-lg">
+              <div className="flex items-center gap-1 p-1 bg-[#F8E8EF] rounded-lg">
                 <button
                   onClick={() => {
                     setPlayerEligibilityFilter("ALL");
@@ -766,8 +766,8 @@ export default function DomesticIntelligencePage() {
                   }}
                   className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${
                     playerEligibilityFilter === "ALL"
-                      ? "bg-white text-[#31136C] shadow-sm"
-                      : "text-[#31136C]/70 hover:text-[#31136C]"
+                      ? "bg-white text-[#101D3A] shadow-sm"
+                      : "text-[#52627A] hover:text-[#101D3A]"
                   }`}
                 >
                   All ({eligibilityCounts.ALL || playerTotal})
@@ -779,8 +779,8 @@ export default function DomesticIntelligencePage() {
                   }}
                   className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${
                     playerEligibilityFilter === "VERIFIED_UNCAPPED"
-                      ? "bg-[#31136C] text-white shadow-sm"
-                      : "text-[#31136C]/70 hover:text-[#31136C]"
+                      ? "bg-[#101D3A] text-white shadow-sm"
+                      : "text-[#52627A] hover:text-[#101D3A]"
                   }`}
                 >
                   Uncapped ({eligibilityCounts.VERIFIED_UNCAPPED || (playerEligibilityFilter === "VERIFIED_UNCAPPED" ? playerTotal : 0)})
@@ -792,8 +792,8 @@ export default function DomesticIntelligencePage() {
                   }}
                   className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${
                     playerEligibilityFilter === "PENDING_VERIFICATION"
-                      ? "bg-[#950460] text-[#31136C] shadow-sm"
-                      : "text-[#31136C]/70 hover:text-[#31136C]"
+                      ? "bg-[#D4145A] text-[#101D3A] shadow-sm"
+                      : "text-[#52627A] hover:text-[#101D3A]"
                   }`}
                 >
                   Pending ({eligibilityCounts.PENDING_VERIFICATION || (playerEligibilityFilter === "PENDING_VERIFICATION" ? playerTotal : 0)})
@@ -807,7 +807,7 @@ export default function DomesticIntelligencePage() {
                   setPlayerRoleFilter(e.target.value);
                   setPlayerPage(1);
                 }}
-                className="bg-white/80 border border-[#31136C]/12 rounded-lg px-3 py-2 text-xs font-semibold text-[#31136C] focus:outline-none focus:ring-2 focus:ring-[#31136C]"
+                className="bg-white/80 border border-[#E7EAF0] rounded-lg px-3 py-2 text-xs font-semibold text-[#101D3A] focus:outline-none focus:ring-2 focus:ring-[#101D3A]"
               >
                 <option value="">All Roles</option>
                 <option value="Batter">Batter</option>
@@ -827,8 +827,8 @@ export default function DomesticIntelligencePage() {
                     onClick={() => setSelectedPlayerId(String(p.canonical_id))}
                     className={`p-3 rounded-xl text-left border transition-all ${
                       isSelected
-                        ? "bg-[#31136C] text-white border-[#31136C] shadow-sm"
-                        : "bg-white hover:bg-white text-[#31136C] border-[#31136C]/12"
+                        ? "bg-[#101D3A] text-white border-[#101D3A] shadow-sm"
+                        : "bg-white hover:bg-white text-[#101D3A] border-[#E7EAF0]"
                     }`}
                   >
                     <div className="flex items-center justify-between gap-1 mb-1">
@@ -836,24 +836,24 @@ export default function DomesticIntelligencePage() {
                         className={`text-[9px] font-mono px-1.5 py-0.2 rounded font-bold ${
                           p.eligibility_status === "VERIFIED_UNCAPPED"
                             ? isSelected
-                              ? "bg-[#31136C] text-white"
-                              : "bg-[#950460]/10 text-[#950460] border border-[#950460]/30/60"
+                              ? "bg-[#101D3A] text-white"
+                              : "bg-[#D4145A]/10 text-[#D4145A] border border-[#D4145A]/30/60"
                             : isSelected
-                            ? "bg-[#31136C] text-white"
-                            : "bg-[#31136C]/05 text-[#31136C]/70"
+                            ? "bg-[#101D3A] text-white"
+                            : "bg-[#F8E8EF] text-[#52627A]"
                         }`}
                       >
                         {p.eligibility_status === "VERIFIED_UNCAPPED" ? "UNCAPPED" : "PENDING"}
                       </span>
                       <span
                         className={`w-1.5 h-1.5 rounded-full ${
-                          p.statistical_coverage_status === "AVAILABLE" ? "bg-[#950460]" : "bg-[#31136C]/20"
+                          p.statistical_coverage_status === "AVAILABLE" ? "bg-[#D4145A]" : "bg-[#101D3A]/20"
                         }`}
                         title={p.statistical_coverage_status === "AVAILABLE" ? "Telemetry Available" : "No Match Data"}
                       />
                     </div>
                     <div className="font-bold text-xs truncate">{p.player_name}</div>
-                    <div className={`text-[10px] truncate mt-0.5 ${isSelected ? "text-[#31136C]/30" : "text-[#31136C]/70"}`}>
+                    <div className={`text-[10px] truncate mt-0.5 ${isSelected ? "text-[#101D3A]/30" : "text-[#52627A]"}`}>
                       {p.team || "Domestic"} • {p.role || "Prospect"}
                     </div>
                   </button>
@@ -863,25 +863,25 @@ export default function DomesticIntelligencePage() {
 
             {/* Pagination Bar */}
             {playerTotal > 12 && (
-              <div className="flex items-center justify-between pt-3 border-t border-[#31136C]/10 text-xs">
-                <span className="text-[#31136C]/70 font-mono text-[11px]">
+              <div className="flex items-center justify-between pt-3 border-t border-[#E7EAF0] text-xs">
+                <span className="text-[#52627A] font-mono text-[11px]">
                   {(playerPage - 1) * 12 + 1}–{Math.min(playerPage * 12, playerTotal)} of {playerTotal} candidates
                 </span>
                 <div className="flex items-center gap-1.5">
                   <button
                     disabled={playerPage <= 1}
                     onClick={() => setPlayerPage((p) => Math.max(1, p - 1))}
-                    className="p-1.5 rounded-lg border border-[#31136C]/12 text-[#31136C]/70 disabled:opacity-40 hover:bg-white"
+                    className="p-1.5 rounded-lg border border-[#E7EAF0] text-[#52627A] disabled:opacity-40 hover:bg-white"
                   >
                     <ChevronLeft size={14} />
                   </button>
-                  <span className="font-mono text-xs font-bold text-[#31136C] px-2">
+                  <span className="font-mono text-xs font-bold text-[#101D3A] px-2">
                     Page {playerPage} of {Math.ceil(playerTotal / 12)}
                   </span>
                   <button
                     disabled={playerPage >= Math.ceil(playerTotal / 12)}
                     onClick={() => setPlayerPage((p) => p + 1)}
-                    className="p-1.5 rounded-lg border border-[#31136C]/12 text-[#31136C]/70 disabled:opacity-40 hover:bg-white"
+                    className="p-1.5 rounded-lg border border-[#E7EAF0] text-[#52627A] disabled:opacity-40 hover:bg-white"
                   >
                     <ChevronRight size={14} />
                   </button>
@@ -891,48 +891,48 @@ export default function DomesticIntelligencePage() {
           </div>
 
           {loadingPlayer ? (
-            <div className="p-12 text-center text-xs text-[#31136C]/70 font-mono">
+            <div className="p-12 text-center text-xs text-[#52627A] font-mono">
               Loading domestic intelligence dossier...
             </div>
           ) : (
             <>
               {/* Dual-Discipline Summary Card */}
               {allRoundData && (
-                <div className="bg-white p-6 md:p-8 rounded-2xl border border-[#31136C]/12 shadow-sm space-y-6">
-                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#31136C]/10 pb-5">
+                <div className="bg-white p-6 md:p-8 rounded-2xl border border-[#E7EAF0] shadow-sm space-y-6">
+                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#E7EAF0] pb-5">
                     <div>
                       <div className="flex items-center gap-2 mb-1.5">
-                        <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-[#950460]/10 text-[#950460] border border-[#950460]/30/60">
+                        <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-[#D4145A]/10 text-[#D4145A] border border-[#D4145A]/30/60">
                           {allRoundData.eligibility_status}
                         </span>
-                        <span className="text-xs font-mono text-[#31136C]/70">
+                        <span className="text-xs font-mono text-[#52627A]">
                           Canonical ID: #{allRoundData.canonical_id}
                         </span>
                         <span
                           className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold ${
                             allRoundData.statistical_coverage_status === "AVAILABLE"
-                              ? "bg-[#31136C]/05 text-[#31136C]"
-                              : "bg-[#950460]/10 text-[#950460] border border-[#950460]/30/60"
+                              ? "bg-[#F8E8EF] text-[#101D3A]"
+                              : "bg-[#D4145A]/10 text-[#D4145A] border border-[#D4145A]/30/60"
                           }`}
                         >
                           {allRoundData.statistical_coverage_status === "AVAILABLE" ? "TELEMETRY ACTIVE" : "PENDING MATCH COVERAGE"}
                         </span>
                       </div>
-                      <h2 className="text-2xl font-black text-[#31136C]">{allRoundData.full_name}</h2>
-                      <p className="text-xs text-[#31136C]/70 mt-1">
-                        Primary Role: <span className="font-semibold text-[#31136C]">{allRoundData.primary_role}</span> • Team: {allRoundData.domestic_team}
+                      <h2 className="text-2xl font-black text-[#101D3A]">{allRoundData.full_name}</h2>
+                      <p className="text-xs text-[#52627A] mt-1">
+                        Primary Role: <span className="font-semibold text-[#101D3A]">{allRoundData.primary_role}</span> • Team: {allRoundData.domestic_team}
                       </p>
                     </div>
 
                     {/* Transparent Archetype & Sample Size */}
-                    <div className="p-3.5 rounded-xl bg-white border border-[#31136C]/12 text-right">
-                      <div className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#31136C]/70">
+                    <div className="p-3.5 rounded-xl bg-white border border-[#E7EAF0] text-right">
+                      <div className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#52627A]">
                         Evidence-Based Archetype
                       </div>
-                      <div className="text-sm font-bold text-[#31136C] mt-0.5">
+                      <div className="text-sm font-bold text-[#101D3A] mt-0.5">
                         {allRoundData.role_archetype_context}
                       </div>
-                      <div className="text-[11px] font-mono text-[#31136C]/70 mt-0.5">
+                      <div className="text-[11px] font-mono text-[#52627A] mt-0.5">
                         Sample: {allRoundData.sample_size?.matches ?? 0} matches • {allRoundData.sample_size?.innings_batted ?? 0} inn • {allRoundData.sample_size?.overs_bowled ?? 0} ov
                       </div>
                     </div>
@@ -940,13 +940,13 @@ export default function DomesticIntelligencePage() {
 
                   {/* Informational Banner when No Statistical Coverage */}
                   {allRoundData.statistical_coverage_status === "NO_STATISTICAL_COVERAGE" && (
-                    <div className="p-4 rounded-xl bg-[#950460]/10 border border-[#950460]/30 text-[#950460] flex items-start gap-3">
-                      <AlertCircle className="text-[#950460] mt-0.5 flex-shrink-0" size={16} />
+                    <div className="p-4 rounded-xl bg-[#D4145A]/10 border border-[#D4145A]/30 text-[#D4145A] flex items-start gap-3">
+                      <AlertCircle className="text-[#D4145A] mt-0.5 flex-shrink-0" size={16} />
                       <div>
                         <div className="text-xs font-bold">
                           No Domestic Match Telemetry Recorded in Current Dataset
                         </div>
-                        <div className="text-xs text-[#950460] mt-0.5">
+                        <div className="text-xs text-[#D4145A] mt-0.5">
                           Candidate is confirmed in official BCCI registries. Ball-by-ball match delivery records are pending ingestion for this cricketer. Zero statistics are presented to avoid speculative fabrication.
                         </div>
                       </div>
@@ -957,36 +957,36 @@ export default function DomesticIntelligencePage() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-2">
                     {/* Batting Dimension */}
                     <div className="space-y-4">
-                      <div className="flex items-center justify-between pb-2 border-b border-[#31136C]/10">
+                      <div className="flex items-center justify-between pb-2 border-b border-[#E7EAF0]">
                         <div className="flex items-center gap-2">
-                          <TrendingUp size={16} className="text-[#31136C]" />
-                          <h4 className="text-sm font-bold text-[#31136C]">Batting Profile</h4>
+                          <TrendingUp size={16} className="text-[#101D3A]" />
+                          <h4 className="text-sm font-bold text-[#101D3A]">Batting Profile</h4>
                         </div>
-                        <span className="text-xs font-mono text-[#31136C]/70">
+                        <span className="text-xs font-mono text-[#52627A]">
                           {allRoundData.batting_summary?.innings ?? 0} innings
                         </span>
                       </div>
                       <div className="grid grid-cols-3 gap-4">
                         <div>
-                          <div className="text-[10px] font-mono uppercase text-[#31136C]/70">Runs</div>
-                          <div className="text-xl font-bold font-mono text-[#31136C] mt-0.5">
+                          <div className="text-[10px] font-mono uppercase text-[#52627A]">Runs</div>
+                          <div className="text-xl font-bold font-mono text-[#101D3A] mt-0.5">
                             {allRoundData.batting_summary?.runs ?? 0}
                           </div>
                         </div>
                         <div>
-                          <div className="text-[10px] font-mono uppercase text-[#31136C]/70">Strike Rate</div>
-                          <div className="text-xl font-bold font-mono text-[#31136C] mt-0.5">
+                          <div className="text-[10px] font-mono uppercase text-[#52627A]">Strike Rate</div>
+                          <div className="text-xl font-bold font-mono text-[#101D3A] mt-0.5">
                             {allRoundData.batting_summary?.strike_rate ?? 0.0}
                           </div>
                         </div>
                         <div>
-                          <div className="text-[10px] font-mono uppercase text-[#31136C]/70">Average</div>
-                          <div className="text-xl font-bold font-mono text-[#31136C] mt-0.5">
+                          <div className="text-[10px] font-mono uppercase text-[#52627A]">Average</div>
+                          <div className="text-xl font-bold font-mono text-[#101D3A] mt-0.5">
                             {allRoundData.batting_summary?.batting_average ?? allRoundData.batting_summary?.average ?? "N/A"}
                           </div>
                         </div>
                       </div>
-                      <div className="flex items-center justify-between text-xs text-[#31136C]/70 pt-2 border-t border-[#31136C]/10">
+                      <div className="flex items-center justify-between text-xs text-[#52627A] pt-2 border-t border-[#E7EAF0]">
                         <span>Boundaries: {allRoundData.batting_summary?.boundary_percentage ?? 0.0}%</span>
                         <span>High Score: {allRoundData.batting_summary?.high_score ?? 0}</span>
                       </div>
@@ -994,44 +994,44 @@ export default function DomesticIntelligencePage() {
 
                     {/* Bowling Dimension */}
                     <div className="space-y-4">
-                      <div className="flex items-center justify-between pb-2 border-b border-[#31136C]/10">
+                      <div className="flex items-center justify-between pb-2 border-b border-[#E7EAF0]">
                         <div className="flex items-center gap-2">
-                          <Target size={16} className="text-[#31136C]" />
-                          <h4 className="text-sm font-bold text-[#31136C]">Bowling Profile</h4>
+                          <Target size={16} className="text-[#101D3A]" />
+                          <h4 className="text-sm font-bold text-[#101D3A]">Bowling Profile</h4>
                         </div>
-                        <span className="text-xs font-mono text-[#31136C]/70">
+                        <span className="text-xs font-mono text-[#52627A]">
                           {allRoundData.bowling_summary?.overs ?? allRoundData.bowling_summary?.overs_bowled ?? 0} overs
                         </span>
                       </div>
                       <div className="grid grid-cols-3 gap-4">
                         <div>
-                          <div className="text-[10px] font-mono uppercase text-[#31136C]/70">Wickets</div>
-                          <div className="text-xl font-bold font-mono text-[#31136C] mt-0.5">
+                          <div className="text-[10px] font-mono uppercase text-[#52627A]">Wickets</div>
+                          <div className="text-xl font-bold font-mono text-[#101D3A] mt-0.5">
                             {allRoundData.bowling_summary?.bowler_wickets ?? allRoundData.bowling_summary?.wickets ?? 0}
                           </div>
                         </div>
                         <div>
-                          <div className="text-[10px] font-mono uppercase text-[#31136C]/70">Economy</div>
-                          <div className="text-xl font-bold font-mono text-[#31136C] mt-0.5">
+                          <div className="text-[10px] font-mono uppercase text-[#52627A]">Economy</div>
+                          <div className="text-xl font-bold font-mono text-[#101D3A] mt-0.5">
                             {allRoundData.bowling_summary?.economy_rate ?? allRoundData.bowling_summary?.economy ?? 0.0}
                           </div>
                         </div>
                         <div>
-                          <div className="text-[10px] font-mono uppercase text-[#31136C]/70">Average</div>
-                          <div className="text-xl font-bold font-mono text-[#31136C] mt-0.5">
+                          <div className="text-[10px] font-mono uppercase text-[#52627A]">Average</div>
+                          <div className="text-xl font-bold font-mono text-[#101D3A] mt-0.5">
                             {allRoundData.bowling_summary?.bowling_average ?? allRoundData.bowling_summary?.average ?? "N/A"}
                           </div>
                         </div>
                       </div>
-                      <div className="flex items-center justify-between text-xs text-[#31136C]/70 pt-2 border-t border-[#31136C]/10">
+                      <div className="flex items-center justify-between text-xs text-[#52627A] pt-2 border-t border-[#E7EAF0]">
                         <span>Dots: {allRoundData.bowling_summary?.dot_balls_bowled ?? 0}</span>
                         <span>Catches: {allRoundData.fielding_summary?.catches ?? 0}</span>
                       </div>
                     </div>
                   </div>
 
-                  <div className="pt-4 border-t border-[#31136C]/10 text-[11px] text-[#31136C]/70 flex items-center gap-2">
-                    <Shield size={13} className="text-[#950460]" />
+                  <div className="pt-4 border-t border-[#E7EAF0] text-[11px] text-[#52627A] flex items-center gap-2">
+                    <Shield size={13} className="text-[#D4145A]" />
                     <span>
                       Integrity Policy: Independent metrics are preserved without composite ratings or speculative weights.
                     </span>
@@ -1040,22 +1040,22 @@ export default function DomesticIntelligencePage() {
               )}
 
               {/* Granular Phase Splits Table */}
-              <div className="bg-white p-6 rounded-2xl border border-[#31136C]/12 shadow-sm space-y-4">
+              <div className="bg-white p-6 rounded-2xl border border-[#E7EAF0] shadow-sm space-y-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h3 className="text-base font-bold text-[#31136C]">
+                    <h3 className="text-base font-bold text-[#101D3A]">
                       Granular Phase Performance Splits
                     </h3>
-                    <p className="text-xs text-[#31136C]/70">
+                    <p className="text-xs text-[#52627A]">
                       Powerplay (overs 0-5), Middle (overs 6-14), and Death (overs 15-19) breakdown
                     </p>
                   </div>
-                  <BarChart3 size={18} className="text-[#31136C]/70" />
+                  <BarChart3 size={18} className="text-[#52627A]" />
                 </div>
 
-                <div className="overflow-x-auto border border-[#31136C]/12 rounded-xl">
+                <div className="overflow-x-auto border border-[#E7EAF0] rounded-xl">
                   <table className="w-full text-left text-xs">
-                    <thead className="bg-white text-[#31136C]/70 font-semibold border-b border-[#31136C]/12">
+                    <thead className="bg-white text-[#52627A] font-semibold border-b border-[#E7EAF0]">
                       <tr>
                         <th className="py-2.5 px-3">Phase</th>
                         <th className="py-2.5 px-3">Overs</th>
@@ -1071,15 +1071,15 @@ export default function DomesticIntelligencePage() {
                     <tbody className="divide-y divide-slate-100">
                       {playerPhaseSplits.map((split) => (
                         <tr key={split.phase} className="hover:bg-white/80">
-                          <td className="py-2.5 px-3 font-bold text-[#31136C]">{split.phase}</td>
-                          <td className="py-2.5 px-3 font-mono text-[#31136C]/70">{split.overs_range}</td>
-                          <td className="py-2.5 px-3 text-right font-extrabold text-[#31136C]">{split.batting_runs}</td>
-                          <td className="py-2.5 px-3 text-right text-[#31136C]/70">{split.batting_balls}</td>
-                          <td className="py-2.5 px-3 text-right font-mono font-bold text-[#31136C]">{split.batting_strike_rate}</td>
-                          <td className="py-2.5 px-3 text-right text-[#31136C]/70">{split.batting_fours} / {split.batting_sixes}</td>
-                          <td className="py-2.5 px-3 text-right text-[#31136C]/70">{split.bowling_overs}</td>
-                          <td className="py-2.5 px-3 text-right font-bold text-[#31136C]">{split.bowler_wickets}</td>
-                          <td className="py-2.5 px-3 text-right font-mono text-[#31136C]/70">{split.bowling_economy}</td>
+                          <td className="py-2.5 px-3 font-bold text-[#101D3A]">{split.phase}</td>
+                          <td className="py-2.5 px-3 font-mono text-[#52627A]">{split.overs_range}</td>
+                          <td className="py-2.5 px-3 text-right font-extrabold text-[#101D3A]">{split.batting_runs}</td>
+                          <td className="py-2.5 px-3 text-right text-[#52627A]">{split.batting_balls}</td>
+                          <td className="py-2.5 px-3 text-right font-mono font-bold text-[#101D3A]">{split.batting_strike_rate}</td>
+                          <td className="py-2.5 px-3 text-right text-[#52627A]">{split.batting_fours} / {split.batting_sixes}</td>
+                          <td className="py-2.5 px-3 text-right text-[#52627A]">{split.bowling_overs}</td>
+                          <td className="py-2.5 px-3 text-right font-bold text-[#101D3A]">{split.bowler_wickets}</td>
+                          <td className="py-2.5 px-3 text-right font-mono text-[#52627A]">{split.bowling_economy}</td>
                         </tr>
                       ))}
                     </tbody>

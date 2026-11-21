@@ -12,7 +12,7 @@ interface ConnectionWaveformProps {
 /**
  * ConnectionWaveform:
  * Compact, elegant oscilloscope-style waveform indicator.
- * - Connected: Continuously animated up-and-down waveform in authentic Rajasthan Royals gradient (#31136C to #950460).
+ * - Connected: Continuously animated up-and-down waveform in authentic Rajasthan Royals gradient (#101D3A to #D4145A).
  * - Disconnected: Freezes immediately in a static neutral flatline state.
  * - Respects prefers-reduced-motion.
  */
@@ -57,7 +57,7 @@ export const ConnectionWaveform: React.FC<ConnectionWaveformProps> = ({
         xmlns="http://www.w3.org/2000/svg"
       >
         <defs>
-          {/* Authentic Rajasthan Royals Gradient: Persian Indigo (#31136C) to Cardinal Pink (#950460) */}
+          {/* Authentic Rajasthan Royals Waveform Gradient: Royal Pink (#D4145A) to Deep Pink (#A80F50) */}
           <linearGradient
             id="rr-waveform-gradient"
             x1="0%"
@@ -65,9 +65,9 @@ export const ConnectionWaveform: React.FC<ConnectionWaveformProps> = ({
             x2="100%"
             y2="0%"
           >
-            <stop offset="0%" stopColor="#31136C" />
-            <stop offset="50%" stopColor="#950460" />
-            <stop offset="100%" stopColor="#31136C" />
+            <stop offset="0%" stopColor="#D4145A" />
+            <stop offset="50%" stopColor="#A80F50" />
+            <stop offset="100%" stopColor="#D4145A" />
           </linearGradient>
         </defs>
 
@@ -88,8 +88,8 @@ export const ConnectionWaveform: React.FC<ConnectionWaveformProps> = ({
           <g>
             <path
               d={flatlinePath}
-              stroke="#31136C"
-              strokeOpacity="0.25"
+              stroke="#52627A"
+              strokeOpacity="0.3"
               strokeWidth="1.5"
               strokeLinecap="round"
               fill="none"

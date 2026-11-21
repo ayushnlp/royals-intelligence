@@ -125,20 +125,20 @@ export default function OverviewPage() {
       {/* ------------------------------------------------------------------- */}
       <section className="space-y-4">
         <div className="flex items-center gap-2">
-          <span className="text-[11px] font-mono font-bold tracking-widest text-[#31136C] uppercase">
+          <span className="text-[11px] font-mono font-bold tracking-widest text-[#101D3A] uppercase">
             RAJASTHAN ROYALS · CRICKET ANALYTICS
           </span>
-          <span className="text-[11px] font-mono text-[#950460]/60">/</span>
-          <span className="text-[11px] font-mono text-[#31136C]/70">
+          <span className="text-[11px] font-mono text-[#D4145A]/60">/</span>
+          <span className="text-[11px] font-mono text-[#52627A]">
             COMPETITION PHASE 1
           </span>
         </div>
 
         <div className="space-y-2 max-w-4xl">
-          <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-[#31136C] leading-tight font-heading">
+          <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-[#101D3A] leading-tight font-heading">
             Executive Intelligence Overview
           </h1>
-          <p className="text-sm md:text-base text-[#31136C]/70 leading-relaxed font-normal">
+          <p className="text-sm md:text-base text-[#52627A] leading-relaxed font-normal">
             Unified analytical intelligence for Rajasthan Royals leadership: identifying reliable performers under pressure, evaluating match-situation baselines, discovering verified uncapped Indian talent, and uncovering tactical advantages.
           </p>
         </div>
@@ -147,43 +147,43 @@ export default function OverviewPage() {
         <div className="flex flex-wrap items-center gap-3 pt-2">
           <Link
             href="/pressure"
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-[#31136C] text-white text-xs font-semibold hover:bg-[#31136C] transition-colors shadow-soft group"
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-[#101D3A] text-white text-xs font-semibold hover:bg-[#101D3A] transition-colors shadow-soft group"
           >
-            <Shield size={14} className="text-[#950460]/60" />
+            <Shield size={14} className="text-[#D4145A]/60" />
             <span>Pressure Intelligence Dossier</span>
-            <ArrowRight size={13} className="text-[#31136C]/30 group-hover:translate-x-0.5 transition-transform" />
+            <ArrowRight size={13} className="text-[#101D3A]/30 group-hover:translate-x-0.5 transition-transform" />
           </Link>
 
           <Link
             href="/uncapped"
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-white border border-[#31136C]/12 text-[#31136C] text-xs font-semibold hover:bg-white transition-colors shadow-soft group"
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-white border border-[#E7EAF0] text-[#101D3A] text-xs font-semibold hover:bg-white transition-colors shadow-soft group"
           >
-            <Sparkles size={14} className="text-[#31136C]" />
+            <Sparkles size={14} className="text-[#101D3A]" />
             <span>Uncapped Scouting Shortlist</span>
-            <ArrowRight size={13} className="text-[#31136C]/70 group-hover:translate-x-0.5 transition-transform" />
+            <ArrowRight size={13} className="text-[#52627A] group-hover:translate-x-0.5 transition-transform" />
           </Link>
 
           <Link
             href="/tactical"
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg text-[#31136C]/70 text-xs font-medium hover:text-[#31136C] transition-colors"
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg text-[#52627A] text-xs font-medium hover:text-[#101D3A] transition-colors"
           >
-            <Crosshair size={14} className="text-[#950460]" />
+            <Crosshair size={14} className="text-[#D4145A]" />
             <span>Tactical Analytics</span>
           </Link>
         </div>
 
         {/* Connection Notice */}
         {(!isLive || errorMsg) && (
-          <div className="p-3.5 rounded-xl bg-[#950460]/10 border border-[#950460]/30 text-[#950460] text-xs flex items-center justify-between gap-3 shadow-xs">
+          <div className="p-3.5 rounded-xl bg-[#D4145A]/10 border border-[#D4145A]/30 text-[#D4145A] text-xs flex items-center justify-between gap-3 shadow-xs">
             <div className="flex items-center gap-2.5">
-              <span className="w-2 h-2 rounded-full bg-[#950460] animate-pulse shrink-0" />
+              <span className="w-2 h-2 rounded-full bg-[#D4145A] animate-pulse shrink-0" />
               <span>
                 <strong>BACKEND STANDBY NOTICE:</strong> Backend analytics service is offline or unreachable. Ensure the FastAPI backend is running on port 8000.
               </span>
             </div>
             <button
               onClick={loadOverviewData}
-              className="px-2.5 py-1 rounded bg-[#950460]/20 hover:bg-[#950460]/30 text-[#950460] font-bold text-[11px] shrink-0 flex items-center gap-1 transition-colors"
+              className="px-2.5 py-1 rounded bg-[#D4145A]/20 hover:bg-[#A80F50]/30 text-[#D4145A] font-bold text-[11px] shrink-0 flex items-center gap-1 transition-colors"
             >
               <RefreshCw size={12} className={loading ? "animate-spin" : ""} />
               <span>Retry</span>
@@ -195,16 +195,16 @@ export default function OverviewPage() {
       {/* ------------------------------------------------------------------- */}
       {/* 2. Editorial Telemetry Strip */}
       {/* ------------------------------------------------------------------- */}
-      <section className="py-5 border-y border-[#31136C]/12">
+      <section className="py-5 border-y border-[#E7EAF0]">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
           <div>
-            <span className="text-[11px] font-mono uppercase tracking-wider text-[#31136C]/70 block mb-1">
+            <span className="text-[11px] font-mono uppercase tracking-wider text-[#52627A] block mb-1">
               Controlling Data Pack
             </span>
-            <div className="text-2xl md:text-3xl font-extrabold text-[#31136C] font-mono tracking-tight">
+            <div className="text-2xl md:text-3xl font-extrabold text-[#101D3A] font-mono tracking-tight">
               {pressureOverview?.total_deliveries ? pressureOverview.total_deliveries.toLocaleString() : "—"}
             </div>
-            <p className="text-xs text-[#31136C]/70 mt-1">
+            <p className="text-xs text-[#52627A] mt-1">
               {pressureOverview
                 ? `Deliveries across ${pressureOverview.matches_with_deliveries + pressureOverview.reconciled_abandoned_matches} matches (${pressureOverview.total_competitions} tournaments)`
                 : "Awaiting backend telemetry"}
@@ -212,40 +212,40 @@ export default function OverviewPage() {
           </div>
 
           <div>
-            <span className="text-[11px] font-mono uppercase tracking-wider text-[#31136C]/70 block mb-1">
+            <span className="text-[11px] font-mono uppercase tracking-wider text-[#52627A] block mb-1">
               Official Deliverables
             </span>
-            <div className="text-2xl md:text-3xl font-extrabold text-[#31136C] font-mono tracking-tight">
+            <div className="text-2xl md:text-3xl font-extrabold text-[#101D3A] font-mono tracking-tight">
               Top 10 / Top 10
             </div>
-            <p className="text-xs text-[#31136C]/70 mt-1">
+            <p className="text-xs text-[#52627A] mt-1">
               1-SE Conservative lower bounds (100% qualified)
             </p>
           </div>
 
           <div>
-            <span className="text-[11px] font-mono uppercase tracking-wider text-[#31136C]/70 block mb-1">
+            <span className="text-[11px] font-mono uppercase tracking-wider text-[#52627A] block mb-1">
               Uncapped Domestic Intelligence
             </span>
-            <div className="text-2xl md:text-3xl font-extrabold text-[#31136C] font-mono tracking-tight">
+            <div className="text-2xl md:text-3xl font-extrabold text-[#101D3A] font-mono tracking-tight">
               {uncappedOverview
                 ? `${uncappedOverview.total_verified_uncapped_batters + uncappedOverview.total_verified_uncapped_bowlers} Verified`
                 : "—"}
             </div>
-            <p className="text-xs text-[#31136C]/70 mt-1">
+            <p className="text-xs text-[#52627A] mt-1">
               Certified 0 senior caps in AUCTION-02 ledger
             </p>
           </div>
 
           <div>
-            <span className="text-[11px] font-mono uppercase tracking-wider text-[#31136C]/70 block mb-1">
+            <span className="text-[11px] font-mono uppercase tracking-wider text-[#52627A] block mb-1">
               Verification Health
             </span>
-            <div className="text-2xl md:text-3xl font-extrabold text-[#950460] font-mono tracking-tight flex items-baseline gap-2">
+            <div className="text-2xl md:text-3xl font-extrabold text-[#D4145A] font-mono tracking-tight flex items-baseline gap-2">
               <span>{isLive ? "Engine Online" : "Service Standby"}</span>
-              <span className={`w-2 h-2 rounded-full ${isLive ? "bg-[#950460] animate-pulse" : "bg-[#950460]"}`} />
+              <span className={`w-2 h-2 rounded-full ${isLive ? "bg-[#D4145A] animate-pulse" : "bg-[#D4145A]"}`} />
             </div>
-            <p className="text-xs text-[#31136C]/70 mt-1">
+            <p className="text-xs text-[#52627A] mt-1">
               {isLive ? `FastAPI v${health?.version || "0.1.0"} active` : "Backend service awaiting initialization"}
             </p>
           </div>
@@ -256,18 +256,18 @@ export default function OverviewPage() {
       {/* 3. Official Round 1 Deliverables: Batting & Bowling Leaderboards */}
       {/* ------------------------------------------------------------------- */}
       <section className="space-y-6">
-        <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-2 border-b border-[#31136C]/12 pb-3">
+        <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-2 border-b border-[#E7EAF0] pb-3">
           <div>
-            <h2 className="text-lg font-bold text-[#31136C] tracking-tight">
+            <h2 className="text-lg font-bold text-[#101D3A] tracking-tight">
               Official Round 1 Leaderboards Under Pressure
             </h2>
-            <p className="text-xs text-[#31136C]/70">
+            <p className="text-xs text-[#52627A]">
               Primary selections: overall qualified batters and bowlers (&ge; 60 pressure deliveries).
             </p>
           </div>
           <Link
             href="/pressure"
-            className="text-xs font-semibold text-[#31136C] hover:text-[#31136C] transition-colors inline-flex items-center gap-1"
+            className="text-xs font-semibold text-[#101D3A] hover:text-[#101D3A] transition-colors inline-flex items-center gap-1"
           >
             <span>View Complete Leaderboards & Dossiers</span>
             <ArrowRight size={13} />
@@ -276,50 +276,50 @@ export default function OverviewPage() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Batting Top 5 Preview */}
-          <div className="space-y-3 p-6 rounded-2xl bg-white border border-[#31136C]/12">
-            <div className="flex items-center justify-between text-xs font-semibold text-[#31136C]">
+          <div className="space-y-3 p-6 rounded-2xl bg-white border border-[#E7EAF0]">
+            <div className="flex items-center justify-between text-xs font-semibold text-[#101D3A]">
               <span className="flex items-center gap-2">
-                <TrendingUp size={15} className="text-[#31136C]" />
+                <TrendingUp size={15} className="text-[#101D3A]" />
                 <span>Top 5 Batters Under Pressure (Conservative PRI)</span>
                 {isLiveBatters ? (
-                  <span className="px-1.5 py-0.5 rounded text-[9px] font-mono font-bold bg-[#950460]/10 text-[#31136C] border border-[#950460]/30">
+                  <span className="px-1.5 py-0.5 rounded text-[9px] font-mono font-bold bg-[#D4145A]/10 text-[#101D3A] border border-[#D4145A]/30">
                     LIVE ENGINE
                   </span>
                 ) : (
-                  <span className="px-1.5 py-0.5 rounded text-[9px] font-mono font-bold bg-white text-[#31136C]/70 border border-[#31136C]/12">
+                  <span className="px-1.5 py-0.5 rounded text-[9px] font-mono font-bold bg-white text-[#52627A] border border-[#E7EAF0]">
                     STANDBY
                   </span>
                 )}
               </span>
-              <span className="font-mono text-[11px] text-[#31136C]/70">Balls / Matches</span>
+              <span className="font-mono text-[11px] text-[#52627A]">Balls / Matches</span>
             </div>
 
             {isLiveBatters ? (
-              <div className="divide-y divide-[#31136C]/12 border-t border-[#31136C]/12 text-xs">
+              <div className="divide-y divide-[#E7EAF0] border-t border-[#E7EAF0] text-xs">
                 {battersToDisplay.map((p) => (
                   <div key={p.rank} className="py-2.5 flex items-center justify-between hover:bg-white px-2 rounded-md transition-colors">
                     <div className="flex items-center gap-3">
-                      <span className="font-mono font-bold text-[#31136C]/70 w-4 text-center">{p.rank}</span>
+                      <span className="font-mono font-bold text-[#52627A] w-4 text-center">{p.rank}</span>
                       <div>
-                        <span className="font-bold text-[#31136C] block">{p.name}</span>
-                        <span className="text-[11px] text-[#31136C]/70 font-mono">{p.team}</span>
+                        <span className="font-bold text-[#101D3A] block">{p.name}</span>
+                        <span className="text-[11px] text-[#52627A] font-mono">{p.team}</span>
                       </div>
                     </div>
                     <div className="text-right">
-                      <span className={`font-mono font-bold ${p.val.startsWith("+") ? "text-[#950460]" : "text-[#31136C]"}`}>
+                      <span className={`font-mono font-bold ${p.val.startsWith("+") ? "text-[#D4145A]" : "text-[#101D3A]"}`}>
                         {p.val} pts
                       </span>
-                      <span className="text-[11px] font-mono text-[#31136C]/70 block">{p.balls}b • {p.matches}m</span>
+                      <span className="text-[11px] font-mono text-[#52627A] block">{p.balls}b • {p.matches}m</span>
                     </div>
                   </div>
                 ))}
               </div>
             ) : (
-              <div className="py-8 px-4 text-center rounded-lg border border-dashed border-[#31136C]/12 bg-white">
-                <div className="text-xs text-[#31136C]/70 font-medium">Official pressure batting leaderboards currently unavailable.</div>
+              <div className="py-8 px-4 text-center rounded-lg border border-dashed border-[#E7EAF0] bg-white">
+                <div className="text-xs text-[#52627A] font-medium">Official pressure batting leaderboards currently unavailable.</div>
                 <button
                   onClick={loadOverviewData}
-                  className="mt-2 inline-flex items-center gap-1.5 px-3 py-1 bg-white border border-[#31136C]/12 rounded text-xs font-semibold text-[#31136C] hover:bg-white shadow-xs"
+                  className="mt-2 inline-flex items-center gap-1.5 px-3 py-1 bg-white border border-[#E7EAF0] rounded text-xs font-semibold text-[#101D3A] hover:bg-white shadow-xs"
                 >
                   <RefreshCw size={12} className={loading ? "animate-spin" : ""} />
                   <span>Retry Connection</span>
@@ -327,59 +327,59 @@ export default function OverviewPage() {
               </div>
             )}
 
-            <div className="pt-2 text-[11px] text-[#31136C]/70 font-mono flex justify-between">
+            <div className="pt-2 text-[11px] text-[#52627A] font-mono flex justify-between">
               <span>{ranks6to10Batters ? `Ranks 6–10: ${ranks6to10Batters}` : "Ranks 6–10 viewable on full leaderboard"}</span>
-              <Link href="/pressure?tab=batting" className="text-[#31136C] hover:text-[#31136C] font-sans font-medium">
+              <Link href="/pressure?tab=batting" className="text-[#101D3A] hover:text-[#101D3A] font-sans font-medium">
                 Full Batters &rarr;
               </Link>
             </div>
           </div>
 
           {/* Bowling Top 5 Preview */}
-          <div className="space-y-3 p-6 rounded-2xl bg-white border border-[#31136C]/12">
-            <div className="flex items-center justify-between text-xs font-semibold text-[#31136C]">
+          <div className="space-y-3 p-6 rounded-2xl bg-white border border-[#E7EAF0]">
+            <div className="flex items-center justify-between text-xs font-semibold text-[#101D3A]">
               <span className="flex items-center gap-2">
-                <Target size={15} className="text-[#950460]" />
+                <Target size={15} className="text-[#D4145A]" />
                 <span>Top 5 Bowlers Under Pressure (Conservative Runs Saved)</span>
                 {isLiveBowlers ? (
-                  <span className="px-1.5 py-0.5 rounded text-[9px] font-mono font-bold bg-[#950460]/10 text-[#31136C] border border-[#950460]/30">
+                  <span className="px-1.5 py-0.5 rounded text-[9px] font-mono font-bold bg-[#D4145A]/10 text-[#101D3A] border border-[#D4145A]/30">
                     LIVE ENGINE
                   </span>
                 ) : (
-                  <span className="px-1.5 py-0.5 rounded text-[9px] font-mono font-bold bg-white text-[#31136C]/70 border border-[#31136C]/12">
+                  <span className="px-1.5 py-0.5 rounded text-[9px] font-mono font-bold bg-white text-[#52627A] border border-[#E7EAF0]">
                     STANDBY
                   </span>
                 )}
               </span>
-              <span className="font-mono text-[11px] text-[#31136C]/70">Balls / Matches</span>
+              <span className="font-mono text-[11px] text-[#52627A]">Balls / Matches</span>
             </div>
 
             {isLiveBowlers ? (
-              <div className="divide-y divide-[#31136C]/12 border-t border-[#31136C]/12 text-xs">
+              <div className="divide-y divide-[#E7EAF0] border-t border-[#E7EAF0] text-xs">
                 {bowlersToDisplay.map((p) => (
                   <div key={p.rank} className="py-2.5 flex items-center justify-between hover:bg-white px-2 rounded-md transition-colors">
                     <div className="flex items-center gap-3">
-                      <span className="font-mono font-bold text-[#31136C]/70 w-4 text-center">{p.rank}</span>
+                      <span className="font-mono font-bold text-[#52627A] w-4 text-center">{p.rank}</span>
                       <div>
-                        <span className="font-bold text-[#31136C] block">{p.name}</span>
-                        <span className="text-[11px] text-[#31136C]/70 font-mono">{p.team}</span>
+                        <span className="font-bold text-[#101D3A] block">{p.name}</span>
+                        <span className="text-[11px] text-[#52627A] font-mono">{p.team}</span>
                       </div>
                     </div>
                     <div className="text-right">
-                      <span className={`font-mono font-bold ${p.val.startsWith("-") ? "text-[#950460]" : "text-[#31136C]"}`}>
+                      <span className={`font-mono font-bold ${p.val.startsWith("-") ? "text-[#D4145A]" : "text-[#101D3A]"}`}>
                         {p.val} rpo
                       </span>
-                      <span className="text-[11px] font-mono text-[#31136C]/70 block">{p.balls}b • {p.matches}m</span>
+                      <span className="text-[11px] font-mono text-[#52627A] block">{p.balls}b • {p.matches}m</span>
                     </div>
                   </div>
                 ))}
               </div>
             ) : (
-              <div className="py-8 px-4 text-center rounded-lg border border-dashed border-[#31136C]/12 bg-white">
-                <div className="text-xs text-[#31136C]/70 font-medium">Official pressure bowling leaderboards currently unavailable.</div>
+              <div className="py-8 px-4 text-center rounded-lg border border-dashed border-[#E7EAF0] bg-white">
+                <div className="text-xs text-[#52627A] font-medium">Official pressure bowling leaderboards currently unavailable.</div>
                 <button
                   onClick={loadOverviewData}
-                  className="mt-2 inline-flex items-center gap-1.5 px-3 py-1 bg-white border border-[#31136C]/12 rounded text-xs font-semibold text-[#31136C] hover:bg-white shadow-xs"
+                  className="mt-2 inline-flex items-center gap-1.5 px-3 py-1 bg-white border border-[#E7EAF0] rounded text-xs font-semibold text-[#101D3A] hover:bg-white shadow-xs"
                 >
                   <RefreshCw size={12} className={loading ? "animate-spin" : ""} />
                   <span>Retry Connection</span>
@@ -387,9 +387,9 @@ export default function OverviewPage() {
               </div>
             )}
 
-            <div className="pt-2 text-[11px] text-[#31136C]/70 font-mono flex justify-between">
+            <div className="pt-2 text-[11px] text-[#52627A] font-mono flex justify-between">
               <span>{ranks6to10Bowlers ? `Ranks 6–10: ${ranks6to10Bowlers}` : "Ranks 6–10 viewable on full leaderboard"}</span>
-              <Link href="/pressure?tab=bowling" className="text-[#31136C] hover:text-[#31136C] font-sans font-medium">
+              <Link href="/pressure?tab=bowling" className="text-[#101D3A] hover:text-[#101D3A] font-sans font-medium">
                 Full Bowlers &rarr;
               </Link>
             </div>
@@ -401,18 +401,18 @@ export default function OverviewPage() {
       {/* 4. Supplementary Uncapped Indian Domestic Intelligence */}
       {/* ------------------------------------------------------------------- */}
       <section className="space-y-6">
-        <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-2 border-b border-[#31136C]/12 pb-3">
+        <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-2 border-b border-[#E7EAF0] pb-3">
           <div>
-            <h2 className="text-lg font-bold text-[#31136C] tracking-tight">
+            <h2 className="text-lg font-bold text-[#101D3A] tracking-tight">
               Supplementary Uncapped Indian Domestic Intelligence
             </h2>
-            <p className="text-xs text-[#31136C]/70">
+            <p className="text-xs text-[#52627A]">
               Specialized franchise auction intelligence for Rajasthan Royals — 100% verified zero senior international caps.
             </p>
           </div>
           <Link
             href="/uncapped"
-            className="text-xs font-semibold text-[#950460] hover:text-[#31136C] transition-colors inline-flex items-center gap-1"
+            className="text-xs font-semibold text-[#D4145A] hover:text-[#101D3A] transition-colors inline-flex items-center gap-1"
           >
             <span>View Full 20-Player Shortlist & Squad Fit Ratings</span>
             <ArrowRight size={13} />
@@ -421,12 +421,12 @@ export default function OverviewPage() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {/* Top Uncapped Batters */}
-          <div className="space-y-3 p-6 rounded-2xl bg-white border border-[#31136C]/12">
-            <span className="text-xs font-semibold text-[#31136C] flex items-center gap-2">
-              <Sparkles size={14} className="text-[#950460]" />
+          <div className="space-y-3 p-6 rounded-2xl bg-white border border-[#E7EAF0]">
+            <span className="text-xs font-semibold text-[#101D3A] flex items-center gap-2">
+              <Sparkles size={14} className="text-[#D4145A]" />
               Verified Uncapped Batters (Top 3)
             </span>
-            <div className="divide-y divide-[#31136C]/12 border-t border-[#31136C]/12 text-xs">
+            <div className="divide-y divide-[#E7EAF0] border-t border-[#E7EAF0] text-xs">
               {[
                 { rank: 1, name: "Ashutosh Sharma", team: "Railways / PBKS", metric: "-3.63 PRI", fit: "93.20 Fit", desc: "Provable domestic death finisher (+10.3 SR delta)" },
                 { rank: 2, name: "Shashank Singh", team: "Chhattisgarh / PBKS", metric: "-11.07 PRI", fit: "87.85 Fit", desc: "Composed middle-overs aggregator and accelerator" },
@@ -435,15 +435,15 @@ export default function OverviewPage() {
                 <div key={p.rank} className="py-2.5 flex items-center justify-between hover:bg-white px-2 rounded-md transition-colors">
                   <div>
                     <div className="flex items-center gap-2">
-                      <span className="font-mono font-bold text-[#31136C]/70 w-4">{p.rank}</span>
-                      <span className="font-bold text-[#31136C]">{p.name}</span>
-                      <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-[#950460]/10 text-[#950460]">Verified</span>
+                      <span className="font-mono font-bold text-[#52627A] w-4">{p.rank}</span>
+                      <span className="font-bold text-[#101D3A]">{p.name}</span>
+                      <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-[#D4145A]/10 text-[#D4145A]">Verified</span>
                     </div>
-                    <p className="text-[11px] text-[#31136C]/70 mt-0.5 pl-6">{p.desc}</p>
+                    <p className="text-[11px] text-[#52627A] mt-0.5 pl-6">{p.desc}</p>
                   </div>
                   <div className="text-right">
-                    <span className="font-mono font-bold text-[#31136C]">{p.fit}</span>
-                    <span className="text-[10px] font-mono text-[#31136C]/70 block">{p.metric}</span>
+                    <span className="font-mono font-bold text-[#101D3A]">{p.fit}</span>
+                    <span className="text-[10px] font-mono text-[#52627A] block">{p.metric}</span>
                   </div>
                 </div>
               ))}
@@ -451,12 +451,12 @@ export default function OverviewPage() {
           </div>
 
           {/* Top Uncapped Bowlers */}
-          <div className="space-y-3 p-6 rounded-2xl bg-white border border-[#31136C]/12">
-            <span className="text-xs font-semibold text-[#31136C] flex items-center gap-2">
-              <Crosshair size={14} className="text-[#31136C]" />
+          <div className="space-y-3 p-6 rounded-2xl bg-white border border-[#E7EAF0]">
+            <span className="text-xs font-semibold text-[#101D3A] flex items-center gap-2">
+              <Crosshair size={14} className="text-[#101D3A]" />
               Verified Uncapped Bowlers (Top 3)
             </span>
-            <div className="divide-y divide-[#31136C]/12 border-t border-[#31136C]/12 text-xs">
+            <div className="divide-y divide-[#E7EAF0] border-t border-[#E7EAF0] text-xs">
               {[
                 { rank: 1, name: "Vaibhav Arora", team: "Himachal / KKR", metric: "-2.36 RPO", fit: "90.00 Fit", desc: "Dual-phase swing in PP and disciplined death yorkers" },
                 { rank: 2, name: "Suyash Sharma", team: "Delhi / KKR", metric: "-2.41 RPO", fit: "82.95 Fit", desc: "Attacking wrist-spin option with deceptive googly" },
@@ -465,15 +465,15 @@ export default function OverviewPage() {
                 <div key={p.rank} className="py-2.5 flex items-center justify-between hover:bg-white px-2 rounded-md transition-colors">
                   <div>
                     <div className="flex items-center gap-2">
-                      <span className="font-mono font-bold text-[#31136C]/70 w-4">{p.rank}</span>
-                      <span className="font-bold text-[#31136C]">{p.name}</span>
-                      <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-[#950460]/10 text-[#950460]">Verified</span>
+                      <span className="font-mono font-bold text-[#52627A] w-4">{p.rank}</span>
+                      <span className="font-bold text-[#101D3A]">{p.name}</span>
+                      <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-[#D4145A]/10 text-[#D4145A]">Verified</span>
                     </div>
-                    <p className="text-[11px] text-[#31136C]/70 mt-0.5 pl-6">{p.desc}</p>
+                    <p className="text-[11px] text-[#52627A] mt-0.5 pl-6">{p.desc}</p>
                   </div>
                   <div className="text-right">
-                    <span className="font-mono font-bold text-[#31136C]">{p.fit}</span>
-                    <span className="text-[10px] font-mono text-[#31136C]/70 block">{p.metric}</span>
+                    <span className="font-mono font-bold text-[#101D3A]">{p.fit}</span>
+                    <span className="text-[10px] font-mono text-[#52627A] block">{p.metric}</span>
                   </div>
                 </div>
               ))}
@@ -485,56 +485,56 @@ export default function OverviewPage() {
       {/* ------------------------------------------------------------------- */}
       {/* 5. Methodological Architecture */}
       {/* ------------------------------------------------------------------- */}
-      <section className="space-y-4 pt-4 border-t border-[#31136C]/12">
+      <section className="space-y-4 pt-4 border-t border-[#E7EAF0]">
         <div>
-          <h2 className="text-base font-bold text-[#31136C] tracking-tight">
+          <h2 className="text-base font-bold text-[#101D3A] tracking-tight">
             Methodological Architecture
           </h2>
-          <p className="text-xs text-[#31136C]/70">
+          <p className="text-xs text-[#52627A]">
             Four core scientific pillars governing the ROYALS INTELLIGENCE pressure evaluation system.
           </p>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 text-xs">
-          <div className="p-5 rounded-xl bg-white border border-[#31136C]/12 space-y-1.5">
-            <div className="flex items-center gap-2 font-bold text-[#31136C]">
-              <Flame size={15} className="text-[#31136C]" />
+          <div className="p-5 rounded-xl bg-white border border-[#E7EAF0] space-y-1.5">
+            <div className="flex items-center gap-2 font-bold text-[#101D3A]">
+              <Flame size={15} className="text-[#101D3A]" />
               <span>1. Dynamic Pressure</span>
             </div>
-            <p className="text-[#31136C]/70 leading-relaxed">
+            <p className="text-[#52627A] leading-relaxed">
               Multi-factor leverage model: Chasing Required Run Rate &ge; 9.0 with &le; 36 balls, wickets in hand &le; 4,
               and death-over target acceleration.
             </p>
           </div>
 
-          <div className="p-5 rounded-xl bg-white border border-[#31136C]/12 space-y-1.5">
-            <div className="flex items-center gap-2 font-bold text-[#31136C]">
-              <Layers size={15} className="text-[#31136C]" />
+          <div className="p-5 rounded-xl bg-white border border-[#E7EAF0] space-y-1.5">
+            <div className="flex items-center gap-2 font-bold text-[#101D3A]">
+              <Layers size={15} className="text-[#101D3A]" />
               <span>2. 12-Cell Baselines</span>
             </div>
-            <p className="text-[#31136C]/70 leading-relaxed">
+            <p className="text-[#52627A] leading-relaxed">
               Every delivery is benchmarked against Innings (2) &times; Phase (3) &times; Tier (2) strata,
               eliminating structural death-over entry bias.
             </p>
           </div>
 
-          <div className="p-5 rounded-xl bg-white border border-[#31136C]/12 space-y-1.5">
-            <div className="flex items-center gap-2 font-bold text-[#31136C]">
-              <Sparkles size={15} className="text-[#950460]" />
+          <div className="p-5 rounded-xl bg-white border border-[#E7EAF0] space-y-1.5">
+            <div className="flex items-center gap-2 font-bold text-[#101D3A]">
+              <Sparkles size={15} className="text-[#D4145A]" />
               <span>3. Empirical Bayes</span>
             </div>
-            <p className="text-[#31136C]/70 leading-relaxed">
+            <p className="text-[#52627A] leading-relaxed">
               Separates skill from noise using Gaussian population priors (&mu;<sub>0</sub>, &tau;<sup>2</sup>). Low-sample outliers shrink toward
               the league mean.
             </p>
           </div>
 
-          <div className="p-5 rounded-xl bg-white border border-[#31136C]/12 space-y-1.5">
-            <div className="flex items-center gap-2 font-bold text-[#31136C]">
-              <Shield size={15} className="text-[#950460]" />
+          <div className="p-5 rounded-xl bg-white border border-[#E7EAF0] space-y-1.5">
+            <div className="flex items-center gap-2 font-bold text-[#101D3A]">
+              <Shield size={15} className="text-[#D4145A]" />
               <span>4. Conservative PRI</span>
             </div>
-            <p className="text-[#31136C]/70 leading-relaxed">
+            <p className="text-[#52627A] leading-relaxed">
               Rankings govern by Conservative PRI = Shrunk Posterior Mean minus 1.0 SE, directly penalizing high
               estimation uncertainty.
             </p>
@@ -545,12 +545,12 @@ export default function OverviewPage() {
       {/* ------------------------------------------------------------------- */}
       {/* 6. Navigation to Analytical Modules */}
       {/* ------------------------------------------------------------------- */}
-      <section className="space-y-4 pt-4 border-t border-[#31136C]/12">
+      <section className="space-y-4 pt-4 border-t border-[#E7EAF0]">
         <div>
-          <h2 className="text-base font-bold text-[#31136C] tracking-tight">
+          <h2 className="text-base font-bold text-[#101D3A] tracking-tight">
             Intelligence Modules
           </h2>
-          <p className="text-xs text-[#31136C]/70">
+          <p className="text-xs text-[#52627A]">
             Dedicated research environments connected to the verified tournament database.
           </p>
         </div>
@@ -558,56 +558,56 @@ export default function OverviewPage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <Link
             href="/pressure"
-            className="p-5 rounded-xl bg-white border border-[#31136C]/12 hover:border-[#950460] hover:shadow-soft transition-all group block"
+            className="p-5 rounded-xl bg-white border border-[#E7EAF0] hover:border-[#D4145A] hover:shadow-soft transition-all group block"
           >
             <div className="flex items-center justify-between mb-2">
-              <Shield size={18} className="text-[#31136C]" />
-              <ArrowRight size={13} className="text-[#31136C]/70 group-hover:translate-x-0.5 group-hover:text-[#31136C] transition-all" />
+              <Shield size={18} className="text-[#101D3A]" />
+              <ArrowRight size={13} className="text-[#52627A] group-hover:translate-x-0.5 group-hover:text-[#101D3A] transition-all" />
             </div>
-            <h3 className="font-bold text-xs text-[#31136C]">Pressure Intelligence</h3>
-            <p className="text-[11px] text-[#31136C]/70 mt-1 leading-normal">
+            <h3 className="font-bold text-xs text-[#101D3A]">Pressure Intelligence</h3>
+            <p className="text-[11px] text-[#52627A] mt-1 leading-normal">
               Official Top 10 leaderboards, uncertainty forest plots, and candidate evidence dossiers.
             </p>
           </Link>
 
           <Link
             href="/tactical"
-            className="p-5 rounded-xl bg-white border border-[#31136C]/12 hover:border-[#950460] hover:shadow-soft transition-all group block"
+            className="p-5 rounded-xl bg-white border border-[#E7EAF0] hover:border-[#D4145A] hover:shadow-soft transition-all group block"
           >
             <div className="flex items-center justify-between mb-2">
-              <Crosshair size={18} className="text-[#950460]" />
-              <ArrowRight size={13} className="text-[#31136C]/70 group-hover:translate-x-0.5 group-hover:text-[#31136C] transition-all" />
+              <Crosshair size={18} className="text-[#D4145A]" />
+              <ArrowRight size={13} className="text-[#52627A] group-hover:translate-x-0.5 group-hover:text-[#101D3A] transition-all" />
             </div>
-            <h3 className="font-bold text-xs text-[#31136C]">Tactical Intelligence</h3>
-            <p className="text-[11px] text-[#31136C]/70 mt-1 leading-normal">
+            <h3 className="font-bold text-xs text-[#101D3A]">Tactical Intelligence</h3>
+            <p className="text-[11px] text-[#52627A] mt-1 leading-normal">
               Phase splits (PP, Middle, Death), shot archetypes, bowling variations, and radar speeds.
             </p>
           </Link>
 
           <Link
             href="/uncapped"
-            className="p-5 rounded-xl bg-white border border-[#31136C]/12 hover:border-[#950460] hover:shadow-soft transition-all group block"
+            className="p-5 rounded-xl bg-white border border-[#E7EAF0] hover:border-[#D4145A] hover:shadow-soft transition-all group block"
           >
             <div className="flex items-center justify-between mb-2">
-              <Sparkles size={18} className="text-[#950460]" />
-              <ArrowRight size={13} className="text-[#31136C]/70 group-hover:translate-x-0.5 group-hover:text-[#31136C] transition-all" />
+              <Sparkles size={18} className="text-[#D4145A]" />
+              <ArrowRight size={13} className="text-[#52627A] group-hover:translate-x-0.5 group-hover:text-[#101D3A] transition-all" />
             </div>
-            <h3 className="font-bold text-xs text-[#31136C]">Uncapped Talent</h3>
-            <p className="text-[11px] text-[#31136C]/70 mt-1 leading-normal">
+            <h3 className="font-bold text-xs text-[#101D3A]">Uncapped Talent</h3>
+            <p className="text-[11px] text-[#52627A] mt-1 leading-normal">
               Verified Indian domestic batters & bowlers, Rajasthan Royals squad fit ratings, and reserves.
             </p>
           </Link>
 
           <Link
             href="/domestic"
-            className="p-5 rounded-xl bg-white border border-[#31136C]/12 hover:border-[#950460] hover:shadow-soft transition-all group block"
+            className="p-5 rounded-xl bg-white border border-[#E7EAF0] hover:border-[#D4145A] hover:shadow-soft transition-all group block"
           >
             <div className="flex items-center justify-between mb-2">
-              <Swords size={18} className="text-[#31136C]" />
-              <ArrowRight size={13} className="text-[#31136C]/70 group-hover:translate-x-0.5 group-hover:text-[#31136C] transition-all" />
+              <Swords size={18} className="text-[#101D3A]" />
+              <ArrowRight size={13} className="text-[#52627A] group-hover:translate-x-0.5 group-hover:text-[#101D3A] transition-all" />
             </div>
-            <h3 className="font-bold text-xs text-[#31136C]">Domestic & Matches</h3>
-            <p className="text-[11px] text-[#31136C]/70 mt-1 leading-normal">
+            <h3 className="font-bold text-xs text-[#101D3A]">Domestic & Matches</h3>
+            <p className="text-[11px] text-[#52627A] mt-1 leading-normal">
               287-player directory, match scorecards, player histories, and all-round dual contributions.
             </p>
           </Link>

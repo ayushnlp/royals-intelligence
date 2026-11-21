@@ -121,26 +121,26 @@ export default function AcquisitionPage() {
       {/* Header Banner */}
       <section className="space-y-3">
         <div className="flex flex-wrap items-center gap-3 text-xs">
-          <span className="font-mono font-bold tracking-widest text-[#31136C] uppercase px-2.5 py-1 rounded-md bg-[#950460]/10 border border-[#950460]/30">
+          <span className="font-mono font-bold tracking-widest text-[#101D3A] uppercase px-2.5 py-1 rounded-md bg-[#D4145A]/10 border border-[#D4145A]/30">
             Rajasthan Royals Infrastructure
           </span>
-          <span className="text-[#31136C]/30">•</span>
-          <span className="font-mono text-[#31136C]/70">
+          <span className="text-[#101D3A]/30">•</span>
+          <span className="font-mono text-[#52627A]">
             Cryptographic SHA-256 Provenance
           </span>
-          <span className="text-[#31136C]/30">•</span>
-          <span className="inline-flex items-center gap-1.5 text-[#950460] font-medium">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#950460]" />
+          <span className="text-[#101D3A]/30">•</span>
+          <span className="inline-flex items-center gap-1.5 text-[#D4145A] font-medium">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#D4145A]" />
             Parquet Lakehouse Active
           </span>
         </div>
 
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div className="max-w-3xl space-y-2">
-            <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-[#31136C] leading-tight">
+            <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-[#101D3A] leading-tight">
               Cricket Data Ingestion & Provenance Hub
             </h1>
-            <p className="text-sm md:text-base text-[#31136C]/70 leading-relaxed font-normal">
+            <p className="text-sm md:text-base text-[#52627A] leading-relaxed font-normal">
               Multi-source discovery, SHA-256 cryptographic provenance, arithmetic validation, and
               partitioned Apache Parquet storage for IPL intelligence and domestic scouting pools.
             </p>
@@ -149,9 +149,9 @@ export default function AcquisitionPage() {
           <button
             onClick={loadAllData}
             disabled={loading}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-[#31136C] text-white text-xs font-semibold hover:bg-[#31136C] transition-colors shadow-sm shrink-0 self-start md:self-auto"
+            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-[#101D3A] text-white text-xs font-semibold hover:bg-[#101D3A] transition-colors shadow-sm shrink-0 self-start md:self-auto"
           >
-            <RefreshCw size={14} className={loading ? "animate-spin text-[#31136C]" : "text-[#950460]"} />
+            <RefreshCw size={14} className={loading ? "animate-spin text-[#101D3A]" : "text-[#D4145A]"} />
             <span>Refresh Feeds</span>
           </button>
         </div>
@@ -159,17 +159,17 @@ export default function AcquisitionPage() {
 
       {/* Connection Notice */}
       {errorMsg && (
-        <div className="p-4 rounded-xl bg-[#950460]/10 border border-[#950460]/30 text-[#950460] flex items-center justify-between gap-4">
+        <div className="p-4 rounded-xl bg-[#D4145A]/10 border border-[#D4145A]/30 text-[#D4145A] flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <AlertCircle className="w-5 h-5 text-[#950460] shrink-0" />
+            <AlertCircle className="w-5 h-5 text-[#D4145A] shrink-0" />
             <div>
               <div className="text-xs font-bold">Acquisition Hub Connection Notice</div>
-              <div className="text-xs text-[#950460] mt-0.5">{errorMsg}</div>
+              <div className="text-xs text-[#D4145A] mt-0.5">{errorMsg}</div>
             </div>
           </div>
           <button
             onClick={loadAllData}
-            className="px-3 py-1.5 rounded-lg bg-[#950460] text-white font-bold text-xs hover:bg-[#950460] transition-colors shrink-0 flex items-center gap-1.5"
+            className="px-3 py-1.5 rounded-lg bg-[#D4145A] text-white font-bold text-xs hover:bg-[#A80F50] transition-colors shrink-0 flex items-center gap-1.5"
           >
             <RefreshCw className="w-3.5 h-3.5" />
             <span>Retry</span>
@@ -178,52 +178,52 @@ export default function AcquisitionPage() {
       )}
 
       {/* Top Metrics Open Telemetry Strip */}
-      <section className="py-5 border-y border-[#31136C]/12">
+      <section className="py-5 border-y border-[#E7EAF0]">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
           <div>
-            <span className="text-[11px] font-mono uppercase tracking-wider text-[#31136C]/70 block mb-1">
+            <span className="text-[11px] font-mono uppercase tracking-wider text-[#52627A] block mb-1">
               Registered Sources
             </span>
-            <div className="text-xl md:text-2xl font-extrabold text-[#31136C] font-mono tracking-tight">
+            <div className="text-xl md:text-2xl font-extrabold text-[#101D3A] font-mono tracking-tight">
               {sources.length > 0 ? `${sources.length} Sources` : "—"}
             </div>
-            <p className="text-xs text-[#31136C]/70 mt-0.5">
+            <p className="text-xs text-[#52627A] mt-0.5">
               4 Reliability Tiers (Open, Official, Curated, Manual)
             </p>
           </div>
 
           <div>
-            <span className="text-[11px] font-mono uppercase tracking-wider text-[#31136C]/70 block mb-1">
+            <span className="text-[11px] font-mono uppercase tracking-wider text-[#52627A] block mb-1">
               Parquet Lakehouse
             </span>
-            <div className="text-xl md:text-2xl font-extrabold text-[#31136C] font-mono tracking-tight">
+            <div className="text-xl md:text-2xl font-extrabold text-[#101D3A] font-mono tracking-tight">
               {coverage?.total_deliveries_indexed ? coverage.total_deliveries_indexed.toLocaleString() : "—"}
             </div>
-            <p className="text-xs text-[#31136C]/70 mt-0.5">
+            <p className="text-xs text-[#52627A] mt-0.5">
               Columnar Snappy Parquet delivery stream
             </p>
           </div>
 
           <div>
-            <span className="text-[11px] font-mono uppercase tracking-wider text-[#31136C]/70 block mb-1">
+            <span className="text-[11px] font-mono uppercase tracking-wider text-[#52627A] block mb-1">
               Matches Indexed
             </span>
-            <div className="text-xl md:text-2xl font-extrabold text-[#31136C] font-mono tracking-tight">
+            <div className="text-xl md:text-2xl font-extrabold text-[#101D3A] font-mono tracking-tight">
               {coverage?.total_matches_acquired ? coverage.total_matches_acquired.toLocaleString() : "—"}
             </div>
-            <p className="text-xs text-[#31136C]/70 mt-0.5">
+            <p className="text-xs text-[#52627A] mt-0.5">
               Deduplicated match format records
             </p>
           </div>
 
           <div>
-            <span className="text-[11px] font-mono uppercase tracking-wider text-[#31136C]/70 block mb-1">
+            <span className="text-[11px] font-mono uppercase tracking-wider text-[#52627A] block mb-1">
               Audit Status
             </span>
-            <div className="text-xl md:text-2xl font-extrabold text-[#950460] font-mono tracking-tight">
+            <div className="text-xl md:text-2xl font-extrabold text-[#D4145A] font-mono tracking-tight">
               100% Passed
             </div>
-            <p className="text-xs text-[#31136C]/70 mt-0.5">
+            <p className="text-xs text-[#52627A] mt-0.5">
               SHA-256 cryptographic logs validated
             </p>
           </div>
@@ -231,7 +231,7 @@ export default function AcquisitionPage() {
       </section>
 
       {/* Navigation Tabs */}
-      <div className="flex border-b border-[#31136C]/12 gap-2 overflow-x-auto pb-px">
+      <div className="flex border-b border-[#E7EAF0] gap-2 overflow-x-auto pb-px">
         {[
           { id: "sources", label: "Source Registry & Evaluation", icon: Server },
           { id: "coverage", label: "Coverage & Dataset Manifests", icon: Layers },
@@ -246,11 +246,11 @@ export default function AcquisitionPage() {
               onClick={() => setActiveTab(tab.id as any)}
               className={`flex items-center gap-2 px-4 py-2.5 text-xs font-bold transition-all border-b-2 whitespace-nowrap ${
                 isActive
-                  ? "border-[#31136C] text-[#31136C] bg-white rounded-t-lg shadow-sm"
-                  : "border-transparent text-[#31136C]/70 hover:text-[#31136C] hover:border-[#31136C]/20"
+                  ? "border-[#101D3A] text-[#101D3A] bg-white rounded-t-lg shadow-sm"
+                  : "border-transparent text-[#52627A] hover:text-[#101D3A] hover:border-[#101D3A]/20"
               }`}
             >
-              <Icon size={15} className={isActive ? "text-[#31136C]" : "text-[#31136C]/70"} />
+              <Icon size={15} className={isActive ? "text-[#101D3A]" : "text-[#52627A]"} />
               <span>{tab.label}</span>
             </button>
           );
@@ -260,10 +260,10 @@ export default function AcquisitionPage() {
       {/* Tab 1: Source Registry */}
       {activeTab === "sources" && (
         <div className="space-y-4">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-4 rounded-xl border border-[#31136C]/12">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-4 rounded-xl border border-[#E7EAF0]">
             <div>
-              <h3 className="text-sm font-bold text-[#31136C]">Evaluated Cricket Data Sources</h3>
-              <p className="text-xs text-[#31136C]/70">
+              <h3 className="text-sm font-bold text-[#101D3A]">Evaluated Cricket Data Sources</h3>
+              <p className="text-xs text-[#52627A]">
                 Sources evaluated against legal licensing, rate limits, coverage, and anti-scraping policies.
               </p>
             </div>
@@ -274,8 +274,8 @@ export default function AcquisitionPage() {
                   onClick={() => setSelectedTier(tier)}
                   className={`px-2.5 py-1 rounded-md text-[11px] font-mono font-semibold transition-all ${
                     selectedTier === tier
-                      ? "bg-[#31136C] text-white shadow-sm"
-                      : "bg-[#31136C]/05 text-[#31136C]/70 hover:bg-[#31136C]/08"
+                      ? "bg-[#101D3A] text-white shadow-sm"
+                      : "bg-[#F8E8EF] text-[#52627A] hover:bg-[#F8E8EF]"
                   }`}
                 >
                   {tier}
@@ -285,7 +285,7 @@ export default function AcquisitionPage() {
           </div>
 
           {filteredSources.length === 0 ? (
-            <div className="py-12 text-center text-xs text-[#31136C]/70 bg-[#31136C]/03 rounded-xl border border-dashed border-[#31136C]/12">
+            <div className="py-12 text-center text-xs text-[#52627A] bg-[#101D3A]/03 rounded-xl border border-dashed border-[#E7EAF0]">
               No registered cricket data sources found. Ensure backend acquisition service is running.
             </div>
           ) : (
@@ -293,59 +293,59 @@ export default function AcquisitionPage() {
               {filteredSources.map((source) => (
                 <div
                   key={source.source_id}
-                  className="bg-white rounded-xl border border-[#31136C]/12 p-5 shadow-sm hover:border-[#31136C]/40 transition-all flex flex-col justify-between"
+                  className="bg-white rounded-xl border border-[#E7EAF0] p-5 shadow-sm hover:border-[#101D3A]/40 transition-all flex flex-col justify-between"
                 >
                   <div>
                     <div className="flex items-center justify-between mb-2">
                       <span
                         className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded border ${
                           source.tier === "TIER_1"
-                            ? "bg-[#950460]/10 text-[#950460] border-[#950460]/30"
+                            ? "bg-[#D4145A]/10 text-[#D4145A] border-[#D4145A]/30"
                             : source.tier === "TIER_2"
-                            ? "bg-[#31136C]/06 text-[#31136C] border-[#31136C]/15"
+                            ? "bg-[#F8E8EF] text-[#101D3A] border-[#E7EAF0]"
                             : source.tier === "TIER_3"
-                            ? "bg-[#950460]/10 text-[#950460] border-[#950460]/30"
-                            : "bg-[#950460]/10 text-[#950460] border-[#950460]/30"
+                            ? "bg-[#D4145A]/10 text-[#D4145A] border-[#D4145A]/30"
+                            : "bg-[#D4145A]/10 text-[#D4145A] border-[#D4145A]/30"
                         }`}
                       >
                         {source.tier}
                       </span>
-                      <span className="text-[11px] font-mono text-[#31136C]/70">
+                      <span className="text-[11px] font-mono text-[#52627A]">
                         {source.category}
                       </span>
                     </div>
 
-                    <h4 className="text-base font-bold text-[#31136C] mb-1">{source.name}</h4>
-                    <p className="text-xs font-mono text-[#31136C]/70 mb-3">{source.source_id}</p>
+                    <h4 className="text-base font-bold text-[#101D3A] mb-1">{source.name}</h4>
+                    <p className="text-xs font-mono text-[#52627A] mb-3">{source.source_id}</p>
 
-                    <div className="space-y-1.5 text-xs text-[#31136C]/70 mb-4 bg-white p-3 rounded-lg border border-[#31136C]/10">
+                    <div className="space-y-1.5 text-xs text-[#52627A] mb-4 bg-white p-3 rounded-lg border border-[#E7EAF0]">
                       <div className="flex justify-between">
-                        <span className="text-[#31136C]/70">Access Mode:</span>
-                        <span className="font-semibold text-[#31136C]">{source.access_method}</span>
+                        <span className="text-[#52627A]">Access Mode:</span>
+                        <span className="font-semibold text-[#101D3A]">{source.access_method}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-[#31136C]/70">Licensing:</span>
-                        <span className="font-semibold text-[#31136C]">{source.licensing?.license_name || "Proprietary"}</span>
+                        <span className="text-[#52627A]">Licensing:</span>
+                        <span className="font-semibold text-[#101D3A]">{source.licensing?.license_name || "Proprietary"}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-[#31136C]/70">Update Frequency:</span>
-                        <span className="font-semibold text-[#31136C]">{source.update_frequency}</span>
+                        <span className="text-[#52627A]">Update Frequency:</span>
+                        <span className="font-semibold text-[#101D3A]">{source.update_frequency}</span>
                       </div>
                     </div>
                   </div>
 
-                  <div className="pt-3 border-t border-[#31136C]/10 flex items-center justify-between mt-auto">
+                  <div className="pt-3 border-t border-[#E7EAF0] flex items-center justify-between mt-auto">
                     <div className="flex items-center gap-1.5">
                       <span
                         className={`w-2 h-2 rounded-full ${
-                          source.status === "active" ? "bg-[#950460] animate-pulse" : "bg-[#950460]/100"
+                          source.status === "active" ? "bg-[#D4145A] animate-pulse" : "bg-[#D4145A]/100"
                         }`}
                       />
-                      <span className="text-xs font-medium text-[#31136C]/70 capitalize">
+                      <span className="text-xs font-medium text-[#52627A] capitalize">
                         {source.status === "active" ? "Operational" : "Manual Route Only"}
                       </span>
                     </div>
-                    <span className="text-[11px] text-[#31136C] font-semibold">
+                    <span className="text-[11px] text-[#101D3A] font-semibold">
                       {source.reliability_assessment.split(" ")[0]} Reliability
                     </span>
                   </div>
@@ -359,10 +359,10 @@ export default function AcquisitionPage() {
       {/* Tab 2: Coverage & Manifests */}
       {activeTab === "coverage" && (
         <div className="space-y-6">
-          <div className="bg-white rounded-xl border border-[#31136C]/12 p-5 shadow-sm space-y-4">
+          <div className="bg-white rounded-xl border border-[#E7EAF0] p-5 shadow-sm space-y-4">
             <div>
-              <h3 className="text-sm font-bold text-[#31136C]">Tournament Coverage Status & Gap Audit</h3>
-              <p className="text-xs text-[#31136C]/70">
+              <h3 className="text-sm font-bold text-[#101D3A]">Tournament Coverage Status & Gap Audit</h3>
+              <p className="text-xs text-[#52627A]">
                 Audited data availability across targeted competitions. Unacquired elements are transparently documented.
               </p>
             </div>
@@ -372,52 +372,52 @@ export default function AcquisitionPage() {
                 {coverage.competitions.map((comp) => (
                   <div
                     key={`${comp.competition_id}_${comp.season}`}
-                    className="p-4 rounded-xl bg-white border border-[#31136C]/12 space-y-2"
+                    className="p-4 rounded-xl bg-white border border-[#E7EAF0] space-y-2"
                   >
                     <div className="flex items-center justify-between">
                       <div>
-                        <h4 className="text-sm font-bold text-[#31136C]">
+                        <h4 className="text-sm font-bold text-[#101D3A]">
                           {comp.competition_name} ({comp.season})
                         </h4>
-                        <span className="text-[11px] text-[#31136C]/70 font-mono">
+                        <span className="text-[11px] text-[#52627A] font-mono">
                           Target ID: {comp.competition_id}
                         </span>
                       </div>
                       <span
                         className={`text-xs font-mono font-bold px-2.5 py-1 rounded-full border ${
                           comp.status === "ACQUIRED"
-                            ? "bg-[#950460]/10 text-[#950460] border-[#950460]/30"
+                            ? "bg-[#D4145A]/10 text-[#D4145A] border-[#D4145A]/30"
                             : comp.status === "PARTIALLY_ACQUIRED"
-                            ? "bg-[#950460]/10 text-[#950460] border-[#950460]/30"
-                            : "bg-[#31136C]/05 text-[#31136C]/70 border-[#31136C]/20"
+                            ? "bg-[#D4145A]/10 text-[#D4145A] border-[#D4145A]/30"
+                            : "bg-[#F8E8EF] text-[#52627A] border-[#101D3A]/20"
                         }`}
                       >
                         {comp.status}
                       </span>
                     </div>
 
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs pt-2 border-t border-[#31136C]/12">
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs pt-2 border-t border-[#E7EAF0]">
                       <div>
-                        <span className="text-[#31136C]/70 block">Matches:</span>
-                        <span className="font-bold font-mono text-[#31136C]">{comp.matches_acquired}</span>
+                        <span className="text-[#52627A] block">Matches:</span>
+                        <span className="font-bold font-mono text-[#101D3A]">{comp.matches_acquired}</span>
                       </div>
                       <div>
-                        <span className="text-[#31136C]/70 block">Ball-by-Ball:</span>
-                        <span className="font-bold font-mono text-[#31136C]">{comp.ball_by_ball_available} rows</span>
+                        <span className="text-[#52627A] block">Ball-by-Ball:</span>
+                        <span className="font-bold font-mono text-[#101D3A]">{comp.ball_by_ball_available} rows</span>
                       </div>
                       <div>
-                        <span className="text-[#31136C]/70 block">Scorecards:</span>
-                        <span className="font-bold font-mono text-[#31136C]">{comp.scorecards_available}</span>
+                        <span className="text-[#52627A] block">Scorecards:</span>
+                        <span className="font-bold font-mono text-[#101D3A]">{comp.scorecards_available}</span>
                       </div>
                       <div>
-                        <span className="text-[#31136C]/70 block">Squads:</span>
-                        <span className="font-bold text-[#950460]">{comp.squads_available ? "Verified" : "Pending"}</span>
+                        <span className="text-[#52627A] block">Squads:</span>
+                        <span className="font-bold text-[#D4145A]">{comp.squads_available ? "Verified" : "Pending"}</span>
                       </div>
                     </div>
 
                     {comp.data_gaps.length > 0 && (
-                      <div className="mt-2 text-xs text-[#950460] bg-[#950460]/10 p-2 rounded border border-[#950460]/20 flex items-start gap-1.5">
-                        <AlertCircle size={14} className="shrink-0 mt-0.5 text-[#950460]" />
+                      <div className="mt-2 text-xs text-[#D4145A] bg-[#D4145A]/10 p-2 rounded border border-[#D4145A]/20 flex items-start gap-1.5">
+                        <AlertCircle size={14} className="shrink-0 mt-0.5 text-[#D4145A]" />
                         <span>{comp.data_gaps.join(" ")}</span>
                       </div>
                     )}
@@ -425,18 +425,18 @@ export default function AcquisitionPage() {
                 ))}
               </div>
             ) : (
-              <div className="py-8 text-center text-xs text-[#31136C]/70 bg-[#31136C]/03 rounded-xl border border-dashed border-[#31136C]/12">
+              <div className="py-8 text-center text-xs text-[#52627A] bg-[#101D3A]/03 rounded-xl border border-dashed border-[#E7EAF0]">
                 Tournament coverage audit records currently unavailable from backend service.
               </div>
             )}
           </div>
 
           {/* Dataset Manifests Table */}
-          <div className="bg-white rounded-xl border border-[#31136C]/12 p-5 shadow-sm space-y-4">
-            <h3 className="text-sm font-bold text-[#31136C]">Parquet Dataset Manifests</h3>
+          <div className="bg-white rounded-xl border border-[#E7EAF0] p-5 shadow-sm space-y-4">
+            <h3 className="text-sm font-bold text-[#101D3A]">Parquet Dataset Manifests</h3>
             <div className="overflow-x-auto">
               <table className="w-full text-xs text-left">
-                <thead className="bg-white text-[#31136C]/70 uppercase font-mono border-b border-[#31136C]/12">
+                <thead className="bg-white text-[#52627A] uppercase font-mono border-b border-[#E7EAF0]">
                   <tr>
                     <th className="px-4 py-2.5">Dataset ID</th>
                     <th className="px-4 py-2.5">Source</th>
@@ -448,22 +448,22 @@ export default function AcquisitionPage() {
                 </thead>
                 <tbody className="divide-y divide-slate-100">
                   {datasets.map((d) => (
-                    <tr key={d.dataset_id} className="hover:hover:bg-[#31136C]/03 font-mono">
-                      <td className="px-4 py-3 font-bold text-[#31136C]">{d.dataset_id}</td>
-                      <td className="px-4 py-3 text-[#31136C]/70">{d.source_id}</td>
-                      <td className="px-4 py-3 text-[#31136C] font-bold">{d.total_matches}</td>
-                      <td className="px-4 py-3 text-[#31136C] font-bold">{d.total_deliveries}</td>
+                    <tr key={d.dataset_id} className="hover:hover:bg-[#101D3A]/03 font-mono">
+                      <td className="px-4 py-3 font-bold text-[#101D3A]">{d.dataset_id}</td>
+                      <td className="px-4 py-3 text-[#52627A]">{d.source_id}</td>
+                      <td className="px-4 py-3 text-[#101D3A] font-bold">{d.total_matches}</td>
+                      <td className="px-4 py-3 text-[#101D3A] font-bold">{d.total_deliveries}</td>
                       <td className="px-4 py-3">
-                        <span className="text-[#950460] bg-[#950460]/10 px-2 py-0.5 rounded border border-[#950460]/30">
+                        <span className="text-[#D4145A] bg-[#D4145A]/10 px-2 py-0.5 rounded border border-[#D4145A]/30">
                           {d.validation_status}
                         </span>
                       </td>
-                      <td className="px-4 py-3 text-[#31136C] font-bold">{d.completeness_percentage}%</td>
+                      <td className="px-4 py-3 text-[#101D3A] font-bold">{d.completeness_percentage}%</td>
                     </tr>
                   ))}
                   {datasets.length === 0 && (
                     <tr>
-                      <td colSpan={6} className="text-center py-6 text-[#31136C]/70 italic">
+                      <td colSpan={6} className="text-center py-6 text-[#52627A] italic">
                         No dataset manifests generated yet. Run ingestion via CLI or Upload.
                       </td>
                     </tr>
@@ -477,11 +477,11 @@ export default function AcquisitionPage() {
 
       {/* Tab 3: Run History */}
       {activeTab === "runs" && (
-        <div className="bg-white rounded-xl border border-[#31136C]/12 p-5 shadow-sm space-y-4">
+        <div className="bg-white rounded-xl border border-[#E7EAF0] p-5 shadow-sm space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-sm font-bold text-[#31136C]">Ingestion Run History</h3>
-              <p className="text-xs text-[#31136C]/70">
+              <h3 className="text-sm font-bold text-[#101D3A]">Ingestion Run History</h3>
+              <p className="text-xs text-[#52627A]">
                 Audited execution logs with execution durations, arithmetic validation checks, and SHA-256 hashes.
               </p>
             </div>
@@ -489,7 +489,7 @@ export default function AcquisitionPage() {
 
           <div className="overflow-x-auto">
             <table className="w-full text-xs text-left">
-              <thead className="bg-white text-[#31136C]/70 uppercase font-mono border-b border-[#31136C]/12">
+              <thead className="bg-white text-[#52627A] uppercase font-mono border-b border-[#E7EAF0]">
                 <tr>
                   <th className="px-4 py-2.5">Run ID</th>
                   <th className="px-4 py-2.5">Source</th>
@@ -502,26 +502,26 @@ export default function AcquisitionPage() {
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {runs.map((r) => (
-                  <tr key={r.run_id} className="hover:hover:bg-[#31136C]/03 font-mono">
-                    <td className="px-4 py-3 font-bold text-[#31136C]">{r.run_id}</td>
-                    <td className="px-4 py-3 text-[#31136C]/70">{r.source_id}</td>
-                    <td className="px-4 py-3 text-[#31136C]/70">{r.season}</td>
-                    <td className="px-4 py-3 text-[#31136C]/70">{r.duration_seconds}s</td>
+                  <tr key={r.run_id} className="hover:hover:bg-[#101D3A]/03 font-mono">
+                    <td className="px-4 py-3 font-bold text-[#101D3A]">{r.run_id}</td>
+                    <td className="px-4 py-3 text-[#52627A]">{r.source_id}</td>
+                    <td className="px-4 py-3 text-[#52627A]">{r.season}</td>
+                    <td className="px-4 py-3 text-[#52627A]">{r.duration_seconds}s</td>
                     <td className="px-4 py-3">
                       <span
                         className={`px-2 py-0.5 rounded text-[11px] font-bold ${
                           r.status === "COMPLETED"
-                            ? "bg-[#950460]/10 text-[#950460] border border-[#950460]/30"
-                            : "bg-[#950460]/10 text-[#950460] border border-[#950460]/30"
+                            ? "bg-[#D4145A]/10 text-[#D4145A] border border-[#D4145A]/30"
+                            : "bg-[#D4145A]/10 text-[#D4145A] border border-[#D4145A]/30"
                         }`}
                       >
                         {r.status}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-[#950460] font-bold">
+                    <td className="px-4 py-3 text-[#D4145A] font-bold">
                       {r.validation?.valid_records || 0} / {r.validation?.total_records || 0} ({r.validation?.completeness_percentage || 100}%)
                     </td>
-                    <td className="px-4 py-3 text-[#31136C]/70">{r.idempotent_skips}</td>
+                    <td className="px-4 py-3 text-[#52627A]">{r.idempotent_skips}</td>
                   </tr>
                 ))}
               </tbody>
@@ -532,10 +532,10 @@ export default function AcquisitionPage() {
 
       {/* Tab 4: Manual Upload */}
       {activeTab === "upload" && (
-        <div className="bg-white rounded-xl border border-[#31136C]/12 p-6 shadow-sm max-w-2xl mx-auto space-y-6">
+        <div className="bg-white rounded-xl border border-[#E7EAF0] p-6 shadow-sm max-w-2xl mx-auto space-y-6">
           <div>
-            <h3 className="text-base font-bold text-[#31136C]">Compliant Manual Dataset Import</h3>
-            <p className="text-xs text-[#31136C]/70 leading-relaxed mt-1">
+            <h3 className="text-base font-bold text-[#101D3A]">Compliant Manual Dataset Import</h3>
+            <p className="text-xs text-[#52627A] leading-relaxed mt-1">
               Authorized interface for uploading structured match scorecards, scouting notes, or CSV player registries.
               All uploads are checked for file size (&le; 20MB), assigned cryptographic SHA-256 hashes, and validated
               without automated web scraping.
@@ -543,8 +543,8 @@ export default function AcquisitionPage() {
           </div>
 
           <form onSubmit={handleUploadSubmit} className="space-y-4">
-            <div className="border-2 border-dashed border-[#31136C]/12 hover:border-[#31136C] transition-colors rounded-xl p-8 text-center hover:bg-[#31136C]/03 flex flex-col items-center justify-center">
-              <Upload size={32} className="text-[#31136C]/70 mb-2" />
+            <div className="border-2 border-dashed border-[#E7EAF0] hover:border-[#101D3A] transition-colors rounded-xl p-8 text-center hover:bg-[#101D3A]/03 flex flex-col items-center justify-center">
+              <Upload size={32} className="text-[#52627A] mb-2" />
               <input
                 type="file"
                 id="fileInput"
@@ -554,11 +554,11 @@ export default function AcquisitionPage() {
               />
               <label
                 htmlFor="fileInput"
-                className="cursor-pointer text-xs font-bold text-[#31136C] hover:underline mb-1"
+                className="cursor-pointer text-xs font-bold text-[#101D3A] hover:underline mb-1"
               >
                 {uploadFile ? uploadFile.name : "Select a .json or .csv match file"}
               </label>
-              <p className="text-[11px] text-[#31136C]/70">
+              <p className="text-[11px] text-[#52627A]">
                 Standard Cricsheet JSON or tabular CSV (Max 20MB)
               </p>
             </div>
@@ -566,16 +566,16 @@ export default function AcquisitionPage() {
             <button
               type="submit"
               disabled={!uploadFile || uploading}
-              className="w-full py-2.5 px-4 rounded-xl bg-[#31136C] hover:bg-[#31136C] text-white text-xs font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="w-full py-2.5 px-4 rounded-xl bg-[#101D3A] hover:bg-[#101D3A] text-white text-xs font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               {uploading ? (
                 <>
-                  <RefreshCw size={14} className="animate-spin text-[#31136C]" />
+                  <RefreshCw size={14} className="animate-spin text-[#101D3A]" />
                   <span>Validating & Hashing...</span>
                 </>
               ) : (
                 <>
-                  <CheckCircle2 size={14} className="text-[#950460]" />
+                  <CheckCircle2 size={14} className="text-[#D4145A]" />
                   <span>Execute Compliant Ingestion</span>
                 </>
               )}
@@ -583,14 +583,14 @@ export default function AcquisitionPage() {
           </form>
 
           {uploadResult && (
-            <div className="p-4 rounded-xl bg-white border border-[#31136C]/12 text-xs space-y-2 font-mono">
+            <div className="p-4 rounded-xl bg-white border border-[#E7EAF0] text-xs space-y-2 font-mono">
               <div className="flex items-center justify-between">
-                <span className="font-bold text-[#31136C]">Ingestion Audit Result:</span>
-                <span className="text-[#950460] font-bold">SHA-256 Verified</span>
+                <span className="font-bold text-[#101D3A]">Ingestion Audit Result:</span>
+                <span className="text-[#D4145A] font-bold">SHA-256 Verified</span>
               </div>
-              <p className="text-[#31136C]/70">{uploadResult.message}</p>
+              <p className="text-[#52627A]">{uploadResult.message}</p>
               {uploadResult.checksum_sha256 && (
-                <div className="text-[11px] text-[#31136C]/70 break-all bg-white p-2 rounded border border-[#31136C]/10">
+                <div className="text-[11px] text-[#52627A] break-all bg-white p-2 rounded border border-[#E7EAF0]">
                   Hash: {uploadResult.checksum_sha256}
                 </div>
               )}
