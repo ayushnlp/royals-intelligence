@@ -64,6 +64,7 @@ export default function DomesticIntelligencePage() {
   const [matchScorecard, setMatchScorecard] = useState<MatchScorecardResponse | null>(null);
   const [activeInningsIdx, setActiveInningsIdx] = useState(0);
   const [loadingScorecard, setLoadingScorecard] = useState(false);
+  const [scorecardError, setScorecardError] = useState<string | null>(null);
 
   // Player Discovery & Dossier State
   const [domesticPlayers, setDomesticPlayers] = useState<DomesticPlayerSummary[]>([]);
@@ -185,26 +186,43 @@ export default function DomesticIntelligencePage() {
   useEffect(() => {
     if (!selectedMatchId) {
       setMatchScorecard(null);
+      setScorecardError(null);
+      setLoadingScorecard(false);
       return;
     }
+
     let isCurrent = true;
+    setMatchScorecard(null);
+    setScorecardError(null);
+    setLoadingScorecard(true);
+
     async function loadCard() {
-      setLoadingScorecard(true);
       try {
         const card = await fetchMatchScorecard(selectedMatchId!);
         if (isCurrent) {
-          setMatchScorecard(card);
-          setActiveInningsIdx(0);
+          if (String(card.match_id) === String(selectedMatchId)) {
+            setMatchScorecard(card);
+            setActiveInningsIdx(0);
+            setScorecardError(null);
+          } else {
+            console.warn(`Scorecard match_id mismatch: expected ${selectedMatchId}, got ${card.match_id}`);
+            setScorecardError(`Scorecard match_id mismatch: expected ${selectedMatchId}, got ${card.match_id}`);
+            setMatchScorecard(null);
+          }
         }
-      } catch (err) {
+      } catch (err: any) {
         if (isCurrent) {
           console.warn("Failed to load match scorecard:", err);
+          setScorecardError(err?.message || `Match ${selectedMatchId} scorecard could not be retrieved.`);
           setMatchScorecard(null);
         }
       } finally {
-        if (isCurrent) setLoadingScorecard(false);
+        if (isCurrent) {
+          setLoadingScorecard(false);
+        }
       }
     }
+
     loadCard();
     return () => {
       isCurrent = false;
@@ -601,31 +619,69 @@ export default function DomesticIntelligencePage() {
             {/* Modal Header */}
             <div className="p-5 border-b border-[#E7EAF0] flex items-center justify-between bg-white sticky top-0 z-10">
               <div>
-                <span className="text-[10px] font-mono font-bold text-[#101D3A] uppercase tracking-wider">
-                  Verified Match Telemetry
+                <span className="text-[10px] font-mono font-bold text-[#E4005A] uppercase tracking-wider">
+                  Verified Match Telemetry • Match #{selectedMatchId}
                 </span>
-                <h3 className="text-lg font-extrabold text-[#101D3A]">
-                  {matchScorecard ? `${matchScorecard.home_team.name} vs ${matchScorecard.away_team.name}` : "Loading Scorecard..."}
+                <h3 className="text-lg font-extrabold text-[#17294B]">
+                  {loadingScorecard
+                    ? "Loading Scorecard..."
+                    : matchScorecard && String(matchScorecard.match_id) === String(selectedMatchId)
+                    ? `${matchScorecard.home_team.name} vs ${matchScorecard.away_team.name}`
+                    : scorecardError
+                    ? "Scorecard Unavailable"
+                    : "Match Scorecard"}
                 </h3>
-                {matchScorecard && (
-                  <p className="text-xs text-[#52627A] mt-0.5">
-                    {matchScorecard.venue_name}, {matchScorecard.venue_city} • {matchScorecard.match_date} • {matchScorecard.win_margin}
+                {matchScorecard && String(matchScorecard.match_id) === String(selectedMatchId) && (
+                  <p className="text-xs text-[#74658F] mt-0.5">
+                    {matchScorecard.competition_name} ({matchScorecard.season}) • {matchScorecard.venue_name}, {matchScorecard.venue_city} • {matchScorecard.match_date} • {matchScorecard.win_margin}
                   </p>
                 )}
               </div>
               <button
                 onClick={() => setSelectedMatchId(null)}
-                className="p-1.5 rounded-lg text-[#52627A] hover:text-[#52627A] hover:bg-[#F8E8EF] transition-colors"
+                className="p-1.5 rounded-lg text-[#74658F] hover:text-[#17294B] hover:bg-[#FCE8F0] transition-colors cursor-pointer"
               >
                 <X size={18} />
               </button>
             </div>
 
             {loadingScorecard ? (
-              <div className="p-12 text-center text-xs text-[#52627A] font-mono">
-                Extracting ball-by-ball match diagnostics...
+              <div className="p-12 text-center text-xs text-[#74658F] font-mono space-y-3">
+                <div className="w-8 h-8 border-2 border-[#E4005A] border-t-transparent rounded-full animate-spin mx-auto" />
+                <p>Extracting ball-by-ball match diagnostics for Match #{selectedMatchId}...</p>
               </div>
-            ) : matchScorecard && activeInnings ? (
+            ) : scorecardError ? (
+              <div className="p-8 text-center space-y-3">
+                <div className="w-10 h-10 rounded-full bg-[#FCE8F0] text-[#E4005A] flex items-center justify-center mx-auto">
+                  <AlertCircle size={20} />
+                </div>
+                <h4 className="text-sm font-bold text-[#17294B]">Unable to Load Scorecard</h4>
+                <p className="text-xs text-[#74658F] max-w-md mx-auto">{scorecardError}</p>
+                <button
+                  onClick={() => setSelectedMatchId(null)}
+                  className="mt-2 px-4 py-1.5 rounded-xl bg-[#17294B] text-white text-xs font-bold hover:bg-[#950460] transition-colors cursor-pointer"
+                >
+                  Close
+                </button>
+              </div>
+            ) : matchScorecard && String(matchScorecard.match_id) === String(selectedMatchId) && matchScorecard.innings.length === 0 ? (
+              <div className="p-8 text-center space-y-3">
+                <div className="w-10 h-10 rounded-full bg-[#EEF4FC] text-[#17294B] flex items-center justify-center mx-auto">
+                  <AlertCircle size={20} />
+                </div>
+                <h4 className="text-sm font-bold text-[#17294B]">Ball-by-Ball Scorecard Unavailable</h4>
+                <p className="text-xs text-[#74658F] max-w-md mx-auto">
+                  {matchScorecard.win_margin ? `Official Outcome: ${matchScorecard.win_margin}. ` : ""}
+                  No ball-by-ball delivery telemetry was recorded for this fixture (e.g. match was abandoned or washed out without play).
+                </p>
+                <button
+                  onClick={() => setSelectedMatchId(null)}
+                  className="mt-2 px-4 py-1.5 rounded-xl bg-[#17294B] text-white text-xs font-bold hover:bg-[#950460] transition-colors cursor-pointer"
+                >
+                  Close
+                </button>
+              </div>
+            ) : matchScorecard && String(matchScorecard.match_id) === String(selectedMatchId) && activeInnings ? (
               <div className="p-6 space-y-6">
                 {/* Innings Selector */}
                 <div className="flex items-center gap-2 border-b border-[#E7EAF0] pb-3">
@@ -633,10 +689,10 @@ export default function DomesticIntelligencePage() {
                     <button
                       key={inn.innings_number}
                       onClick={() => setActiveInningsIdx(idx)}
-                      className={`px-4 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                      className={`px-4 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                         activeInningsIdx === idx
-                          ? "bg-[#101D3A] text-white shadow-sm"
-                          : "bg-[#F8E8EF] text-[#52627A] hover:bg-[#F8E8EF]"
+                          ? "bg-[#17294B] text-white shadow-sm"
+                          : "bg-[#EEF4FC] text-[#17294B] hover:bg-[#FCE8F0]"
                       }`}
                     >
                       Innings {inn.innings_number}: {inn.batting_team_name} ({inn.total_runs}/{inn.wickets})
@@ -646,20 +702,20 @@ export default function DomesticIntelligencePage() {
 
                 {/* Phase Summaries Cards */}
                 <div>
-                  <h4 className="text-xs font-bold uppercase tracking-wider text-[#52627A] mb-3">
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-[#74658F] mb-3">
                     Phase-by-Phase Scoring Trajectory
                   </h4>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                     {activeInnings.phase_summaries.map((phase) => (
                       <div key={phase.phase_name} className="p-3 bg-white rounded-xl border border-[#E7EAF0]">
                         <div className="flex items-center justify-between mb-1">
-                          <span className="text-xs font-bold text-[#101D3A]">{phase.phase_name}</span>
-                          <span className="text-[10px] font-mono text-[#52627A]">{phase.overs_range}</span>
+                          <span className="text-xs font-bold text-[#17294B]">{phase.phase_name}</span>
+                          <span className="text-[10px] font-mono text-[#74658F]">{phase.overs_range}</span>
                         </div>
-                        <div className="text-xl font-black text-[#101D3A] my-1">
-                          {phase.runs} <span className="text-xs font-normal text-[#52627A]">runs / {phase.wickets} wkts</span>
+                        <div className="text-xl font-black text-[#17294B] my-1">
+                          {phase.runs} <span className="text-xs font-normal text-[#74658F]">runs / {phase.wickets} wkts</span>
                         </div>
-                        <div className="flex items-center justify-between text-[11px] text-[#52627A] pt-2 border-t border-[#E7EAF0]">
+                        <div className="flex items-center justify-between text-[11px] text-[#74658F] pt-2 border-t border-[#E7EAF0]">
                           <span>Run Rate: {phase.run_rate}</span>
                           <span>Boundary: {phase.boundary_runs} runs</span>
                         </div>
@@ -671,16 +727,16 @@ export default function DomesticIntelligencePage() {
                 {/* Batting Scorecard */}
                 <div>
                   <div className="flex items-center justify-between mb-2">
-                    <h4 className="text-xs font-bold uppercase tracking-wider text-[#52627A]">
+                    <h4 className="text-xs font-bold uppercase tracking-wider text-[#74658F]">
                       Batting Scorecard — {activeInnings.batting_team_name}
                     </h4>
-                    <span className="text-xs font-mono text-[#52627A]">
+                    <span className="text-xs font-mono text-[#74658F]">
                       Total: {activeInnings.total_runs}/{activeInnings.wickets} ({activeInnings.overs_completed} ov, RR {activeInnings.run_rate})
                     </span>
                   </div>
                   <div className="overflow-x-auto border border-[#E7EAF0] rounded-xl">
                     <table className="w-full text-left text-xs">
-                      <thead className="bg-white text-[#52627A] font-semibold border-b border-[#E7EAF0]">
+                      <thead className="bg-white text-[#74658F] font-semibold border-b border-[#E7EAF0]">
                         <tr>
                           <th className="py-2.5 px-3">Batter</th>
                           <th className="py-2.5 px-3">Dismissal</th>
@@ -694,35 +750,41 @@ export default function DomesticIntelligencePage() {
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-100">
-                        {activeInnings.batting_scorecards.map((b) => (
-                          <tr key={b.player_id} className="hover:bg-white/80">
-                            <td className="py-2.5 px-3 font-semibold text-[#101D3A] flex items-center gap-1.5">
+                        {activeInnings.batting_scorecards.map((b, bIdx) => (
+                          <tr
+                            key={b.player_id}
+                            className={cn(
+                              "transition-colors",
+                              bIdx % 2 === 0 ? "bg-[#FCE8F0]/30 hover:bg-[#FCE8F0]/60" : "bg-[#EEF4FC]/40 hover:bg-[#EEF4FC]/70"
+                            )}
+                          >
+                            <td className="py-2.5 px-3 font-semibold text-[#17294B] flex items-center gap-1.5">
                               {b.player_name}
                               {b.is_uncapped && (
-                                <span className="px-1.5 py-0.2 rounded text-[9px] font-mono font-bold bg-[#101D3A]/15 text-[#101D3A]">
+                                <span className="px-1.5 py-0.2 rounded text-[9px] font-mono font-bold bg-[#E4005A]/15 text-[#E4005A]">
                                   UNCAPPED
                                 </span>
                               )}
                             </td>
-                            <td className="py-2.5 px-3 text-[#52627A] text-[11px]">
+                            <td className="py-2.5 px-3 text-[#74658F] text-[11px]">
                               {b.is_out ? (
                                 <span>
                                   {b.dismissal_kind} {b.bowler_name ? `b ${b.bowler_name}` : ""}{" "}
                                   {b.fielder_name ? `c ${b.fielder_name}` : ""}
                                 </span>
                               ) : (
-                                <span className="font-semibold text-[#D4145A]">not out</span>
+                                <span className="font-semibold text-[#E4005A]">not out</span>
                               )}
                             </td>
-                            <td className="py-2.5 px-3 text-right font-extrabold text-[#101D3A]">{b.runs}</td>
-                            <td className="py-2.5 px-3 text-right text-[#52627A]">{b.balls_faced}</td>
-                            <td className="py-2.5 px-3 text-right text-[#52627A]">{b.fours}</td>
-                            <td className="py-2.5 px-3 text-right text-[#52627A]">{b.sixes}</td>
-                            <td className="py-2.5 px-3 text-right font-mono font-bold text-[#101D3A]">{b.strike_rate}</td>
-                            <td className="py-2.5 px-3 text-right font-mono text-[#52627A] text-[11px]">
+                            <td className="py-2.5 px-3 text-right font-extrabold text-[#17294B]">{b.runs}</td>
+                            <td className="py-2.5 px-3 text-right text-[#74658F]">{b.balls_faced}</td>
+                            <td className="py-2.5 px-3 text-right text-[#74658F]">{b.fours}</td>
+                            <td className="py-2.5 px-3 text-right text-[#74658F]">{b.sixes}</td>
+                            <td className="py-2.5 px-3 text-right font-mono font-bold text-[#17294B]">{b.strike_rate}</td>
+                            <td className="py-2.5 px-3 text-right font-mono text-[#74658F] text-[11px]">
                               {b.powerplay_runs !== undefined ? `${b.powerplay_runs}/${b.powerplay_balls}` : "-"}
                             </td>
-                            <td className="py-2.5 px-3 text-right font-mono text-[#52627A] text-[11px]">
+                            <td className="py-2.5 px-3 text-right font-mono text-[#74658F] text-[11px]">
                               {b.death_runs !== undefined ? `${b.death_runs}/${b.death_balls}` : "-"}
                             </td>
                           </tr>
@@ -734,12 +796,12 @@ export default function DomesticIntelligencePage() {
 
                 {/* Bowling Scorecard */}
                 <div>
-                  <h4 className="text-xs font-bold uppercase tracking-wider text-[#52627A] mb-2">
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-[#74658F] mb-2">
                     Bowling Scorecard — {activeInnings.bowling_team_name}
                   </h4>
                   <div className="overflow-x-auto border border-[#E7EAF0] rounded-xl">
                     <table className="w-full text-left text-xs">
-                      <thead className="bg-white text-[#52627A] font-semibold border-b border-[#E7EAF0]">
+                      <thead className="bg-white text-[#74658F] font-semibold border-b border-[#E7EAF0]">
                         <tr>
                           <th className="py-2.5 px-3">Bowler</th>
                           <th className="py-2.5 px-3 text-right">O</th>
@@ -752,23 +814,29 @@ export default function DomesticIntelligencePage() {
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-100">
-                        {activeInnings.bowling_scorecards.map((bw) => (
-                          <tr key={bw.player_id} className="hover:bg-white/80">
-                            <td className="py-2.5 px-3 font-semibold text-[#101D3A] flex items-center gap-1.5">
+                        {activeInnings.bowling_scorecards.map((bw, bwIdx) => (
+                          <tr
+                            key={bw.player_id}
+                            className={cn(
+                              "transition-colors",
+                              bwIdx % 2 === 0 ? "bg-[#FCE8F0]/30 hover:bg-[#FCE8F0]/60" : "bg-[#EEF4FC]/40 hover:bg-[#EEF4FC]/70"
+                            )}
+                          >
+                            <td className="py-2.5 px-3 font-semibold text-[#17294B] flex items-center gap-1.5">
                               {bw.player_name}
                               {bw.is_uncapped && (
-                                <span className="px-1.5 py-0.2 rounded text-[9px] font-mono font-bold bg-[#101D3A]/15 text-[#101D3A]">
+                                <span className="px-1.5 py-0.2 rounded text-[9px] font-mono font-bold bg-[#E4005A]/15 text-[#E4005A]">
                                   UNCAPPED
                                 </span>
                               )}
                             </td>
-                            <td className="py-2.5 px-3 text-right font-mono text-[#101D3A]">{bw.overs}</td>
-                            <td className="py-2.5 px-3 text-right text-[#52627A]">{bw.maidens}</td>
-                            <td className="py-2.5 px-3 text-right font-extrabold text-[#101D3A]">{bw.runs_conceded}</td>
-                            <td className="py-2.5 px-3 text-right font-extrabold text-[#101D3A]">{bw.bowler_wickets}</td>
-                            <td className="py-2.5 px-3 text-right font-mono font-bold text-[#101D3A]">{bw.economy_rate}</td>
-                            <td className="py-2.5 px-3 text-right text-[#52627A]">{bw.dot_balls ?? 0}</td>
-                            <td className="py-2.5 px-3 text-right text-[#52627A] font-mono text-[11px]">
+                            <td className="py-2.5 px-3 text-right font-mono text-[#17294B]">{bw.overs}</td>
+                            <td className="py-2.5 px-3 text-right text-[#74658F]">{bw.maidens}</td>
+                            <td className="py-2.5 px-3 text-right font-extrabold text-[#17294B]">{bw.runs_conceded}</td>
+                            <td className="py-2.5 px-3 text-right font-extrabold text-[#17294B]">{bw.bowler_wickets}</td>
+                            <td className="py-2.5 px-3 text-right font-mono font-bold text-[#17294B]">{bw.economy_rate}</td>
+                            <td className="py-2.5 px-3 text-right text-[#74658F]">{bw.dot_balls ?? 0}</td>
+                            <td className="py-2.5 px-3 text-right text-[#74658F] font-mono text-[11px]">
                               w:{bw.wides} nb:{bw.noballs}
                             </td>
                           </tr>
@@ -777,15 +845,70 @@ export default function DomesticIntelligencePage() {
                     </table>
                   </div>
                 </div>
+
+                {/* Fall of Wickets & Partnerships Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Fall of Wickets */}
+                  {activeInnings.fall_of_wickets && activeInnings.fall_of_wickets.length > 0 && (
+                    <div className="p-4 bg-white rounded-xl border border-[#E7EAF0] space-y-2">
+                      <h4 className="text-xs font-bold uppercase tracking-wider text-[#74658F]">
+                        Fall of Wickets
+                      </h4>
+                      <div className="space-y-1.5 max-h-48 overflow-y-auto">
+                        {activeInnings.fall_of_wickets.map((f) => (
+                          <div
+                            key={f.wicket_number}
+                            className="flex items-center justify-between text-xs py-1 px-2 rounded bg-[#EEF4FC]/30 text-[#17294B]"
+                          >
+                            <span className="font-mono text-[11px] font-bold text-[#E4005A]">
+                              {f.wicket_number}-{f.runs}
+                            </span>
+                            <span className="text-[#52627A] truncate max-w-[140px]">{f.batter_out_name}</span>
+                            <span className="font-mono text-[10px] text-[#74658F]">{f.over_display} ov</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Key Partnerships */}
+                  {activeInnings.partnerships && activeInnings.partnerships.length > 0 && (
+                    <div className="p-4 bg-white rounded-xl border border-[#E7EAF0] space-y-2">
+                      <h4 className="text-xs font-bold uppercase tracking-wider text-[#74658F]">
+                        Batting Partnerships
+                      </h4>
+                      <div className="space-y-1.5 max-h-48 overflow-y-auto">
+                        {activeInnings.partnerships.map((p) => (
+                          <div
+                            key={p.wicket_number}
+                            className="flex items-center justify-between text-xs py-1 px-2 rounded bg-[#FCE8F0]/30 text-[#17294B]"
+                          >
+                            <span className="font-mono text-[11px] font-bold text-[#950460]">
+                              Wkt {p.wicket_number}: {p.runs} ({p.balls}b)
+                            </span>
+                            <span className="text-[#52627A] text-[11px] truncate max-w-[150px]">
+                              {p.batter_1_name} & {p.batter_2_name}
+                            </span>
+                            {p.is_unbroken && (
+                              <span className="text-[9px] font-bold font-mono px-1 rounded bg-[#E4005A]/10 text-[#E4005A]">
+                                UNBROKEN
+                              </span>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
             ) : null}
 
             {/* Modal Footer */}
-            <div className="p-4 bg-white border-t border-[#E7EAF0] flex justify-between items-center text-xs text-[#52627A]">
+            <div className="p-4 bg-white border-t border-[#E7EAF0] flex justify-between items-center text-xs text-[#74658F]">
               <span className="font-mono text-[11px]">Provenance: Rajasthan Royals Analytics Pipeline (Stage 3)</span>
               <button
                 onClick={() => setSelectedMatchId(null)}
-                className="px-4 py-1.5 rounded-lg bg-[#F8E8EF] text-[#101D3A] font-bold hover:bg-[#101D3A]/20 transition-colors"
+                className="px-4 py-1.5 rounded-lg bg-[#17294B] text-white font-bold hover:bg-[#950460] transition-colors cursor-pointer"
               >
                 Close
               </button>
