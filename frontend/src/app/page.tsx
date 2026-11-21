@@ -55,10 +55,9 @@ export default function HomePage() {
           </span>
         </div>
 
-        {/* Badge: SEASON 02 */}
+        {/* Label: SEASON 02 */}
         <div className="mb-3 sm:mb-4">
-          <span className="inline-flex items-center gap-2.5 px-4.5 py-1.5 rounded-full text-xs sm:text-sm font-mono font-bold tracking-wider bg-[#FCE8F0] text-[#E4005A] border border-[#E4005A]/35 shadow-2xs">
-            <span className="w-2 h-2 rounded-full bg-[#E4005A]" />
+          <span className="text-xs sm:text-sm font-mono font-bold tracking-wider text-[#17294B] uppercase">
             SEASON 02
           </span>
         </div>
@@ -103,17 +102,17 @@ export default function HomePage() {
       {/* =================================================================== */}
       {/* 2. UNIFIED SEGMENTED MODULE NAVIGATION BAR — BOTTOM-CENTERED */}
       {/* =================================================================== */}
-      <section className="w-full flex justify-center pt-3 sm:pt-5 pb-1">
+      <section className="w-full flex justify-center pt-3 sm:pt-4 pb-1">
         <nav
           aria-label="Module Quick Navigation"
-          className="inline-flex items-center p-1 sm:p-1.5 rounded-full bg-[#FCE8F0]/40 border border-[#E7EAF0] shadow-2xs max-w-full overflow-x-auto"
+          className="inline-flex items-center p-1 rounded-full bg-[#FCE8F0]/50 border border-[#E7EAF0] shadow-2xs max-w-full"
         >
           {featureCards.map((card) => {
             return (
               <Link
                 key={card.title}
                 href={card.href}
-                className="px-3 sm:px-4 lg:px-5 py-2 sm:py-2.5 rounded-full text-xs sm:text-[13px] font-heading font-extrabold text-[#17294B] hover:text-[#E4005A] hover:bg-white active:bg-white/90 transition-all duration-150 whitespace-nowrap cursor-pointer text-center outline-none focus-visible:ring-2 focus-visible:ring-[#E4005A]"
+                className="px-2.5 sm:px-3 lg:px-3.5 py-1.5 sm:py-2 rounded-full text-[11px] sm:text-xs font-heading font-extrabold text-[#17294B] hover:text-[#E4005A] hover:bg-white active:bg-white/90 transition-all duration-150 whitespace-nowrap cursor-pointer text-center outline-none focus-visible:ring-2 focus-visible:ring-[#E4005A]"
               >
                 {card.title}
               </Link>

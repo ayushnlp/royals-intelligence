@@ -236,27 +236,21 @@ export default function VenuePitchIntelligencePage() {
             <button
               key={v.venue_code}
               onClick={() => setSelectedVenueCode(v.venue_code)}
-              className={`flex-shrink-0 px-4 py-2.5 rounded-xl border text-left transition-all ${
+              className={`flex-shrink-0 px-4 py-2.5 rounded-xl border-2 text-left transition-all ${
                 selectedVenueCode === v.venue_code
-                  ? "bg-[#FCE8F0] text-[#17294B] border-[#E4005A] ring-2 ring-[#E4005A]/30 shadow-sm"
-                  : "bg-white text-[#17294B] border-[#E7EAF0] hover:border-[#E4005A]/30"
+                  ? "bg-[#FCE8F0] text-[#17294B] border-[#E4005A] shadow-sm"
+                  : "bg-white text-[#17294B] border-[#E7EAF0] hover:border-[#E4005A]/40"
               }`}
             >
               <div className="flex items-center justify-between gap-3">
-                <span className="font-bold text-xs">{v.name}</span>
+                <span className="font-bold text-xs text-[#17294B]">{v.name}</span>
                 {v.is_rr_home && (
-                  <span
-                    className={`px-1.5 py-0.5 rounded text-[9px] font-mono font-bold ${
-                      selectedVenueCode === v.venue_code
-                        ? "bg-[#E4005A] text-white"
-                        : "bg-[#FCE8F0] text-[#E4005A] border border-[#E4005A]/20"
-                    }`}
-                  >
+                  <span className="px-1.5 py-0.5 rounded text-[9px] font-mono font-bold bg-[#E4005A] text-white shrink-0">
                     RR HOME
                   </span>
                 )}
               </div>
-              <div className="text-[11px] text-[#52627A] mt-0.5">
+              <div className={`text-[11px] mt-0.5 ${selectedVenueCode === v.venue_code ? "text-[#17294B] font-medium" : "text-[#52627A]"}`}>
                 {v.city} • {v.matches_hosted_count} matches
               </div>
             </button>

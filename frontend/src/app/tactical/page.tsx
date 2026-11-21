@@ -356,77 +356,77 @@ export default function TacticalIntelligencePage() {
       {/* ------------------------------------------------------------------- */}
       {/* 2. Open Editorial Telemetry Strip (Inline Metric Groups) */}
       {/* ------------------------------------------------------------------- */}
-      <section className="py-5 border-y border-[#E7EAF0]">
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6 md:gap-4">
+      <section className="py-6 sm:py-7 border-y border-[#E7EAF0]">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 sm:gap-6 lg:gap-5 xl:gap-6">
           <div className="space-y-1">
-            <span className="text-[10px] font-mono uppercase tracking-wider text-[#52627A] font-semibold block">
+            <span className="text-xs sm:text-[12.5px] font-mono font-bold uppercase tracking-wider text-[#52627A] block mb-1">
               Total Deliveries
             </span>
-            <div className="text-2xl md:text-3xl font-extrabold text-[#E4005A] font-mono tracking-tight flex items-baseline gap-1.5">
+            <div className="text-2xl sm:text-[26px] lg:text-[24px] xl:text-[28px] font-extrabold text-[#17294B] font-mono tracking-tight flex items-baseline gap-1.5 leading-tight my-1">
               <span>{summary ? summary.total_deliveries.toLocaleString() : "—"}</span>
-              <span className="w-1.5 h-1.5 rounded-full bg-[#E4005A]" />
+              <span className="w-1.5 h-1.5 rounded-full bg-[#17294B]" />
             </div>
-            <p className="text-[11px] text-[#52627A] truncate">
+            <p className="text-xs sm:text-[13px] text-[#52627A] leading-snug">
               {summary ? `${summary.legal_deliveries.toLocaleString()} legal deliveries` : "—"}
             </p>
           </div>
 
           <div className="space-y-1">
-            <span className="text-[10px] font-mono uppercase tracking-wider text-[#52627A] font-semibold block">
+            <span className="text-xs sm:text-[12.5px] font-mono font-bold uppercase tracking-wider text-[#52627A] block mb-1">
               Matches Covered
             </span>
-            <div className="text-2xl md:text-3xl font-extrabold text-[#E4005A] font-mono tracking-tight">
+            <div className="text-2xl sm:text-[26px] lg:text-[24px] xl:text-[28px] font-extrabold text-[#17294B] font-mono tracking-tight leading-tight my-1">
               {summary ? summary.total_matches_with_deliveries : "—"}
             </div>
-            <p className="text-[11px] text-[#52627A] truncate">
+            <p className="text-xs sm:text-[13px] text-[#52627A] leading-snug">
               {summary ? "Matches with deliveries indexed" : "—"}
             </p>
           </div>
 
           <div className="space-y-1">
-            <span className="text-[10px] font-mono uppercase tracking-wider text-[#52627A] font-semibold block">
+            <span className="text-xs sm:text-[12.5px] font-mono font-bold uppercase tracking-wider text-[#52627A] block mb-1">
               Runs Off Bat
             </span>
-            <div className="text-2xl md:text-3xl font-extrabold text-[#E4005A] font-mono tracking-tight">
+            <div className="text-2xl sm:text-[26px] lg:text-[24px] xl:text-[28px] font-extrabold text-[#17294B] font-mono tracking-tight leading-tight my-1">
               {summary ? summary.total_runs_off_bat.toLocaleString() : "—"}
             </div>
-            <p className="text-[11px] text-[#52627A] truncate">
+            <p className="text-xs sm:text-[13px] text-[#52627A] leading-snug">
               Run rate: {summary ? `${summary.overall_run_rate_per_6_balls.toFixed(2)} rpo` : "—"}
             </p>
           </div>
 
           <div className="space-y-1">
-            <span className="text-[10px] font-mono uppercase tracking-wider text-[#52627A] font-semibold block">
+            <span className="text-xs sm:text-[12.5px] font-mono font-bold uppercase tracking-wider text-[#52627A] block mb-1">
               Total Wickets
             </span>
-            <div className="text-2xl md:text-3xl font-extrabold text-[#E4005A] font-mono tracking-tight">
+            <div className="text-2xl sm:text-[26px] lg:text-[24px] xl:text-[28px] font-extrabold text-[#17294B] font-mono tracking-tight leading-tight my-1">
               {summary ? summary.total_wickets_fallen.toLocaleString() : "—"}
             </div>
-            <p className="text-[11px] text-[#52627A] truncate">
+            <p className="text-xs sm:text-[13px] text-[#52627A] leading-snug">
               {summary ? `${summary.total_bowler_wickets.toLocaleString()} bowler wickets` : "—"}
             </p>
           </div>
 
           <div className="space-y-1">
-            <span className="text-[10px] font-mono uppercase tracking-wider text-[#52627A] font-semibold block">
+            <span className="text-xs sm:text-[12.5px] font-mono font-bold uppercase tracking-wider text-[#52627A] block mb-1">
               Active Players
             </span>
-            <div className="text-2xl md:text-3xl font-extrabold text-[#E4005A] font-mono tracking-tight">
+            <div className="text-2xl sm:text-[26px] lg:text-[24px] xl:text-[28px] font-extrabold text-[#17294B] font-mono tracking-tight leading-tight my-1">
               {summary ? `${summary.total_unique_strikers} / ${summary.total_unique_bowlers}` : "—"}
             </div>
-            <p className="text-[11px] text-[#52627A] truncate">
+            <p className="text-xs sm:text-[13px] text-[#52627A] leading-snug">
               Batters / Bowlers mapped
             </p>
           </div>
 
           <div className="space-y-1">
-            <span className="text-[10px] font-mono uppercase tracking-wider text-[#52627A] font-semibold block">
+            <span className="text-xs sm:text-[12.5px] font-mono font-bold uppercase tracking-wider text-[#52627A] block mb-1">
               Radar Speeds
             </span>
-            <div className="text-2xl md:text-3xl font-extrabold text-[#E4005A] font-mono tracking-tight">
+            <div className="text-2xl sm:text-[26px] lg:text-[24px] xl:text-[28px] font-extrabold text-[#17294B] font-mono tracking-tight leading-tight my-1">
               {summary ? summary.valid_radar_speed_records.toLocaleString() : "—"}
             </div>
-            <p className="text-[11px] text-[#E4005A] font-medium truncate">
+            <p className="text-xs sm:text-[13px] text-[#17294B] font-medium leading-snug">
               {summary ? `${((summary.valid_radar_speed_records / summary.total_deliveries) * 100).toFixed(1)}% sensor coverage` : "—"}
             </p>
           </div>

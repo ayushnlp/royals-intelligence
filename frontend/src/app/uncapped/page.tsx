@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
-import Link from "next/link";
 import {
   UncappedOverviewResponse,
   UncappedLeaderboardResponse,
@@ -22,7 +21,6 @@ import {
   FileText,
   RefreshCw,
   Crosshair,
-  ArrowRight,
   CheckCircle2,
   AlertTriangle,
   SlidersHorizontal,
@@ -173,24 +171,6 @@ export default function UncappedIntelligencePage() {
               Ranked under empirical high-pressure scenarios (&gt;1.50 Required Run Rate, middle/death overs, run-chases)
               with Empirical Bayes shrinkage and 1-SE conservative credible bounds.
             </p>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-3 shrink-0">
-            <Link
-              href="/pressure"
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#17294B] text-white text-xs font-semibold hover:bg-[#17294B] transition-colors shadow-soft"
-            >
-              <Shield size={14} className="text-[#E4005A]" />
-              <span>Official Global Top 10</span>
-              <ArrowRight size={13} className="text-[#17294B]/30" />
-            </Link>
-            <Link
-              href="/domestic"
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-white border border-[#E7EAF0] text-[#17294B] text-xs font-semibold hover:bg-white transition-colors shadow-soft"
-            >
-              <Sparkles size={14} className="text-[#E4005A]" />
-              <span>Domestic Match Dossiers</span>
-            </Link>
           </div>
         </div>
       </section>

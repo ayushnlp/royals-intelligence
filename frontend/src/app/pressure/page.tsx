@@ -183,76 +183,76 @@ export default function PressureIntelligencePage() {
       {/* ------------------------------------------------------------------- */}
       {/* 2. Open Editorial Telemetry Strip (No Card Boxes) */}
       {/* ------------------------------------------------------------------- */}
-      <section className="py-5 border-y border-[#E7EAF0]">
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
+      <section className="py-6 sm:py-7 border-y border-[#E7EAF0]">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 sm:gap-6 lg:gap-5 xl:gap-6">
           <div>
-            <span className="text-[11px] font-mono uppercase tracking-wider text-[#52627A] block mb-1">
+            <span className="text-xs sm:text-[12.5px] font-mono font-bold uppercase tracking-wider text-[#52627A] block mb-1.5">
               Strict Pressure Balls
             </span>
-            <div className="text-xl font-extrabold text-[#E4005A] font-mono tracking-tight">
+            <div className="text-2xl sm:text-[26px] lg:text-[24px] xl:text-[28px] font-extrabold text-[#17294B] font-mono tracking-tight leading-tight my-1">
               {overview ? overview.strict_pressure_bowling_balls.toLocaleString() : "—"}
             </div>
-            <p className="text-xs text-[#52627A] mt-0.5">
+            <p className="text-xs sm:text-[13px] text-[#52627A] mt-1 leading-snug">
               31,163 Batting Pressure
             </p>
           </div>
 
           <div>
-            <span className="text-[11px] font-mono uppercase tracking-wider text-[#52627A] block mb-1">
+            <span className="text-xs sm:text-[12.5px] font-mono font-bold uppercase tracking-wider text-[#52627A] block mb-1.5">
               Death Concentration
             </span>
-            <div className="text-xl font-extrabold text-[#E4005A] font-mono tracking-tight">
+            <div className="text-2xl sm:text-[26px] lg:text-[24px] xl:text-[28px] font-extrabold text-[#17294B] font-mono tracking-tight leading-tight my-1">
               {overview ? `${overview.death_overs_bowling_pressure_share_pct}%` : "—"}
             </div>
-            <p className="text-xs text-[#52627A] mt-0.5">
+            <p className="text-xs sm:text-[13px] text-[#52627A] mt-1 leading-snug">
               Overs 16–20 Pressure Share
             </p>
           </div>
 
           <div>
-            <span className="text-[11px] font-mono uppercase tracking-wider text-[#52627A] block mb-1">
+            <span className="text-xs sm:text-[12.5px] font-mono font-bold uppercase tracking-wider text-[#52627A] block mb-1.5">
               Candidate Scope
             </span>
-            <div className="text-xl font-extrabold text-[#E4005A] font-mono tracking-tight">
+            <div className="text-2xl sm:text-[26px] lg:text-[24px] xl:text-[28px] font-extrabold text-[#17294B] font-mono tracking-tight leading-tight my-1">
               {overview ? `${overview.total_evaluated_batters} / ${overview.total_evaluated_bowlers}` : "—"}
             </div>
-            <p className="text-xs text-[#52627A] mt-0.5">
+            <p className="text-xs sm:text-[13px] text-[#52627A] mt-1 leading-snug">
               Batters / Bowlers Evaluated
             </p>
           </div>
 
           <div>
-            <span className="text-[11px] font-mono uppercase tracking-wider text-[#52627A] block mb-1">
+            <span className="text-xs sm:text-[12.5px] font-mono font-bold uppercase tracking-wider text-[#52627A] block mb-1.5">
               Sample Size Gate
             </span>
-            <div className="text-xl font-extrabold text-[#E4005A] font-mono tracking-tight">
+            <div className="text-2xl sm:text-[26px] lg:text-[24px] xl:text-[28px] font-extrabold text-[#17294B] font-mono tracking-tight leading-tight my-1">
               &ge; 60 Balls
             </div>
-            <p className="text-xs text-[#52627A] mt-0.5">
+            <p className="text-xs sm:text-[13px] text-[#52627A] mt-1 leading-snug">
               Strict official qualification gate
             </p>
           </div>
 
           <div>
-            <span className="text-[11px] font-mono uppercase tracking-wider text-[#52627A] block mb-1">
+            <span className="text-xs sm:text-[12.5px] font-mono font-bold uppercase tracking-wider text-[#52627A] block mb-1.5">
               Baseline Strata
             </span>
-            <div className="text-xl font-extrabold text-[#E4005A] font-mono tracking-tight">
+            <div className="text-2xl sm:text-[26px] lg:text-[24px] xl:text-[28px] font-extrabold text-[#17294B] font-mono tracking-tight leading-tight my-1">
               12 Cells
             </div>
-            <p className="text-xs text-[#52627A] mt-0.5">
+            <p className="text-xs sm:text-[13px] text-[#52627A] mt-1 leading-snug">
               Phase &times; Tier &times; Innings
             </p>
           </div>
 
           <div>
-            <span className="text-[11px] font-mono uppercase tracking-wider text-[#52627A] block mb-1">
+            <span className="text-xs sm:text-[12.5px] font-mono font-bold uppercase tracking-wider text-[#52627A] block mb-1.5">
               Governing Metric
             </span>
-            <div className="text-xl font-extrabold text-[#E4005A] font-mono tracking-tight">
+            <div className="text-2xl sm:text-[26px] lg:text-[24px] xl:text-[28px] font-extrabold text-[#17294B] font-mono tracking-tight leading-tight my-1">
               1-SE Bound
             </div>
-            <p className="text-xs text-[#52627A] mt-0.5">
+            <p className="text-xs sm:text-[13px] text-[#52627A] mt-1 leading-snug">
               Conservative PRI &minus; 1.0 SE
             </p>
           </div>

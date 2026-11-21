@@ -161,58 +161,45 @@ export default function OverviewPage() {
       {/* ------------------------------------------------------------------- */}
       {/* 2. Editorial Telemetry Strip */}
       {/* ------------------------------------------------------------------- */}
-      <section className="py-5 border-y border-[#E7EAF0]">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 lg:gap-6">
-          <div>
-            <span className="text-xs sm:text-[13px] font-semibold uppercase tracking-wider text-[#52627A] block mb-1">
+      <section className="py-6 sm:py-7 lg:py-8 border-y border-[#E7EAF0]">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 lg:gap-10">
+          <div className="flex flex-col">
+            <span className="text-xs sm:text-sm font-bold uppercase tracking-wider text-[#52627A] block mb-1.5">
               Controlling Data Pack
             </span>
-            <div className="text-2xl sm:text-[28px] lg:text-[30px] font-extrabold text-[#E4005A] font-mono tracking-tight leading-tight my-1">
+            <div className="text-2xl sm:text-3xl lg:text-[34px] xl:text-[36px] font-extrabold text-[#17294B] font-mono tracking-tight leading-tight my-1.5 whitespace-nowrap">
               {pressureOverview?.total_deliveries ? pressureOverview.total_deliveries.toLocaleString() : "—"}
             </div>
-            <p className="text-xs sm:text-[13px] text-[#52627A] mt-1 leading-snug">
+            <p className="text-xs sm:text-[13.5px] text-[#52627A] mt-1.5 leading-snug">
               {pressureOverview
                 ? `Deliveries across ${pressureOverview.matches_with_deliveries + pressureOverview.reconciled_abandoned_matches} matches (${pressureOverview.total_competitions} tournaments)`
                 : "Awaiting backend telemetry"}
             </p>
           </div>
 
-          <div>
-            <span className="text-xs sm:text-[13px] font-semibold uppercase tracking-wider text-[#52627A] block mb-1">
+          <div className="flex flex-col">
+            <span className="text-xs sm:text-sm font-bold uppercase tracking-wider text-[#52627A] block mb-1.5">
               Official Deliverables
             </span>
-            <div className="text-2xl sm:text-[28px] lg:text-[30px] font-extrabold text-[#E4005A] font-mono tracking-tight leading-tight my-1 whitespace-nowrap">
+            <div className="text-2xl sm:text-3xl lg:text-[34px] xl:text-[36px] font-extrabold text-[#17294B] font-mono tracking-tight leading-tight my-1.5 whitespace-nowrap">
               Top 10 / Top 10
             </div>
-            <p className="text-xs sm:text-[13px] text-[#52627A] mt-1 leading-snug">
+            <p className="text-xs sm:text-[13.5px] text-[#52627A] mt-1.5 leading-snug">
               1-SE Conservative lower bounds (100% qualified)
             </p>
           </div>
 
-          <div>
-            <span className="text-xs sm:text-[13px] font-semibold uppercase tracking-wider text-[#52627A] block mb-1">
+          <div className="flex flex-col">
+            <span className="text-xs sm:text-sm font-bold uppercase tracking-wider text-[#52627A] block mb-1.5">
               Uncapped Domestic Intelligence
             </span>
-            <div className="text-2xl sm:text-[28px] lg:text-[30px] font-extrabold text-[#E4005A] font-mono tracking-tight leading-tight my-1">
+            <div className="text-2xl sm:text-3xl lg:text-[34px] xl:text-[36px] font-extrabold text-[#17294B] font-mono tracking-tight leading-tight my-1.5 whitespace-nowrap">
               {uncappedOverview
                 ? `${uncappedOverview.total_verified_uncapped_batters + uncappedOverview.total_verified_uncapped_bowlers} Verified`
                 : "—"}
             </div>
-            <p className="text-xs sm:text-[13px] text-[#52627A] mt-1 leading-snug">
+            <p className="text-xs sm:text-[13.5px] text-[#52627A] mt-1.5 leading-snug">
               Certified 0 senior caps in AUCTION-02 ledger
-            </p>
-          </div>
-
-          <div>
-            <span className="text-xs sm:text-[13px] font-semibold uppercase tracking-wider text-[#52627A] block mb-1">
-              Verification Health
-            </span>
-            <div className="text-xl sm:text-2xl lg:text-[26px] font-extrabold text-[#E4005A] font-mono tracking-tight flex items-center gap-2 leading-tight my-1 whitespace-nowrap">
-              <span>{isLive ? "Engine Online" : "Service Standby"}</span>
-              <span className={`w-2.5 h-2.5 rounded-full shrink-0 ${isLive ? "bg-[#E4005A] animate-pulse" : "bg-[#E4005A]"}`} />
-            </div>
-            <p className="text-xs sm:text-[13px] text-[#52627A] mt-1 leading-snug">
-              {isLive ? `FastAPI v${health?.version || "0.1.0"} active` : "Backend service awaiting initialization"}
             </p>
           </div>
         </div>
