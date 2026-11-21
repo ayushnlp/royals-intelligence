@@ -43,125 +43,99 @@ export default function HomePage() {
   ];
 
   return (
-    <div className="min-h-screen lg:h-screen lg:max-h-screen flex flex-col bg-white text-[#17294B] overflow-x-hidden selection:bg-[#E4005A]/20 selection:text-[#17294B]">
+    <div className="w-full space-y-8 sm:space-y-10 py-2 sm:py-4">
       {/* =================================================================== */}
-      {/* 1. HEADER — AUTHENTIC RAJASTHAN ROYALS BRANDING */}
+      {/* 1. HERO SECTION — Central anchor with official RR branding & Poppins */}
       {/* =================================================================== */}
-      <header className="h-14 sm:h-16 shrink-0 bg-white border-b border-[#E7EAF0] px-4 sm:px-6 lg:px-8 flex items-center justify-between z-30">
-        {/* Left: Pure Brand Text */}
-        <Link
-          href="/"
-          className="font-heading font-extrabold text-base sm:text-lg tracking-tight text-[#17294B] hover:text-[#E4005A] transition-colors"
-        >
-          ROYALS INTELLIGENCE
-        </Link>
+      <section className="flex flex-col items-center text-center pt-2 sm:pt-4 pb-2">
+        {/* Eyebrow: ROYALS INTELLIGENCE */}
+        <div className="mb-2">
+          <span className="font-heading font-extrabold text-xs sm:text-[13px] tracking-[0.28em] text-[#17294B] uppercase">
+            ROYALS INTELLIGENCE
+          </span>
+        </div>
 
-        {/* Right: Prominent Header Explore Button */}
-        <Link
-          href="/overview"
-          className="group inline-flex items-center gap-2 px-4 py-2 sm:px-5 sm:py-2.5 rounded-xl bg-[#17294B] hover:bg-[#950460] text-white text-xs sm:text-[13px] font-bold tracking-wider transition-all duration-200 shadow-md hover:shadow-lg hover:scale-[1.02] active:scale-[0.98]"
-        >
-          <span>EXPLORE INTELLIGENCE</span>
-          <ArrowRight size={14} className="text-[#E4005A] group-hover:text-white transition-colors group-hover:translate-x-0.5" />
-        </Link>
-      </header>
+        {/* Badge: SEASON 02 */}
+        <div className="mb-2.5">
+          <span className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full text-xs font-mono font-bold tracking-wider bg-[#FCE8F0] text-[#E4005A] border border-[#E4005A]/30 shadow-2xs">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#E4005A]" />
+            SEASON 02
+          </span>
+        </div>
 
-      {/* =================================================================== */}
-      {/* 2. MAIN VIEWPORT CONTENT CONTAINER */}
-      {/* =================================================================== */}
-      <main className="flex-1 flex flex-col justify-between px-4 sm:px-6 lg:px-8 py-2 sm:py-3 lg:py-4 max-w-7xl mx-auto w-full">
-        {/* HERO SECTION — Upper-middle anchor with official RR Jersey treatment */}
-        <section className="flex flex-col items-center text-center my-auto pt-2 sm:pt-4 pb-2">
-          {/* Eyebrow: ROYALS INTELLIGENCE */}
-          <div className="mb-1.5">
-            <span className="font-heading font-extrabold text-xs sm:text-[13px] tracking-[0.28em] text-[#17294B] uppercase">
-              ROYALS INTELLIGENCE
-            </span>
-          </div>
+        {/* Sublabel: RAJASTHAN ROYALS · DATA-DRIVEN CRICKET */}
+        <div className="mb-3">
+          <p className="text-xs sm:text-[13px] font-semibold tracking-[0.22em] text-[#74658F] uppercase">
+            RAJASTHAN ROYALS · DATA-DRIVEN CRICKET
+          </p>
+        </div>
 
-          {/* Badge: SEASON 02 */}
-          <div className="mb-2">
-            <span className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full text-xs font-mono font-bold tracking-wider bg-[#FCE8F0] text-[#E4005A] border border-[#E4005A]/30 shadow-2xs">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#E4005A]" />
-              SEASON 02
-            </span>
-          </div>
+        {/* Headline: INTELLIGENCE FOR RAJASTHAN ROYALS. */}
+        <h1 className="font-heading font-extrabold text-[32px] sm:text-[42px] md:text-[48px] lg:text-[54px] text-[#17294B] tracking-tight leading-[1.08] max-w-4xl mx-auto mb-3">
+          INTELLIGENCE FOR RAJASTHAN ROYALS.
+        </h1>
 
-          {/* Sublabel: RAJASTHAN ROYALS · DATA-DRIVEN CRICKET */}
-          <div className="mb-2.5">
-            <p className="text-xs sm:text-[13px] font-semibold tracking-[0.22em] text-[#74658F] uppercase">
-              RAJASTHAN ROYALS · DATA-DRIVEN CRICKET
-            </p>
-          </div>
+        {/* Subtitle: Built to Find the Difference. */}
+        <h3 className="font-heading font-bold text-lg sm:text-xl lg:text-[22px] text-[#E4005A] tracking-tight mb-8">
+          Built to Find the Difference.
+        </h3>
 
-          {/* Headline: INTELLIGENCE FOR RAJASTHAN ROYALS. */}
-          <h1 className="font-heading font-extrabold text-[32px] sm:text-[42px] md:text-[48px] lg:text-[54px] text-[#17294B] tracking-tight leading-[1.08] max-w-4xl mx-auto mb-2.5">
-            INTELLIGENCE FOR RAJASTHAN ROYALS.
-          </h1>
+        {/* Hero CTAs */}
+        <div className="flex flex-row items-center justify-center gap-4">
+          <Link
+            href="/overview"
+            className="group inline-flex items-center justify-center gap-2.5 px-8 py-3.5 sm:px-9 sm:py-4 rounded-xl bg-gradient-to-r from-[#17294B] to-[#E4005A] hover:from-[#17294B] hover:to-[#950460] text-white text-sm sm:text-[15px] font-bold tracking-wider uppercase transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] min-h-[48px] sm:min-h-[52px]"
+          >
+            <span>EXPLORE INTELLIGENCE</span>
+            <ArrowRight size={17} className="text-white transition-transform group-hover:translate-x-0.5" />
+          </Link>
 
-          {/* Subtitle: Built to Find the Difference. */}
-          <h3 className="font-heading font-bold text-lg sm:text-xl lg:text-[22px] text-[#E4005A] tracking-tight mb-6">
-            Built to Find the Difference.
-          </h3>
-
-          {/* Hero CTAs */}
-          <div className="flex flex-row items-center justify-center gap-4">
-            <Link
-              href="/overview"
-              className="group inline-flex items-center justify-center gap-2.5 px-8 py-3.5 sm:px-9 sm:py-4 rounded-xl bg-gradient-to-r from-[#17294B] to-[#E4005A] hover:from-[#17294B] hover:to-[#950460] text-white text-sm sm:text-[15px] font-bold tracking-wider uppercase transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] min-h-[48px] sm:min-h-[52px]"
-            >
-              <span>EXPLORE INTELLIGENCE</span>
-              <ArrowRight size={17} className="text-white transition-transform group-hover:translate-x-0.5" />
-            </Link>
-
-            <button
-              onClick={() => setMethodologyOpen(true)}
-              className="inline-flex items-center justify-center gap-1.5 px-6 py-3.5 sm:px-7 sm:py-4 rounded-xl bg-white text-[#17294B] text-sm sm:text-[15px] font-semibold tracking-wider uppercase border border-[#E7EAF0] hover:bg-[#FCE8F0] hover:text-[#E4005A] hover:border-[#E4005A]/30 transition-all shadow-2xs cursor-pointer min-h-[48px] sm:min-h-[52px]"
-            >
-              <span>OUR METHODOLOGY</span>
-            </button>
-          </div>
-        </section>
-
-        {/* =================================================================== */}
-        {/* 3. COMPACT FEATURE CARDS — ALL FIVE IN ONE ROW (DESKTOP) */}
-        {/* Simplified: No icons, no numbering, no descriptions. ONLY title & link */}
-        {/* =================================================================== */}
-        <section className="my-auto py-2 w-full">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2.5 sm:gap-3 max-w-6xl mx-auto w-full">
-            {featureCards.map((card) => {
-              return (
-                <Link
-                  key={card.title}
-                  href={card.href}
-                  className="group min-h-[92px] lg:h-[100px] p-3.5 rounded-xl border border-[#E7EAF0] bg-white hover:border-[#E4005A] hover:bg-[#FCE8F0]/40 hover:shadow-sm transition-all flex flex-col justify-between"
-                >
-                  <div>
-                    <h4 className="text-xs sm:text-[13px] lg:text-[14px] font-heading font-extrabold text-[#17294B] group-hover:text-[#E4005A] transition-colors tracking-tight leading-snug">
-                      {card.title}
-                    </h4>
-                  </div>
-
-                  <div className="flex items-center gap-1.5 text-xs font-bold text-[#E4005A] group-hover:translate-x-0.5 transition-all mt-auto pt-1">
-                    <span>Access Module</span>
-                    <ArrowRight size={13} className="text-[#E4005A]" />
-                  </div>
-                </Link>
-              );
-            })}
-          </div>
-        </section>
-
-        {/* =================================================================== */}
-        {/* 4. FOOTER — CENTERED AT THE BOTTOM */}
-        {/* =================================================================== */}
-        <footer className="shrink-0 py-1.5 text-center text-[10px] sm:text-[11px] text-[#52627A]">
-          <span>Royals Intelligence Season 02 · Rajasthan Royals Cricket Analytics · Built to Find the Difference.</span>
-        </footer>
-      </main>
+          <button
+            onClick={() => setMethodologyOpen(true)}
+            className="inline-flex items-center justify-center gap-1.5 px-6 py-3.5 sm:px-7 sm:py-4 rounded-xl bg-white text-[#17294B] text-sm sm:text-[15px] font-semibold tracking-wider uppercase border border-[#E7EAF0] hover:bg-[#FCE8F0] hover:text-[#E4005A] hover:border-[#E4005A]/30 transition-all shadow-2xs cursor-pointer min-h-[48px] sm:min-h-[52px]"
+          >
+            <span>OUR METHODOLOGY</span>
+          </button>
+        </div>
+      </section>
 
       {/* =================================================================== */}
-      {/* 5. METHODOLOGY MODAL DIALOG — PRESIGNED ACCESS */}
+      {/* 2. COMPACT FEATURE CARDS — ALL FIVE IN ONE ROW (DESKTOP) */}
+      {/* =================================================================== */}
+      <section className="pt-2 w-full">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 max-w-6xl mx-auto w-full">
+          {featureCards.map((card) => {
+            return (
+              <Link
+                key={card.title}
+                href={card.href}
+                className="group min-h-[96px] lg:h-[104px] p-3.5 rounded-xl border border-[#E7EAF0] bg-white hover:border-[#E4005A] hover:bg-[#FCE8F0]/40 hover:shadow-sm transition-all flex flex-col justify-between"
+              >
+                <div>
+                  <h4 className="text-xs sm:text-[13px] lg:text-[14px] font-heading font-extrabold text-[#17294B] group-hover:text-[#E4005A] transition-colors tracking-tight leading-snug">
+                    {card.title}
+                  </h4>
+                </div>
+
+                <div className="flex items-center gap-1.5 text-xs font-bold text-[#E4005A] group-hover:translate-x-0.5 transition-all mt-auto pt-1">
+                  <span>Access Module</span>
+                  <ArrowRight size={13} className="text-[#E4005A]" />
+                </div>
+              </Link>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* =================================================================== */}
+      {/* 3. FOOTER — CENTERED AT THE BOTTOM */}
+      {/* =================================================================== */}
+      <footer className="pt-4 pb-2 text-center text-[10px] sm:text-[11px] text-[#52627A]">
+        <span>Royals Intelligence Season 02 · Rajasthan Royals Cricket Analytics · Built to Find the Difference.</span>
+      </footer>
+
+      {/* =================================================================== */}
+      {/* 4. METHODOLOGY MODAL DIALOG — PRESIGNED ACCESS */}
       {/* =================================================================== */}
       {methodologyOpen && (
         <div
