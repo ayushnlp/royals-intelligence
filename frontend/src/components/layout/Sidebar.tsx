@@ -134,33 +134,18 @@ export const Sidebar: React.FC<SidebarProps> = ({ className }) => {
       {/* Brand Identity Header */}
       <div className="flex items-center justify-between px-4 h-16 border-b border-[#E7EAF0]">
         {!collapsed ? (
-          <Link href="/" className="flex items-center gap-2.5 group">
-            <div className="w-8 h-8 rounded-lg bg-[#E4005A] border border-[#E4005A] flex items-center justify-center shrink-0 transition-transform group-hover:scale-105 shadow-sm">
-              <span className="font-heading font-extrabold text-xs text-white">
-                RR
-              </span>
-            </div>
-            <div className="leading-tight">
-              <div className="flex items-center gap-1.5">
-                <span className="font-heading font-extrabold text-xs tracking-tight text-[#17294B] block">
-                  ROYALS
-                </span>
-                <span className="text-[9px] font-mono font-bold px-1 py-0.2 rounded bg-[#E4005A]/10 text-[#E4005A] border border-[#E4005A]/30">
-                  S02
-                </span>
-              </div>
-              <span className="text-[9px] font-mono tracking-wider text-[#17294B]/70 font-semibold uppercase block">
-                INTELLIGENCE
-              </span>
-            </div>
+          <Link href="/" className="group flex items-center">
+            <span className="font-heading font-extrabold text-[15px] sm:text-base tracking-tight text-[#17294B] group-hover:text-[#E4005A] transition-colors whitespace-nowrap">
+              ROYAL INTELLIGENCE
+            </span>
           </Link>
         ) : (
           <Link
             href="/"
-            className="mx-auto w-8 h-8 rounded-lg bg-[#E4005A] border border-[#E4005A] flex items-center justify-center transition-transform hover:scale-105 shadow-sm"
-            title="Royals Intelligence (Season 02)"
+            className="mx-auto font-heading font-extrabold text-sm text-[#17294B] hover:text-[#E4005A] transition-colors"
+            title="Royal Intelligence"
           >
-            <span className="font-heading font-extrabold text-xs text-white">RR</span>
+            RI
           </Link>
         )}
 

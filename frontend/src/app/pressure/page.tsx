@@ -456,7 +456,7 @@ export default function PressureIntelligencePage() {
                             {batter.pressure_matches}
                           </td>
                           <td className="px-4 py-3 text-center font-sans">
-                            <span className="text-[10px] font-mono font-medium px-2 py-0.5 rounded-full bg-[#FCE8F0] text-[#17294B]">
+                            <span className="text-[11px] font-mono font-bold text-[#E4005A] tracking-tight">
                               {batter.competition_qualification.replace("_QUALIFIED", "")}
                             </span>
                           </td>
@@ -632,7 +632,7 @@ export default function PressureIntelligencePage() {
                             {bowler.pressure_matches}
                           </td>
                           <td className="px-4 py-3 text-center font-sans">
-                            <span className="text-[10px] font-mono font-medium px-2 py-0.5 rounded-full bg-[#FCE8F0] text-[#17294B]">
+                            <span className="text-[11px] font-mono font-bold text-[#E4005A] tracking-tight">
                               {bowler.competition_qualification.replace("_QUALIFIED", "")}
                             </span>
                           </td>

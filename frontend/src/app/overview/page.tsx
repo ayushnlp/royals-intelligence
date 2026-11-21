@@ -190,16 +190,16 @@ export default function OverviewPage() {
       {/* ------------------------------------------------------------------- */}
       {/* 2. Editorial Telemetry Strip */}
       {/* ------------------------------------------------------------------- */}
-      <section className="py-6 border-y border-[#E7EAF0]">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
+      <section className="py-5 border-y border-[#E7EAF0]">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 lg:gap-6">
           <div>
-            <span className="text-[13px] sm:text-sm font-semibold uppercase tracking-wider text-[#52627A] block mb-1.5">
+            <span className="text-xs sm:text-[13px] font-semibold uppercase tracking-wider text-[#52627A] block mb-1">
               Controlling Data Pack
             </span>
-            <div className="text-3xl sm:text-[34px] lg:text-[36px] font-extrabold text-[#E4005A] font-mono tracking-tight leading-tight my-1">
+            <div className="text-2xl sm:text-[28px] lg:text-[30px] font-extrabold text-[#E4005A] font-mono tracking-tight leading-tight my-1">
               {pressureOverview?.total_deliveries ? pressureOverview.total_deliveries.toLocaleString() : "—"}
             </div>
-            <p className="text-[13px] sm:text-[14px] text-[#52627A] mt-1.5 leading-snug">
+            <p className="text-xs sm:text-[13px] text-[#52627A] mt-1 leading-snug">
               {pressureOverview
                 ? `Deliveries across ${pressureOverview.matches_with_deliveries + pressureOverview.reconciled_abandoned_matches} matches (${pressureOverview.total_competitions} tournaments)`
                 : "Awaiting backend telemetry"}
@@ -207,40 +207,40 @@ export default function OverviewPage() {
           </div>
 
           <div>
-            <span className="text-[13px] sm:text-sm font-semibold uppercase tracking-wider text-[#52627A] block mb-1.5">
+            <span className="text-xs sm:text-[13px] font-semibold uppercase tracking-wider text-[#52627A] block mb-1">
               Official Deliverables
             </span>
-            <div className="text-3xl sm:text-[34px] lg:text-[36px] font-extrabold text-[#E4005A] font-mono tracking-tight leading-tight my-1">
+            <div className="text-2xl sm:text-[28px] lg:text-[30px] font-extrabold text-[#E4005A] font-mono tracking-tight leading-tight my-1 whitespace-nowrap">
               Top 10 / Top 10
             </div>
-            <p className="text-[13px] sm:text-[14px] text-[#52627A] mt-1.5 leading-snug">
+            <p className="text-xs sm:text-[13px] text-[#52627A] mt-1 leading-snug">
               1-SE Conservative lower bounds (100% qualified)
             </p>
           </div>
 
           <div>
-            <span className="text-[13px] sm:text-sm font-semibold uppercase tracking-wider text-[#52627A] block mb-1.5">
+            <span className="text-xs sm:text-[13px] font-semibold uppercase tracking-wider text-[#52627A] block mb-1">
               Uncapped Domestic Intelligence
             </span>
-            <div className="text-3xl sm:text-[34px] lg:text-[36px] font-extrabold text-[#E4005A] font-mono tracking-tight leading-tight my-1">
+            <div className="text-2xl sm:text-[28px] lg:text-[30px] font-extrabold text-[#E4005A] font-mono tracking-tight leading-tight my-1">
               {uncappedOverview
                 ? `${uncappedOverview.total_verified_uncapped_batters + uncappedOverview.total_verified_uncapped_bowlers} Verified`
                 : "—"}
             </div>
-            <p className="text-[13px] sm:text-[14px] text-[#52627A] mt-1.5 leading-snug">
+            <p className="text-xs sm:text-[13px] text-[#52627A] mt-1 leading-snug">
               Certified 0 senior caps in AUCTION-02 ledger
             </p>
           </div>
 
           <div>
-            <span className="text-[13px] sm:text-sm font-semibold uppercase tracking-wider text-[#52627A] block mb-1.5">
+            <span className="text-xs sm:text-[13px] font-semibold uppercase tracking-wider text-[#52627A] block mb-1">
               Verification Health
             </span>
-            <div className="text-3xl sm:text-[34px] lg:text-[36px] font-extrabold text-[#E4005A] font-mono tracking-tight flex items-baseline gap-2.5 leading-tight my-1">
+            <div className="text-2xl sm:text-[28px] lg:text-[30px] font-extrabold text-[#E4005A] font-mono tracking-tight flex items-baseline gap-2.5 leading-tight my-1">
               <span>{isLive ? "Engine Online" : "Service Standby"}</span>
               <span className={`w-2.5 h-2.5 rounded-full ${isLive ? "bg-[#E4005A] animate-pulse" : "bg-[#E4005A]"}`} />
             </div>
-            <p className="text-[13px] sm:text-[14px] text-[#52627A] mt-1.5 leading-snug">
+            <p className="text-xs sm:text-[13px] text-[#52627A] mt-1 leading-snug">
               {isLive ? `FastAPI v${health?.version || "0.1.0"} active` : "Backend service awaiting initialization"}
             </p>
           </div>
@@ -276,15 +276,6 @@ export default function OverviewPage() {
               <span className="flex items-center gap-2">
                 <TrendingUp size={15} className="text-[#17294B]" />
                 <span>Top 5 Batters Under Pressure (Conservative PRI)</span>
-                {isLiveBatters ? (
-                  <span className="px-1.5 py-0.5 rounded text-[9px] font-mono font-bold bg-[#E4005A]/10 text-[#17294B] border border-[#E4005A]/30">
-                    LIVE ENGINE
-                  </span>
-                ) : (
-                  <span className="px-1.5 py-0.5 rounded text-[9px] font-mono font-bold bg-white text-[#52627A] border border-[#E7EAF0]">
-                    STANDBY
-                  </span>
-                )}
               </span>
               <span className="font-mono text-[11px] text-[#52627A]">Balls / Matches</span>
             </div>
@@ -343,15 +334,6 @@ export default function OverviewPage() {
               <span className="flex items-center gap-2">
                 <Target size={15} className="text-[#E4005A]" />
                 <span>Top 5 Bowlers Under Pressure (Conservative Runs Saved)</span>
-                {isLiveBowlers ? (
-                  <span className="px-1.5 py-0.5 rounded text-[9px] font-mono font-bold bg-[#E4005A]/10 text-[#17294B] border border-[#E4005A]/30">
-                    LIVE ENGINE
-                  </span>
-                ) : (
-                  <span className="px-1.5 py-0.5 rounded text-[9px] font-mono font-bold bg-white text-[#52627A] border border-[#E7EAF0]">
-                    STANDBY
-                  </span>
-                )}
               </span>
               <span className="font-mono text-[11px] text-[#52627A]">Balls / Matches</span>
             </div>

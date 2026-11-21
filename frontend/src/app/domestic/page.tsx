@@ -460,7 +460,7 @@ export default function DomesticIntelligencePage() {
                       ? "border-[#E4005A] ring-2 ring-[#E4005A]/30 bg-white shadow-sm"
                       : idx % 2 === 0
                       ? "bg-[#FCE8F0]/40 border-[#E7EAF0] hover:border-[#E4005A]/40"
-                      : "bg-[#EEF4FC]/50 border-[#E7EAF0] hover:border-[#E4005A]/40"
+                      : "bg-white border-[#E7EAF0] hover:border-[#E4005A]/40"
                   )}
                 >
                   <div className="flex items-center justify-between mb-3">
