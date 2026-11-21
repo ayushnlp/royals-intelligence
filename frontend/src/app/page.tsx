@@ -101,24 +101,25 @@ export default function HomePage() {
       </section>
 
       {/* =================================================================== */}
-      {/* 2. FIVE MODULE CARDS — BOTTOM-CENTERED IN ONE ROW (DESKTOP) */}
+      {/* 2. UNIFIED SEGMENTED MODULE NAVIGATION BAR — BOTTOM-CENTERED */}
       {/* =================================================================== */}
-      <section className="pt-1 sm:pt-2 w-full">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2.5 sm:gap-3 max-w-6xl mx-auto w-full">
+      <section className="pt-1 sm:pt-2 w-full flex justify-center">
+        <nav
+          aria-label="Module Quick Navigation"
+          className="inline-flex items-center p-1 sm:p-1.5 rounded-full bg-[#FCE8F0]/40 border border-[#E7EAF0] shadow-2xs max-w-full overflow-x-auto"
+        >
           {featureCards.map((card) => {
             return (
               <Link
                 key={card.title}
                 href={card.href}
-                className="group h-[64px] sm:h-[68px] lg:h-[72px] px-3.5 py-2.5 rounded-xl border border-[#E7EAF0] bg-white hover:border-[#E4005A] hover:bg-[#FCE8F0]/50 hover:shadow-md transition-all duration-200 flex items-center justify-center text-center cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[#E4005A]"
+                className="px-3 sm:px-4 lg:px-5 py-2 sm:py-2.5 rounded-full text-xs sm:text-[13px] font-heading font-extrabold text-[#17294B] hover:text-[#E4005A] hover:bg-white active:bg-white/90 transition-all duration-150 whitespace-nowrap cursor-pointer text-center outline-none focus-visible:ring-2 focus-visible:ring-[#E4005A]"
               >
-                <h4 className="text-xs sm:text-[13px] font-heading font-extrabold text-[#17294B] group-hover:text-[#E4005A] transition-colors tracking-tight leading-snug">
-                  {card.title}
-                </h4>
+                {card.title}
               </Link>
             );
           })}
-        </div>
+        </nav>
       </section>
 
       {/* =================================================================== */}
