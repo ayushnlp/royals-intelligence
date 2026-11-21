@@ -1017,9 +1017,9 @@ export default function DomesticIntelligencePage() {
                   <button
                     key={p.canonical_id}
                     onClick={() => setSelectedPlayerId(String(p.canonical_id))}
-                    className={`p-3 rounded-xl text-left border transition-all ${
+                    className={`p-3 rounded-xl text-left border transition-all cursor-pointer ${
                       isSelected
-                        ? "bg-[#101D3A] text-white border-[#101D3A] shadow-sm"
+                        ? "bg-[#FCE8F0] text-[#17294B] border-[#E4005A] shadow-sm"
                         : "bg-white hover:bg-white text-[#101D3A] border-[#E7EAF0]"
                     }`}
                   >
@@ -1028,10 +1028,10 @@ export default function DomesticIntelligencePage() {
                         className={`text-[9px] font-mono px-1.5 py-0.2 rounded font-bold ${
                           p.eligibility_status === "VERIFIED_UNCAPPED"
                             ? isSelected
-                              ? "bg-[#101D3A] text-white"
-                              : "bg-[#D4145A]/10 text-[#D4145A] border border-[#D4145A]/30/60"
+                              ? "bg-[#E4005A] text-white"
+                              : "bg-[#D4145A]/10 text-[#D4145A] border border-[#D4145A]/30"
                             : isSelected
-                            ? "bg-[#101D3A] text-white"
+                            ? "bg-white text-[#17294B] border border-[#E4005A]/30"
                             : "bg-[#F8E8EF] text-[#52627A]"
                         }`}
                       >
@@ -1039,13 +1039,13 @@ export default function DomesticIntelligencePage() {
                       </span>
                       <span
                         className={`w-1.5 h-1.5 rounded-full ${
-                          p.statistical_coverage_status === "AVAILABLE" ? "bg-[#D4145A]" : "bg-[#101D3A]/20"
+                          p.statistical_coverage_status === "AVAILABLE" ? "bg-[#E4005A]" : "bg-[#17294B]/20"
                         }`}
                         title={p.statistical_coverage_status === "AVAILABLE" ? "Telemetry Available" : "No Match Data"}
                       />
                     </div>
-                    <div className="font-bold text-xs truncate">{p.player_name}</div>
-                    <div className={`text-[10px] truncate mt-0.5 ${isSelected ? "text-[#101D3A]/30" : "text-[#52627A]"}`}>
+                    <div className="font-bold text-xs truncate text-[#17294B]">{p.player_name}</div>
+                    <div className={`text-[10px] truncate mt-0.5 ${isSelected ? "text-[#17294B]/80 font-medium" : "text-[#52627A]"}`}>
                       {p.team || "Domestic"} • {p.role || "Prospect"}
                     </div>
                   </button>
