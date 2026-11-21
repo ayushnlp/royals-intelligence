@@ -77,15 +77,28 @@ async def list_domestic_players(
 
 
 
-@router.get("/competitions", response_model=List[CompetitionSeasonSummary], summary="Directory of Domestic Competitions & Seasons")
-async def list_domestic_competitions(
+@router.get("/seasons", response_model=List[Dict[str, Any]], summary="List Available Verified Domestic Seasons")
+async def list_domestic_seasons(
     db: Optional[AsyncSession] = Depends(get_db),
 ):
     """
-    Returns available domestic cricket tournaments (SMAT, VHT, Ranji, DPL, UP T20)
-    with format specifications, match counts, coverage, and provenance tracking.
+    Returns available domestic cricket seasons ordered chronologically descending,
+    with verification status, match totals, and active competition counts.
     """
-    return await DomesticSeasonService.list_competitions(db)
+    return await DomesticSeasonService.list_available_seasons(db)
+
+
+@router.get("/competitions", response_model=List[CompetitionSeasonSummary], summary="Directory of Domestic Competitions & Seasons")
+async def list_domestic_competitions(
+    season: Optional[str] = Query(None, description="Filter competitions by season (e.g. '2024', '2025', '2026', '2023')"),
+    db: Optional[AsyncSession] = Depends(get_db),
+):
+    """
+    Returns available domestic cricket tournaments (IPL, SMAT, VHT, Ranji, DPL)
+    with format specifications, match counts, coverage, and provenance tracking.
+    When season is specified, strictly returns only tournaments with verified data in that season.
+    """
+    return await DomesticSeasonService.list_competitions(db, season=season)
 
 
 @router.get("/seasons/{competition_id}/{season}/matches", response_model=Dict[str, Any], summary="List Season Matches with Filtering & Pagination")

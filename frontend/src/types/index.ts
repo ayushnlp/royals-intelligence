@@ -287,6 +287,15 @@ export interface EvaluationItem {
 }
 
 // Stage 3 Domestic Season & Match Intelligence Interfaces
+export interface DomesticSeasonSummary {
+  season: string;
+  label: string;
+  has_data: boolean;
+  competition_count: number;
+  total_matches: number;
+  competitions: string[];
+}
+
 export interface CompetitionSeasonSummary {
   competition_id: string;
   competition_name: string;

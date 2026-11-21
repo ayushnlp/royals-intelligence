@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
+  DomesticSeasonSummary,
   CompetitionSeasonSummary,
   MatchSummaryItem,
   MatchScorecardResponse,
@@ -12,6 +13,7 @@ import {
   DomesticPlayerSummary,
 } from "@/types";
 import {
+  fetchDomesticSeasons,
   fetchDomesticCompetitions,
   fetchSeasonMatches,
   fetchSeasonSummary,
@@ -48,9 +50,10 @@ import { cn } from "@/lib/utils";
 
 export default function DomesticIntelligencePage() {
   const [activeTab, setActiveTab] = useState<"tournaments" | "matches" | "player_profile">("tournaments");
+  const [availableSeasons, setAvailableSeasons] = useState<DomesticSeasonSummary[]>([]);
   const [competitions, setCompetitions] = useState<CompetitionSeasonSummary[]>([]);
   const [selectedCompId, setSelectedCompId] = useState<string>("ipl");
-  const [selectedSeason, setSelectedSeason] = useState<string>("2024");
+  const [selectedSeason, setSelectedSeason] = useState<string>("2026");
   const [loading, setLoading] = useState(true);
 
   // Match List state
@@ -109,28 +112,46 @@ export default function DomesticIntelligencePage() {
     };
   }, []);
 
-  // Load competitions on initial mount
-  const loadComps = async () => {
+  // Load verified available seasons on mount
+  useEffect(() => {
+    let isCurrent = true;
+    async function loadSeasons() {
+      try {
+        const seasons = await fetchDomesticSeasons();
+        if (isCurrent && seasons && seasons.length > 0) {
+          setAvailableSeasons(seasons);
+        }
+      } catch (err) {
+        if (isCurrent) console.warn("Failed to load domestic seasons:", err);
+      }
+    }
+    loadSeasons();
+    return () => {
+      isCurrent = false;
+    };
+  }, []);
+
+  // Load competitions whenever selectedSeason changes
+  const loadComps = useCallback(async (seasonToLoad: string) => {
     setLoading(true);
     setErrorMsg(null);
     try {
-      const res = await fetchDomesticCompetitions();
+      const res = await fetchDomesticCompetitions(seasonToLoad);
       setCompetitions(res);
       if (res.length > 0) {
         setSelectedCompId((prev) => (!prev || !res.some((c) => c.competition_id === prev) ? res[0].competition_id : prev));
-        setSelectedSeason((prev) => (!prev || !res.some((c) => c.season === prev) ? res[0].season : prev));
       }
     } catch (err: any) {
-      setErrorMsg(err.message || "Failed to load domestic competitions.");
+      setErrorMsg(err.message || `Failed to load domestic competitions for season ${seasonToLoad}.`);
+      setCompetitions([]);
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
-    loadComps();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    loadComps(selectedSeason);
+  }, [selectedSeason, loadComps]);
 
   // Load matches when competition or season or team changes
   useEffect(() => {
@@ -304,13 +325,13 @@ export default function DomesticIntelligencePage() {
           {/* Global Selectors */}
           <div className="flex items-center gap-3 shrink-0">
             <div className="flex flex-col">
-              <label className="text-[10px] font-bold text-[#52627A] uppercase tracking-wider mb-1 font-mono">
-                Competition
+              <label className="text-[10px] font-bold text-[#74658F] uppercase tracking-wider mb-1 font-mono">
+                Active Tournament
               </label>
               <select
                 value={selectedCompId}
                 onChange={(e) => setSelectedCompId(e.target.value)}
-                className="bg-white border border-[#E7EAF0] rounded-lg px-3 py-1.5 text-xs font-semibold text-[#101D3A] focus:outline-none focus:ring-2 focus:ring-[#101D3A] shadow-sm"
+                className="bg-white border border-[#E7EAF0] rounded-lg px-3 py-1.5 text-xs font-semibold text-[#17294B] focus:outline-none focus:ring-2 focus:ring-[#E4005A] shadow-sm cursor-pointer"
               >
                 {competitions.length > 0 ? (
                   competitions.map((c) => (
@@ -319,30 +340,34 @@ export default function DomesticIntelligencePage() {
                     </option>
                   ))
                 ) : (
-                  <>
-                    <option value="ipl">Indian Premier League (T20)</option>
-                    <option value="smat">Syed Mushtaq Ali Trophy (T20)</option>
-                    <option value="vht">Vijay Hazare Trophy (List A)</option>
-                    <option value="ranji">Ranji Trophy (Multi-Day)</option>
-                    <option value="dpl">Delhi Premier League (T20)</option>
-                  </>
+                  <option value="ipl">Indian Premier League (T20)</option>
                 )}
               </select>
             </div>
 
             <div className="flex flex-col">
-              <label className="text-[10px] font-bold text-[#52627A] uppercase tracking-wider mb-1 font-mono">
+              <label className="text-[10px] font-bold text-[#74658F] uppercase tracking-wider mb-1 font-mono">
                 Season
               </label>
               <select
                 value={selectedSeason}
                 onChange={(e) => setSelectedSeason(e.target.value)}
-                className="bg-white border border-[#E7EAF0] rounded-lg px-3 py-1.5 text-xs font-semibold text-[#101D3A] focus:outline-none focus:ring-2 focus:ring-[#101D3A] shadow-sm"
+                className="bg-white border border-[#E7EAF0] rounded-lg px-3 py-1.5 text-xs font-semibold text-[#17294B] focus:outline-none focus:ring-2 focus:ring-[#E4005A] shadow-sm cursor-pointer"
               >
-                <option value="2024">2024</option>
-                <option value="2025">2025</option>
-                <option value="2026">2026</option>
-                <option value="2024-25">2024-25</option>
+                {availableSeasons.length > 0 ? (
+                  availableSeasons.map((s) => (
+                    <option key={s.season} value={s.season}>
+                      {s.season}
+                    </option>
+                  ))
+                ) : (
+                  <>
+                    <option value="2026">2026</option>
+                    <option value="2025">2025</option>
+                    <option value="2024">2024</option>
+                    <option value="2023">2023</option>
+                  </>
+                )}
               </select>
             </div>
           </div>
@@ -351,17 +376,17 @@ export default function DomesticIntelligencePage() {
 
       {/* Connection Notice */}
       {errorMsg && (
-        <div className="p-4 rounded-xl bg-[#D4145A]/10 border border-[#D4145A]/30 text-[#D4145A] flex items-center justify-between gap-4">
+        <div className="p-4 rounded-xl bg-[#FCE8F0] border border-[#E4005A]/30 text-[#E4005A] flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <AlertCircle className="w-5 h-5 text-[#D4145A] shrink-0" />
+            <AlertCircle className="w-5 h-5 text-[#E4005A] shrink-0" />
             <div>
               <div className="text-xs font-bold">Domestic Service Connection Notice</div>
-              <div className="text-xs text-[#D4145A] mt-0.5">{errorMsg}</div>
+              <div className="text-xs text-[#E4005A] mt-0.5">{errorMsg}</div>
             </div>
           </div>
           <button
-            onClick={loadComps}
-            className="px-3 py-1.5 rounded-lg bg-[#D4145A] text-white font-bold text-xs hover:bg-[#A80F50] transition-colors shrink-0 flex items-center gap-1.5"
+            onClick={() => loadComps(selectedSeason)}
+            className="px-3 py-1.5 rounded-lg bg-[#E4005A] text-white font-bold text-xs hover:bg-[#950460] transition-colors shrink-0 flex items-center gap-1.5 cursor-pointer"
           >
             <RefreshCw className="w-3.5 h-3.5" />
             <span>Retry</span>
@@ -409,66 +434,86 @@ export default function DomesticIntelligencePage() {
       {/* TAB 1: TOURNAMENT DIRECTORY */}
       {activeTab === "tournaments" && (
         <div className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-            {competitions.map((comp, idx) => (
-              <div
-                key={`${comp.competition_id}_${comp.season}`}
-                onClick={() => {
-                  setSelectedCompId(comp.competition_id);
-                  setSelectedSeason(comp.season);
-                  setActiveTab("matches");
-                }}
-                className={cn(
-                  "group p-5 rounded-2xl border cursor-pointer transition-all hover:shadow-md",
-                  selectedCompId === comp.competition_id && selectedSeason === comp.season
-                    ? "border-[#E4005A] ring-2 ring-[#E4005A]/30 bg-white shadow-sm"
-                    : idx % 2 === 0
-                    ? "bg-[#FCE8F0]/40 border-[#E7EAF0] hover:border-[#E4005A]/40"
-                    : "bg-[#EEF4FC]/50 border-[#E7EAF0] hover:border-[#E4005A]/40"
-                )}
-              >
-                <div className="flex items-center justify-between mb-3">
-                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-[#FCE8F0] text-[#950460]">
-                    {comp.competition_type}
-                  </span>
-                  <span className="text-xs font-mono font-bold text-[#17294B]">{comp.season}</span>
-                </div>
-
-                <h3 className="font-bold text-base text-[#17294B] group-hover:text-[#E4005A] transition-colors mb-1">
-                  {comp.competition_name}
-                </h3>
-                <p className="text-xs text-[#74658F] mb-4">Governing Body: {comp.governing_body}</p>
-
-                <div className="grid grid-cols-3 gap-2 py-3 px-3 bg-white/90 rounded-xl border border-[#E7EAF0] text-center mb-4">
-                  <div>
-                    <div className="text-[10px] uppercase font-bold text-[#74658F]">Matches</div>
-                    <div className="text-sm font-extrabold text-[#17294B]">{comp.match_count}</div>
+          {competitions.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+              {competitions.map((comp, idx) => (
+                <div
+                  key={`${comp.competition_id}_${comp.season}`}
+                  onClick={() => {
+                    setSelectedCompId(comp.competition_id);
+                    setSelectedSeason(comp.season);
+                    setActiveTab("matches");
+                  }}
+                  className={cn(
+                    "group p-5 rounded-2xl border cursor-pointer transition-all hover:shadow-md",
+                    selectedCompId === comp.competition_id && selectedSeason === comp.season
+                      ? "border-[#E4005A] ring-2 ring-[#E4005A]/30 bg-white shadow-sm"
+                      : idx % 2 === 0
+                      ? "bg-[#FCE8F0]/40 border-[#E7EAF0] hover:border-[#E4005A]/40"
+                      : "bg-[#EEF4FC]/50 border-[#E7EAF0] hover:border-[#E4005A]/40"
+                  )}
+                >
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-[#FCE8F0] text-[#950460]">
+                      {comp.competition_type}
+                    </span>
+                    <span className="text-xs font-mono font-bold text-[#17294B]">{comp.season}</span>
                   </div>
-                  <div>
-                    <div className="text-[10px] uppercase font-bold text-[#74658F]">Teams</div>
-                    <div className="text-sm font-extrabold text-[#17294B]">{comp.teams_count}</div>
-                  </div>
-                  <div>
-                    <div className="text-[10px] uppercase font-bold text-[#74658F]">Ball-by-Ball</div>
-                    <div className="text-sm font-extrabold text-[#15966B] flex items-center justify-center gap-1">
-                      <CheckCircle2 size={12} className="text-[#15966B]" />
-                      <span>{comp.has_ball_by_ball ? "Verified" : "Pending"}</span>
+
+                  <h3 className="font-bold text-base text-[#17294B] group-hover:text-[#E4005A] transition-colors mb-1">
+                    {comp.competition_name}
+                  </h3>
+                  <p className="text-xs text-[#74658F] mb-4">Governing Body: {comp.governing_body}</p>
+
+                  <div className="grid grid-cols-3 gap-2 py-3 px-3 bg-white/90 rounded-xl border border-[#E7EAF0] text-center mb-4">
+                    <div>
+                      <div className="text-[10px] uppercase font-bold text-[#74658F]">Matches</div>
+                      <div className="text-sm font-extrabold text-[#17294B]">{comp.match_count}</div>
+                    </div>
+                    <div>
+                      <div className="text-[10px] uppercase font-bold text-[#74658F]">Teams</div>
+                      <div className="text-sm font-extrabold text-[#17294B]">{comp.teams_count}</div>
+                    </div>
+                    <div>
+                      <div className="text-[10px] uppercase font-bold text-[#74658F]">Ball-by-Ball</div>
+                      <div className="text-sm font-extrabold text-[#15966B] flex items-center justify-center gap-1">
+                        <CheckCircle2 size={12} className="text-[#15966B]" />
+                        <span>{comp.has_ball_by_ball ? "Verified" : "Pending"}</span>
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                <div className="flex items-center justify-between text-xs text-[#74658F] pt-2 border-t border-[#E7EAF0]">
-                  <span className="flex items-center gap-1 text-[11px] text-[#15966B] font-semibold">
-                    <CheckCircle2 size={13} className="text-[#15966B]" />
-                    Audit Pass: {comp.validation_pass_rate}%
-                  </span>
-                  <span className="text-[11px] font-mono font-bold text-[#E4005A] flex items-center">
-                    Explore Fixtures <ChevronRight size={13} />
-                  </span>
+                  <div className="flex items-center justify-between text-xs text-[#74658F] pt-2 border-t border-[#E7EAF0]">
+                    <span className="flex items-center gap-1 text-[11px] text-[#15966B] font-semibold">
+                      <CheckCircle2 size={13} className="text-[#15966B]" />
+                      Audit Pass: {comp.validation_pass_rate}%
+                    </span>
+                    <span className="text-[11px] font-mono font-bold text-[#E4005A] flex items-center">
+                      Explore Fixtures <ChevronRight size={13} />
+                    </span>
+                  </div>
                 </div>
+              ))}
+            </div>
+          ) : (
+            <div className="p-8 rounded-2xl bg-white border border-[#E7EAF0] text-center space-y-3">
+              <div className="w-12 h-12 rounded-full bg-[#FCE8F0] text-[#E4005A] flex items-center justify-center mx-auto">
+                <AlertCircle size={24} />
               </div>
-            ))}
-          </div>
+              <h4 className="text-sm font-bold text-[#17294B]">
+                No competition data available for this season.
+              </h4>
+              <p className="text-xs text-[#74658F] max-w-md mx-auto">
+                No verified domestic tournament records exist for season {selectedSeason}.
+              </p>
+              <button
+                onClick={() => setSelectedSeason("2024")}
+                className="mt-2 px-4 py-2 rounded-xl bg-[#17294B] hover:bg-[#950460] text-white text-xs font-bold transition-colors cursor-pointer"
+              >
+                Switch to Verified 2024 Domestic Season
+              </button>
+            </div>
+          )}
         </div>
       )}
 
@@ -493,43 +538,59 @@ export default function DomesticIntelligencePage() {
           </div>
 
           {/* Matches Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {matches.map((m, mIdx) => (
-              <div
-                key={m.match_id}
-                onClick={() => setSelectedMatchId(m.match_id)}
-                className={cn(
-                  "p-4 rounded-xl border cursor-pointer transition-all hover:shadow-sm",
-                  mIdx % 2 === 0 ? "bg-[#FCE8F0]/30 border-[#E7EAF0] hover:border-[#E4005A]" : "bg-[#EEF4FC]/40 border-[#E7EAF0] hover:border-[#E4005A]"
-                )}
-              >
-                <div className="flex items-center justify-between text-[11px] text-[#74658F] font-mono mb-2">
-                  <span>Match #{m.match_number || "—"}</span>
-                  <span>{m.match_date}</span>
-                </div>
-
-                <div className="flex items-center justify-between my-2">
-                  <div className="flex items-center gap-2">
-                    <span className="font-extrabold text-sm text-[#950460]">{m.home_team_name}</span>
-                    <span className="text-xs text-[#74658F] font-mono">vs</span>
-                    <span className="font-extrabold text-sm text-[#950460]">{m.away_team_name}</span>
-                  </div>
-                  {m.winner_team_code && (
-                    <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-[#FCE8F0] text-[#E4005A] border border-[#E4005A]/20">
-                      Won: {m.winner_team_code}
-                    </span>
+          {matches.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {matches.map((m, mIdx) => (
+                <div
+                  key={m.match_id}
+                  onClick={() => setSelectedMatchId(m.match_id)}
+                  className={cn(
+                    "p-4 rounded-xl border cursor-pointer transition-all hover:shadow-sm",
+                    mIdx % 2 === 0 ? "bg-[#FCE8F0]/30 border-[#E7EAF0] hover:border-[#E4005A]" : "bg-[#EEF4FC]/40 border-[#E7EAF0] hover:border-[#E4005A]"
                   )}
-                </div>
+                >
+                  <div className="flex items-center justify-between text-[11px] text-[#74658F] font-mono mb-2">
+                    <span>Match #{m.match_number || "—"}</span>
+                    <span>{m.match_date}</span>
+                  </div>
 
-                <div className="flex items-center justify-between text-xs text-[#74658F] pt-2 border-t border-[#E7EAF0] mt-2">
-                  <span>{m.venue_name}, {m.venue_city}</span>
-                  <span className="text-[#E4005A] font-bold flex items-center text-[11px]">
-                    Full Scorecard <ChevronRight size={12} />
-                  </span>
+                  <div className="flex items-center justify-between my-2">
+                    <div className="flex items-center gap-2">
+                      <span className="font-extrabold text-sm text-[#950460]">{m.home_team_name}</span>
+                      <span className="text-xs text-[#74658F] font-mono">vs</span>
+                      <span className="font-extrabold text-sm text-[#950460]">{m.away_team_name}</span>
+                    </div>
+                    {m.winner_team_code && (
+                      <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-[#FCE8F0] text-[#E4005A] border border-[#E4005A]/20">
+                        Won: {m.winner_team_code}
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="flex items-center justify-between text-xs text-[#74658F] pt-2 border-t border-[#E7EAF0] mt-2">
+                    <span>{m.venue_name}, {m.venue_city}</span>
+                    <span className="text-[#E4005A] font-bold flex items-center text-[11px]">
+                      Full Scorecard <ChevronRight size={12} />
+                    </span>
+                  </div>
                 </div>
+              ))}
+            </div>
+          ) : (
+            <div className="p-8 rounded-2xl bg-white border border-[#E7EAF0] text-center space-y-3">
+              <div className="w-10 h-10 rounded-full bg-[#FCE8F0] text-[#E4005A] flex items-center justify-center mx-auto">
+                <AlertCircle size={20} />
               </div>
-            ))}
-          </div>
+              <h4 className="text-sm font-bold text-[#17294B]">
+                No match records available for {selectedCompId.toUpperCase()} in season {selectedSeason}
+              </h4>
+              <p className="text-xs text-[#74658F] max-w-md mx-auto">
+                {teamFilter
+                  ? `No matches found matching filter "${teamFilter}" for ${selectedCompId.toUpperCase()} in season ${selectedSeason}.`
+                  : `Competition "${selectedCompId.toUpperCase()}" has no match records for season ${selectedSeason}.`}
+              </p>
+            </div>
+          )}
         </div>
       )}
 
