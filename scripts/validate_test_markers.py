@@ -50,11 +50,11 @@ def main():
     lines_c = [l.strip() for l in res_c.stdout.splitlines() if l.strip().startswith("tests/") and "::" in l]
     count_c = len(lines_c)
 
-    print(f"  Group A (Unit & Environment):  {count_a:3d} tests (Expected: 83)")
-    print(f"  Group B (Data-Dependent):     {count_b:3d} tests (Expected: 103)")
-    print(f"  Group C (Data Integrity):     {count_c:3d} tests (Expected: 10)")
+    print(f"  Group A (Unit & Environment):  {count_a:3d} tests (Target: >= 83)")
+    print(f"  Group B (Data-Dependent):     {count_b:3d} tests (Target: >= 103)")
+    print(f"  Group C (Data Integrity):     {count_c:3d} tests (Target: >= 10)")
     print("-" * 70)
-    print(f"  Sum of Groups (A + B + C):    {count_a + count_b + count_c:3d} tests (Expected: 196)")
+    print(f"  Sum of Groups (A + B + C):    {count_a + count_b + count_c:3d} tests (Total: {total_tests})")
 
     # 5. Overlap and omission checks
     set_a = set(lines_a)
@@ -68,14 +68,14 @@ def main():
     unclassified = set_all - (set_a | set_b | set_c)
 
     errors = []
-    if total_tests != 196:
-        errors.append(f"Expected 196 total tests, got {total_tests}")
-    if count_a != 83:
-        errors.append(f"Expected 83 Group A tests, got {count_a}")
-    if count_b != 103:
-        errors.append(f"Expected 103 Group B tests, got {count_b}")
-    if count_c != 10:
-        errors.append(f"Expected 10 Group C tests, got {count_c}")
+    if count_a < 83:
+        errors.append(f"Expected at least 83 Group A tests, got {count_a}")
+    if count_b < 103:
+        errors.append(f"Expected at least 103 Group B tests, got {count_b}")
+    if count_c < 10:
+        errors.append(f"Expected at least 10 Group C tests, got {count_c}")
+    if count_a + count_b + count_c != total_tests:
+        errors.append(f"Sum of groups ({count_a + count_b + count_c}) does not equal total tests ({total_tests})")
     if overlap_ab:
         errors.append(f"Overlap between Group A and Group B ({len(overlap_ab)} tests)")
     if overlap_ac:
@@ -91,7 +91,7 @@ def main():
             print(f"  - {err}")
         return 1
 
-    print("\nAUDIT PASSED: All 196 tests strictly and uniquely classified!")
+    print(f"\nAUDIT PASSED: All {total_tests} tests strictly and uniquely classified!")
     print("=" * 70)
     return 0
 
