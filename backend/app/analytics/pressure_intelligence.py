@@ -5,7 +5,6 @@ Serves locked Round 1 Pressure Analytics artifacts and Bayesian candidate dossie
 
 from pathlib import Path
 from typing import Optional, List, Dict, Any
-import numpy as np
 import pandas as pd
 
 from app.core.logging import logger

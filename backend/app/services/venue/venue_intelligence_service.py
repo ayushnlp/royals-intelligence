@@ -4,14 +4,11 @@ Provides normalized stadium profiles, boundary geometry, historical scoring tren
 pitch evidence analysis, and uncapped player venue performance.
 """
 
-from typing import Optional, List, Dict, Any, Tuple
+from typing import Optional, List, Dict, Any
 from datetime import datetime, timezone
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, and_, func
 
-from app.models.core import VenueModel, MatchModel, InningsModel, TeamModel, PlayerModel
-from app.models.performance import BattingScorecardModel, BowlingScorecardModel, BallByBallDeliveryModel
-from app.acquisition.normalization.normalizer import CricketDataNormalizer, VENUE_ALIASES
+from app.acquisition.normalization.normalizer import CricketDataNormalizer
 from app.schemas.venue_api import (
     BoundaryDimensions,
     VenueSummaryItem,
@@ -20,7 +17,6 @@ from app.schemas.venue_api import (
     PitchEvidenceAnalysisResponse,
     UncappedPlayerVenuePerformanceResponse,
 )
-from app.core.logging import logger
 
 # Authoritative Venue Directory (Verified BCCI / Open-Meteo Stadium Catalog)
 # Important: Ground dimensions are strictly verified measurements; where unknown, represented explicitly as None.

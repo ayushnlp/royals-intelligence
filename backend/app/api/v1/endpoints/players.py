@@ -14,7 +14,7 @@ from sqlalchemy import select, or_
 from app.db.session import get_db
 from app.models.core import PlayerModel, PlayerIdentityModel
 from app.models.scouting import UncappedPlayerProfileModel
-from app.services.identity.player_identity_service import PlayerIdentityService, EligibilityRuleConfig
+from app.services.identity.player_identity_service import PlayerIdentityService
 from app.schemas.uncapped_api import (
     UncappedPlayerSummary,
     UncappedPlayerDetail,

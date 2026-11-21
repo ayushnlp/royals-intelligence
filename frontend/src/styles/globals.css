@@ -4,20 +4,29 @@
 
 :root {
   --background: #FFFFFF;
-  --foreground: #31136C;
-  --royals-navy: #31136C;
-  --royals-pink: #950460;
+  --foreground: #17294B;
+  --royals-navy: #17294B;
+  --royals-deep-navy: #17294B;
+  --royals-pink: #E4005A;
+  --royals-deep-pink: #E4005A;
+  --royals-cardinal-pink: #950460;
+  --royals-light-pink: #FCE8F0;
+  --royals-light-blue: #EEF4FC;
+  --royals-rose: #FCE8F0;
   --royals-white: #FFFFFF;
-  --royals-orange: #950460;
-  --royals-green: #950460;
+  --royals-border: #E7EAF0;
+  --royals-body: #263653;
+  --royals-muted: #74658F;
+  --royals-orange: #F28C28;
+  --royals-green: #15966B;
+  --royals-verified-green: #15966B;
   --royals-bg: #FFFFFF;
   --royals-card: #FFFFFF;
   --royals-surface: #FFFFFF;
-  --royals-text: #31136C;
-  --royals-muted: rgba(23, 43, 73, 0.7);
-  --royals-border: rgba(23, 43, 73, 0.12);
-  --royals-success: #950460;
-  --royals-warning: #950460;
+  --royals-text: #17294B;
+  --royals-muted: #74658F;
+  --royals-success: #15966B;
+  --royals-warning: #F28C28;
 }
 
 html {
@@ -27,7 +36,7 @@ html {
 body {
   color: var(--foreground);
   background: var(--background);
-  font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-family: var(--font-poppins), Poppins, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }

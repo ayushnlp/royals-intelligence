@@ -10,28 +10,28 @@ interface StatusBadgeProps {
 export const StatusBadge: React.FC<StatusBadgeProps> = ({ status, label, className }) => {
   const configs = {
     healthy: {
-      bg: "bg-[#950460]/10 border-[#950460]/30 text-[#950460]",
-      dot: "bg-[#950460]",
+      bg: "bg-[#15966B]/10 border-[#15966B]/30 text-[#15966B]",
+      dot: "bg-[#15966B]",
       defaultLabel: "Healthy / Online",
     },
     standby: {
-      bg: "bg-[#31136C]/08 border-[#31136C]/20 text-[#31136C]",
-      dot: "bg-[#31136C]",
+      bg: "bg-[#FCE8F0] border-[#E7EAF0] text-[#17294B]",
+      dot: "bg-[#17294B]/60",
       defaultLabel: "Standby / Ready",
     },
     pending: {
-      bg: "bg-[#31136C]/08 border-[#31136C]/20 text-[#31136C]",
-      dot: "bg-[#31136C]",
+      bg: "bg-[#FCE8F0] border-[#E7EAF0] text-[#17294B]",
+      dot: "bg-[#17294B]/60",
       defaultLabel: "Integration Pending",
     },
     degraded: {
-      bg: "bg-[#950460]/10 border-[#950460]/30 text-[#950460]",
-      dot: "bg-[#950460]",
+      bg: "bg-[#F28C28]/10 border-[#F28C28]/30 text-[#F28C28]",
+      dot: "bg-[#F28C28]",
       defaultLabel: "Degraded",
     },
     stage0: {
-      bg: "bg-[#950460]/10 border-[#950460]/30 text-[#31136C]",
-      dot: "bg-[#950460]",
+      bg: "bg-[#FCE8F0] border-[#E4005A]/30 text-[#E4005A]",
+      dot: "bg-[#E4005A]",
       defaultLabel: "Stage 0 Baseline",
     },
   };
