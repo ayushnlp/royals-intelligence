@@ -178,7 +178,7 @@ export default function AcquisitionPage() {
             <span className="text-[11px] font-mono uppercase tracking-wider text-[#52627A] block mb-1">
               Registered Sources
             </span>
-            <div className="text-xl md:text-2xl font-extrabold text-[#17294B] font-mono tracking-tight">
+            <div className="text-xl md:text-2xl font-extrabold text-[#E4005A] font-mono tracking-tight">
               {sources.length > 0 ? `${sources.length} Sources` : "—"}
             </div>
             <p className="text-xs text-[#52627A] mt-0.5">
@@ -190,7 +190,7 @@ export default function AcquisitionPage() {
             <span className="text-[11px] font-mono uppercase tracking-wider text-[#52627A] block mb-1">
               Parquet Lakehouse
             </span>
-            <div className="text-xl md:text-2xl font-extrabold text-[#17294B] font-mono tracking-tight">
+            <div className="text-xl md:text-2xl font-extrabold text-[#E4005A] font-mono tracking-tight">
               {coverage?.total_deliveries_indexed ? coverage.total_deliveries_indexed.toLocaleString() : "—"}
             </div>
             <p className="text-xs text-[#52627A] mt-0.5">
@@ -202,7 +202,7 @@ export default function AcquisitionPage() {
             <span className="text-[11px] font-mono uppercase tracking-wider text-[#52627A] block mb-1">
               Matches Indexed
             </span>
-            <div className="text-xl md:text-2xl font-extrabold text-[#17294B] font-mono tracking-tight">
+            <div className="text-xl md:text-2xl font-extrabold text-[#E4005A] font-mono tracking-tight">
               {coverage?.total_matches_acquired ? coverage.total_matches_acquired.toLocaleString() : "—"}
             </div>
             <p className="text-xs text-[#52627A] mt-0.5">
@@ -393,15 +393,15 @@ export default function AcquisitionPage() {
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs pt-2 border-t border-[#E7EAF0]">
                       <div>
                         <span className="text-[#52627A] block">Matches:</span>
-                        <span className="font-bold font-mono text-[#17294B]">{comp.matches_acquired}</span>
+                        <span className="font-bold font-mono text-[#E4005A]">{comp.matches_acquired}</span>
                       </div>
                       <div>
                         <span className="text-[#52627A] block">Ball-by-Ball:</span>
-                        <span className="font-bold font-mono text-[#17294B]">{comp.ball_by_ball_available} rows</span>
+                        <span className="font-bold font-mono text-[#E4005A]">{comp.ball_by_ball_available} rows</span>
                       </div>
                       <div>
                         <span className="text-[#52627A] block">Scorecards:</span>
-                        <span className="font-bold font-mono text-[#17294B]">{comp.scorecards_available}</span>
+                        <span className="font-bold font-mono text-[#E4005A]">{comp.scorecards_available}</span>
                       </div>
                       <div>
                         <span className="text-[#52627A] block">Squads:</span>

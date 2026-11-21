@@ -254,7 +254,7 @@ export default function UncappedIntelligencePage() {
             <span className="text-[10px] font-mono uppercase tracking-wider text-[#52627A] font-semibold block mb-1">
               Qualified Prospects
             </span>
-            <div className="text-xl md:text-2xl font-extrabold text-[#17294B] font-mono tracking-tight">
+            <div className="text-xl md:text-2xl font-extrabold text-[#E4005A] font-mono tracking-tight">
               {overview
                 ? `${overview.total_verified_uncapped_batters} Bat / ${overview.total_verified_uncapped_bowlers} Bowl`
                 : "—"}

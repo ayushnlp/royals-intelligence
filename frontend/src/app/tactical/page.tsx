@@ -375,9 +375,9 @@ export default function TacticalIntelligencePage() {
             <span className="text-[10px] font-mono uppercase tracking-wider text-[#52627A] font-semibold block">
               Total Deliveries
             </span>
-            <div className="text-2xl md:text-3xl font-extrabold text-[#17294B] font-mono tracking-tight flex items-baseline gap-1.5">
+            <div className="text-2xl md:text-3xl font-extrabold text-[#E4005A] font-mono tracking-tight flex items-baseline gap-1.5">
               <span>{summary ? summary.total_deliveries.toLocaleString() : "—"}</span>
-              <span className="w-1.5 h-1.5 rounded-full bg-[#17294B]" />
+              <span className="w-1.5 h-1.5 rounded-full bg-[#E4005A]" />
             </div>
             <p className="text-[11px] text-[#52627A] truncate">
               {summary ? `${summary.legal_deliveries.toLocaleString()} legal deliveries` : "—"}
@@ -388,7 +388,7 @@ export default function TacticalIntelligencePage() {
             <span className="text-[10px] font-mono uppercase tracking-wider text-[#52627A] font-semibold block">
               Matches Covered
             </span>
-            <div className="text-2xl md:text-3xl font-extrabold text-[#17294B] font-mono tracking-tight">
+            <div className="text-2xl md:text-3xl font-extrabold text-[#E4005A] font-mono tracking-tight">
               {summary ? summary.total_matches_with_deliveries : "—"}
             </div>
             <p className="text-[11px] text-[#52627A] truncate">
@@ -400,7 +400,7 @@ export default function TacticalIntelligencePage() {
             <span className="text-[10px] font-mono uppercase tracking-wider text-[#52627A] font-semibold block">
               Runs Off Bat
             </span>
-            <div className="text-2xl md:text-3xl font-extrabold text-[#17294B] font-mono tracking-tight">
+            <div className="text-2xl md:text-3xl font-extrabold text-[#E4005A] font-mono tracking-tight">
               {summary ? summary.total_runs_off_bat.toLocaleString() : "—"}
             </div>
             <p className="text-[11px] text-[#52627A] truncate">
@@ -412,7 +412,7 @@ export default function TacticalIntelligencePage() {
             <span className="text-[10px] font-mono uppercase tracking-wider text-[#52627A] font-semibold block">
               Total Wickets
             </span>
-            <div className="text-2xl md:text-3xl font-extrabold text-[#17294B] font-mono tracking-tight">
+            <div className="text-2xl md:text-3xl font-extrabold text-[#E4005A] font-mono tracking-tight">
               {summary ? summary.total_wickets_fallen.toLocaleString() : "—"}
             </div>
             <p className="text-[11px] text-[#52627A] truncate">
@@ -424,7 +424,7 @@ export default function TacticalIntelligencePage() {
             <span className="text-[10px] font-mono uppercase tracking-wider text-[#52627A] font-semibold block">
               Active Players
             </span>
-            <div className="text-2xl md:text-3xl font-extrabold text-[#17294B] font-mono tracking-tight">
+            <div className="text-2xl md:text-3xl font-extrabold text-[#E4005A] font-mono tracking-tight">
               {summary ? `${summary.total_unique_strikers} / ${summary.total_unique_bowlers}` : "—"}
             </div>
             <p className="text-[11px] text-[#52627A] truncate">
@@ -436,7 +436,7 @@ export default function TacticalIntelligencePage() {
             <span className="text-[10px] font-mono uppercase tracking-wider text-[#52627A] font-semibold block">
               Radar Speeds
             </span>
-            <div className="text-2xl md:text-3xl font-extrabold text-[#17294B] font-mono tracking-tight">
+            <div className="text-2xl md:text-3xl font-extrabold text-[#E4005A] font-mono tracking-tight">
               {summary ? summary.valid_radar_speed_records.toLocaleString() : "—"}
             </div>
             <p className="text-[11px] text-[#E4005A] font-medium truncate">

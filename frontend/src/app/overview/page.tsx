@@ -196,7 +196,7 @@ export default function OverviewPage() {
             <span className="text-[13px] sm:text-sm font-semibold uppercase tracking-wider text-[#52627A] block mb-1.5">
               Controlling Data Pack
             </span>
-            <div className="text-3xl sm:text-[34px] lg:text-[36px] font-extrabold text-[#17294B] font-mono tracking-tight leading-tight my-1">
+            <div className="text-3xl sm:text-[34px] lg:text-[36px] font-extrabold text-[#E4005A] font-mono tracking-tight leading-tight my-1">
               {pressureOverview?.total_deliveries ? pressureOverview.total_deliveries.toLocaleString() : "—"}
             </div>
             <p className="text-[13px] sm:text-[14px] text-[#52627A] mt-1.5 leading-snug">
@@ -210,7 +210,7 @@ export default function OverviewPage() {
             <span className="text-[13px] sm:text-sm font-semibold uppercase tracking-wider text-[#52627A] block mb-1.5">
               Official Deliverables
             </span>
-            <div className="text-3xl sm:text-[34px] lg:text-[36px] font-extrabold text-[#17294B] font-mono tracking-tight leading-tight my-1">
+            <div className="text-3xl sm:text-[34px] lg:text-[36px] font-extrabold text-[#E4005A] font-mono tracking-tight leading-tight my-1">
               Top 10 / Top 10
             </div>
             <p className="text-[13px] sm:text-[14px] text-[#52627A] mt-1.5 leading-snug">
@@ -222,7 +222,7 @@ export default function OverviewPage() {
             <span className="text-[13px] sm:text-sm font-semibold uppercase tracking-wider text-[#52627A] block mb-1.5">
               Uncapped Domestic Intelligence
             </span>
-            <div className="text-3xl sm:text-[34px] lg:text-[36px] font-extrabold text-[#17294B] font-mono tracking-tight leading-tight my-1">
+            <div className="text-3xl sm:text-[34px] lg:text-[36px] font-extrabold text-[#E4005A] font-mono tracking-tight leading-tight my-1">
               {uncappedOverview
                 ? `${uncappedOverview.total_verified_uncapped_batters + uncappedOverview.total_verified_uncapped_bowlers} Verified`
                 : "—"}
@@ -301,17 +301,17 @@ export default function OverviewPage() {
                     )}
                   >
                     <div className="flex items-center gap-3">
-                      <span className="font-mono font-bold text-[#74658F] w-4 text-center">{p.rank}</span>
+                      <span className="font-mono font-bold text-[#E4005A] w-4 text-center">{p.rank}</span>
                       <div>
                         <span className="font-bold text-[#17294B] block">{p.name}</span>
                         <span className="text-[11px] text-[#950460] font-semibold font-mono">{p.team}</span>
                       </div>
                     </div>
                     <div className="text-right">
-                      <span className={`font-mono font-bold ${p.val.startsWith("+") ? "text-[#E4005A]" : "text-[#17294B]"}`}>
+                      <span className="font-mono font-bold text-[#E4005A]">
                         {p.val} pts
                       </span>
-                      <span className="text-[11px] font-mono text-[#74658F] block">{p.balls}b • {p.matches}m</span>
+                      <span className="text-[11px] font-mono text-[#74658F] block"><strong className="text-[#E4005A]">{p.balls}</strong>b • <strong className="text-[#E4005A]">{p.matches}</strong>m</span>
                     </div>
                   </div>
                 ))}
@@ -368,17 +368,17 @@ export default function OverviewPage() {
                     )}
                   >
                     <div className="flex items-center gap-3">
-                      <span className="font-mono font-bold text-[#74658F] w-4 text-center">{p.rank}</span>
+                      <span className="font-mono font-bold text-[#E4005A] w-4 text-center">{p.rank}</span>
                       <div>
                         <span className="font-bold text-[#17294B] block">{p.name}</span>
                         <span className="text-[11px] text-[#950460] font-semibold font-mono">{p.team}</span>
                       </div>
                     </div>
                     <div className="text-right">
-                      <span className={`font-mono font-bold ${p.val.startsWith("-") ? "text-[#E4005A]" : "text-[#17294B]"}`}>
+                      <span className="font-mono font-bold text-[#E4005A]">
                         {p.val} rpo
                       </span>
-                      <span className="text-[11px] font-mono text-[#74658F] block">{p.balls}b • {p.matches}m</span>
+                      <span className="text-[11px] font-mono text-[#74658F] block"><strong className="text-[#E4005A]">{p.balls}</strong>b • <strong className="text-[#E4005A]">{p.matches}</strong>m</span>
                     </div>
                   </div>
                 ))}
@@ -451,7 +451,7 @@ export default function OverviewPage() {
                 >
                   <div>
                     <div className="flex items-center gap-2">
-                      <span className="font-mono font-bold text-[#74658F] w-4">{p.rank}</span>
+                      <span className="font-mono font-bold text-[#E4005A] w-4">{p.rank}</span>
                       <span className="font-bold text-[#17294B]">{p.name}</span>
                       <span className="inline-flex items-center gap-1 text-[11px] font-bold text-[#15966B]">
                         <CheckCircle2 size={12} className="text-[#15966B]" />
@@ -461,8 +461,8 @@ export default function OverviewPage() {
                     <p className="text-[11px] text-[#74658F] mt-0.5 pl-6">{p.desc}</p>
                   </div>
                   <div className="text-right">
-                    <span className="font-mono font-bold text-[#17294B]">{p.fit}</span>
-                    <span className="text-[10px] font-mono text-[#74658F] block">{p.metric}</span>
+                    <span className="font-mono font-bold text-[#E4005A]">{p.fit}</span>
+                    <span className="text-[10px] font-mono text-[#E4005A] block">{p.metric}</span>
                   </div>
                 </div>
               ))}
@@ -491,7 +491,7 @@ export default function OverviewPage() {
                 >
                   <div>
                     <div className="flex items-center gap-2">
-                      <span className="font-mono font-bold text-[#74658F] w-4">{p.rank}</span>
+                      <span className="font-mono font-bold text-[#E4005A] w-4">{p.rank}</span>
                       <span className="font-bold text-[#17294B]">{p.name}</span>
                       <span className="inline-flex items-center gap-1 text-[11px] font-bold text-[#15966B]">
                         <CheckCircle2 size={12} className="text-[#15966B]" />
@@ -501,8 +501,8 @@ export default function OverviewPage() {
                     <p className="text-[11px] text-[#74658F] mt-0.5 pl-6">{p.desc}</p>
                   </div>
                   <div className="text-right">
-                    <span className="font-mono font-bold text-[#17294B]">{p.fit}</span>
-                    <span className="text-[10px] font-mono text-[#74658F] block">{p.metric}</span>
+                    <span className="font-mono font-bold text-[#E4005A]">{p.fit}</span>
+                    <span className="text-[10px] font-mono text-[#E4005A] block">{p.metric}</span>
                   </div>
                 </div>
               ))}

@@ -209,7 +209,7 @@ export default function PressureIntelligencePage() {
             <span className="text-[11px] font-mono uppercase tracking-wider text-[#52627A] block mb-1">
               Strict Pressure Balls
             </span>
-            <div className="text-xl font-extrabold text-[#17294B] font-mono tracking-tight">
+            <div className="text-xl font-extrabold text-[#E4005A] font-mono tracking-tight">
               {overview ? overview.strict_pressure_bowling_balls.toLocaleString() : "—"}
             </div>
             <p className="text-xs text-[#52627A] mt-0.5">
@@ -221,7 +221,7 @@ export default function PressureIntelligencePage() {
             <span className="text-[11px] font-mono uppercase tracking-wider text-[#52627A] block mb-1">
               Death Concentration
             </span>
-            <div className="text-xl font-extrabold text-[#17294B] font-mono tracking-tight">
+            <div className="text-xl font-extrabold text-[#E4005A] font-mono tracking-tight">
               {overview ? `${overview.death_overs_bowling_pressure_share_pct}%` : "—"}
             </div>
             <p className="text-xs text-[#52627A] mt-0.5">
@@ -233,7 +233,7 @@ export default function PressureIntelligencePage() {
             <span className="text-[11px] font-mono uppercase tracking-wider text-[#52627A] block mb-1">
               Candidate Scope
             </span>
-            <div className="text-xl font-extrabold text-[#17294B] font-mono tracking-tight">
+            <div className="text-xl font-extrabold text-[#E4005A] font-mono tracking-tight">
               {overview ? `${overview.total_evaluated_batters} / ${overview.total_evaluated_bowlers}` : "—"}
             </div>
             <p className="text-xs text-[#52627A] mt-0.5">
@@ -245,7 +245,7 @@ export default function PressureIntelligencePage() {
             <span className="text-[11px] font-mono uppercase tracking-wider text-[#52627A] block mb-1">
               Sample Size Gate
             </span>
-            <div className="text-xl font-extrabold text-[#17294B] font-mono tracking-tight">
+            <div className="text-xl font-extrabold text-[#E4005A] font-mono tracking-tight">
               &ge; 60 Balls
             </div>
             <p className="text-xs text-[#52627A] mt-0.5">
@@ -257,7 +257,7 @@ export default function PressureIntelligencePage() {
             <span className="text-[11px] font-mono uppercase tracking-wider text-[#52627A] block mb-1">
               Baseline Strata
             </span>
-            <div className="text-xl font-extrabold text-[#17294B] font-mono tracking-tight">
+            <div className="text-xl font-extrabold text-[#E4005A] font-mono tracking-tight">
               12 Cells
             </div>
             <p className="text-xs text-[#52627A] mt-0.5">
@@ -269,7 +269,7 @@ export default function PressureIntelligencePage() {
             <span className="text-[11px] font-mono uppercase tracking-wider text-[#52627A] block mb-1">
               Governing Metric
             </span>
-            <div className="text-xl font-extrabold text-[#17294B] font-mono tracking-tight">
+            <div className="text-xl font-extrabold text-[#E4005A] font-mono tracking-tight">
               1-SE Bound
             </div>
             <p className="text-xs text-[#52627A] mt-0.5">
@@ -440,7 +440,7 @@ export default function PressureIntelligencePage() {
                               <span className="text-[10px] font-normal text-[#74658F]">SR pts</span>
                             </span>
                           </td>
-                          <td className="px-4 py-3 text-right text-[#17294B] font-bold">
+                          <td className="px-4 py-3 text-right text-[#E4005A] font-bold">
                             +{batter.posterior_mean.toFixed(1)}
                           </td>
                           <td className="px-4 py-3 text-right text-[#74658F]">
@@ -449,7 +449,7 @@ export default function PressureIntelligencePage() {
                           <td className="px-4 py-3 text-right text-[#74658F] text-[11px]">
                             [{batter.ci_95_lower.toFixed(1)}, +{batter.ci_95_upper.toFixed(1)}]
                           </td>
-                          <td className="px-4 py-3 text-right text-[#17294B] font-bold">
+                          <td className="px-4 py-3 text-right text-[#E4005A] font-bold">
                             {batter.pressure_legal_balls}
                           </td>
                           <td className="px-4 py-3 text-right text-[#74658F]">
@@ -611,12 +611,12 @@ export default function PressureIntelligencePage() {
                             </div>
                           </td>
                           <td className="px-4 py-3 text-right">
-                            <span className="font-bold text-sm text-[#17294B] font-mono">
+                            <span className="font-bold text-sm text-[#E4005A] font-mono">
                               {bowler.conservative_runs_saved.toFixed(2)}{" "}
                               <span className="text-[10px] font-normal text-[#74658F]">RPO</span>
                             </span>
                           </td>
-                          <td className="px-4 py-3 text-right text-[#17294B] font-bold">
+                          <td className="px-4 py-3 text-right text-[#E4005A] font-bold">
                             {bowler.posterior_mean > 0 ? `+${bowler.posterior_mean.toFixed(2)}` : bowler.posterior_mean.toFixed(2)}
                           </td>
                           <td className="px-4 py-3 text-right text-[#74658F]">
@@ -625,7 +625,7 @@ export default function PressureIntelligencePage() {
                           <td className="px-4 py-3 text-right text-[#74658F] text-[11px]">
                             [{bowler.ci_95_lower.toFixed(2)}, +{bowler.ci_95_upper.toFixed(2)}]
                           </td>
-                          <td className="px-4 py-3 text-right text-[#17294B] font-bold">
+                          <td className="px-4 py-3 text-right text-[#E4005A] font-bold">
                             {bowler.pressure_legal_balls}
                           </td>
                           <td className="px-4 py-3 text-right text-[#74658F]">

@@ -726,20 +726,20 @@ export default function VenuePitchIntelligencePage() {
                       <div className="grid grid-cols-3 gap-2 text-center text-xs">
                         <div className="p-2 bg-white rounded border border-[#E7EAF0]">
                           <div className="text-[10px] text-[#52627A]">Runs</div>
-                          <div className="font-extrabold text-sm text-[#17294B]">{playerPerformance.batting_at_venue.runs}</div>
+                          <div className="font-extrabold text-sm text-[#E4005A]">{playerPerformance.batting_at_venue.runs}</div>
                         </div>
                         <div className="p-2 bg-white rounded border border-[#E7EAF0]">
                           <div className="text-[10px] text-[#52627A]">Strike Rate</div>
-                          <div className="font-extrabold text-sm text-[#17294B]">{playerPerformance.batting_at_venue.strike_rate}</div>
+                          <div className="font-extrabold text-sm text-[#E4005A]">{playerPerformance.batting_at_venue.strike_rate}</div>
                         </div>
                         <div className="p-2 bg-white rounded border border-[#E7EAF0]">
                           <div className="text-[10px] text-[#52627A]">Average</div>
-                          <div className="font-bold text-sm text-[#17294B]">{playerPerformance.batting_at_venue.average ?? "N/A"}</div>
+                          <div className="font-bold text-sm text-[#E4005A]">{playerPerformance.batting_at_venue.average ?? "N/A"}</div>
                         </div>
                       </div>
                       {playerPerformance.batting_at_venue.death_sr && (
                         <div className="text-[11px] text-[#52627A] mt-2">
-                          Death Overs SR at this ground: <span className="font-bold text-[#17294B]">{playerPerformance.batting_at_venue.death_sr}</span>
+                          Death Overs SR at this ground: <span className="font-bold text-[#E4005A]">{playerPerformance.batting_at_venue.death_sr}</span>
                         </div>
                       )}
                     </div>
@@ -751,15 +751,15 @@ export default function VenuePitchIntelligencePage() {
                       <div className="grid grid-cols-3 gap-2 text-center text-xs">
                         <div className="p-2 bg-white rounded border border-[#E7EAF0]">
                           <div className="text-[10px] text-[#52627A]">Wickets</div>
-                          <div className="font-extrabold text-sm text-[#17294B]">{playerPerformance.bowling_at_venue.wickets}</div>
+                          <div className="font-extrabold text-sm text-[#E4005A]">{playerPerformance.bowling_at_venue.wickets}</div>
                         </div>
                         <div className="p-2 bg-white rounded border border-[#E7EAF0]">
                           <div className="text-[10px] text-[#52627A]">Economy</div>
-                          <div className="font-extrabold text-sm text-[#17294B]">{playerPerformance.bowling_at_venue.economy}</div>
+                          <div className="font-extrabold text-sm text-[#E4005A]">{playerPerformance.bowling_at_venue.economy}</div>
                         </div>
                         <div className="p-2 bg-white rounded border border-[#E7EAF0]">
                           <div className="text-[10px] text-[#52627A]">Overs</div>
-                          <div className="font-bold text-sm text-[#17294B]">{playerPerformance.bowling_at_venue.overs}</div>
+                          <div className="font-bold text-sm text-[#E4005A]">{playerPerformance.bowling_at_venue.overs}</div>
                         </div>
                       </div>
                     </div>

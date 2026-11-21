@@ -415,7 +415,7 @@ export default function DomesticIntelligencePage() {
           }`}
         >
           <Trophy size={14} className={activeTab === "tournaments" ? "text-[#E4005A]" : "text-[#52627A]"} />
-          <span>Tournament Directory ({competitions.length})</span>
+          <span>Tournament Directory (<strong className="text-[#E4005A]">{competitions.length}</strong>)</span>
         </button>
         <button
           onClick={() => setActiveTab("matches")}
@@ -426,7 +426,7 @@ export default function DomesticIntelligencePage() {
           }`}
         >
           <Swords size={14} className={activeTab === "matches" ? "text-[#E4005A]" : "text-[#52627A]"} />
-          <span>Match Intelligence & Scorecards ({matchTotal})</span>
+          <span>Match Intelligence & Scorecards (<strong className="text-[#E4005A]">{matchTotal}</strong>)</span>
         </button>
         <button
           onClick={() => setActiveTab("player_profile")}
@@ -437,7 +437,7 @@ export default function DomesticIntelligencePage() {
           }`}
         >
           <Target size={14} className={activeTab === "player_profile" ? "text-[#E4005A]" : "text-[#52627A]"} />
-          <span>Uncapped Player Dossier & Splits ({playerTotal})</span>
+          <span>Uncapped Player Dossier & Splits (<strong className="text-[#E4005A]">{playerTotal}</strong>)</span>
         </button>
       </div>
 
@@ -467,7 +467,7 @@ export default function DomesticIntelligencePage() {
                     <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-[#FCE8F0] text-[#950460]">
                       {comp.competition_type}
                     </span>
-                    <span className="text-xs font-mono font-bold text-[#17294B]">{comp.season}</span>
+                    <span className="text-xs font-mono font-bold text-[#E4005A]">{comp.season}</span>
                   </div>
 
                   <h3 className="font-bold text-base text-[#17294B] group-hover:text-[#E4005A] transition-colors mb-1">
@@ -478,11 +478,11 @@ export default function DomesticIntelligencePage() {
                   <div className="grid grid-cols-3 gap-2 py-3 px-3 bg-white/90 rounded-xl border border-[#E7EAF0] text-center mb-4">
                     <div>
                       <div className="text-[10px] uppercase font-bold text-[#74658F]">Matches</div>
-                      <div className="text-sm font-extrabold text-[#17294B]">{comp.match_count}</div>
+                      <div className="text-sm font-extrabold text-[#E4005A] font-mono">{comp.match_count}</div>
                     </div>
                     <div>
                       <div className="text-[10px] uppercase font-bold text-[#74658F]">Teams</div>
-                      <div className="text-sm font-extrabold text-[#17294B]">{comp.teams_count}</div>
+                      <div className="text-sm font-extrabold text-[#E4005A] font-mono">{comp.teams_count}</div>
                     </div>
                     <div>
                       <div className="text-[10px] uppercase font-bold text-[#74658F]">Ball-by-Ball</div>
@@ -496,7 +496,7 @@ export default function DomesticIntelligencePage() {
                   <div className="flex items-center justify-between text-xs text-[#74658F] pt-2 border-t border-[#E7EAF0]">
                     <span className="flex items-center gap-1 text-[11px] text-[#15966B] font-semibold">
                       <CheckCircle2 size={13} className="text-[#15966B]" />
-                      Audit Pass: {comp.validation_pass_rate}%
+                      Audit Pass: <span className="font-mono text-[#E4005A] font-bold">{comp.validation_pass_rate}%</span>
                     </span>
                     <span className="text-[11px] font-mono font-bold text-[#E4005A] flex items-center">
                       Explore Fixtures <ChevronRight size={13} />
@@ -687,7 +687,7 @@ export default function DomesticIntelligencePage() {
                           : "bg-white text-[#52627A] border border-[#E7EAF0] hover:bg-[#FCE8F0]/40 hover:text-[#17294B]"
                       }`}
                     >
-                      Innings {inn.innings_number}: {inn.batting_team_name} ({inn.total_runs}/{inn.wickets})
+                      Innings {inn.innings_number}: {inn.batting_team_name} (<strong className="text-[#E4005A]">{inn.total_runs}/{inn.wickets}</strong>)
                     </button>
                   ))}
                 </div>
@@ -704,12 +704,12 @@ export default function DomesticIntelligencePage() {
                           <span className="text-xs font-bold text-[#17294B]">{phase.phase_name}</span>
                           <span className="text-[10px] font-mono text-[#74658F]">{phase.overs_range}</span>
                         </div>
-                        <div className="text-xl font-black text-[#17294B] my-1">
-                          {phase.runs} <span className="text-xs font-normal text-[#74658F]">runs / {phase.wickets} wkts</span>
+                        <div className="text-xl font-black text-[#E4005A] my-1">
+                          {phase.runs} <span className="text-xs font-normal text-[#74658F]">runs / <strong className="text-[#E4005A]">{phase.wickets}</strong> wkts</span>
                         </div>
                         <div className="flex items-center justify-between text-[11px] text-[#74658F] pt-2 border-t border-[#E7EAF0]">
-                          <span>Run Rate: {phase.run_rate}</span>
-                          <span>Boundary: {phase.boundary_runs} runs</span>
+                          <span>Run Rate: <strong className="text-[#E4005A] font-mono">{phase.run_rate}</strong></span>
+                          <span>Boundary: <strong className="text-[#E4005A] font-mono">{phase.boundary_runs}</strong> runs</span>
                         </div>
                       </div>
                     ))}
@@ -768,11 +768,11 @@ export default function DomesticIntelligencePage() {
                                 <span className="font-semibold text-[#E4005A]">not out</span>
                               )}
                             </td>
-                            <td className="py-2.5 px-3 text-right font-extrabold text-[#17294B]">{b.runs}</td>
+                            <td className="py-2.5 px-3 text-right font-extrabold text-[#E4005A]">{b.runs}</td>
                             <td className="py-2.5 px-3 text-right text-[#74658F]">{b.balls_faced}</td>
                             <td className="py-2.5 px-3 text-right text-[#74658F]">{b.fours}</td>
                             <td className="py-2.5 px-3 text-right text-[#74658F]">{b.sixes}</td>
-                            <td className="py-2.5 px-3 text-right font-mono font-bold text-[#17294B]">{b.strike_rate}</td>
+                            <td className="py-2.5 px-3 text-right font-mono font-bold text-[#E4005A]">{b.strike_rate}</td>
                             <td className="py-2.5 px-3 text-right font-mono text-[#74658F] text-[11px]">
                               {b.powerplay_runs !== undefined ? `${b.powerplay_runs}/${b.powerplay_balls}` : "-"}
                             </td>
@@ -822,11 +822,11 @@ export default function DomesticIntelligencePage() {
                                 </span>
                               )}
                             </td>
-                            <td className="py-2.5 px-3 text-right font-mono text-[#17294B]">{bw.overs}</td>
+                            <td className="py-2.5 px-3 text-right font-mono text-[#E4005A]">{bw.overs}</td>
                             <td className="py-2.5 px-3 text-right text-[#74658F]">{bw.maidens}</td>
-                            <td className="py-2.5 px-3 text-right font-extrabold text-[#17294B]">{bw.runs_conceded}</td>
-                            <td className="py-2.5 px-3 text-right font-extrabold text-[#17294B]">{bw.bowler_wickets}</td>
-                            <td className="py-2.5 px-3 text-right font-mono font-bold text-[#17294B]">{bw.economy_rate}</td>
+                            <td className="py-2.5 px-3 text-right font-extrabold text-[#E4005A]">{bw.runs_conceded}</td>
+                            <td className="py-2.5 px-3 text-right font-extrabold text-[#E4005A]">{bw.bowler_wickets}</td>
+                            <td className="py-2.5 px-3 text-right font-mono font-bold text-[#E4005A]">{bw.economy_rate}</td>
                             <td className="py-2.5 px-3 text-right text-[#74658F]">{bw.dot_balls ?? 0}</td>
                             <td className="py-2.5 px-3 text-right text-[#74658F] font-mono text-[11px]">
                               w:{bw.wides} nb:{bw.noballs}

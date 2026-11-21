@@ -43,40 +43,41 @@ export default function HomePage() {
   ];
 
   return (
-    <div className="w-full flex flex-col justify-between space-y-5 sm:space-y-6 lg:space-y-8 py-2 sm:py-3">
+    <div className="w-full flex flex-col justify-between space-y-4 sm:space-y-5 lg:space-y-6 py-2 sm:py-3">
       {/* =================================================================== */}
       {/* 1. HERO SECTION — Central anchor with official RR branding & Poppins */}
       {/* =================================================================== */}
       <section className="flex flex-col items-center text-center pt-1 sm:pt-2 pb-1">
         {/* Eyebrow: ROYALS INTELLIGENCE */}
-        <div className="mb-1 sm:mb-1.5">
-          <span className="font-heading font-extrabold text-[11px] sm:text-xs tracking-[0.25em] text-[#17294B] uppercase">
+        <div className="mb-1.5">
+          <span className="font-heading font-extrabold text-xs sm:text-sm tracking-[0.28em] text-[#17294B] uppercase">
             ROYALS INTELLIGENCE
           </span>
         </div>
 
         {/* Badge: SEASON 02 */}
-        <div className="mb-1.5 sm:mb-2">
-          <span className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full text-[11px] font-mono font-bold tracking-wider bg-[#FCE8F0] text-[#E4005A] border border-[#E4005A]/30 shadow-2xs">
+        <div className="mb-2">
+          <span className="inline-flex items-center gap-2 px-4 py-1 rounded-full text-xs sm:text-[13px] font-mono font-bold tracking-wider bg-[#FCE8F0] text-[#E4005A] border border-[#E4005A]/35 shadow-2xs">
             <span className="w-1.5 h-1.5 rounded-full bg-[#E4005A]" />
             SEASON 02
           </span>
         </div>
 
         {/* Sublabel: RAJASTHAN ROYALS · DATA-DRIVEN CRICKET */}
-        <div className="mb-1.5 sm:mb-2">
-          <p className="text-[11px] sm:text-xs font-semibold tracking-[0.2em] text-[#74658F] uppercase">
+        <div className="mb-2.5">
+          <p className="text-xs sm:text-[13px] font-semibold tracking-[0.24em] text-[#74658F] uppercase">
             RAJASTHAN ROYALS · DATA-DRIVEN CRICKET
           </p>
         </div>
 
-        {/* Headline: INTELLIGENCE FOR RAJASTHAN ROYALS. */}
-        <h1 className="font-heading font-extrabold text-2xl sm:text-3xl md:text-[32px] lg:text-[36px] xl:text-[40px] text-[#17294B] tracking-tight leading-tight max-w-5xl mx-auto mb-1.5 sm:mb-2">
-          INTELLIGENCE FOR RAJASTHAN ROYALS.
+        {/* Headline: INTELLIGENCE FOR / RAJASTHAN ROYALS. (Intentional Line Break) */}
+        <h1 className="font-heading font-extrabold text-3xl sm:text-4xl md:text-5xl lg:text-[48px] xl:text-[54px] text-[#17294B] tracking-tight leading-[1.08] max-w-5xl mx-auto mb-2.5">
+          <span className="block">INTELLIGENCE FOR</span>
+          <span className="block">RAJASTHAN ROYALS.</span>
         </h1>
 
         {/* Subtitle: Built to Find the Difference. */}
-        <h3 className="font-heading font-bold text-base sm:text-lg lg:text-xl text-[#E4005A] tracking-tight mb-4 sm:mb-5">
+        <h3 className="font-heading font-bold text-lg sm:text-xl lg:text-[22px] text-[#E4005A] tracking-tight mb-5 sm:mb-6">
           Built to Find the Difference.
         </h3>
 
@@ -100,7 +101,7 @@ export default function HomePage() {
       </section>
 
       {/* =================================================================== */}
-      {/* 2. COMPACT FEATURE CARDS — ALL FIVE IN ONE ROW (DESKTOP) */}
+      {/* 2. FIVE MODULE CARDS — BOTTOM-CENTERED IN ONE ROW (DESKTOP) */}
       {/* =================================================================== */}
       <section className="pt-1 sm:pt-2 w-full">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2.5 sm:gap-3 max-w-6xl mx-auto w-full">
@@ -109,18 +110,11 @@ export default function HomePage() {
               <Link
                 key={card.title}
                 href={card.href}
-                className="group min-h-[82px] lg:h-[86px] p-3 rounded-xl border border-[#E7EAF0] bg-white hover:border-[#E4005A] hover:bg-[#FCE8F0]/40 hover:shadow-sm transition-all flex flex-col justify-between"
+                className="group h-[64px] sm:h-[68px] lg:h-[72px] px-3.5 py-2.5 rounded-xl border border-[#E7EAF0] bg-white hover:border-[#E4005A] hover:bg-[#FCE8F0]/50 hover:shadow-md transition-all duration-200 flex items-center justify-center text-center cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[#E4005A]"
               >
-                <div>
-                  <h4 className="text-xs lg:text-[13px] font-heading font-extrabold text-[#17294B] group-hover:text-[#E4005A] transition-colors tracking-tight leading-snug">
-                    {card.title}
-                  </h4>
-                </div>
-
-                <div className="flex items-center gap-1.5 text-[11px] font-bold text-[#E4005A] group-hover:translate-x-0.5 transition-all mt-auto pt-1">
-                  <span>Access Module</span>
-                  <ArrowRight size={12} className="text-[#E4005A]" />
-                </div>
+                <h4 className="text-xs sm:text-[13px] font-heading font-extrabold text-[#17294B] group-hover:text-[#E4005A] transition-colors tracking-tight leading-snug">
+                  {card.title}
+                </h4>
               </Link>
             );
           })}

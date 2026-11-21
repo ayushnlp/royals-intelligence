@@ -88,22 +88,27 @@ export const Sidebar: React.FC<SidebarProps> = ({ className }) => {
         key={item.href}
         href={item.href}
         className={cn(
-          "flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs transition-all duration-150 group relative cursor-pointer",
+          "flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs transition-all duration-150 group relative cursor-pointer outline-none focus:outline-none focus-visible:ring-2 focus-visible:ring-[#E4005A]",
           isActive
-            ? "bg-[#FCE8F0] text-[#17294B] font-bold border-l-4 border-[#E4005A] pl-2.5 shadow-sm"
-            : "text-[#17294B] font-semibold hover:text-[#E4005A] hover:bg-[#FCE8F0]"
+            ? "bg-[#FCE8F0] text-[#17294B] font-bold border border-[#E4005A]/35 shadow-xs"
+            : "text-[#17294B] font-bold hover:text-[#E4005A] hover:bg-[#FCE8F0]/60"
         )}
       >
+        {/* Clean bright RR pink active pill indicator */}
+        {isActive && (
+          <span className="absolute left-0 top-2 bottom-2 w-1 bg-[#E4005A] rounded-r-full" />
+        )}
+
         <Icon
           size={16}
           className={cn(
             "shrink-0 transition-colors",
-            isActive ? "text-[#E4005A]" : "text-[#17294B]/70 group-hover:text-[#E4005A]"
+            isActive ? "text-[#E4005A]" : "text-[#17294B] group-hover:text-[#E4005A]"
           )}
         />
 
         {!collapsed && (
-          <span className="truncate tracking-tight font-semibold text-[13px] text-[#17294B] group-hover:text-[#E4005A]">
+          <span className="truncate tracking-tight font-bold text-[13px] text-[#17294B] group-hover:text-[#E4005A]">
             {item.title}
           </span>
         )}
@@ -122,7 +127,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ className }) => {
     <aside
       className={cn(
         "relative flex flex-col bg-white text-[#17294B] transition-all duration-200 z-30 min-h-screen border-r border-[#E7EAF0] select-none",
-        collapsed ? "w-16" : "w-64",
+        collapsed ? "w-16" : "w-[236px]",
         className
       )}
     >
