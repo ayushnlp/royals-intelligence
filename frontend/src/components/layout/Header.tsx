@@ -1,13 +1,16 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { RefreshCw } from "lucide-react";
+import { ExternalLink } from "lucide-react";
 import { fetchSystemHealth } from "@/lib/api";
 import { SystemHealth } from "@/types";
+import { ConnectionWaveform } from "@/components/ui/ConnectionWaveform";
 
 const PAGE_TITLES: Record<string, string> = {
-  "/": "Executive Overview",
+  "/": "Public Home",
+  "/overview": "Executive Overview",
   "/pressure": "Pressure Intelligence",
   "/tactical": "Tactical Intelligence",
   "/uncapped": "Uncapped Intelligence",
@@ -23,9 +26,14 @@ export const Header: React.FC = () => {
 
   const checkHealth = async () => {
     setLoading(true);
-    const data = await fetchSystemHealth();
-    setHealth(data);
-    setLoading(false);
+    try {
+      const data = await fetchSystemHealth();
+      setHealth(data);
+    } catch {
+      setHealth(null);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -35,50 +43,45 @@ export const Header: React.FC = () => {
   }, []);
 
   const isHealthy = health?.status === "healthy";
-  const currentPageTitle = pathname ? PAGE_TITLES[pathname] || "Intelligence Platform" : "Executive Overview";
+  const currentPageTitle = pathname
+    ? PAGE_TITLES[pathname] || "Intelligence Platform"
+    : "Executive Overview";
 
   return (
-    <header className="h-16 bg-white/95 backdrop-blur-sm border-b border-slate-200/80 px-6 flex items-center justify-between sticky top-0 z-20">
-      {/* Left: Breadcrumb / Page Title */}
+    <header className="h-16 bg-white/95 backdrop-blur-md border-b border-[#31136C]/12 px-6 flex items-center justify-between sticky top-0 z-20">
+      {/* Left: Breadcrumbs / Title */}
       <div className="flex items-center gap-2.5">
-        <span className="text-xs font-medium text-slate-400">
+        <Link
+          href="/"
+          className="text-xs font-semibold text-[#31136C]/70 hover:text-[#950460] transition-colors"
+        >
           Royals Intelligence
-        </span>
-        <span className="text-slate-300 font-light">/</span>
-        <h2 className="text-sm font-semibold tracking-tight text-slate-900">
+        </Link>
+        <span className="text-[#31136C]/30 font-light">/</span>
+        <h1 className="text-sm font-bold tracking-tight text-[#31136C]">
           {currentPageTitle}
-        </h2>
+        </h1>
       </div>
 
-      {/* Right: Telemetry & Live Connection Action */}
+      {/* Right: Actions & Telemetry */}
       <div className="flex items-center gap-3 text-xs">
-        {/* Live Engine Status Indicator */}
-        <button
-          onClick={checkHealth}
-          title="Click to re-check API connectivity"
-          className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-slate-200/80 bg-slate-50/70 hover:bg-slate-100 text-slate-700 hover:text-slate-900 transition-colors cursor-pointer shadow-2xs"
-        >
-          <span className="relative flex h-2 w-2">
-            {isHealthy && (
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-            )}
-            <span
-              className={`relative inline-flex rounded-full h-2 w-2 ${
-                isHealthy ? "bg-emerald-500" : "bg-amber-500"
-              }`}
-            />
-          </span>
-          <span className="font-mono text-[11px] text-slate-500">
-            Engine:{" "}
-            <strong className={isHealthy ? "text-emerald-700 font-semibold" : "text-amber-700 font-semibold"}>
-              {isHealthy ? "Online" : "Standby"}
-            </strong>
-          </span>
-          <RefreshCw
-            size={11}
-            className={`text-slate-400 ${loading ? "animate-spin text-[#E91E8C]" : ""}`}
-          />
-        </button>
+        {/* Link to public homepage if on dashboard */}
+        {pathname !== "/" && (
+          <Link
+            href="/"
+            className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#31136C]/15 bg-[#F7F6FB] hover:bg-[#950460]/10 text-[#31136C] hover:text-[#950460] text-xs font-semibold transition-colors"
+          >
+            <span>Public Home</span>
+            <ExternalLink size={12} className="text-[#950460]" />
+          </Link>
+        )}
+
+        {/* Live Engine Connection Waveform Indicator */}
+        <ConnectionWaveform
+          isHealthy={isHealthy}
+          isProbing={loading}
+          onProbe={checkHealth}
+        />
       </div>
     </header>
   );

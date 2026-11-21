@@ -112,17 +112,38 @@ export async function safeApiFetch<T>(
       signal: options?.signal || controller.signal,
     });
   } catch (err: any) {
-    clearTimeout(timer);
-    if (err.name === "AbortError") {
+    // If local dev backend is unreachable on localhost, attempt graceful fallback to production Render API
+    if (
+      (baseUrl.includes("localhost:8000") || baseUrl.includes("127.0.0.1:8000")) &&
+      err.name !== "AbortError"
+    ) {
+      try {
+        const fallbackUrl = `https://royals-intelligence-api.onrender.com/api/v1${cleanEndpoint}`;
+        res = await fetch(fallbackUrl, {
+          cache: "no-store",
+          ...options,
+          signal: options?.signal || controller.signal,
+        });
+      } catch {
+        clearTimeout(timer);
+        throw new ApiError(
+          `Network error connecting to backend service at ${baseUrl}: ${err.message || "Connection refused / unreachable"}`,
+          { isNetworkError: true, endpoint: cleanEndpoint }
+        );
+      }
+    } else {
+      clearTimeout(timer);
+      if (err.name === "AbortError") {
+        throw new ApiError(
+          `Request timed out after ${timeoutMs / 1000}s connecting to ${cleanEndpoint}`,
+          { isNetworkError: true, endpoint: cleanEndpoint }
+        );
+      }
       throw new ApiError(
-        `Request timed out after ${timeoutMs / 1000}s connecting to ${cleanEndpoint}`,
+        `Network error connecting to backend service at ${baseUrl}: ${err.message || "Connection refused / unreachable"}`,
         { isNetworkError: true, endpoint: cleanEndpoint }
       );
     }
-    throw new ApiError(
-      `Network error connecting to backend service at ${baseUrl}: ${err.message || "Connection refused / unreachable"}`,
-      { isNetworkError: true, endpoint: cleanEndpoint }
-    );
   } finally {
     clearTimeout(timer);
   }
