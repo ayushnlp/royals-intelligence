@@ -377,9 +377,10 @@ export default function DomesticIntelligencePage() {
               >
                 {Array.isArray(availableSeasons) && availableSeasons.length > 0 ? (
                   availableSeasons.map((s) => {
-                    const activeComp = competitions.find(
-                      (c) => c.competition_id === selectedCompId && String(c.season) === String(s.season)
-                    ) || (s.season === selectedSeason ? competitions.find((c) => c.competition_id === selectedCompId) : null);
+                    const safeComps = Array.isArray(competitions) ? competitions : [];
+                    const activeComp = safeComps.find(
+                      (c) => c && c.competition_id === selectedCompId && String(c.season) === String(s.season)
+                    ) || (s.season === selectedSeason ? safeComps.find((c) => c && c.competition_id === selectedCompId) : null);
 
                     const matchDisplay = !s.has_data
                       ? "(No Data)"
@@ -396,7 +397,7 @@ export default function DomesticIntelligencePage() {
                 ) : (
                   <>
                     <option value="2024">
-                      Season 2024 ({competitions.find((c) => c.competition_id === selectedCompId)?.match_count ?? 74} matches)
+                      Season 2024 ({Array.isArray(competitions) ? competitions.find((c) => c && c.competition_id === selectedCompId)?.match_count ?? 74 : 74} matches)
                     </option>
                     <option value="2026">Season 2026</option>
                     <option value="2025">Season 2025</option>
