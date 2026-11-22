@@ -68,18 +68,12 @@ pnpm-debug.log*
 data/raw/**/*
 !data/raw/**/.gitkeep
 !data/raw/**/
-!data/raw/rajasthan_royals/round_1_data_pack/competitions.csv
-!data/raw/rajasthan_royals/round_1_data_pack/matches.csv
-!data/raw/rajasthan_royals/round_1_data_pack/playing_eleven.csv
-!data/raw/rajasthan_royals/round_1_data_pack/teams.csv
-!data/raw/rajasthan_royals/round_1_data_pack/competition_team_player_mapping.csv
-!data/raw/rajasthan_royals/round_1_data_pack/ipl_players.csv
 data/processed/**/*
 !data/processed/**/.gitkeep
 !data/processed/**/
 !data/processed/auction_intelligence/canonical_player_registry.parquet
 !data/processed/auction_intelligence/senior_international_eligibility_ledger.parquet
-!backend/data/runtime_assets/**
+backend/data/runtime_assets/**
 data/validation/**/*
 !data/validation/**/.gitkeep
 !data/validation/**/
@@ -100,7 +94,6 @@ round1_pressure/data/processed/**/*
 !round1_pressure/data/processed/bowling_leaderboard.parquet
 !round1_pressure/data/processed/batting_evidence_profiles.parquet
 !round1_pressure/data/processed/bowling_evidence_profiles.parquet
-!round1_pressure/data/processed/delivery_states_strict.parquet
 round1_pressure/data/outputs/**/*
 !round1_pressure/data/outputs/**/.gitkeep
 !round1_pressure/data/outputs/**/

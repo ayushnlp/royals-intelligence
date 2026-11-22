@@ -163,7 +163,7 @@ export default function DomesticIntelligencePage() {
         const res = await fetchSeasonMatches(selectedCompId, selectedSeason, {
           team: teamFilter || undefined,
           page: 1,
-          page_size: 20,
+          page_size: 100,
         });
         if (isCurrent) {
           const safeMatches = Array.isArray(res?.matches) ? res.matches : [];
@@ -332,19 +332,19 @@ export default function DomesticIntelligencePage() {
           </span>
         </div>
 
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-          <div className="max-w-3xl space-y-2">
-            <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-[#E4005A] leading-tight font-heading">
+        <div className="flex flex-col xl:flex-row xl:items-end justify-between gap-5 pb-1">
+          <div className="space-y-2 flex-1 min-w-0">
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-[#E4005A] leading-tight font-heading lg:whitespace-nowrap">
               Domestic Season & Match Intelligence
             </h1>
-            <p className="text-sm md:text-base text-[#52627A] leading-relaxed font-normal">
+            <p className="text-sm md:text-base text-[#52627A] leading-relaxed font-normal max-w-4xl">
               Format-aware phase diagnostics, ball-by-ball scorecards, partnerships, progression worms,
               and uncompromised all-round dual-contribution tracking for IPL 2027 recruitment.
             </p>
           </div>
 
           {/* Global Selectors */}
-          <div className="flex items-center gap-3 shrink-0">
+          <div className="flex items-center gap-3 shrink-0 self-start xl:self-end">
             <div className="flex flex-col">
               <label className="text-[10px] font-bold text-[#74658F] uppercase tracking-wider mb-1 font-mono">
                 Active Tournament
@@ -376,14 +376,28 @@ export default function DomesticIntelligencePage() {
                 className="bg-white border border-[#E7EAF0] rounded-lg px-3 py-1.5 text-xs font-semibold text-[#17294B] focus:outline-none focus:ring-2 focus:ring-[#E4005A] shadow-sm cursor-pointer"
               >
                 {Array.isArray(availableSeasons) && availableSeasons.length > 0 ? (
-                  availableSeasons.map((s) => (
-                    <option key={s.season} value={s.season}>
-                      Season {s.season} {s.has_data ? `(${s.total_matches} matches)` : "(No Data)"}
-                    </option>
-                  ))
+                  availableSeasons.map((s) => {
+                    const activeComp = competitions.find(
+                      (c) => c.competition_id === selectedCompId && String(c.season) === String(s.season)
+                    ) || (s.season === selectedSeason ? competitions.find((c) => c.competition_id === selectedCompId) : null);
+
+                    const matchDisplay = !s.has_data
+                      ? "(No Data)"
+                      : activeComp
+                      ? `(${activeComp.match_count} matches)`
+                      : `(${s.total_matches} matches)`;
+
+                    return (
+                      <option key={s.season} value={s.season}>
+                        Season {s.season} {matchDisplay}
+                      </option>
+                    );
+                  })
                 ) : (
                   <>
-                    <option value="2024">Season 2024 (Verified Domestic)</option>
+                    <option value="2024">
+                      Season 2024 ({competitions.find((c) => c.competition_id === selectedCompId)?.match_count ?? 74} matches)
+                    </option>
                     <option value="2026">Season 2026</option>
                     <option value="2025">Season 2025</option>
                     <option value="2023">Season 2023</option>

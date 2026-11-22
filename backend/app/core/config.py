@@ -45,6 +45,7 @@ def resolve_asset_path(relative_path: Union[str, Path], required: bool = True) -
     cwd = Path.cwd()
     filename = rel.name
 
+    data_env = os.environ.get("DATA_DIR")
     candidates = [
         root / rel,
         cwd / rel,
@@ -56,7 +57,13 @@ def resolve_asset_path(relative_path: Union[str, Path], required: bool = True) -
         Path("/app") / rel,
         Path("/app/data/runtime_assets") / filename,
         Path("/data") / rel,
+        Path("/etc/secrets") / filename,
+        Path("/var/data") / rel,
+        Path("/var/data") / filename,
     ]
+    if data_env:
+        candidates.insert(0, Path(data_env) / rel)
+        candidates.insert(1, Path(data_env) / filename)
 
     for candidate in candidates:
         if candidate.exists():
