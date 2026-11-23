@@ -4,7 +4,7 @@ Uses Pydantic BaseSettings for strong typing and environment parsing.
 """
 
 import os
-from typing import List, Union
+from typing import List, Union, Optional
 from pathlib import Path
 from pydantic import field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -91,8 +91,8 @@ class Settings(BaseSettings):
     SECRET_KEY: str = "development-secret-key-change-in-production-min-32-chars"
     
     # Server-Side Security & Proprietary Credentials (never client-asserted)
-    SCOUT_ADMIN_API_KEY: str = "rr_scout_admin_secret_token_2026"
-    LEAD_ANALYST_API_KEY: str = "rr_lead_analyst_secret_token_2026"
+    SCOUT_ADMIN_API_KEY: Optional[str] = None
+    LEAD_ANALYST_API_KEY: Optional[str] = None
 
     # Server Binding
     HOST: str = "0.0.0.0"
@@ -167,10 +167,10 @@ class Settings(BaseSettings):
             insecure_items: List[str] = []
             if self.SECRET_KEY == "development-secret-key-change-in-production-min-32-chars" or len(self.SECRET_KEY) < 32:
                 insecure_items.append("SECRET_KEY (must be unique and >= 32 characters)")
-            if self.SCOUT_ADMIN_API_KEY == "rr_scout_admin_secret_token_2026":
-                insecure_items.append("SCOUT_ADMIN_API_KEY (must be explicitly set)")
-            if self.LEAD_ANALYST_API_KEY == "rr_lead_analyst_secret_token_2026":
-                insecure_items.append("LEAD_ANALYST_API_KEY (must be explicitly set)")
+            if not self.SCOUT_ADMIN_API_KEY or self.SCOUT_ADMIN_API_KEY == "rr_scout_admin_secret_token_2026":
+                insecure_items.append("SCOUT_ADMIN_API_KEY (must be explicitly configured with a secure non-default secret)")
+            if not self.LEAD_ANALYST_API_KEY or self.LEAD_ANALYST_API_KEY == "rr_lead_analyst_secret_token_2026":
+                insecure_items.append("LEAD_ANALYST_API_KEY (must be explicitly configured with a secure non-default secret)")
             
             if insecure_items:
                 raise ValueError(

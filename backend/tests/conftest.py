@@ -2,8 +2,13 @@
 Royals Intelligence - Pytest Global Fixtures
 """
 
+import os
 import sys
 from pathlib import Path
+
+# Ensure test-scoped API keys are present for test suite execution
+os.environ.setdefault("SCOUT_ADMIN_API_KEY", "test_scout_admin_key_for_testing_only")
+os.environ.setdefault("LEAD_ANALYST_API_KEY", "test_lead_analyst_key_for_testing_only")
 
 # Ensure backend root is in sys.path
 backend_dir = Path(__file__).resolve().parent.parent
