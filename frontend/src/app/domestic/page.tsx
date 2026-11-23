@@ -1054,6 +1054,11 @@ export default function DomesticIntelligencePage() {
                       >
                         {p.eligibility_status === "VERIFIED_UNCAPPED" ? "UNCAPPED" : "PENDING"}
                       </span>
+                      {p.primary_authority === "BCCI & ICC Official Records" && (
+                        <span className="text-[8px] font-mono font-bold px-1 py-0.2 rounded bg-[#17294B]/10 text-[#17294B]">
+                          BCCI
+                        </span>
+                      )}
                       <span
                         className={`w-1.5 h-1.5 rounded-full ${
                           p.statistical_coverage_status === "AVAILABLE" ? "bg-[#E4005A]" : "bg-[#17294B]/20"
@@ -1110,10 +1115,23 @@ export default function DomesticIntelligencePage() {
                 <div className="bg-white p-6 md:p-8 rounded-2xl border border-[#E7EAF0] shadow-sm space-y-6">
                   <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#E7EAF0] pb-5">
                     <div>
-                      <div className="flex items-center gap-2 mb-1.5">
-                        <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-[#E4005A]/10 text-[#E4005A] border border-[#E4005A]/30/60">
+                      <div className="flex items-center gap-2 mb-1.5 flex-wrap">
+                        <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-[#E4005A]/10 text-[#E4005A] border border-[#E4005A]/30">
                           {allRoundData.eligibility_status}
                         </span>
+                        {allRoundData.primary_authority === "BCCI & ICC Official Records" ? (
+                          <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-[#17294B] text-white">
+                            BCCI Official Record
+                          </span>
+                        ) : allRoundData.primary_authority === "USER_CONFIRMED_UNCAPPED" ? (
+                          <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-amber-50 text-amber-700 border border-amber-300">
+                            User Confirmed (0-Cap)
+                          </span>
+                        ) : allRoundData.primary_authority ? (
+                          <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-slate-100 text-slate-700">
+                            {allRoundData.primary_authority}
+                          </span>
+                        ) : null}
                         <span className="text-xs font-mono text-[#52627A]">
                           Canonical ID: #{allRoundData.canonical_id}
                         </span>

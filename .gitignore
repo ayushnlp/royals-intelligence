@@ -122,3 +122,7 @@ Thumbs.db
 !.vscode/settings.json
 *.swp
 *.swo
+
+# Scratch & Temporary Analysis Scripts
+scratch/
+
