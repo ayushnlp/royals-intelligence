@@ -283,6 +283,10 @@ class AllRoundContributionResponse(BaseModel):
     full_name: str
     canonical_id: str
     eligibility_status: str
+    primary_authority: Optional[str] = Field(
+        default=None,
+        description="Authoritative certification source (e.g. 'BCCI & ICC Official Records' or 'USER_CONFIRMED_UNCAPPED')"
+    )
     primary_role: str
     domestic_team: Optional[str] = None
     sample_size: Dict[str, Any] = Field(
@@ -314,6 +318,10 @@ class DomesticPlayerSummary(BaseModel):
     player_name: str
     canonical_key: Optional[str] = None
     eligibility_status: str  # 'VERIFIED_UNCAPPED', 'PENDING_VERIFICATION', 'VERIFIED_CAPPED', 'UNKNOWN'
+    primary_authority: Optional[str] = Field(
+        default=None,
+        description="Authoritative certification source (e.g. 'BCCI & ICC Official Records' or 'USER_CONFIRMED_UNCAPPED')"
+    )
     is_uncapped: bool = True
     role: Optional[str] = None
     team: Optional[str] = None

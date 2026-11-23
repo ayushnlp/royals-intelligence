@@ -117,8 +117,11 @@ export async function safeApiFetch<T>(
       (baseUrl.includes("localhost:8000") || baseUrl.includes("127.0.0.1:8000")) &&
       err.name !== "AbortError"
     ) {
+      const fallbackUrl = `https://royals-intelligence-api.onrender.com/api/v1${cleanEndpoint}`;
+      console.warn(
+        `[Royals Intelligence API] Local backend at ${baseUrl} is unreachable (${err.message || "Connection refused"}). Routing request to production Render API: ${fallbackUrl}`
+      );
       try {
-        const fallbackUrl = `https://royals-intelligence-api.onrender.com/api/v1${cleanEndpoint}`;
         res = await fetch(fallbackUrl, {
           cache: "no-store",
           ...options,
@@ -127,7 +130,7 @@ export async function safeApiFetch<T>(
       } catch {
         clearTimeout(timer);
         throw new ApiError(
-          `Network error connecting to backend service at ${baseUrl}: ${err.message || "Connection refused / unreachable"}`,
+          `Network error: Local backend (${baseUrl}) is offline and production fallback (${fallbackUrl}) failed: ${err.message || "Connection refused"}`,
           { isNetworkError: true, endpoint: cleanEndpoint }
         );
       }

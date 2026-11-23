@@ -1,0 +1,27 @@
+{
+  "name": "royals-intelligence",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Royals Intelligence — Production Cricket Analytics & Scouting Monorepo",
+  "scripts": {
+    "dev": "python scripts/dev.py",
+    "dev:prod": "python scripts/dev.py --prod",
+    "dev:backend": "python scripts/dev.py --backend-only",
+    "dev:frontend": "cd frontend && npm run dev",
+    "build": "cd frontend && npm run build",
+    "start": "python scripts/dev.py --prod",
+    "type-check": "cd frontend && npm run type-check",
+    "test:backend": "cd backend && pytest -v",
+    "test:frontend": "cd frontend && npm run type-check",
+    "test": "npm run test:backend && npm run test:frontend"
+  },
+  "keywords": [
+    "cricket-analytics",
+    "rajasthan-royals",
+    "ipl",
+    "fastapi",
+    "nextjs"
+  ],
+  "author": "Ayush Tripathi",
+  "license": "UNLICENSED"
+}

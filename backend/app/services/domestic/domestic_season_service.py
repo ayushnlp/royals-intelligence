@@ -43,6 +43,43 @@ class DomesticSeasonService:
     _overseas_pids: Set[int] = set()
     _delivery_match_ids: Set[int] = set()
 
+    # Authoritative fixture schedule for Delhi Premier League 2024 (33 matches)
+    DPL_FIXTURES_RAW: List[Tuple[int, str, str, str, str, str, str, str]] = [
+        (1, "2024-08-17", "PD6", "Purani Dilli 6", "SDS", "South Delhi Superstarz", "SDS", "3 wickets"),
+        (2, "2024-08-18", "CDK", "Central Delhi Kings", "EDR", "East Delhi Riders", "EDR", "5 wickets"),
+        (3, "2024-08-18", "WDL", "West Delhi Lions", "NDS", "North Delhi Strikers", "NDS", "7 wickets"),
+        (4, "2024-08-19", "PD6", "Purani Dilli 6", "EDR", "East Delhi Riders", "EDR", "26 runs"),
+        (5, "2024-08-20", "CDK", "Central Delhi Kings", "NDS", "North Delhi Strikers", "CDK", "109 runs"),
+        (6, "2024-08-21", "SDS", "South Delhi Superstarz", "WDL", "West Delhi Lions", "SDS", "69 runs"),
+        (7, "2024-08-21", "PD6", "Purani Dilli 6", "CDK", "Central Delhi Kings", "PD6", "6 wickets"),
+        (8, "2024-08-22", "NDS", "North Delhi Strikers", "EDR", "East Delhi Riders", "EDR", "20 runs"),
+        (9, "2024-08-23", "PD6", "Purani Dilli 6", "WDL", "West Delhi Lions", "PD6", "6 wickets"),
+        (10, "2024-08-23", "CDK", "Central Delhi Kings", "SDS", "South Delhi Superstarz", "CDK", "2 wickets"),
+        (11, "2024-08-24", "EDR", "East Delhi Riders", "WDL", "West Delhi Lions", "EDR", "5 wickets"),
+        (12, "2024-08-24", "NDS", "North Delhi Strikers", "PD6", "Purani Dilli 6", "PD6", "20 runs"),
+        (13, "2024-08-25", "SDS", "South Delhi Superstarz", "NDS", "North Delhi Strikers", "SDS", "4 runs"),
+        (14, "2024-08-25", "CDK", "Central Delhi Kings", "WDL", "West Delhi Lions", "CDK", "8 wickets"),
+        (15, "2024-08-26", "EDR", "East Delhi Riders", "SDS", "South Delhi Superstarz", "EDR", "4 wickets"),
+        (16, "2024-08-27", "CDK", "Central Delhi Kings", "PD6", "Purani Dilli 6", "CDK", "8 wickets"),
+        (17, "2024-08-28", "WDL", "West Delhi Lions", "NDS", "North Delhi Strikers", "NDS", "5 wickets"),
+        (18, "2024-08-29", "EDR", "East Delhi Riders", "PD6", "Purani Dilli 6", "EDR", "6 wickets"),
+        (19, "2024-08-30", "SDS", "South Delhi Superstarz", "WDL", "West Delhi Lions", "SDS", "122 runs"),
+        (20, "2024-08-30", "NDS", "North Delhi Strikers", "CDK", "Central Delhi Kings", "CDK", "4 wickets"),
+        (21, "2024-08-31", "PD6", "Purani Dilli 6", "SDS", "South Delhi Superstarz", "SDS", "6 wickets"),
+        (22, "2024-08-31", "EDR", "East Delhi Riders", "CDK", "Central Delhi Kings", "EDR", "5 wickets"),
+        (23, "2024-09-01", "WDL", "West Delhi Lions", "PD6", "Purani Dilli 6", "PD6", "5 wickets"),
+        (24, "2024-09-01", "EDR", "East Delhi Riders", "NDS", "North Delhi Strikers", "EDR", "6 wickets"),
+        (25, "2024-09-02", "SDS", "South Delhi Superstarz", "CDK", "Central Delhi Kings", "SDS", "11 runs"),
+        (26, "2024-09-02", "WDL", "West Delhi Lions", "EDR", "East Delhi Riders", "EDR", "52 runs"),
+        (27, "2024-09-03", "PD6", "Purani Dilli 6", "NDS", "North Delhi Strikers", "PD6", "6 wickets"),
+        (28, "2024-09-03", "SDS", "South Delhi Superstarz", "NDS", "North Delhi Strikers", "SDS", "112 runs"),
+        (29, "2024-09-04", "CDK", "Central Delhi Kings", "WDL", "West Delhi Lions", "CDK", "4 wickets"),
+        (30, "2024-09-05", "SDS", "South Delhi Superstarz", "EDR", "East Delhi Riders", "EDR", "5 wickets"),
+        (31, "2024-09-06", "EDR", "East Delhi Riders", "NDS", "North Delhi Strikers", "EDR", "7 wickets"),
+        (32, "2024-09-07", "SDS", "South Delhi Superstarz", "PD6", "Purani Dilli 6", "SDS", "7 wickets"),
+        (33, "2024-09-08", "EDR", "East Delhi Riders", "SDS", "South Delhi Superstarz", "EDR", "3 runs"),
+    ]
+
     @classmethod
     def _initialize_datasets(cls) -> None:
         """Loads and pre-indexes authoritative parquet and CSV datasets."""
@@ -74,7 +111,7 @@ class DomesticSeasonService:
             # Merge canonical registry with ledger
             merged_reg = pd.merge(
                 reg_df,
-                led_df[["canonical_id", "final_eligibility_state", "reviewer_notes", "test_caps_count", "odi_caps_count", "t20i_caps_count"]],
+                led_df[["canonical_id", "final_eligibility_state", "primary_authority", "reviewer_notes", "test_caps_count", "odi_caps_count", "t20i_caps_count"]],
                 on="canonical_id",
                 how="left",
                 suffixes=("", "_led")
@@ -208,6 +245,7 @@ class DomesticSeasonService:
                     caps_count=caps,
                     match_count=int(row["match_count"]),
                     statistical_coverage_status=str(row["statistical_coverage_status"]),
+                    primary_authority=str(row["primary_authority"]) if pd.notna(row.get("primary_authority")) else None,
                     notes=str(row.get("reviewer_notes", "")) if pd.notna(row.get("reviewer_notes")) else None,
                 )
             )
@@ -582,43 +620,6 @@ class DomesticSeasonService:
                     )
                 return items, total
 
-        # Seed fixtures for SMAT & verified fixtures for DPL (33 matches)
-        dpl_fixtures_raw = [
-            (1, "2024-08-17", "PD6", "Purani Dilli 6", "SDS", "South Delhi Superstarz", "SDS", "3 wickets"),
-            (2, "2024-08-18", "CDK", "Central Delhi Kings", "EDR", "East Delhi Riders", "EDR", "5 wickets"),
-            (3, "2024-08-18", "WDL", "West Delhi Lions", "NDS", "North Delhi Strikers", "NDS", "7 wickets"),
-            (4, "2024-08-19", "PD6", "Purani Dilli 6", "EDR", "East Delhi Riders", "EDR", "26 runs"),
-            (5, "2024-08-20", "CDK", "Central Delhi Kings", "NDS", "North Delhi Strikers", "CDK", "109 runs"),
-            (6, "2024-08-21", "SDS", "South Delhi Superstarz", "WDL", "West Delhi Lions", "SDS", "69 runs"),
-            (7, "2024-08-21", "PD6", "Purani Dilli 6", "CDK", "Central Delhi Kings", "PD6", "6 wickets"),
-            (8, "2024-08-22", "NDS", "North Delhi Strikers", "EDR", "East Delhi Riders", "EDR", "20 runs"),
-            (9, "2024-08-23", "PD6", "Purani Dilli 6", "WDL", "West Delhi Lions", "PD6", "6 wickets"),
-            (10, "2024-08-23", "CDK", "Central Delhi Kings", "SDS", "South Delhi Superstarz", "CDK", "2 wickets"),
-            (11, "2024-08-24", "EDR", "East Delhi Riders", "WDL", "West Delhi Lions", "EDR", "5 wickets"),
-            (12, "2024-08-24", "NDS", "North Delhi Strikers", "PD6", "Purani Dilli 6", "PD6", "20 runs"),
-            (13, "2024-08-25", "SDS", "South Delhi Superstarz", "NDS", "North Delhi Strikers", "SDS", "4 runs"),
-            (14, "2024-08-25", "CDK", "Central Delhi Kings", "WDL", "West Delhi Lions", "CDK", "8 wickets"),
-            (15, "2024-08-26", "EDR", "East Delhi Riders", "SDS", "South Delhi Superstarz", "EDR", "4 wickets"),
-            (16, "2024-08-27", "CDK", "Central Delhi Kings", "PD6", "Purani Dilli 6", "CDK", "8 wickets"),
-            (17, "2024-08-28", "WDL", "West Delhi Lions", "NDS", "North Delhi Strikers", "NDS", "5 wickets"),
-            (18, "2024-08-29", "EDR", "East Delhi Riders", "PD6", "Purani Dilli 6", "EDR", "6 wickets"),
-            (19, "2024-08-30", "SDS", "South Delhi Superstarz", "WDL", "West Delhi Lions", "SDS", "122 runs"),
-            (20, "2024-08-30", "NDS", "North Delhi Strikers", "CDK", "Central Delhi Kings", "CDK", "4 wickets"),
-            (21, "2024-08-31", "PD6", "Purani Dilli 6", "SDS", "South Delhi Superstarz", "SDS", "6 wickets"),
-            (22, "2024-08-31", "EDR", "East Delhi Riders", "CDK", "Central Delhi Kings", "EDR", "5 wickets"),
-            (23, "2024-09-01", "WDL", "West Delhi Lions", "PD6", "Purani Dilli 6", "PD6", "5 wickets"),
-            (24, "2024-09-01", "EDR", "East Delhi Riders", "NDS", "North Delhi Strikers", "EDR", "6 wickets"),
-            (25, "2024-09-02", "SDS", "South Delhi Superstarz", "CDK", "Central Delhi Kings", "SDS", "11 runs"),
-            (26, "2024-09-02", "WDL", "West Delhi Lions", "EDR", "East Delhi Riders", "EDR", "52 runs"),
-            (27, "2024-09-03", "PD6", "Purani Dilli 6", "NDS", "North Delhi Strikers", "PD6", "6 wickets"),
-            (28, "2024-09-03", "SDS", "South Delhi Superstarz", "NDS", "North Delhi Strikers", "SDS", "112 runs"),
-            (29, "2024-09-04", "CDK", "Central Delhi Kings", "WDL", "West Delhi Lions", "CDK", "4 wickets"),
-            (30, "2024-09-05", "SDS", "South Delhi Superstarz", "EDR", "East Delhi Riders", "EDR", "5 wickets"),
-            (31, "2024-09-06", "EDR", "East Delhi Riders", "NDS", "North Delhi Strikers", "EDR", "7 wickets"),
-            (32, "2024-09-07", "SDS", "South Delhi Superstarz", "PD6", "Purani Dilli 6", "SDS", "7 wickets"),
-            (33, "2024-09-08", "EDR", "East Delhi Riders", "SDS", "South Delhi Superstarz", "EDR", "3 runs"),
-        ]
-
         seed_matches = [
             MatchSummaryItem(
                 match_id="smat_2024_del_pun",
@@ -691,9 +692,9 @@ class DomesticSeasonService:
                 winner_team_code=win_code,
                 win_margin=margin,
                 result_outcome="normal",
-                has_ball_by_ball=True,
+                has_ball_by_ball=(num == 18),
             )
-            for num, date, h_code, h_name, a_code, a_name, win_code, margin in dpl_fixtures_raw
+            for num, date, h_code, h_name, a_code, a_name, win_code, margin in cls.DPL_FIXTURES_RAW
         ]
 
         filtered = [
@@ -792,9 +793,9 @@ class DomesticSeasonService:
     # 5. RESOLVE PLAYER AND ENFORCE SCOPE
     # -------------------------------------------------------------------------
     @classmethod
-    def _resolve_player(cls, player_id: str) -> Tuple[int, str, str, str, str]:
+    def _resolve_player(cls, player_id: str) -> Tuple[int, str, str, str, str, Optional[str]]:
         """
-        Resolves player_id to (canonical_id, canonical_name, eligibility_status, role, team).
+        Resolves player_id to (canonical_id, canonical_name, eligibility_status, role, team, primary_authority).
         Enforces:
         - HTTP 404 (KeyError) on nonexistent player ID.
         - HTTP 403 (ValueError) on Senior Capped International players.
@@ -805,9 +806,9 @@ class DomesticSeasonService:
 
         # Legacy test alias support for existing regression test suite
         if pid_clean == "uncapped_rr_01":
-            return 8101, "Ashutosh Sharma", "VERIFIED_UNCAPPED", "Middle-Order Finisher", "Punjab Kings"
+            return 8101, "Ashutosh Sharma", "VERIFIED_UNCAPPED", "Middle-Order Finisher", "Punjab Kings", "USER_CONFIRMED_UNCAPPED"
         elif pid_clean == "uncapped_rr_02":
-            return 25669, "Priyansh Arya", "VERIFIED_UNCAPPED", "Top-Order Batter", "Delhi"
+            return 25669, "Priyansh Arya", "VERIFIED_UNCAPPED", "Top-Order Batter", "Delhi", "USER_CONFIRMED_UNCAPPED"
 
         df = cls._registry_df
         match = pd.DataFrame()
@@ -832,6 +833,7 @@ class DomesticSeasonService:
         state = str(row["final_eligibility_state"])
         role = str(row.get("supplied_csv_role", "Player")) if pd.notna(row.get("supplied_csv_role")) else "Player"
         team = str(row.get("supplied_csv_team", "Domestic State Team")) if pd.notna(row.get("supplied_csv_team")) else "Domestic State Team"
+        authority = str(row["primary_authority"]) if pd.notna(row.get("primary_authority")) else None
 
         # Scope guard: strictly uncapped & pending verification only
         if state == "VERIFIED_CAPPED":
@@ -840,7 +842,7 @@ class DomesticSeasonService:
                 f"Platform scope is strictly UNCAPPED PLAYERS ONLY."
             )
 
-        return cid, pname, state, role, team
+        return cid, pname, state, role, team, authority
 
     @classmethod
     async def _verify_uncapped_scope(cls, session: Optional[AsyncSession], player_id: str) -> None:
@@ -902,7 +904,7 @@ class DomesticSeasonService:
                 )
             ]
 
-        cid, pname, state, role, team = cls._resolve_player(player_id)
+        cid, pname, state, role, team, _ = cls._resolve_player(player_id)
         cls._initialize_datasets()
 
         deliv = cls._deliveries_df
@@ -1055,7 +1057,7 @@ class DomesticSeasonService:
             ]
             return legacy_items, len(legacy_items)
 
-        cid, pname, state, role, team = cls._resolve_player(player_id)
+        cid, pname, state, role, team, _ = cls._resolve_player(player_id)
         cls._initialize_datasets()
 
         deliv = cls._deliveries_df
@@ -1218,7 +1220,7 @@ class DomesticSeasonService:
                 ),
             ]
 
-        cid, pname, state, role, team = cls._resolve_player(player_id)
+        cid, pname, state, role, team, _ = cls._resolve_player(player_id)
         cls._initialize_datasets()
 
         deliv = cls._deliveries_df
@@ -1306,6 +1308,7 @@ class DomesticSeasonService:
                 full_name="Shashank Singh",
                 canonical_id="shashank_singh_pbks_rr",
                 eligibility_status="CONFIRMED_UNCAPPED",
+                primary_authority="USER_CONFIRMED_UNCAPPED",
                 primary_role="Finishing Batter & Seam Bowler",
                 domestic_team="Chhattisgarh",
                 sample_size={
@@ -1344,7 +1347,7 @@ class DomesticSeasonService:
                 statistical_coverage_status="AVAILABLE",
             )
 
-        cid, pname, state, role, team = cls._resolve_player(player_id)
+        cid, pname, state, role, team, authority = cls._resolve_player(player_id)
         cls._initialize_datasets()
 
         deliv = cls._deliveries_df
@@ -1360,6 +1363,7 @@ class DomesticSeasonService:
                 full_name=pname,
                 canonical_id=str(cid),
                 eligibility_status=state,
+                primary_authority=authority,
                 primary_role=role,
                 domestic_team=team,
                 sample_size={"matches": 0, "innings_batted": 0, "innings_bowled": 0, "overs_bowled": 0.0},
@@ -1382,6 +1386,7 @@ class DomesticSeasonService:
                 full_name=pname,
                 canonical_id=str(cid),
                 eligibility_status=state,
+                primary_authority=authority,
                 primary_role=role,
                 domestic_team=team,
                 sample_size={"matches": total_matches, "innings_batted": 0, "innings_bowled": 0, "overs_bowled": 0.0},
@@ -1436,6 +1441,7 @@ class DomesticSeasonService:
             full_name=pname,
             canonical_id=str(cid),
             eligibility_status=state,
+            primary_authority=authority,
             primary_role=role,
             domestic_team=team,
             sample_size={

@@ -541,6 +541,7 @@ export interface AllRoundContributionResponse {
   full_name: string;
   canonical_id: string;
   eligibility_status: string;
+  primary_authority?: string;
   primary_role: string;
   domestic_team?: string;
   sample_size: {
@@ -564,6 +565,7 @@ export interface DomesticPlayerSummary {
   player_name: string;
   canonical_key?: string;
   eligibility_status: string;
+  primary_authority?: string;
   is_uncapped: boolean;
   role?: string;
   team?: string;
