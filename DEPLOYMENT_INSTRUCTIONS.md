@@ -49,9 +49,9 @@ Configure in **Render Dashboard $\rightarrow$ Environment**:
 | Variable Name | Required? | Example / Value Specification | Purpose |
 | :--- | :--- | :--- | :--- |
 | `ENVIRONMENT` | **Mandatory** | `production` | Enables production security validators and turns off debug echo. |
-| `SECRET_KEY` | **Mandatory** | *(Generate unique $\ge 32$ character secret)* | Used for cryptographic session signing. Fails closed if default. |
-| `SCOUT_ADMIN_API_KEY` | **Mandatory for Admin** | *(Generate unique high-entropy token)* | Required for administrative scouting mutations and audit logging. |
-| `LEAD_ANALYST_API_KEY` | **Mandatory for Analyst** | *(Generate unique high-entropy token)* | Required for analyst-tier mutations. |
+| `SECRET_KEY` | **Mandatory** | *(Generate unique $\ge 32$ character secret)* | Used for cryptographic session signing. Fails closed if default or $<32$ characters. |
+| `SCOUT_ADMIN_API_KEY` | **Mandatory in Production** | *(Generate unique high-entropy token)* | Required at startup when `ENVIRONMENT=production` (enforced by `validate_production_security`). Authorizes administrative scouting mutations. |
+| `LEAD_ANALYST_API_KEY` | **Mandatory in Production** | *(Generate unique high-entropy token)* | Required at startup when `ENVIRONMENT=production`. Authorizes lead analyst mutations. |
 | `BACKEND_CORS_ORIGINS` | **Mandatory** | `https://royals-intelligence.vercel.app` | Comma-separated list of allowed origins. (`https://*.vercel.app` is auto-allowed via regex). |
 | `DATA_DIR` | **Mandatory** | `/var/data` | Root path where Render Persistent Disk is mounted. |
 | `DATABASE_URL` | Optional / Recommended | `postgresql+asyncpg://user:pass@host:5432/db` | Render PostgreSQL URL. Automatically converted from `postgres://` to `postgresql+asyncpg://`. |
@@ -105,9 +105,9 @@ The backend requires 12 runtime datasets resolved deterministically via `backend
 ### Step-by-Step Dataset Provisioning Procedure:
 1. Attach a **1 GB Render Persistent Disk** mounted at `/var/data` to the backend web service.
 2. In the Render service dashboard, open the Shell tab (or use SCP/SSH) and upload the 12 assets into `/var/data` matching the layout above.
-3. Validate presence of all 12 files before routing production traffic:
+3. Validate presence and readability of all 12 assets before routing production traffic:
    ```bash
-   python -c "from app.core.config import resolve_asset_path; assets = ['canonical_player_registry.parquet', 'senior_international_eligibility_ledger.parquet', 'delivery_states_strict.parquet', 'competitions.csv', 'matches.csv', 'playing_eleven.csv', 'competition_team_player_mapping.csv', 'batting_leaderboard.parquet', 'bowling_leaderboard.parquet', 'batting_evidence_profiles.parquet', 'bowling_evidence_profiles.parquet']; [print('OK:', resolve_asset_path(a)) for a in assets]; print('ALL 12 ASSETS RESOLVED')""
+   python -c "from app.core.config import resolve_asset_path; import pandas as pd; assets = ['canonical_player_registry.parquet', 'senior_international_eligibility_ledger.parquet', 'delivery_states_strict.parquet', 'competitions.csv', 'matches.csv', 'playing_eleven.csv', 'competition_team_player_mapping.csv', 'teams.csv', 'batting_leaderboard.parquet', 'bowling_leaderboard.parquet', 'batting_evidence_profiles.parquet', 'bowling_evidence_profiles.parquet']; [print(f'OK: {a:<45} | Rows: {len(pd.read_parquet(resolve_asset_path(a)) if a.endswith(\".parquet\") else pd.read_csv(resolve_asset_path(a))):>6}') for a in assets]; print('ALL 12 ASSETS EXIST AND ARE 100% READABLE!')"
    ```
 4. **Missing Asset Diagnosis:**
    If any Pressure Intelligence dataset is missing from disk, endpoints `/api/v1/analytics/pressure/*` return HTTP 503 (`Service Unavailable`) with a descriptive message naming the missing asset. The base application (`/health`, `/api/v1/health`) remains fully operational.
