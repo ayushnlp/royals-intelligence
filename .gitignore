@@ -73,6 +73,7 @@ data/processed/**/*
 !data/processed/**/
 !data/processed/auction_intelligence/canonical_player_registry.parquet
 !data/processed/auction_intelligence/senior_international_eligibility_ledger.parquet
+backend/data/runtime_assets/**
 data/validation/**/*
 !data/validation/**/.gitkeep
 !data/validation/**/

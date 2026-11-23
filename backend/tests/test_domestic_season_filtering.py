@@ -119,3 +119,28 @@ def test_non_ipl_competition_matches_accessible():
     assert res_emerging.status_code == 200
     data_e = res_emerging.json()
     assert data_e["total_matches"] == 15
+
+@pytest.mark.data_dependent
+def test_dpl_2024_all_33_matches_and_scorecard():
+    """Verifies that Delhi Premier League 2024 returns exactly 33 matches matching competition directory."""
+    res = client.get("/api/v1/domestic/seasons/dpl/2024/matches?page=1&page_size=50")
+    assert res.status_code == 200
+    data = res.json()
+    assert data["total_matches"] == 33
+    assert len(data["matches"]) == 33
+    for m in data["matches"]:
+        assert m["competition_id"] == "dpl"
+        assert m["season"] == "2024"
+
+    # Team filtering
+    res_team = client.get("/api/v1/domestic/seasons/dpl/2024/matches?team=EDR")
+    assert res_team.status_code == 200
+    data_team = res_team.json()
+    assert data_team["total_matches"] == 12
+
+    # Scorecard access
+    res_card = client.get("/api/v1/domestic/matches/dpl_2024_sds_edr")
+    assert res_card.status_code == 200
+    card = res_card.json()
+    assert card["competition_id"] == "dpl"
+    assert len(card["innings"]) > 0
