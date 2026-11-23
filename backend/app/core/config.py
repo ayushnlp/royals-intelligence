@@ -51,19 +51,26 @@ def resolve_asset_path(relative_path: Union[str, Path], required: bool = True) -
         cwd / rel,
         root / "backend" / rel,
         cwd / "backend" / rel,
+        root / "round1_pressure" / "data" / "processed" / filename,
+        cwd / "round1_pressure" / "data" / "processed" / filename,
         root / "backend" / "data" / "runtime_assets" / filename,
         root / "data" / "runtime_assets" / filename,
         cwd / "data" / "runtime_assets" / filename,
         Path("/app") / rel,
+        Path("/app/round1_pressure/data/processed") / filename,
         Path("/app/data/runtime_assets") / filename,
         Path("/data") / rel,
+        Path("/data/pressure") / filename,
+        Path("/data") / filename,
         Path("/etc/secrets") / filename,
         Path("/var/data") / rel,
+        Path("/var/data/pressure") / filename,
         Path("/var/data") / filename,
     ]
     if data_env:
         candidates.insert(0, Path(data_env) / rel)
-        candidates.insert(1, Path(data_env) / filename)
+        candidates.insert(1, Path(data_env) / "pressure" / filename)
+        candidates.insert(2, Path(data_env) / filename)
 
     for candidate in candidates:
         if candidate.exists():

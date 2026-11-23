@@ -17,12 +17,7 @@ class PressureIntelligenceEngine:
     """
 
     def __init__(self, data_dir: Optional[Path] = None):
-        if data_dir is None:
-            base_dir = Path(__file__).resolve().parent.parent.parent.parent
-            self.data_dir = base_dir / "round1_pressure" / "data" / "processed"
-        else:
-            self.data_dir = Path(data_dir)
-
+        self.data_dir = Path(data_dir) if data_dir else None
         self._batting_lb: Optional[pd.DataFrame] = None
         self._bowling_lb: Optional[pd.DataFrame] = None
         self._batting_ev: Optional[pd.DataFrame] = None
@@ -30,26 +25,46 @@ class PressureIntelligenceEngine:
         self._is_loaded: bool = False
 
     def load_data(self) -> None:
-        """Loads processed Parquet artifacts into memory with null-safety sanitization."""
+        """Loads processed Parquet artifacts into memory with deterministic runtime asset resolution."""
         if self._is_loaded:
             return
 
-        if not self.data_dir.exists():
-            raise FileNotFoundError(f"Pressure data directory not found: {self.data_dir}")
+        from app.core.config import resolve_asset_path
 
-        bat_lb_path = self.data_dir / "batting_leaderboard.parquet"
-        bowl_lb_path = self.data_dir / "bowling_leaderboard.parquet"
-        bat_ev_path = self.data_dir / "batting_evidence_profiles.parquet"
-        bowl_ev_path = self.data_dir / "bowling_evidence_profiles.parquet"
+        def _resolve_file(filename: str) -> Path:
+            if self.data_dir:
+                d1 = self.data_dir / filename
+                if d1.exists():
+                    return d1
+                d2 = self.data_dir / "pressure" / filename
+                if d2.exists():
+                    return d2
+                raise RuntimeError(
+                    f"Required dataset asset '{filename}' not found in explicitly configured directory '{self.data_dir}'."
+                )
+            # Deterministic resolution across runtime assets, DATA_DIR, and repo layout
+            for cand in [f"pressure/{filename}", f"round1_pressure/data/processed/{filename}", filename]:
+                p = resolve_asset_path(cand, required=False)
+                if p.exists():
+                    return p
+            # Raise descriptive error through resolve_asset_path if missing
+            return resolve_asset_path(f"pressure/{filename}", required=True)
 
-        if bat_lb_path.exists():
-            self._batting_lb = pd.read_parquet(bat_lb_path)
-        if bowl_lb_path.exists():
-            self._bowling_lb = pd.read_parquet(bowl_lb_path)
-        if bat_ev_path.exists():
-            self._batting_ev = pd.read_parquet(bat_ev_path)
-        if bowl_ev_path.exists():
-            self._bowling_ev = pd.read_parquet(bowl_ev_path)
+        try:
+            bat_lb_path = _resolve_file("batting_leaderboard.parquet")
+            bowl_lb_path = _resolve_file("bowling_leaderboard.parquet")
+            bat_ev_path = _resolve_file("batting_evidence_profiles.parquet")
+            bowl_ev_path = _resolve_file("bowling_evidence_profiles.parquet")
+        except RuntimeError as exc:
+            logger.error(f"Pressure Intelligence runtime dataset resolution failure: {exc}")
+            raise FileNotFoundError(
+                f"Required Pressure Intelligence dataset missing. Ensure datasets are mounted to DATA_DIR or /var/data.\nDetails: {exc}"
+            ) from exc
+
+        self._batting_lb = pd.read_parquet(bat_lb_path)
+        self._bowling_lb = pd.read_parquet(bowl_lb_path)
+        self._batting_ev = pd.read_parquet(bat_ev_path)
+        self._bowling_ev = pd.read_parquet(bowl_ev_path)
 
         self._is_loaded = True
         logger.info("PressureIntelligenceEngine artifacts loaded successfully.")
