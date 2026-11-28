@@ -372,36 +372,44 @@ export default function DomesticIntelligencePage() {
               </label>
               <select
                 value={selectedSeason}
-                onChange={(e) => setSelectedSeason(e.target.value)}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  const item = availableSeasons.find((s) => s.season === val);
+                  if (!item || item.has_data) {
+                    setSelectedSeason(val);
+                  }
+                }}
                 className="bg-white border border-[#E7EAF0] rounded-lg px-3 py-1.5 text-xs font-semibold text-[#17294B] focus:outline-none focus:ring-2 focus:ring-[#E4005A] shadow-sm cursor-pointer"
               >
                 {Array.isArray(availableSeasons) && availableSeasons.length > 0 ? (
-                  availableSeasons.map((s) => {
-                    const safeComps = Array.isArray(competitions) ? competitions : [];
-                    const activeComp = safeComps.find(
-                      (c) => c && c.competition_id === selectedCompId && String(c.season) === String(s.season)
-                    ) || (s.season === selectedSeason ? safeComps.find((c) => c && c.competition_id === selectedCompId) : null);
+                  [...availableSeasons]
+                    .sort((a, b) => (b.has_data ? 1 : 0) - (a.has_data ? 1 : 0))
+                    .map((s) => {
+                      const safeComps = Array.isArray(competitions) ? competitions : [];
+                      const activeComp = safeComps.find(
+                        (c) => c && c.competition_id === selectedCompId && String(c.season) === String(s.season)
+                      ) || (s.season === selectedSeason ? safeComps.find((c) => c && c.competition_id === selectedCompId) : null);
 
-                    const matchDisplay = !s.has_data
-                      ? "(No Data)"
-                      : activeComp
-                      ? `(${activeComp.match_count} matches)`
-                      : `(${s.total_matches} matches)`;
+                      const matchDisplay = !s.has_data
+                        ? "(Upcoming / Ingestion Staging)"
+                        : activeComp
+                        ? `(Verified • ${activeComp.match_count} matches)`
+                        : `(Verified • ${s.total_matches} matches)`;
 
-                    return (
-                      <option key={s.season} value={s.season}>
-                        Season {s.season} {matchDisplay}
-                      </option>
-                    );
-                  })
+                      return (
+                        <option key={s.season} value={s.season} disabled={!s.has_data}>
+                          Season {s.season} {matchDisplay}
+                        </option>
+                      );
+                    })
                 ) : (
                   <>
                     <option value="2024">
                       Season 2024 ({Array.isArray(competitions) ? competitions.find((c) => c && c.competition_id === selectedCompId)?.match_count ?? 74 : 74} matches)
                     </option>
-                    <option value="2026">Season 2026</option>
-                    <option value="2025">Season 2025</option>
-                    <option value="2023">Season 2023</option>
+                    <option value="2026" disabled>Season 2026 (Upcoming)</option>
+                    <option value="2025" disabled>Season 2025 (Upcoming)</option>
+                    <option value="2023" disabled>Season 2023 (Archived)</option>
                   </>
                 )}
               </select>
