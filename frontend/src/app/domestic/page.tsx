@@ -372,44 +372,32 @@ export default function DomesticIntelligencePage() {
               </label>
               <select
                 value={selectedSeason}
-                onChange={(e) => {
-                  const val = e.target.value;
-                  const item = availableSeasons.find((s) => s.season === val);
-                  if (!item || item.has_data) {
-                    setSelectedSeason(val);
-                  }
-                }}
+                onChange={(e) => setSelectedSeason(e.target.value)}
                 className="bg-white border border-[#E7EAF0] rounded-lg px-3 py-1.5 text-xs font-semibold text-[#17294B] focus:outline-none focus:ring-2 focus:ring-[#E4005A] shadow-sm cursor-pointer"
               >
                 {Array.isArray(availableSeasons) && availableSeasons.length > 0 ? (
-                  [...availableSeasons]
-                    .sort((a, b) => (b.has_data ? 1 : 0) - (a.has_data ? 1 : 0))
-                    .map((s) => {
-                      const safeComps = Array.isArray(competitions) ? competitions : [];
-                      const activeComp = safeComps.find(
-                        (c) => c && c.competition_id === selectedCompId && String(c.season) === String(s.season)
-                      ) || (s.season === selectedSeason ? safeComps.find((c) => c && c.competition_id === selectedCompId) : null);
+                  availableSeasons.map((s) => {
+                    const safeComps = Array.isArray(competitions) ? competitions : [];
+                    const activeComp = safeComps.find(
+                      (c) => c && c.competition_id === selectedCompId && String(c.season) === String(s.season)
+                    ) || (s.season === selectedSeason ? safeComps.find((c) => c && c.competition_id === selectedCompId) : null);
 
-                      const matchDisplay = !s.has_data
-                        ? "(Upcoming / Ingestion Staging)"
-                        : activeComp
-                        ? `(Verified • ${activeComp.match_count} matches)`
-                        : `(Verified • ${s.total_matches} matches)`;
+                    const matchDisplay = activeComp
+                      ? `(${activeComp.match_count} matches)`
+                      : `(${s.total_matches} matches)`;
 
-                      return (
-                        <option key={s.season} value={s.season} disabled={!s.has_data}>
-                          Season {s.season} {matchDisplay}
-                        </option>
-                      );
-                    })
+                    return (
+                      <option key={s.season} value={s.season}>
+                        Season {s.season} {matchDisplay}
+                      </option>
+                    );
+                  })
                 ) : (
                   <>
-                    <option value="2024">
-                      Season 2024 ({Array.isArray(competitions) ? competitions.find((c) => c && c.competition_id === selectedCompId)?.match_count ?? 74 : 74} matches)
-                    </option>
-                    <option value="2026" disabled>Season 2026 (Upcoming)</option>
-                    <option value="2025" disabled>Season 2025 (Upcoming)</option>
-                    <option value="2023" disabled>Season 2023 (Archived)</option>
+                    <option value="2026">Season 2026</option>
+                    <option value="2025">Season 2025</option>
+                    <option value="2024">Season 2024</option>
+                    <option value="2023">Season 2023</option>
                   </>
                 )}
               </select>
@@ -442,33 +430,30 @@ export default function DomesticIntelligencePage() {
       <div className="flex items-center gap-6 border-b border-[#E7EAF0]">
         <button
           onClick={() => setActiveTab("tournaments")}
-          className={`flex items-center gap-2 py-3 text-xs font-semibold transition-all border-b-2 -mb-px whitespace-nowrap cursor-pointer ${
-            activeTab === "tournaments"
+          className={`flex items-center gap-2 py-3 text-xs font-semibold transition-all border-b-2 -mb-px whitespace-nowrap cursor-pointer ${activeTab === "tournaments"
               ? "border-[#E4005A] text-[#E4005A] font-bold"
               : "border-transparent text-[#52627A] hover:text-[#17294B]"
-          }`}
+            }`}
         >
           <Trophy size={14} className={activeTab === "tournaments" ? "text-[#E4005A]" : "text-[#52627A]"} />
           <span>Tournament Directory (<strong className="text-[#E4005A]">{competitions.length}</strong>)</span>
         </button>
         <button
           onClick={() => setActiveTab("matches")}
-          className={`flex items-center gap-2 py-3 text-xs font-semibold transition-all border-b-2 -mb-px whitespace-nowrap cursor-pointer ${
-            activeTab === "matches"
+          className={`flex items-center gap-2 py-3 text-xs font-semibold transition-all border-b-2 -mb-px whitespace-nowrap cursor-pointer ${activeTab === "matches"
               ? "border-[#E4005A] text-[#E4005A] font-bold"
               : "border-transparent text-[#52627A] hover:text-[#17294B]"
-          }`}
+            }`}
         >
           <Swords size={14} className={activeTab === "matches" ? "text-[#E4005A]" : "text-[#52627A]"} />
           <span>Match Intelligence & Scorecards (<strong className="text-[#E4005A]">{matchTotal}</strong>)</span>
         </button>
         <button
           onClick={() => setActiveTab("player_profile")}
-          className={`flex items-center gap-2 py-3 text-xs font-semibold transition-all border-b-2 -mb-px whitespace-nowrap cursor-pointer ${
-            activeTab === "player_profile"
+          className={`flex items-center gap-2 py-3 text-xs font-semibold transition-all border-b-2 -mb-px whitespace-nowrap cursor-pointer ${activeTab === "player_profile"
               ? "border-[#E4005A] text-[#E4005A] font-bold"
               : "border-transparent text-[#52627A] hover:text-[#17294B]"
-          }`}
+            }`}
         >
           <Target size={14} className={activeTab === "player_profile" ? "text-[#E4005A]" : "text-[#52627A]"} />
           <span>Uncapped Player Dossier & Splits (<strong className="text-[#E4005A]">{playerTotal}</strong>)</span>
@@ -659,10 +644,10 @@ export default function DomesticIntelligencePage() {
                   {loadingScorecard
                     ? "Loading Scorecard..."
                     : matchScorecard && String(matchScorecard.match_id) === String(selectedMatchId)
-                    ? `${matchScorecard.home_team.name} vs ${matchScorecard.away_team.name}`
-                    : scorecardError
-                    ? "Scorecard Unavailable"
-                    : "Match Scorecard"}
+                      ? `${matchScorecard.home_team.name} vs ${matchScorecard.away_team.name}`
+                      : scorecardError
+                        ? "Scorecard Unavailable"
+                        : "Match Scorecard"}
                 </h3>
                 {matchScorecard && String(matchScorecard.match_id) === String(selectedMatchId) && (
                   <p className="text-xs text-[#74658F] mt-0.5">
@@ -722,11 +707,10 @@ export default function DomesticIntelligencePage() {
                     <button
                       key={inn.innings_number}
                       onClick={() => setActiveInningsIdx(idx)}
-                      className={`px-4 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                        activeInningsIdx === idx
+                      className={`px-4 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${activeInningsIdx === idx
                           ? "bg-[#FCE8F0] text-[#17294B] border border-[#E4005A] shadow-sm"
                           : "bg-white text-[#52627A] border border-[#E7EAF0] hover:bg-[#FCE8F0]/40 hover:text-[#17294B]"
-                      }`}
+                        }`}
                     >
                       Innings {inn.innings_number}: {inn.batting_team_name} (<strong className="text-[#E4005A]">{inn.total_runs}/{inn.wickets}</strong>)
                     </button>
@@ -989,11 +973,10 @@ export default function DomesticIntelligencePage() {
                     setPlayerEligibilityFilter("ALL");
                     setPlayerPage(1);
                   }}
-                  className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${
-                    playerEligibilityFilter === "ALL"
+                  className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${playerEligibilityFilter === "ALL"
                       ? "bg-white text-[#17294B] shadow-sm"
                       : "text-[#52627A] hover:text-[#17294B]"
-                  }`}
+                    }`}
                 >
                   All ({eligibilityCounts.ALL || playerTotal})
                 </button>
@@ -1002,11 +985,10 @@ export default function DomesticIntelligencePage() {
                     setPlayerEligibilityFilter("VERIFIED_UNCAPPED");
                     setPlayerPage(1);
                   }}
-                  className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${
-                    playerEligibilityFilter === "VERIFIED_UNCAPPED"
+                  className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${playerEligibilityFilter === "VERIFIED_UNCAPPED"
                       ? "bg-[#17294B] text-white shadow-sm"
                       : "text-[#52627A] hover:text-[#17294B]"
-                  }`}
+                    }`}
                 >
                   Uncapped ({eligibilityCounts.VERIFIED_UNCAPPED || (playerEligibilityFilter === "VERIFIED_UNCAPPED" ? playerTotal : 0)})
                 </button>
@@ -1015,11 +997,10 @@ export default function DomesticIntelligencePage() {
                     setPlayerEligibilityFilter("PENDING_VERIFICATION");
                     setPlayerPage(1);
                   }}
-                  className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${
-                    playerEligibilityFilter === "PENDING_VERIFICATION"
+                  className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${playerEligibilityFilter === "PENDING_VERIFICATION"
                       ? "bg-[#E4005A] text-[#17294B] shadow-sm"
                       : "text-[#52627A] hover:text-[#17294B]"
-                  }`}
+                    }`}
                 >
                   Pending ({eligibilityCounts.PENDING_VERIFICATION || (playerEligibilityFilter === "PENDING_VERIFICATION" ? playerTotal : 0)})
                 </button>
@@ -1050,23 +1031,21 @@ export default function DomesticIntelligencePage() {
                   <button
                     key={p.canonical_id}
                     onClick={() => setSelectedPlayerId(String(p.canonical_id))}
-                    className={`p-3 rounded-xl text-left border transition-all cursor-pointer ${
-                      isSelected
+                    className={`p-3 rounded-xl text-left border transition-all cursor-pointer ${isSelected
                         ? "bg-[#FCE8F0] text-[#17294B] border-[#E4005A] shadow-sm"
                         : "bg-white hover:bg-white text-[#17294B] border-[#E7EAF0]"
-                    }`}
+                      }`}
                   >
                     <div className="flex items-center justify-between gap-1 mb-1">
                       <span
-                        className={`text-[9px] font-mono px-1.5 py-0.2 rounded font-bold ${
-                          p.eligibility_status === "VERIFIED_UNCAPPED"
+                        className={`text-[9px] font-mono px-1.5 py-0.2 rounded font-bold ${p.eligibility_status === "VERIFIED_UNCAPPED"
                             ? isSelected
                               ? "bg-[#E4005A] text-white"
                               : "bg-[#E4005A]/10 text-[#E4005A] border border-[#E4005A]/30"
                             : isSelected
-                            ? "bg-white text-[#17294B] border border-[#E4005A]/30"
-                            : "bg-[#FCE8F0] text-[#52627A]"
-                        }`}
+                              ? "bg-white text-[#17294B] border border-[#E4005A]/30"
+                              : "bg-[#FCE8F0] text-[#52627A]"
+                          }`}
                       >
                         {p.eligibility_status === "VERIFIED_UNCAPPED" ? "UNCAPPED" : "PENDING"}
                       </span>
@@ -1076,9 +1055,8 @@ export default function DomesticIntelligencePage() {
                         </span>
                       )}
                       <span
-                        className={`w-1.5 h-1.5 rounded-full ${
-                          p.statistical_coverage_status === "AVAILABLE" ? "bg-[#E4005A]" : "bg-[#17294B]/20"
-                        }`}
+                        className={`w-1.5 h-1.5 rounded-full ${p.statistical_coverage_status === "AVAILABLE" ? "bg-[#E4005A]" : "bg-[#17294B]/20"
+                          }`}
                         title={p.statistical_coverage_status === "AVAILABLE" ? "Telemetry Available" : "No Match Data"}
                       />
                     </div>
@@ -1152,11 +1130,10 @@ export default function DomesticIntelligencePage() {
                           Canonical ID: #{allRoundData.canonical_id}
                         </span>
                         <span
-                          className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold ${
-                            allRoundData.statistical_coverage_status === "AVAILABLE"
+                          className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold ${allRoundData.statistical_coverage_status === "AVAILABLE"
                               ? "bg-[#FCE8F0] text-[#17294B]"
                               : "bg-[#E4005A]/10 text-[#E4005A] border border-[#E4005A]/30/60"
-                          }`}
+                            }`}
                         >
                           {allRoundData.statistical_coverage_status === "AVAILABLE" ? "TELEMETRY ACTIVE" : "PENDING MATCH COVERAGE"}
                         </span>

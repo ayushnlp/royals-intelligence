@@ -97,6 +97,10 @@ class DomesticMatchService:
 
             if matches_path and matches_path.exists():
                 cls._matches_df = pd.read_csv(matches_path)
+            else:
+                from app.services.domestic.catalog_data import get_fallback_matches_df
+                cls._matches_df = get_fallback_matches_df()
+
             if deliv_path and deliv_path.exists():
                 cls._deliveries_df = pd.read_parquet(deliv_path)
             if teams_path and teams_path.exists():
@@ -104,6 +108,11 @@ class DomesticMatchService:
                 cls._team_id_to_name = dict(zip(cls._teams_df["team_id"], cls._teams_df["team_name"]))
             if comps_path and comps_path.exists():
                 cls._competitions_df = pd.read_csv(comps_path)
+            else:
+                from app.services.domestic.catalog_data import get_fallback_competitions_df
+                cls._competitions_df = get_fallback_competitions_df()
+
+            if cls._competitions_df is not None:
                 cls._comp_id_to_name = dict(zip(cls._competitions_df["comp_id"], cls._competitions_df["comp_name"]))
                 cls._comp_id_to_type = dict(zip(cls._competitions_df["comp_id"], cls._competitions_df["match_format"]))
 

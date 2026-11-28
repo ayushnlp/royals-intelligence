@@ -135,9 +135,18 @@ class DomesticSeasonService:
             # 2. Competitions and Matches
             if comps_path and comps_path.exists():
                 cls._competitions_df = pd.read_csv(comps_path)
+            else:
+                from app.services.domestic.catalog_data import get_fallback_competitions_df
+                cls._competitions_df = get_fallback_competitions_df()
+
             if matches_path and matches_path.exists():
                 cls._matches_df = pd.read_csv(matches_path)
-                if cls._competitions_df is not None:
+            else:
+                from app.services.domestic.catalog_data import get_fallback_matches_df
+                cls._matches_df = get_fallback_matches_df()
+
+            if cls._matches_df is not None and cls._competitions_df is not None:
+                if "season" not in cls._matches_df.columns:
                     cls._matches_df = pd.merge(cls._matches_df, cls._competitions_df, on="comp_id", how="left")
 
             # 3. Delivery states strict (primary ball-by-ball source)
