@@ -4,6 +4,7 @@ Enforces strict server-side authentication, role-based authorization,
 and deny-by-default policies. Client-asserted role headers are rejected.
 """
 
+import hmac
 from typing import List, Optional
 from pydantic import BaseModel
 from fastapi import Header, HTTPException, status, Depends
@@ -13,6 +14,12 @@ from app.core.logging import logger
 ROLE_SCOUT_ADMIN = "rr_scout_admin"
 ROLE_LEAD_ANALYST = "rr_lead_analyst"
 ROLE_PUBLIC = "public"
+
+# Revoked / Compromised Legacy Tokens (permanently blocked across all environments)
+REVOKED_COMPROMISED_TOKENS = {
+    "rr_scout_admin_secret_token_2026",
+    "rr_lead_analyst_secret_token_2026",
+}
 
 
 class AuthenticatedUser(BaseModel):
@@ -46,8 +53,11 @@ async def get_current_user_optional(
             token = authorization.split("Bearer ")[1].strip()
         elif x_api_key:
             token = x_api_key.strip()
+
+        is_valid_scout = bool(token and settings.SCOUT_ADMIN_API_KEY and hmac.compare_digest(token, settings.SCOUT_ADMIN_API_KEY))
+        is_valid_analyst = bool(token and settings.LEAD_ANALYST_API_KEY and hmac.compare_digest(token, settings.LEAD_ANALYST_API_KEY))
             
-        if not token or token not in [settings.SCOUT_ADMIN_API_KEY, settings.LEAD_ANALYST_API_KEY]:
+        if not token or token in REVOKED_COMPROMISED_TOKENS or not (is_valid_scout or is_valid_analyst):
             logger.warning(f"Security Alert: Rejected forged client role header '{x_user_role}' without valid credentials.")
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
@@ -71,15 +81,24 @@ async def get_current_user_optional(
     if not token:
         return None
 
-    # 4. Validate against server credentials
-    if token == settings.SCOUT_ADMIN_API_KEY:
+    # 4. Explicitly block compromised/revoked legacy tokens
+    if token in REVOKED_COMPROMISED_TOKENS:
+        logger.warning("Security Alert: Attempted use of revoked compromised legacy token.")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Compromised legacy credential has been permanently revoked. Configure a secure SCOUT_ADMIN_API_KEY in the server environment.",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    # 5. Validate against server credentials (constant-time comparison)
+    if settings.SCOUT_ADMIN_API_KEY and hmac.compare_digest(token, settings.SCOUT_ADMIN_API_KEY):
         return AuthenticatedUser(
             user_id="rr_scout_admin_01",
             username="rr_scout_admin",
             roles=[ROLE_SCOUT_ADMIN, ROLE_LEAD_ANALYST],
             auth_method=auth_method,
         )
-    elif token == settings.LEAD_ANALYST_API_KEY:
+    elif settings.LEAD_ANALYST_API_KEY and hmac.compare_digest(token, settings.LEAD_ANALYST_API_KEY):
         return AuthenticatedUser(
             user_id="rr_lead_analyst_01",
             username="rr_lead_analyst",

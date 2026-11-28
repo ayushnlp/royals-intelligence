@@ -9,12 +9,26 @@ from app.core.config import Settings
 
 @pytest.mark.environment
 def test_development_configuration_allows_defaults():
-    """Development environment must permit default local convenience credentials."""
-    s = Settings(ENVIRONMENT="development")
+    """Development environment defaults to unconfigured (None) privileged credentials, failing closed by default."""
+    s = Settings(ENVIRONMENT="development", SCOUT_ADMIN_API_KEY=None, LEAD_ANALYST_API_KEY=None)
     assert s.ENVIRONMENT == "development"
     assert s.SECRET_KEY == "development-secret-key-change-in-production-min-32-chars"
-    assert s.SCOUT_ADMIN_API_KEY == "rr_scout_admin_secret_token_2026"
-    assert s.LEAD_ANALYST_API_KEY == "rr_lead_analyst_secret_token_2026"
+    assert s.SCOUT_ADMIN_API_KEY is None
+    assert s.LEAD_ANALYST_API_KEY is None
+
+
+@pytest.mark.environment
+def test_production_rejects_missing_privileged_api_keys():
+    """Production environment must fail closed when privileged keys are missing."""
+    with pytest.raises(ValueError) as excinfo:
+        Settings(
+            ENVIRONMENT="production",
+            SECRET_KEY="a" * 32,
+            SCOUT_ADMIN_API_KEY=None,
+            LEAD_ANALYST_API_KEY=None,
+        )
+    assert "SCOUT_ADMIN_API_KEY" in str(excinfo.value)
+    assert "LEAD_ANALYST_API_KEY" in str(excinfo.value)
 
 
 @pytest.mark.environment
@@ -69,3 +83,12 @@ def test_production_accepts_valid_secure_configuration():
     )
     assert s.ENVIRONMENT == "production"
     assert s.SECRET_KEY == "c" * 32
+
+
+@pytest.mark.environment
+def test_revoked_compromised_token_blocked():
+    """Verifies that the exposed legacy token is permanently blocked by security middleware."""
+    from app.core.security import REVOKED_COMPROMISED_TOKENS
+    assert "rr_scout_admin_secret_token_2026" in REVOKED_COMPROMISED_TOKENS
+    assert "rr_lead_analyst_secret_token_2026" in REVOKED_COMPROMISED_TOKENS
+

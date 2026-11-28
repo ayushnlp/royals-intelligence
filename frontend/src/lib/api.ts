@@ -228,8 +228,6 @@ export async function uploadDataset(formData: FormData): Promise<UploadDatasetRe
 // Stage 2: Uncapped Players, Eligibility & Scouting
 // ============================================================================
 
-const SCOUT_ADMIN_TOKEN = process.env.NEXT_PUBLIC_SCOUT_ADMIN_TOKEN || "rr_scout_admin_secret_token_2026";
-
 export async function fetchUncappedPlayers(params?: {
   eligibility?: string;
   tier?: string;
@@ -256,14 +254,13 @@ export async function verifyPlayerEligibility(
   playerId: string,
   payload: { new_status: string; verification_notes: string; verified_by?: string }
 ): Promise<any> {
-  return await safeApiFetch(`/players/${playerId}/verify-eligibility`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${SCOUT_ADMIN_TOKEN}`,
-    },
-    body: JSON.stringify(payload),
-  });
+  // Security Boundary: Client-side execution of administrative mutations is disabled.
+  // Master administrative secrets must never be exposed or asserted from browser JavaScript.
+  // Requires an authenticated server-side administrative session.
+  throw new ApiError(
+    "Administrative operation disabled: Direct client-side execution of eligibility verification is blocked for security. Authenticate via authorized server-side administrative session.",
+    { isNetworkError: false, endpoint: `/players/${playerId}/verify-eligibility` }
+  );
 }
 
 export async function fetchPlayerBatting(playerId: string): Promise<any> {
@@ -285,14 +282,11 @@ export async function fetchPlayerRecentForm(
 }
 
 export async function discoverProprietarySchema(sampleRows: any[]): Promise<any> {
-  return await safeApiFetch("/proprietary/discover-schema", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${SCOUT_ADMIN_TOKEN}`,
-    },
-    body: JSON.stringify({ sample_rows: sampleRows }),
-  });
+  // Security Boundary: Client-side proprietary schema discovery is disabled without server auth.
+  throw new ApiError(
+    "Administrative operation disabled: Direct client-side proprietary schema discovery is blocked for security. Use backend administrative ingestion pipeline.",
+    { isNetworkError: false, endpoint: "/proprietary/discover-schema" }
+  );
 }
 
 export async function ingestProprietaryPack(payload: {
@@ -300,22 +294,16 @@ export async function ingestProprietaryPack(payload: {
   column_mapping?: any;
   dataset_key?: string;
 }): Promise<any> {
-  return await safeApiFetch("/proprietary/ingest-pack", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${SCOUT_ADMIN_TOKEN}`,
-    },
-    body: JSON.stringify(payload),
-  });
+  // Security Boundary: Client-side proprietary data pack ingestion is disabled without server auth.
+  throw new ApiError(
+    "Administrative operation disabled: Direct client-side proprietary data pack ingestion is blocked for security. Use backend administrative ingestion pipeline.",
+    { isNetworkError: false, endpoint: "/proprietary/ingest-pack" }
+  );
 }
 
 export async function fetchPlayerEvaluations(playerId: string, userRole: string = "public"): Promise<any[]> {
-  const headers: Record<string, string> = {};
-  if (userRole === "rr_scout_admin") {
-    headers["Authorization"] = `Bearer ${SCOUT_ADMIN_TOKEN}`;
-  }
-  return await safeApiFetch<any[]>(`/proprietary/evaluations/${playerId}`, { headers });
+  // Public/anonymous evaluations endpoint returns sanitized public data. Privileged evaluations require server-side session.
+  return await safeApiFetch<any[]>(`/proprietary/evaluations/${playerId}`);
 }
 
 // ============================================================================

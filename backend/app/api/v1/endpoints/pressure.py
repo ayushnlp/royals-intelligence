@@ -30,8 +30,16 @@ def get_pressure_engine() -> PressureIntelligenceEngine:
     global _engine
     if _engine is None:
         logger.info("Initializing PressureIntelligenceEngine...")
-        _engine = PressureIntelligenceEngine()
-        _engine.load_data()
+        engine = PressureIntelligenceEngine()
+        try:
+            engine.load_data()
+        except FileNotFoundError as exc:
+            logger.error(f"Pressure Intelligence unavailable due to missing dataset assets: {exc}")
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail=f"Pressure Intelligence datasets offline or unmounted. Verify runtime assets in DATA_DIR: {exc}",
+            )
+        _engine = engine
         logger.info("PressureIntelligenceEngine initialized successfully.")
     return _engine
 

@@ -108,14 +108,8 @@ class UncappedPressureIntelligenceService:
     """
 
     def __init__(self, processed_dir: Optional[Path] = None, raw_dir: Optional[Path] = None):
-        base_dir = Path(__file__).resolve().parent.parent.parent.parent
-        self.processed_dir = processed_dir or (base_dir / "round1_pressure" / "data" / "processed")
-        if raw_dir is not None:
-            self.raw_dir = Path(raw_dir)
-        else:
-            primary_raw = base_dir / "data" / "raw" / "rajasthan_royals" / "round_1_data_pack"
-            alt_raw = base_dir / "round1_pressure" / "data" / "raw"
-            self.raw_dir = primary_raw if primary_raw.exists() else alt_raw
+        self.processed_dir = Path(processed_dir) if processed_dir else None
+        self.raw_dir = Path(raw_dir) if raw_dir else None
 
         self._batting_lb: Optional[pd.DataFrame] = None
         self._bowling_lb: Optional[pd.DataFrame] = None
@@ -126,25 +120,48 @@ class UncappedPressureIntelligenceService:
         self._is_loaded: bool = False
 
     def load_data(self) -> None:
-        """Loads processed Parquet artifacts and player mapping data."""
+        """Loads processed Parquet artifacts and player mapping data with runtime asset resolution."""
         if self._is_loaded:
             return
 
-        base_dir = Path(__file__).resolve().parent.parent.parent.parent
-        try:
-            bat_path = self.processed_dir / "batting_leaderboard.parquet"
-            bowl_path = self.processed_dir / "bowling_leaderboard.parquet"
-            map_path = self.raw_dir / "competition_team_player_mapping.csv"
-            if not map_path.exists():
-                alt_map = base_dir / "round1_pressure" / "data" / "raw" / "competition_team_player_mapping.csv"
-                if alt_map.exists():
-                    map_path = alt_map
+        from app.core.config import resolve_asset_path
 
-            if bat_path.exists() and bowl_path.exists():
+        def _resolve_file(filename: str, subfolder: str = "pressure") -> Optional[Path]:
+            if self.processed_dir:
+                p = self.processed_dir / filename
+                if p.exists():
+                    return p
+            for cand in [f"{subfolder}/{filename}", f"round1_pressure/data/processed/{filename}", filename]:
+                p = resolve_asset_path(cand, required=False)
+                if p.exists():
+                    return p
+            return None
+
+        try:
+            bat_path = _resolve_file("batting_leaderboard.parquet")
+            bowl_path = _resolve_file("bowling_leaderboard.parquet")
+            
+            map_path = None
+            if self.raw_dir:
+                candidate_map = self.raw_dir / "competition_team_player_mapping.csv"
+                if candidate_map.exists():
+                    map_path = candidate_map
+            if not map_path:
+                for cand in [
+                    "competition_team_player_mapping.csv",
+                    "data/raw/rajasthan_royals/round_1_data_pack/competition_team_player_mapping.csv",
+                    "round1_pressure/data/raw/competition_team_player_mapping.csv",
+                ]:
+                    p = resolve_asset_path(cand, required=False)
+                    if p.exists():
+                        map_path = p
+                        break
+
+            if bat_path and bowl_path and bat_path.exists() and bowl_path.exists():
                 self._batting_lb = pd.read_parquet(bat_path)
                 self._bowling_lb = pd.read_parquet(bowl_path)
             else:
-                logger.warning(f"Uncapped leaderboards missing in {self.processed_dir}; running in standby mode.")
+                logger.warning("Uncapped leaderboards missing in runtime asset paths; running in standby mode.")
                 self._batting_lb = pd.DataFrame()
                 self._bowling_lb = pd.DataFrame()
 

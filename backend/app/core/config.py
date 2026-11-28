@@ -4,7 +4,7 @@ Uses Pydantic BaseSettings for strong typing and environment parsing.
 """
 
 import os
-from typing import List, Union
+from typing import List, Union, Optional
 from pathlib import Path
 from pydantic import field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -51,19 +51,26 @@ def resolve_asset_path(relative_path: Union[str, Path], required: bool = True) -
         cwd / rel,
         root / "backend" / rel,
         cwd / "backend" / rel,
+        root / "round1_pressure" / "data" / "processed" / filename,
+        cwd / "round1_pressure" / "data" / "processed" / filename,
         root / "backend" / "data" / "runtime_assets" / filename,
         root / "data" / "runtime_assets" / filename,
         cwd / "data" / "runtime_assets" / filename,
         Path("/app") / rel,
+        Path("/app/round1_pressure/data/processed") / filename,
         Path("/app/data/runtime_assets") / filename,
         Path("/data") / rel,
+        Path("/data/pressure") / filename,
+        Path("/data") / filename,
         Path("/etc/secrets") / filename,
         Path("/var/data") / rel,
+        Path("/var/data/pressure") / filename,
         Path("/var/data") / filename,
     ]
     if data_env:
         candidates.insert(0, Path(data_env) / rel)
-        candidates.insert(1, Path(data_env) / filename)
+        candidates.insert(1, Path(data_env) / "pressure" / filename)
+        candidates.insert(2, Path(data_env) / filename)
 
     for candidate in candidates:
         if candidate.exists():
@@ -91,8 +98,8 @@ class Settings(BaseSettings):
     SECRET_KEY: str = "development-secret-key-change-in-production-min-32-chars"
     
     # Server-Side Security & Proprietary Credentials (never client-asserted)
-    SCOUT_ADMIN_API_KEY: str = "rr_scout_admin_secret_token_2026"
-    LEAD_ANALYST_API_KEY: str = "rr_lead_analyst_secret_token_2026"
+    SCOUT_ADMIN_API_KEY: Optional[str] = None
+    LEAD_ANALYST_API_KEY: Optional[str] = None
 
     # Server Binding
     HOST: str = "0.0.0.0"
@@ -167,10 +174,10 @@ class Settings(BaseSettings):
             insecure_items: List[str] = []
             if self.SECRET_KEY == "development-secret-key-change-in-production-min-32-chars" or len(self.SECRET_KEY) < 32:
                 insecure_items.append("SECRET_KEY (must be unique and >= 32 characters)")
-            if self.SCOUT_ADMIN_API_KEY == "rr_scout_admin_secret_token_2026":
-                insecure_items.append("SCOUT_ADMIN_API_KEY (must be explicitly set)")
-            if self.LEAD_ANALYST_API_KEY == "rr_lead_analyst_secret_token_2026":
-                insecure_items.append("LEAD_ANALYST_API_KEY (must be explicitly set)")
+            if not self.SCOUT_ADMIN_API_KEY or self.SCOUT_ADMIN_API_KEY == "rr_scout_admin_secret_token_2026":
+                insecure_items.append("SCOUT_ADMIN_API_KEY (must be explicitly configured with a secure non-default secret)")
+            if not self.LEAD_ANALYST_API_KEY or self.LEAD_ANALYST_API_KEY == "rr_lead_analyst_secret_token_2026":
+                insecure_items.append("LEAD_ANALYST_API_KEY (must be explicitly configured with a secure non-default secret)")
             
             if insecure_items:
                 raise ValueError(

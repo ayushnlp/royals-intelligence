@@ -193,7 +193,7 @@ export default function PressureIntelligencePage() {
               {overview ? overview.strict_pressure_bowling_balls.toLocaleString() : "—"}
             </div>
             <p className="text-xs sm:text-[13px] text-[#52627A] mt-1 leading-snug">
-              31,163 Batting Pressure
+              Bowling deliveries | 31,163 Batting Pressure
             </p>
           </div>
 
