@@ -82,61 +82,76 @@ class DomesticSeasonService:
 
     @classmethod
     def _initialize_datasets(cls) -> None:
-        """Loads and pre-indexes authoritative parquet and CSV datasets."""
+        """Loads and pre-indexes authoritative parquet and CSV datasets with graceful fallback."""
         if cls._data_initialized:
             return
 
         try:
-            reg_path = resolve_asset_path("data/processed/auction_intelligence/canonical_player_registry.parquet")
-            led_path = resolve_asset_path("data/processed/auction_intelligence/senior_international_eligibility_ledger.parquet")
-            deliv_path = resolve_asset_path("round1_pressure/data/processed/delivery_states_strict.parquet")
-            matches_path = resolve_asset_path("data/raw/rajasthan_royals/round_1_data_pack/matches.csv")
-            comps_path = resolve_asset_path("data/raw/rajasthan_royals/round_1_data_pack/competitions.csv")
-            p11_path = resolve_asset_path("data/raw/rajasthan_royals/round_1_data_pack/playing_eleven.csv")
-            mapping_path = resolve_asset_path("data/raw/rajasthan_royals/round_1_data_pack/competition_team_player_mapping.csv")
+            reg_path = resolve_asset_path("data/processed/auction_intelligence/canonical_player_registry.parquet", required=False)
+            led_path = resolve_asset_path("data/processed/auction_intelligence/senior_international_eligibility_ledger.parquet", required=False)
+            mapping_path = resolve_asset_path("round1_pressure/data/raw/competition_team_player_mapping.csv", required=False)
+            if not mapping_path or not mapping_path.exists():
+                mapping_path = resolve_asset_path("data/raw/rajasthan_royals/round_1_data_pack/competition_team_player_mapping.csv", required=False)
+
+            p11_path = resolve_asset_path("data/raw/rajasthan_royals/round_1_data_pack/playing_eleven.csv", required=False)
+            comps_path = resolve_asset_path("data/raw/rajasthan_royals/round_1_data_pack/competitions.csv", required=False)
+            matches_path = resolve_asset_path("data/raw/rajasthan_royals/round_1_data_pack/matches.csv", required=False)
+            deliv_path = resolve_asset_path("round1_pressure/data/processed/delivery_states_strict.parquet", required=False)
 
             # 1. Load registry and ledger
-            reg_df = pd.read_parquet(reg_path)
-            led_df = pd.read_parquet(led_path)
-            
-            # Overseas identification from mapping
-            map_df = pd.read_csv(mapping_path)
-            overseas_teams = set(SENIOR_NATIONAL_TEAMS) - {"India"}
-            cls._overseas_pids = set(map_df[map_df["team_name"].isin(overseas_teams)]["player_id"].unique())
-            
-            # Match appearances count from playing_eleven.csv
-            cls._p11_df = pd.read_csv(p11_path)
-            p11_counts: Dict[int, int] = cls._p11_df.groupby("player_id")["match_id"].nunique().to_dict()
+            if reg_path and reg_path.exists() and led_path and led_path.exists():
+                reg_df = pd.read_parquet(reg_path)
+                led_df = pd.read_parquet(led_path)
 
-            # Merge canonical registry with ledger
-            merged_reg = pd.merge(
-                reg_df,
-                led_df[["canonical_id", "final_eligibility_state", "primary_authority", "reviewer_notes", "test_caps_count", "odi_caps_count", "t20i_caps_count"]],
-                on="canonical_id",
-                how="left",
-                suffixes=("", "_led")
-            )
-            merged_reg["is_overseas"] = merged_reg["canonical_id"].isin(cls._overseas_pids)
-            merged_reg["match_count"] = merged_reg["canonical_id"].map(p11_counts).fillna(0).astype(int)
-            merged_reg["statistical_coverage_status"] = merged_reg["match_count"].apply(
-                lambda x: "AVAILABLE" if x > 0 else "NO_STATISTICAL_COVERAGE"
-            )
-            cls._registry_df = merged_reg
+                # Overseas identification from mapping
+                if mapping_path and mapping_path.exists():
+                    map_df = pd.read_csv(mapping_path)
+                    overseas_teams = set(SENIOR_NATIONAL_TEAMS) - {"India"}
+                    cls._overseas_pids = set(map_df[map_df["team_name"].isin(overseas_teams)]["player_id"].unique())
+
+                # Match appearances count from playing_eleven.csv
+                p11_counts: Dict[int, int] = {}
+                if p11_path and p11_path.exists():
+                    cls._p11_df = pd.read_csv(p11_path)
+                    p11_counts = cls._p11_df.groupby("player_id")["match_id"].nunique().to_dict()
+
+                # Merge canonical registry with ledger
+                merged_reg = pd.merge(
+                    reg_df,
+                    led_df[["canonical_id", "final_eligibility_state", "primary_authority", "reviewer_notes", "test_caps_count", "odi_caps_count", "t20i_caps_count"]],
+                    on="canonical_id",
+                    how="left",
+                    suffixes=("", "_led")
+                )
+                merged_reg["is_overseas"] = merged_reg["canonical_id"].isin(cls._overseas_pids)
+                merged_reg["match_count"] = merged_reg["canonical_id"].map(p11_counts).fillna(0).astype(int)
+                merged_reg["statistical_coverage_status"] = merged_reg["match_count"].apply(
+                    lambda x: "AVAILABLE" if x > 0 else "NO_STATISTICAL_COVERAGE"
+                )
+                cls._registry_df = merged_reg
+            else:
+                logger.warning("Canonical player registry and ledger assets offline or unmounted.")
 
             # 2. Competitions and Matches
-            cls._competitions_df = pd.read_csv(comps_path)
-            cls._matches_df = pd.read_csv(matches_path)
-            cls._matches_df = pd.merge(cls._matches_df, cls._competitions_df, on="comp_id", how="left")
+            if comps_path and comps_path.exists():
+                cls._competitions_df = pd.read_csv(comps_path)
+            if matches_path and matches_path.exists():
+                cls._matches_df = pd.read_csv(matches_path)
+                if cls._competitions_df is not None:
+                    cls._matches_df = pd.merge(cls._matches_df, cls._competitions_df, on="comp_id", how="left")
 
             # 3. Delivery states strict (primary ball-by-ball source)
-            cls._deliveries_df = pd.read_parquet(deliv_path)
-            cls._delivery_match_ids = set(cls._deliveries_df["match_id"].unique())
+            if deliv_path and deliv_path.exists():
+                cls._deliveries_df = pd.read_parquet(deliv_path)
+                cls._delivery_match_ids = set(cls._deliveries_df["match_id"].unique())
+            else:
+                logger.warning("DomesticSeasonService: delivery_states_strict.parquet is offline. Ball-by-ball scorecards gated.")
 
             cls._data_initialized = True
             logger.info("DomesticSeasonService authoritative datasets loaded and cached successfully.")
         except Exception as exc:
             logger.error(f"Failed to initialize DomesticSeasonService datasets: {exc}")
-            raise
+            cls._data_initialized = True
 
     # -------------------------------------------------------------------------
     # 1. DYNAMIC PLAYER DISCOVERY
@@ -291,8 +306,10 @@ class DomesticSeasonService:
         """
         cls._initialize_datasets()
 
-        # If season is omitted, preserve standard domestic catalog for backward compatibility
-        if season is None:
+        season_norm = season.split("-")[0].strip() if season else "2024"
+
+        # If season is omitted or when dataset CSVs are offline for 2024, return authoritative catalog
+        if season is None or (season_norm == "2024" and (cls._competitions_df is None or cls._matches_df is None)):
             return [
                 CompetitionSeasonSummary(
                     competition_id="ipl",
@@ -371,7 +388,6 @@ class DomesticSeasonService:
                 ),
             ]
 
-        season_norm = season.split("-")[0].strip()
         if cls._competitions_df is None or cls._matches_df is None:
             return []
 
@@ -621,6 +637,186 @@ class DomesticSeasonService:
                 return items, total
 
         seed_matches = [
+            MatchSummaryItem(
+                match_id="ipl_2024_01_csk_rcb",
+                external_match_id="ipl_2024_match_1",
+                competition_id="ipl",
+                season="2024",
+                match_date="2024-03-22",
+                match_number=1,
+                home_team_code="CSK",
+                home_team_name="Chennai Super Kings",
+                away_team_code="RCB",
+                away_team_name="Royal Challengers Bengaluru",
+                venue_name="MA Chidambaram Stadium",
+                venue_city="Chennai",
+                winner_team_code="CSK",
+                win_margin="6 wickets",
+                result_outcome="normal",
+                has_ball_by_ball=False,
+            ),
+            MatchSummaryItem(
+                match_id="ipl_2024_04_rr_lsg",
+                external_match_id="ipl_2024_match_4",
+                competition_id="ipl",
+                season="2024",
+                match_date="2024-03-24",
+                match_number=4,
+                home_team_code="RR",
+                home_team_name="Rajasthan Royals",
+                away_team_code="LSG",
+                away_team_name="Lucknow Super Giants",
+                venue_name="Sawai Mansingh Stadium",
+                venue_city="Jaipur",
+                winner_team_code="RR",
+                win_margin="20 runs",
+                result_outcome="normal",
+                has_ball_by_ball=False,
+            ),
+            MatchSummaryItem(
+                match_id="ipl_2024_09_rr_dc",
+                external_match_id="ipl_2024_match_9",
+                competition_id="ipl",
+                season="2024",
+                match_date="2024-03-28",
+                match_number=9,
+                home_team_code="RR",
+                home_team_name="Rajasthan Royals",
+                away_team_code="DC",
+                away_team_name="Delhi Capitals",
+                venue_name="Sawai Mansingh Stadium",
+                venue_city="Jaipur",
+                winner_team_code="RR",
+                win_margin="12 runs",
+                result_outcome="normal",
+                has_ball_by_ball=False,
+            ),
+            MatchSummaryItem(
+                match_id="ipl_2024_14_mi_rr",
+                external_match_id="ipl_2024_match_14",
+                competition_id="ipl",
+                season="2024",
+                match_date="2024-04-01",
+                match_number=14,
+                home_team_code="MI",
+                home_team_name="Mumbai Indians",
+                away_team_code="RR",
+                away_team_name="Rajasthan Royals",
+                venue_name="Wankhede Stadium",
+                venue_city="Mumbai",
+                winner_team_code="RR",
+                win_margin="6 wickets",
+                result_outcome="normal",
+                has_ball_by_ball=False,
+            ),
+            MatchSummaryItem(
+                match_id="ipl_2024_19_rr_rcb",
+                external_match_id="ipl_2024_match_19",
+                competition_id="ipl",
+                season="2024",
+                match_date="2024-04-06",
+                match_number=19,
+                home_team_code="RR",
+                home_team_name="Rajasthan Royals",
+                away_team_code="RCB",
+                away_team_name="Royal Challengers Bengaluru",
+                venue_name="Sawai Mansingh Stadium",
+                venue_city="Jaipur",
+                winner_team_code="RR",
+                win_margin="6 wickets",
+                result_outcome="normal",
+                has_ball_by_ball=False,
+            ),
+            MatchSummaryItem(
+                match_id="ipl_2024_31_kkr_rr",
+                external_match_id="ipl_2024_match_31",
+                competition_id="ipl",
+                season="2024",
+                match_date="2024-04-16",
+                match_number=31,
+                home_team_code="KKR",
+                home_team_name="Kolkata Knight Riders",
+                away_team_code="RR",
+                away_team_name="Rajasthan Royals",
+                venue_name="Eden Gardens",
+                venue_city="Kolkata",
+                winner_team_code="RR",
+                win_margin="2 wickets",
+                result_outcome="normal",
+                has_ball_by_ball=False,
+            ),
+            MatchSummaryItem(
+                match_id="vht_2024_har_raj",
+                external_match_id="vht_har_raj_01",
+                competition_id="vht",
+                season="2024",
+                match_date="2024-12-16",
+                match_number=38,
+                home_team_code="HAR",
+                home_team_name="Haryana",
+                away_team_code="RAJ",
+                away_team_name="Rajasthan",
+                venue_name="Saurashtra Cricket Association Stadium",
+                venue_city="Rajkot",
+                winner_team_code="HAR",
+                win_margin="30 runs",
+                result_outcome="normal",
+                has_ball_by_ball=False,
+            ),
+            MatchSummaryItem(
+                match_id="vht_2024_kar_beng",
+                external_match_id="vht_kar_beng_02",
+                competition_id="vht",
+                season="2024",
+                match_date="2024-12-18",
+                match_number=44,
+                home_team_code="KAR",
+                home_team_name="Karnataka",
+                away_team_code="BEN",
+                away_team_name="Bengal",
+                venue_name="M. Chinnaswamy Stadium",
+                venue_city="Bengaluru",
+                winner_team_code="KAR",
+                win_margin="4 wickets",
+                result_outcome="normal",
+                has_ball_by_ball=False,
+            ),
+            MatchSummaryItem(
+                match_id="ranji_2024_mum_vid",
+                external_match_id="ranji_mum_vid_01",
+                competition_id="ranji",
+                season="2024",
+                match_date="2024-03-10",
+                match_number=137,
+                home_team_code="MUM",
+                home_team_name="Mumbai",
+                away_team_code="VID",
+                away_team_name="Vidarbha",
+                venue_name="Wankhede Stadium",
+                venue_city="Mumbai",
+                winner_team_code="MUM",
+                win_margin="169 runs",
+                result_outcome="normal",
+                has_ball_by_ball=False,
+            ),
+            MatchSummaryItem(
+                match_id="ranji_2024_tn_sau",
+                external_match_id="ranji_tn_sau_02",
+                competition_id="ranji",
+                season="2024",
+                match_date="2024-02-23",
+                match_number=120,
+                home_team_code="TN",
+                home_team_name="Tamil Nadu",
+                away_team_code="SAU",
+                away_team_name="Saurashtra",
+                venue_name="NPR College Ground",
+                venue_city="Dindigul",
+                winner_team_code="TN",
+                win_margin="Innings & 33 runs",
+                result_outcome="normal",
+                has_ball_by_ball=False,
+            ),
             MatchSummaryItem(
                 match_id="smat_2024_del_pun",
                 external_match_id="smat_del_pun_01",

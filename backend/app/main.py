@@ -4,7 +4,7 @@ Royals Intelligence - FastAPI Main Application Entrypoint
 
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
-from fastapi import FastAPI, Request, status
+from fastapi import FastAPI, Request, status, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from fastapi.exceptions import RequestValidationError
@@ -47,12 +47,49 @@ app.add_middleware(
 )
 
 
+def _get_cors_headers(request: Request) -> dict:
+    """Helper to attach permissive CORS headers to exception responses matching allowed origins."""
+    origin = request.headers.get("origin")
+    if origin and (
+        origin in settings.BACKEND_CORS_ORIGINS
+        or origin.endswith(".vercel.app")
+        or "localhost" in origin
+        or "127.0.0.1" in origin
+    ):
+        return {
+            "Access-Control-Allow-Origin": origin,
+            "Access-Control-Allow-Credentials": "true",
+            "Access-Control-Allow-Headers": "*",
+            "Access-Control-Allow-Methods": "GET, POST, PUT, PATCH, DELETE, OPTIONS",
+        }
+    return {}
+
+
 # Centralized Exception Handlers (RFC-7807 Problem Details)
+@app.exception_handler(HTTPException)
+async def http_exception_handler(request: Request, exc: HTTPException):
+    headers = _get_cors_headers(request)
+    if exc.headers:
+        headers.update(exc.headers)
+    return JSONResponse(
+        status_code=exc.status_code,
+        headers=headers,
+        content={
+            "title": "HTTP Error",
+            "status": exc.status_code,
+            "detail": exc.detail,
+            "instance": request.url.path,
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+        },
+    )
+
+
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
     logger.warning(f"Request validation failure on {request.url.path}: {exc}")
     return JSONResponse(
         status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+        headers=_get_cors_headers(request),
         content={
             "title": "Unprocessable Entity",
             "status": 422,
@@ -69,6 +106,7 @@ async def general_exception_handler(request: Request, exc: Exception):
     detail_msg = str(exc) if settings.DEBUG else "An unexpected internal server error occurred."
     return JSONResponse(
         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        headers=_get_cors_headers(request),
         content={
             "title": "Internal Server Error",
             "status": 500,

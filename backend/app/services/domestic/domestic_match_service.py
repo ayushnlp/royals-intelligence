@@ -84,27 +84,32 @@ class DomesticMatchService:
 
     @classmethod
     def _initialize_datasets(cls) -> None:
-        """Loads and pre-indexes authoritative match, competition, delivery and player datasets."""
+        """Loads and pre-indexes authoritative match, competition, delivery and player datasets with graceful fallback."""
         if cls._data_initialized:
             return
 
         try:
-            matches_path = resolve_asset_path("data/raw/rajasthan_royals/round_1_data_pack/matches.csv")
-            deliv_path = resolve_asset_path("round1_pressure/data/processed/delivery_states_strict.parquet")
-            teams_path = resolve_asset_path("data/raw/rajasthan_royals/round_1_data_pack/teams.csv")
-            comps_path = resolve_asset_path("data/raw/rajasthan_royals/round_1_data_pack/competitions.csv")
-            ledger_path = resolve_asset_path("data/processed/auction_intelligence/senior_international_eligibility_ledger.parquet")
+            matches_path = resolve_asset_path("data/raw/rajasthan_royals/round_1_data_pack/matches.csv", required=False)
+            deliv_path = resolve_asset_path("round1_pressure/data/processed/delivery_states_strict.parquet", required=False)
+            teams_path = resolve_asset_path("data/raw/rajasthan_royals/round_1_data_pack/teams.csv", required=False)
+            comps_path = resolve_asset_path("data/raw/rajasthan_royals/round_1_data_pack/competitions.csv", required=False)
+            ledger_path = resolve_asset_path("data/processed/auction_intelligence/senior_international_eligibility_ledger.parquet", required=False)
 
-            cls._matches_df = pd.read_csv(matches_path)
-            cls._deliveries_df = pd.read_parquet(deliv_path)
-            cls._teams_df = pd.read_csv(teams_path)
-            cls._team_id_to_name = dict(zip(cls._teams_df["team_id"], cls._teams_df["team_name"]))
-            cls._competitions_df = pd.read_csv(comps_path)
-            cls._comp_id_to_name = dict(zip(cls._competitions_df["comp_id"], cls._competitions_df["comp_name"]))
-            cls._comp_id_to_type = dict(zip(cls._competitions_df["comp_id"], cls._competitions_df["match_format"]))
+            if matches_path and matches_path.exists():
+                cls._matches_df = pd.read_csv(matches_path)
+            if deliv_path and deliv_path.exists():
+                cls._deliveries_df = pd.read_parquet(deliv_path)
+            if teams_path and teams_path.exists():
+                cls._teams_df = pd.read_csv(teams_path)
+                cls._team_id_to_name = dict(zip(cls._teams_df["team_id"], cls._teams_df["team_name"]))
+            if comps_path and comps_path.exists():
+                cls._competitions_df = pd.read_csv(comps_path)
+                cls._comp_id_to_name = dict(zip(cls._competitions_df["comp_id"], cls._competitions_df["comp_name"]))
+                cls._comp_id_to_type = dict(zip(cls._competitions_df["comp_id"], cls._competitions_df["match_format"]))
 
-            led_df = pd.read_parquet(ledger_path)
-            cls._uncapped_player_ids = set(led_df[led_df["final_eligibility_state"] == "UNCAPPED"]["canonical_id"].dropna().tolist())
+            if ledger_path and ledger_path.exists():
+                led_df = pd.read_parquet(ledger_path)
+                cls._uncapped_player_ids = set(led_df[led_df["final_eligibility_state"] == "UNCAPPED"]["canonical_id"].dropna().tolist())
 
             cls._data_initialized = True
             logger.info("DomesticMatchService datasets initialized successfully.")
