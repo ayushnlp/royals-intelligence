@@ -624,6 +624,14 @@ export default function DomesticIntelligencePage() {
                   ? `No matches found matching filter "${teamFilter}" for ${selectedCompId.toUpperCase()} in season ${selectedSeason}.`
                   : `Competition "${selectedCompId.toUpperCase()}" has no match records for season ${selectedSeason}.`}
               </p>
+              {selectedSeason !== "2024" && (
+                <button
+                  onClick={() => setSelectedSeason("2024")}
+                  className="mt-3 inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#950460] text-white text-xs font-bold hover:bg-[#78034d] transition-colors cursor-pointer shadow-sm"
+                >
+                  Switch to Verified 2024 Domestic Season
+                </button>
+              )}
             </div>
           )}
         </div>
